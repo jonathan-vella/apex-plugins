@@ -1,0 +1,39 @@
+name: Validate marketplace
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: validate-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  validate:
+    name: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node
+        uses: actions/setup-node@2028fbc5c25fe9cf00d9f06a71cc4710d4507903 # v6.0.0
+        with:
+          node-version: "24"
+
+      - name: Test the validator
+        run: node --test tools/validate-marketplace.test.mjs
+
+      - name: Validate marketplace, provenance and plugin tree hashes
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: node tools/validate-marketplace.mjs --verify-source

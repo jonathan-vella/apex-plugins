@@ -1,0 +1,3 @@
+# Hosted plugin trees must stay byte-identical to the apex-vnext build; their tree hash is recorded in
+# .github/plugin/provenance.json. Disable end-of-line conversion for every file.
+* -text
