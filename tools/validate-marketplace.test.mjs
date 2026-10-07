@@ -133,22 +133,54 @@ test("every listed plugin needs a record and every hosted folder needs a listing
   const { errors } = await validateRepository(state.root);
   assert.deepEqual(errors, [
     "plugins/stray is not listed in marketplace.json",
-    'marketplace.json lists "apex" without a provenance.json record',
+    'marketplace.json lists "apex" without a valid provenance.json record',
   ]);
 });
 
-test("provenance records must pin full commit SHAs and a known tree algorithm", async (context) => {
+test("provenance records must pin the apex-vnext commit, the CLI package and a known tree algorithm", async (context) => {
   const state = await fixture(context);
-  state.provenance.plugins[0].source.commit = "v1.0.0";
+  state.provenance.plugins[0].source = { repository: "someone/else", commit: "v1.0.0" };
+  state.provenance.plugins[0].cli.package = "@someone/cli";
   state.provenance.plugins[0].cli.version = "0.9.0";
   state.provenance.plugins[0].tree.algorithm = "sha1";
   await state.save();
   const { errors } = await validateRepository(state.root);
   assert.deepEqual(errors, [
+    'provenance.json plugins[0].source.repository must be "jonathan-vella/apex-vnext"',
     "provenance.json plugins[0].source.commit has an invalid format: v1.0.0",
+    'provenance.json plugins[0].cli.package must be "@apexops/cli"',
     "provenance.json plugins[0].cli.version must equal the plugin version",
     'provenance.json plugins[0].tree.algorithm must be "apex-plugin-tree-sha256-v1"',
+    'marketplace.json lists "apex" without a valid provenance.json record',
   ]);
+});
+
+test("an invalid provenance record is reported, not dereferenced", async (context) => {
+  const state = await fixture(context);
+  state.provenance.plugins[0].tree = null;
+  await state.save();
+  const { errors } = await validateRepository(state.root);
+  assert.deepEqual(errors, [
+    "provenance.json plugins[0].tree must be an object",
+    'marketplace.json lists "apex" without a valid provenance.json record',
+  ]);
+});
+
+test("invalid plugin names never become paths and sources need the ./plugins/<name> form", async (context) => {
+  const state = await fixture(context);
+  state.marketplace.plugins.push(
+    { name: "../../..", description: "x", version: "1.0.0", source: "./plugins/../../.." },
+    { name: "Apex", description: "x", version: "1.0.0", source: "./plugins/Apex" },
+  );
+  state.marketplace.plugins[0].source = "plugins/apex";
+  await state.save();
+  const { errors, summary } = await validateRepository(state.root);
+  assert.deepEqual(errors, [
+    'marketplace.json plugins[0].source must be "./plugins/apex"; this marketplace hosts every plugin in-repo',
+    "marketplace.json plugins[1].name has an invalid format: ../../..",
+    "marketplace.json plugins[2].name has an invalid format: Apex",
+  ]);
+  assert.equal(summary.length, 1, "only the valid entry is hashed");
 });
 
 test("--verify-source reports a source commit that is not on main", async (context) => {

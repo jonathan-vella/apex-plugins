@@ -21,6 +21,8 @@ export const MARKETPLACE_NAME = "apex-plugins";
 export const MARKETPLACE_PATH = ".github/plugin/marketplace.json";
 export const PROVENANCE_PATH = ".github/plugin/provenance.json";
 export const TREE_ALGORITHM = "apex-plugin-tree-sha256-v1";
+export const SOURCE_REPOSITORY = "jonathan-vella/apex-vnext";
+export const CLI_PACKAGE = "@apexops/cli";
 
 // Field names from the GitHub Copilot CLI plugin reference, "marketplace.json fields":
 // https://docs.github.com/en/copilot/reference/copilot-cli-reference/cli-plugin-reference#marketplacejson-fields
@@ -52,7 +54,6 @@ const SEMVER =
   /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-((?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)(?:\.(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*))*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$/u;
 const FULL_SHA = /^[0-9a-f]{40}$/u;
 const SHA256 = /^[0-9a-f]{64}$/u;
-const REPOSITORY = /^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/u;
 
 function bytewise(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
@@ -154,10 +155,11 @@ export function validateMarketplace(marketplace, errors) {
     checkString(errors, `${label}.name`, entry.name, { max: 64, pattern: NAME });
     checkString(errors, `${label}.description`, entry.description, { max: 1024 });
     checkString(errors, `${label}.version`, entry.version, { pattern: SEMVER });
-    if (typeof entry.name !== "string") return;
+    // Only a valid name may become a path under plugins/.
+    if (typeof entry.name !== "string" || entry.name.length > 64 || !NAME.test(entry.name)) return;
     if (entries.has(entry.name)) errors.push(`${label}.name "${entry.name}" is listed more than once`);
     const expected = `plugins/${entry.name}`;
-    if (entry.source !== `./${expected}` && entry.source !== expected)
+    if (entry.source !== `./${expected}`)
       errors.push(`${label}.source must be "./${expected}"; this marketplace hosts every plugin in-repo`);
     entries.set(entry.name, entry);
   });
@@ -186,10 +188,12 @@ export function validateProvenance(provenance, errors) {
       )
     )
       return;
+    const errorsBefore = errors.length;
     checkString(errors, `${label}.name`, record.name, { pattern: NAME });
     checkString(errors, `${label}.version`, record.version, { pattern: SEMVER });
     if (checkFields(errors, `${label}.source`, record.source, ["repository", "commit"], ["repository", "commit"])) {
-      checkString(errors, `${label}.source.repository`, record.source.repository, { pattern: REPOSITORY });
+      if (record.source.repository !== SOURCE_REPOSITORY)
+        errors.push(`${label}.source.repository must be "${SOURCE_REPOSITORY}"`);
       checkString(errors, `${label}.source.commit`, record.source.commit, { pattern: FULL_SHA });
     }
     if (
@@ -201,7 +205,7 @@ export function validateProvenance(provenance, errors) {
         ["package", "version", "gitHead"],
       )
     ) {
-      checkString(errors, `${label}.cli.package`, record.cli.package);
+      if (record.cli.package !== CLI_PACKAGE) errors.push(`${label}.cli.package must be "${CLI_PACKAGE}"`);
       checkString(errors, `${label}.cli.version`, record.cli.version, { pattern: SEMVER });
       checkString(errors, `${label}.cli.gitHead`, record.cli.gitHead, { pattern: FULL_SHA });
       if (record.cli.version !== record.version) errors.push(`${label}.cli.version must equal the plugin version`);
@@ -220,7 +224,8 @@ export function validateProvenance(provenance, errors) {
       if (!Number.isInteger(record.tree.files) || record.tree.files < 1)
         errors.push(`${label}.tree.files must be a positive integer`);
     }
-    if (typeof record.name !== "string") return;
+    // Only fully valid records are compared with the hosted trees.
+    if (errors.length !== errorsBefore) return;
     if (records.has(record.name)) errors.push(`${label}.name "${record.name}" is recorded more than once`);
     records.set(record.name, record);
   });
@@ -259,7 +264,7 @@ export async function validateRepository(root, { verifySource = false, token, ch
   for (const [name, entry] of entries) {
     const directory = join(root, "plugins", name);
     const record = records.get(name);
-    if (record === undefined) errors.push(`marketplace.json lists "${name}" without a provenance.json record`);
+    if (record === undefined) errors.push(`marketplace.json lists "${name}" without a valid provenance.json record`);
     else if (record.version !== entry.version)
       errors.push(`"${name}" is ${entry.version} in marketplace.json but ${record.version} in provenance.json`);
     if (!(await isDirectory(directory))) {
@@ -281,13 +286,13 @@ export async function validateRepository(root, { verifySource = false, token, ch
       errors.push(error.message);
       continue;
     }
-    if (record?.tree !== undefined) {
+    if (record !== undefined) {
       if (record.tree.sha256 !== tree.sha256)
         errors.push(`plugins/${name} tree sha256 is ${tree.sha256}; provenance.json records ${record.tree.sha256}`);
       if (record.tree.files !== tree.files.length)
         errors.push(`plugins/${name} has ${tree.files.length} files; provenance.json records ${record.tree.files}`);
     }
-    if (verifySource && record?.source !== undefined) {
+    if (verifySource && record !== undefined) {
       const problem = await checkSource(record.source, token);
       if (problem) errors.push(`${name}: ${problem}`);
     }
