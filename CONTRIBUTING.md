@@ -28,5 +28,5 @@ release commit here, but nothing installs or verifies by tag.
 ## Changes to this repository
 
 Changes to the marketplace tooling, workflow or documentation use a branch, a conventional commit and a pull request
-into `main`. Run `node --test tools/` and `node tools/validate-marketplace.mjs` before you push. Pin GitHub Actions to
-full commit SHAs.
+into `main`. Run `node --test tools/validate-marketplace.test.mjs` and `node tools/validate-marketplace.mjs` before you
+push. Pin GitHub Actions to full commit SHAs.

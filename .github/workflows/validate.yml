@@ -31,7 +31,7 @@ jobs:
           node-version: "24"
 
       - name: Test the validator
-        run: node --test tools/
+        run: node --test tools/validate-marketplace.test.mjs
 
       - name: Validate marketplace, provenance and plugin tree hashes
         env:
