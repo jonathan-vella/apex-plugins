@@ -1,0 +1,37 @@
+{
+  "schemaVersion": "1.0.0",
+  "allowedSources": [
+    "task-completion",
+    "deterministic-test",
+    "validation-failure",
+    "capability-execution",
+    "cache-check",
+    "explicit-correction"
+  ],
+  "allowedCategories": [
+    "correctness",
+    "security",
+    "reliability",
+    "performance",
+    "usability",
+    "documentation",
+    "capability-gap"
+  ],
+  "recurrence": {
+    "threshold": 3,
+    "windowDays": 30
+  },
+  "retention": {
+    "observationDays": 90,
+    "decisionDays": 365
+  },
+  "limits": {
+    "statementCharacters": 1024,
+    "evidenceRefs": 32,
+    "observations": 10000
+  },
+  "proposalTargets": ["documentation", "validator", "instruction", "skill", "architecture", "backlog"],
+  "humanDecisionRequired": true,
+  "automatedIssueCreation": false,
+  "contextInjection": false
+}

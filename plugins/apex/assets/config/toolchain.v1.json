@@ -1,0 +1,136 @@
+{
+  "schemaVersion": "1.0.0",
+  "observationCutoff": "2026-09-20",
+  "supportPolicy": {
+    "selection": "newest-production-supported-mutually-compatible-set-at-cutoff",
+    "node": "newest-lts-patch",
+    "npm": "newest-stable-compatible-with-selected-node",
+    "typescript": "newest-stable-ga-compatible-with-selected-node-and-npm",
+    "vscode": "newest-stable-release-qualified-by-manual-host-tests",
+    "copilotCli": "newest-stable-github-release-qualified-by-client-matrix",
+    "postCutoffReleases": "next-candidate",
+    "exceptionsRequire": ["owner", "evidence", "expiry", "upgradeTarget"]
+  },
+  "core": {
+    "node": {
+      "authoritativeSource": "https://nodejs.org/dist/index.json",
+      "releaseChannel": "lts",
+      "newestObservedVersion": "24.21.0",
+      "selectedExactVersion": "24.21.0",
+      "installedVersion": "24.21.0",
+      "observedAt": "2026-10-05"
+    },
+    "npm": {
+      "authoritativeSource": "https://www.npmjs.com/package/npm",
+      "releaseChannel": "stable",
+      "newestObservedVersion": "12.0.2",
+      "selectedExactVersion": "12.0.2",
+      "installedVersion": "12.0.2",
+      "observedAt": "2026-09-20"
+    },
+    "typescript": {
+      "authoritativeSource": "https://www.npmjs.com/package/typescript",
+      "releaseChannel": "stable-ga",
+      "newestObservedVersion": "7.0.2",
+      "selectedExactVersion": "7.0.2",
+      "installedVersion": "7.0.2",
+      "observedAt": "2026-09-20"
+    },
+    "vscode": {
+      "authoritativeSource": "https://code.visualstudio.com/updates",
+      "releaseChannel": "stable",
+      "newestObservedVersion": "1.141.0",
+      "minimumSupportedVersion": "1.140.0",
+      "installedVersion": "1.141.0",
+      "installedCopilotChatVersion": "0.69.0",
+      "historicalFixtureVersion": "1.130.0",
+      "historicalFixtureCopilotChatVersion": "0.58.0",
+      "observedAt": "2026-10-08",
+      "selectionStatus": "selected-qualification-required",
+      "selectionEvidence": {
+        "receipt": "tools/registry/client-context-baseline-receipt.json",
+        "sha256": "197cbc48abfebc3d01c8511557d7b852ed35b5169e8cb2fdcb747d1dc013f42a"
+      },
+      "postCutoffObservation": {
+        "version": "1.141.0",
+        "copilotChatVersion": "0.69.0",
+        "observedAt": "2026-10-08",
+        "disposition": "selected-current-candidate"
+      },
+      "requiredQualification": [
+        "workspace-agent-discovery",
+        "direct-handoff-question-panel",
+        "mcp-startup",
+        "restart-resume",
+        "model-tier-routing"
+      ],
+      "previewFeaturesRequired": false
+    },
+    "copilotCli": {
+      "authoritativeSource": "https://docs.github.com/en/copilot/how-tos/set-up/install-copilot-cli",
+      "authoritativeReleaseSource": "https://github.com/github/copilot-cli/releases/tag/v1.0.86",
+      "package": "@github/copilot",
+      "releaseChannel": "stable",
+      "newestObservedVersion": "1.0.86",
+      "selectedExactVersion": "1.0.86",
+      "installedVersion": "1.0.86",
+      "historicalFixtureVersion": "1.0.73",
+      "historicalFixtureArtifactHash": "8f9bb5f7e364c267265d1e24ac2aea69ed559ddb956719c6db12a353de6c5970",
+      "observedAt": "2026-09-20",
+      "selectionStatus": "selected-qualification-required",
+      "releaseArtifact": {
+        "name": "copilot-linux-x64.tar.gz",
+        "sha256": "ea4a519d7b2ff54e9c7d10ae9921cf4ab3f5041489ec340852f47f4f63fc535b",
+        "verification": "digest-and-version-command-pass"
+      },
+      "channelObservation": {
+        "githubRelease": "1.0.86",
+        "npmLatest": "1.0.86",
+        "selectedSource": "github-release"
+      },
+      "requiredQualification": [
+        "workspace-instruction-agent-skill-discovery",
+        "typed-question-input-loop",
+        "apex-mcp-startup-and-tool-allowlist",
+        "specialist-and-hidden-worker-routing",
+        "gate-and-authorization-parity",
+        "restart-resume-and-cross-device-transfer",
+        "managed-customization-lifecycle"
+      ],
+      "cloudCodingAgentRequired": false
+    }
+  },
+  "compatibilitySet": {
+    "node": "24.21.0",
+    "npm": "12.0.2",
+    "typescript": "7.0.2",
+    "minimumVscode": "1.140.0",
+    "copilotCli": "1.0.86"
+  },
+  "clientQualificationPolicy": {
+    "mode": "rolling-observed",
+    "preference": "latest-stable-supported",
+    "versionBinding": "observed-per-candidate",
+    "extensionVersionBinding": "observed-per-candidate",
+    "binaryBinding": "sha256-per-candidate",
+    "historicalFixtures": "immutable",
+    "autoUpdateBetweenCandidates": true
+  },
+  "optionalCapabilityPackRuntimes": {
+    "python": {
+      "requiredForCore": false,
+      "releaseChannel": "stable-ga",
+      "selectedExactVersion": null,
+      "lockOwner": "capability-pack",
+      "selectionStatus": "resolved-when-required-pack-is-locked"
+    },
+    "deno": {
+      "requiredForCore": false,
+      "releaseChannel": "stable-ga",
+      "selectedExactVersion": null,
+      "lockOwner": "capability-pack",
+      "selectionStatus": "resolved-when-required-pack-is-locked"
+    }
+  },
+  "approvedExceptions": []
+}

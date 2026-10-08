@@ -4,7 +4,27 @@
     "name": "Jonathan Vella"
   },
   "metadata": {
-    "description": "APEX vNext Agent Plugins for GitHub Copilot: the Copilot CLI, VS Code and the GitHub Copilot app."
+    "description": "APEX vNext Agent Plugins for GitHub Copilot: the Copilot CLI, VS Code and the GitHub Copilot app.",
+    "version": "0.11.0-next.0"
   },
-  "plugins": []
+  "plugins": [
+    {
+      "name": "apex",
+      "description": "APEX vNext Azure workflow agent, hidden workers, skills, managed hooks, the bundled MCP server and read-only Azure pricing tools.",
+      "version": "0.11.0-next.0",
+      "source": "./plugins/apex",
+      "author": {
+        "name": "Jonathan Vella",
+        "url": "https://github.com/jonathan-vella"
+      },
+      "repository": "https://github.com/jonathan-vella/apex-vnext",
+      "license": "MIT",
+      "keywords": [
+        "apex",
+        "azure",
+        "agent-plugin",
+        "infrastructure-as-code"
+      ]
+    }
+  ]
 }

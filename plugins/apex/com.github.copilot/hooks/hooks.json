@@ -1,0 +1,55 @@
+{
+  "version": 1,
+  "hooks": {
+    "preToolUse": [
+      {
+        "type": "command",
+        "matcher": "task|Task|Agent|.*apex[-_]azure[-_]pricing.*",
+        "bash": "f=\"${PLUGIN_ROOT}/com.github.copilot/hooks/apex-hook.mjs\"; if [ -f \"$f\" ]; then exec node \"$f\" preToolUse; fi; cat > /dev/null; echo \"APEX hook: $f is missing; reinstall the APEX plugin. Call allowed.\" >&2",
+        "powershell": "$f = [System.IO.Path]::Combine([string]$env:PLUGIN_ROOT, 'com.github.copilot', 'hooks', 'apex-hook.mjs'); if ([System.IO.File]::Exists($f)) { try { & node $f preToolUse } catch { exit 1 }; exit $LASTEXITCODE }; [void][Console]::In.ReadToEnd(); [Console]::Error.WriteLine(\"APEX hook: $f is missing; reinstall the APEX plugin. Call allowed.\"); exit 0",
+        "timeoutSec": 15
+      },
+      {
+        "type": "command",
+        "matcher": "apex-.*|apex/.*|mcp__apex__.*",
+        "bash": "f=\"${PLUGIN_ROOT}/com.github.copilot/hooks/apex-hook.mjs\"; if [ -f \"$f\" ]; then exec node \"$f\" preToolUse; fi; cat > /dev/null; echo \"APEX hook: $f is missing; reinstall the APEX plugin. Call allowed.\" >&2",
+        "powershell": "$f = [System.IO.Path]::Combine([string]$env:PLUGIN_ROOT, 'com.github.copilot', 'hooks', 'apex-hook.mjs'); if ([System.IO.File]::Exists($f)) { try { & node $f preToolUse } catch { exit 1 }; exit $LASTEXITCODE }; [void][Console]::In.ReadToEnd(); [Console]::Error.WriteLine(\"APEX hook: $f is missing; reinstall the APEX plugin. Call allowed.\"); exit 0",
+        "timeoutSec": 15
+      }
+    ],
+    "postToolUse": [
+      {
+        "type": "command",
+        "matcher": "task|Task|Agent",
+        "bash": "f=\"${PLUGIN_ROOT}/com.github.copilot/hooks/apex-hook.mjs\"; if [ -f \"$f\" ]; then exec node \"$f\" postToolUse; fi; cat > /dev/null; echo \"APEX hook: $f is missing; reinstall the APEX plugin. Call allowed.\" >&2",
+        "powershell": "$f = [System.IO.Path]::Combine([string]$env:PLUGIN_ROOT, 'com.github.copilot', 'hooks', 'apex-hook.mjs'); if ([System.IO.File]::Exists($f)) { try { & node $f postToolUse } catch { exit 1 }; exit $LASTEXITCODE }; [void][Console]::In.ReadToEnd(); [Console]::Error.WriteLine(\"APEX hook: $f is missing; reinstall the APEX plugin. Call allowed.\"); exit 0",
+        "timeoutSec": 15
+      }
+    ],
+    "postToolUseFailure": [
+      {
+        "type": "command",
+        "bash": "f=\"${PLUGIN_ROOT}/com.github.copilot/hooks/apex-hook.mjs\"; if [ -f \"$f\" ]; then exec node \"$f\" postToolUseFailure; fi; cat > /dev/null; echo \"APEX hook: $f is missing; reinstall the APEX plugin. Call allowed.\" >&2",
+        "powershell": "$f = [System.IO.Path]::Combine([string]$env:PLUGIN_ROOT, 'com.github.copilot', 'hooks', 'apex-hook.mjs'); if ([System.IO.File]::Exists($f)) { try { & node $f postToolUseFailure } catch { exit 1 }; exit $LASTEXITCODE }; [void][Console]::In.ReadToEnd(); [Console]::Error.WriteLine(\"APEX hook: $f is missing; reinstall the APEX plugin. Call allowed.\"); exit 0",
+        "timeoutSec": 15
+      }
+    ],
+    "subagentStart": [
+      {
+        "type": "command",
+        "matcher": "rubber-duck",
+        "bash": "f=\"${PLUGIN_ROOT}/com.github.copilot/hooks/apex-hook.mjs\"; if [ -f \"$f\" ]; then exec node \"$f\" subagentStart; fi; cat > /dev/null; echo \"APEX hook: $f is missing; reinstall the APEX plugin. Call allowed.\" >&2",
+        "powershell": "$f = [System.IO.Path]::Combine([string]$env:PLUGIN_ROOT, 'com.github.copilot', 'hooks', 'apex-hook.mjs'); if ([System.IO.File]::Exists($f)) { try { & node $f subagentStart } catch { exit 1 }; exit $LASTEXITCODE }; [void][Console]::In.ReadToEnd(); [Console]::Error.WriteLine(\"APEX hook: $f is missing; reinstall the APEX plugin. Call allowed.\"); exit 0",
+        "timeoutSec": 15
+      }
+    ],
+    "subagentStop": [
+      {
+        "type": "command",
+        "bash": "f=\"${PLUGIN_ROOT}/com.github.copilot/hooks/apex-hook.mjs\"; if [ -f \"$f\" ]; then exec node \"$f\" subagentStop; fi; cat > /dev/null; echo \"APEX hook: $f is missing; reinstall the APEX plugin. Call allowed.\" >&2",
+        "powershell": "$f = [System.IO.Path]::Combine([string]$env:PLUGIN_ROOT, 'com.github.copilot', 'hooks', 'apex-hook.mjs'); if ([System.IO.File]::Exists($f)) { try { & node $f subagentStop } catch { exit 1 }; exit $LASTEXITCODE }; [void][Console]::In.ReadToEnd(); [Console]::Error.WriteLine(\"APEX hook: $f is missing; reinstall the APEX plugin. Call allowed.\"); exit 0",
+        "timeoutSec": 15
+      }
+    ]
+  }
+}
