@@ -1,0 +1,84 @@
+{
+  "schemaVersion": "1.0.0",
+  "bundleVersion": "0.11.0-next.1",
+  "capabilityProtocolVersion": "1.0.0",
+  "components": {
+    "cli": {
+      "source": "local",
+      "version": "0.11.0-next.1"
+    },
+    "contracts": {
+      "source": "local",
+      "version": "0.11.0-next.1"
+    },
+    "kernel": {
+      "source": "local",
+      "version": "0.11.0-next.1"
+    },
+    "capabilities": {
+      "source": "local",
+      "version": "0.11.0-next.1"
+    },
+    "renderers": {
+      "source": "local",
+      "version": "0.11.0-next.1"
+    },
+    "customizationBundle": {
+      "source": "local",
+      "version": "0.11.0-next.1",
+      "manifest": "@apexops/cli/assets/customizations/manifest.json",
+      "assetManifest": "@apexops/cli/assets/manifest.json",
+      "compositionId": "apex-managed-workspace"
+    }
+  },
+  "config": {
+    "workflow": {
+      "path": "config/workflow.v1.json",
+      "sha256": null,
+      "generatedAtBuild": true
+    },
+    "defaults": {
+      "path": "config/defaults.v1.json",
+      "sha256": null,
+      "generatedAtBuild": true
+    },
+    "toolchain": {
+      "path": "config/toolchain.v1.json",
+      "sha256": null,
+      "generatedAtBuild": true
+    },
+    "qualityScorecard": {
+      "path": "config/quality-scorecard.v1.json",
+      "sha256": null,
+      "generatedAtBuild": true
+    },
+    "improvementPolicy": {
+      "path": "config/improvement-policy.v1.json",
+      "sha256": null,
+      "generatedAtBuild": true
+    },
+    "capabilityPacks": {
+      "path": "config/capability-packs.v1.json",
+      "sha256": null,
+      "generatedAtBuild": true
+    }
+  },
+  "schemas": {
+    "registry": "packages/contracts",
+    "sha256": null,
+    "generatedAtBuild": true
+  },
+  "validators": {
+    "registry": "packages/kernel",
+    "sha256": null,
+    "generatedAtBuild": true
+  },
+  "requiredCapabilityPacks": [],
+  "compatibility": {
+    "workflowMajor": 1,
+    "defaultsMajor": 1,
+    "contractMajor": 1,
+    "capabilityProtocolMajor": 1,
+    "incompatibleDisposition": "refuse-with-precise-error"
+  }
+}

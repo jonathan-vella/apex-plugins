@@ -1,0 +1,101 @@
+name: Governance Policy Baseline
+
+on:
+  schedule:
+    - cron: "0 5 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  collect-baseline:
+    if: vars.GOVERNANCE_BASELINE_ENABLED == 'true'
+    runs-on: ubuntu-latest
+    environment: governance
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write
+    env:
+      AZURE_CLIENT_ID: ${{ vars.AZURE_CLIENT_ID || secrets.AZURE_CLIENT_ID }}
+      AZURE_TENANT_ID: ${{ vars.AZURE_TENANT_ID || secrets.AZURE_TENANT_ID }}
+      AZURE_SUBSCRIPTION_ID: ${{ vars.AZURE_SUBSCRIPTION_ID || secrets.AZURE_SUBSCRIPTION_ID }}
+      GOVERNANCE_MG_ID: ${{ vars.GOVERNANCE_MG_ID }}
+      GOVERNANCE_SUBSCRIPTION_ID: ${{ vars.GOVERNANCE_SUBSCRIPTION_ID }}
+      GOVERNANCE_MAX_SUBSCRIPTIONS: ${{ vars.GOVERNANCE_MAX_SUBSCRIPTIONS || '100' }}
+    steps:
+      - name: Validate collection configuration
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $hasManagementGroup = -not [string]::IsNullOrEmpty($env:GOVERNANCE_MG_ID)
+          $hasSubscription = -not [string]::IsNullOrEmpty($env:GOVERNANCE_SUBSCRIPTION_ID)
+          if ($hasManagementGroup -eq $hasSubscription) {
+            throw 'Configure exactly one governance management group or subscription.'
+          }
+          if ($hasManagementGroup -and $env:GOVERNANCE_MG_ID -cnotmatch '\A[a-zA-Z0-9](?:[a-zA-Z0-9_().-]{0,88}[a-zA-Z0-9_()-])?\z') {
+            throw 'Invalid governance management group ID.'
+          }
+          $guidPattern = '\A[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}\z'
+          if ($hasSubscription -and $env:GOVERNANCE_SUBSCRIPTION_ID -cnotmatch $guidPattern) {
+            throw 'Invalid governance subscription ID.'
+          }
+          foreach ($value in @($env:AZURE_CLIENT_ID, $env:AZURE_TENANT_ID, $env:AZURE_SUBSCRIPTION_ID)) {
+            if ([string]::IsNullOrEmpty($value) -or $value -cnotmatch $guidPattern) {
+              throw 'Configure valid Azure OIDC client, tenant, and login subscription IDs.'
+            }
+          }
+          $maximum = 0
+          if ($env:GOVERNANCE_MAX_SUBSCRIPTIONS -cnotmatch '\A[0-9]+\z' -or
+              -not [int]::TryParse($env:GOVERNANCE_MAX_SUBSCRIPTIONS, [ref]$maximum) -or $maximum -lt 1) {
+            throw 'Maximum subscriptions must be an integer from 1 through 2147483647.'
+          }
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Azure Login (OIDC)
+        uses: azure/login@a641126d1b8aa4d1fa005f4f92df94a3a4c4c906 # v3.1.0
+        with:
+          client-id: ${{ env.AZURE_CLIENT_ID }}
+          tenant-id: ${{ env.AZURE_TENANT_ID }}
+          subscription-id: ${{ env.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Collect governance baseline
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $parameters = @{ MaxSubscriptions = [int]$env:GOVERNANCE_MAX_SUBSCRIPTIONS; IncludeDefenderAuto = $true; IncludeDescendants = $true }
+          if ($env:GOVERNANCE_MG_ID) {
+            $parameters.ManagementGroupId = $env:GOVERNANCE_MG_ID
+          } else {
+            $parameters.SubscriptionId = $env:GOVERNANCE_SUBSCRIPTION_ID
+          }
+          try {
+            & ./tools/scripts/collect-governance-baseline.ps1 @parameters *> $null
+            $baseline = Get-Content -LiteralPath '.github/data/governance-policy-baseline.json' -Raw
+            if (-not (Test-Json -Json $baseline -SchemaFile './tools/schemas/governance-baseline.schema.json' -ErrorAction Stop)) {
+              throw 'Invalid baseline.'
+            }
+          } catch {
+            throw 'Governance collection or schema validation failed; no baseline PR will be created.'
+          }
+
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1 # v8.1.1
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          add-paths: .github/data/governance-policy-baseline.json
+          commit-message: "chore(data): Update governance policy baseline"
+          branch: "chore/governance-baseline-update"
+          delete-branch: true
+          title: "chore(data): Update governance policy baseline"
+          body: |
+            Updates only `.github/data/governance-policy-baseline.json`.
+            Human review and manual merge are required. Review scope, coverage,
+            exclusions, and policy changes before approving this baseline.

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/mcp.schema.json",
+  "mcpServers": {
+    "apex": {
+      "type": "stdio",
+      "command": "node",
+      "args": [
+        "${PLUGIN_ROOT}/mcp/apex.mjs"
+      ]
+    },
+    "apex-azure-pricing": {
+      "type": "streamable-http",
+      "url": "https://mcp.management.azure.com",
+      "headers": {
+        "x-mcp-toolset": "CostManagement,Pricing"
+      }
+    }
+  }
+}
