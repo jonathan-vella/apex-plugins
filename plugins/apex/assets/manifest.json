@@ -1,0 +1,2049 @@
+{
+  "version": 1,
+  "sources": {
+    "customizations": "0.11.0-next.2",
+    "config": "1.0.0"
+  },
+  "composition": {
+    "authority": "npm:@apexops/cli",
+    "generator": "packages/cli/scripts/prepare-assets.mjs",
+    "formatVersion": 1,
+    "mappings": [
+      {
+        "id": "customizations",
+        "mode": "copy-tree",
+        "sourceRoot": "customizations",
+        "generatedRoot": "customizations"
+      },
+      {
+        "id": "config",
+        "mode": "copy-tree",
+        "sourceRoot": "config",
+        "generatedRoot": "config"
+      },
+      {
+        "id": "governance-shared-0",
+        "mode": "copy-entries",
+        "sourceRoot": ".github/workflows",
+        "generatedRoot": "customizations/.github/workflows",
+        "entries": [
+          {
+            "source": ".github/workflows/governance-policy-baseline.yml",
+            "target": "customizations/.github/workflows/governance-policy-baseline.yml"
+          }
+        ]
+      },
+      {
+        "id": "governance-shared-1",
+        "mode": "copy-entries",
+        "sourceRoot": "tools/scripts",
+        "generatedRoot": "customizations/tools/scripts",
+        "entries": [
+          {
+            "source": "tools/scripts/collect-governance-baseline.ps1",
+            "target": "customizations/tools/scripts/collect-governance-baseline.ps1"
+          }
+        ]
+      },
+      {
+        "id": "governance-shared-2",
+        "mode": "copy-entries",
+        "sourceRoot": "tools/schemas",
+        "generatedRoot": "customizations/tools/schemas",
+        "entries": [
+          {
+            "source": "tools/schemas/governance-baseline.schema.json",
+            "target": "customizations/tools/schemas/governance-baseline.schema.json"
+          }
+        ]
+      },
+      {
+        "id": "governance-baseline-schema",
+        "mode": "copy-entries",
+        "sourceRoot": "tools/schemas",
+        "generatedRoot": "schemas"
+      },
+      {
+        "id": "copilot-cli-tool-inventory",
+        "mode": "copy-entries",
+        "sourceRoot": "tools/registry",
+        "generatedRoot": "client-projection-metadata"
+      },
+      {
+        "id": "client-projections",
+        "mode": "render-client-projections",
+        "sourceRoot": "customizations",
+        "generatedRoot": "client-projections"
+      },
+      {
+        "id": "capability-pack-registry",
+        "mode": "compose-json",
+        "generatedPath": "capability-packs/registry.v1.json"
+      }
+    ]
+  },
+  "projections": [
+    {
+      "id": "github-copilot-cli",
+      "files": [
+        "client-projections/github-copilot-cli/.github/copilot-instructions.md",
+        "client-projections/github-copilot-cli/.github/copilot/settings.json",
+        "client-projections/github-copilot-cli/.github/instructions/apex-agent-authoring.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-artifact-contracts.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-automation.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-azure-yaml.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-bicep.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-code-quality.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-context.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-documentation.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-governance.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-instruction-authoring.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-javascript.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-json.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-markdown.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-powershell.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-prompt-authoring.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-python.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-safe-file-edits.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-safe-shell.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-shell.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-skill-authoring.instructions.md",
+        "client-projections/github-copilot-cli/.github/instructions/apex-terraform.instructions.md",
+        "client-projections/github-copilot-cli/.github/workflows/governance-policy-baseline.yml",
+        "client-projections/github-copilot-cli/tools/schemas/governance-baseline.schema.json",
+        "client-projections/github-copilot-cli/tools/scripts/collect-governance-baseline.ps1"
+      ],
+      "digest": "1e17a10b0c7e1a32fd0fda9fb8fbaf1d1c583fbf0753f881258c6f42d0bcd25d"
+    }
+  ],
+  "files": [
+    {
+      "path": "capability-packs/registry.v1.json",
+      "source": {
+        "kind": "generated",
+        "composition": "capability-pack-registry"
+      },
+      "sha256": "cca237526a6d322a743ac4b9ee2da283e7602f8fa674c971e31673fabb308b9e",
+      "bytes": 292
+    },
+    {
+      "path": "client-projection-metadata/copilot-cli-agent-tools.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "tools/registry/copilot-cli-agent-tools.json",
+        "mapping": "copilot-cli-tool-inventory"
+      },
+      "sha256": "8fd92b3b2c4676e3f299c2f966b8b833a9ffd33197aea3b46e8f4894bc61b896",
+      "bytes": 3744
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/copilot-instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/copilot-instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/copilot-instructions.md",
+        "sourceHash": "d4127b7bbce20fe8fbf9e1dde5aed4ac8d918fee643cfb58dd32a4e016990dbb"
+      },
+      "sha256": "d4127b7bbce20fe8fbf9e1dde5aed4ac8d918fee643cfb58dd32a4e016990dbb",
+      "bytes": 748
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/copilot/settings.json",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/copilot/settings.json",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/copilot/settings.json",
+        "sourceHash": "b18dd41ff50f5249c25b1875403eb98c85b840c20ed243b9c61938ccdfebac37"
+      },
+      "sha256": "b18dd41ff50f5249c25b1875403eb98c85b840c20ed243b9c61938ccdfebac37",
+      "bytes": 223
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-agent-authoring.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-agent-authoring.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-agent-authoring.instructions.md",
+        "sourceHash": "4fbe0c08ade6a7ff7179347a3393db20fdf5089530d85ec34d987741eae44193"
+      },
+      "sha256": "4fbe0c08ade6a7ff7179347a3393db20fdf5089530d85ec34d987741eae44193",
+      "bytes": 760
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-artifact-contracts.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-artifact-contracts.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-artifact-contracts.instructions.md",
+        "sourceHash": "1af7c34d3ca7c8d6ec41fb7c301d8770c84aa0858d2eb60f44d09fb1aaab6853"
+      },
+      "sha256": "1af7c34d3ca7c8d6ec41fb7c301d8770c84aa0858d2eb60f44d09fb1aaab6853",
+      "bytes": 566
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-automation.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-automation.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-automation.instructions.md",
+        "sourceHash": "69433467b72ff8a3787757c278f00d3d5a4fb41af424e188c8bfefa6e03f4ff0"
+      },
+      "sha256": "69433467b72ff8a3787757c278f00d3d5a4fb41af424e188c8bfefa6e03f4ff0",
+      "bytes": 658
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-azure-yaml.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-azure-yaml.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-azure-yaml.instructions.md",
+        "sourceHash": "9e2b1bbc7c833c6bb684d4a9325342deada00723d88d72ea4cf444748f6dd967"
+      },
+      "sha256": "9e2b1bbc7c833c6bb684d4a9325342deada00723d88d72ea4cf444748f6dd967",
+      "bytes": 489
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-bicep.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-bicep.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-bicep.instructions.md",
+        "sourceHash": "45580568a04ff441e526e08090adb53f3b6e37d14d76439dda1787ba93c48fd4"
+      },
+      "sha256": "45580568a04ff441e526e08090adb53f3b6e37d14d76439dda1787ba93c48fd4",
+      "bytes": 550
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-code-quality.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-code-quality.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-code-quality.instructions.md",
+        "sourceHash": "4532b05eb44cb9ea14b6ed77dc6d9e14eb33e697768a0809cf64989b362bd0d1"
+      },
+      "sha256": "4532b05eb44cb9ea14b6ed77dc6d9e14eb33e697768a0809cf64989b362bd0d1",
+      "bytes": 520
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-context.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-context.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-context.instructions.md",
+        "sourceHash": "35e8375bcf736d43946aec7ebb19965caedf6696618d9a9b9b3723921fd67d49"
+      },
+      "sha256": "35e8375bcf736d43946aec7ebb19965caedf6696618d9a9b9b3723921fd67d49",
+      "bytes": 634
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-documentation.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-documentation.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-documentation.instructions.md",
+        "sourceHash": "7fb003ee9d2e415b41790dc2d91e71638d3004e2178fabc45c7ebec3b941ac87"
+      },
+      "sha256": "7fb003ee9d2e415b41790dc2d91e71638d3004e2178fabc45c7ebec3b941ac87",
+      "bytes": 581
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-governance.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-governance.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-governance.instructions.md",
+        "sourceHash": "b1aca5733b1ad35ec22524a213cea07e03d634909441aedc3e0616d01531b289"
+      },
+      "sha256": "b1aca5733b1ad35ec22524a213cea07e03d634909441aedc3e0616d01531b289",
+      "bytes": 656
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-instruction-authoring.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-instruction-authoring.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-instruction-authoring.instructions.md",
+        "sourceHash": "6066d54fddc92f45c472a2dc2026320f89900a5bc6f947add10e999314980945"
+      },
+      "sha256": "6066d54fddc92f45c472a2dc2026320f89900a5bc6f947add10e999314980945",
+      "bytes": 558
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-javascript.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-javascript.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-javascript.instructions.md",
+        "sourceHash": "53c527b2a7936cafa9dd09424764dd6fed61d217addf845da612b83265483e2f"
+      },
+      "sha256": "53c527b2a7936cafa9dd09424764dd6fed61d217addf845da612b83265483e2f",
+      "bytes": 418
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-json.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-json.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-json.instructions.md",
+        "sourceHash": "326ac7cab2530de6f8277039ba65900f9ad86f5b147b34c246b709a96d6e3683"
+      },
+      "sha256": "326ac7cab2530de6f8277039ba65900f9ad86f5b147b34c246b709a96d6e3683",
+      "bytes": 430
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-markdown.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-markdown.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-markdown.instructions.md",
+        "sourceHash": "e3f6d68f6624a3aa085d803df1d932b31f4d273fe921d2753b68f5e9b7b7a940"
+      },
+      "sha256": "e3f6d68f6624a3aa085d803df1d932b31f4d273fe921d2753b68f5e9b7b7a940",
+      "bytes": 575
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-powershell.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-powershell.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-powershell.instructions.md",
+        "sourceHash": "6533bb1fabbaaa7a0552ba26bbb2c59dc9c933d60ee646a04255dfa1bba738e7"
+      },
+      "sha256": "6533bb1fabbaaa7a0552ba26bbb2c59dc9c933d60ee646a04255dfa1bba738e7",
+      "bytes": 428
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-prompt-authoring.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-prompt-authoring.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-prompt-authoring.instructions.md",
+        "sourceHash": "559528f64b4c0acdbde1968a0f42fa9e5b6144fb043f550cd2cd601c8b2abca2"
+      },
+      "sha256": "559528f64b4c0acdbde1968a0f42fa9e5b6144fb043f550cd2cd601c8b2abca2",
+      "bytes": 602
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-python.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-python.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-python.instructions.md",
+        "sourceHash": "6955b3b3140d1cd4c808dce9358e594f727dcdebeef0e204c2eaba7384b9ee04"
+      },
+      "sha256": "6955b3b3140d1cd4c808dce9358e594f727dcdebeef0e204c2eaba7384b9ee04",
+      "bytes": 402
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-safe-file-edits.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-safe-file-edits.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-safe-file-edits.instructions.md",
+        "sourceHash": "8472bd1eb78a879fd7f94f6d5139c44d742576bf3db41ac2b5a3d81e1a8d8e4c"
+      },
+      "sha256": "8472bd1eb78a879fd7f94f6d5139c44d742576bf3db41ac2b5a3d81e1a8d8e4c",
+      "bytes": 514
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-safe-shell.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-safe-shell.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-safe-shell.instructions.md",
+        "sourceHash": "0f1462caf913a7297cc02a74991deb0a59e0c70b8efc105c10776d0415bc225f"
+      },
+      "sha256": "0f1462caf913a7297cc02a74991deb0a59e0c70b8efc105c10776d0415bc225f",
+      "bytes": 565
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-shell.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-shell.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-shell.instructions.md",
+        "sourceHash": "2026e9434fb4cd182b7aebedb7bd3541763163e4dceea609f1f87827d17f0290"
+      },
+      "sha256": "2026e9434fb4cd182b7aebedb7bd3541763163e4dceea609f1f87827d17f0290",
+      "bytes": 388
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-skill-authoring.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-skill-authoring.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-skill-authoring.instructions.md",
+        "sourceHash": "3c95f8011e6411c47f7112ebd045d13423f016995c872915eca622050cfd7850"
+      },
+      "sha256": "3c95f8011e6411c47f7112ebd045d13423f016995c872915eca622050cfd7850",
+      "bytes": 625
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/instructions/apex-terraform.instructions.md",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/instructions/apex-terraform.instructions.md",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/instructions/apex-terraform.instructions.md",
+        "sourceHash": "07ce657700440bdb06e82c9edd673004f071a8f96bd7ebb59b3698d5a36596d2"
+      },
+      "sha256": "07ce657700440bdb06e82c9edd673004f071a8f96bd7ebb59b3698d5a36596d2",
+      "bytes": 544
+    },
+    {
+      "path": "client-projections/github-copilot-cli/.github/workflows/governance-policy-baseline.yml",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": ".github/workflows/governance-policy-baseline.yml",
+        "adapterVersion": "1.12.0",
+        "sourcePath": ".github/workflows/governance-policy-baseline.yml",
+        "sourceHash": "b002b9b3371e23e903bb3fd33c4439269e916c670e3fd78b9da53e9fc6367a69"
+      },
+      "sha256": "b002b9b3371e23e903bb3fd33c4439269e916c670e3fd78b9da53e9fc6367a69",
+      "bytes": 4589
+    },
+    {
+      "path": "client-projections/github-copilot-cli/tools/schemas/governance-baseline.schema.json",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": "tools/schemas/governance-baseline.schema.json",
+        "adapterVersion": "1.12.0",
+        "sourcePath": "tools/schemas/governance-baseline.schema.json",
+        "sourceHash": "dc09b83f142c9e03e366f35d43e95eaa9fc37d93b8c38275c3f0509a30830249"
+      },
+      "sha256": "dc09b83f142c9e03e366f35d43e95eaa9fc37d93b8c38275c3f0509a30830249",
+      "bytes": 3903
+    },
+    {
+      "path": "client-projections/github-copilot-cli/tools/scripts/collect-governance-baseline.ps1",
+      "source": {
+        "kind": "generated",
+        "composition": "client-projections",
+        "clientId": "github-copilot-cli",
+        "target": "tools/scripts/collect-governance-baseline.ps1",
+        "adapterVersion": "1.12.0",
+        "sourcePath": "tools/scripts/collect-governance-baseline.ps1",
+        "sourceHash": "ff5642cb768f130c04aaace50549bfab156a563d1d4cdea4dfb40d92330f408e"
+      },
+      "sha256": "ff5642cb768f130c04aaace50549bfab156a563d1d4cdea4dfb40d92330f408e",
+      "bytes": 38498
+    },
+    {
+      "path": "config/capability-packs.v1.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "config/capability-packs.v1.json",
+        "mapping": "config"
+      },
+      "sha256": "cca237526a6d322a743ac4b9ee2da283e7602f8fa674c971e31673fabb308b9e",
+      "bytes": 292
+    },
+    {
+      "path": "config/defaults.v1.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "config/defaults.v1.json",
+        "mapping": "config"
+      },
+      "sha256": "ed8adc8415d8cd3ce290dc195dbe186b758291079d840802fef3e6674aca2036",
+      "bytes": 3144
+    },
+    {
+      "path": "config/governance-reference.v1.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "config/governance-reference.v1.json",
+        "mapping": "config"
+      },
+      "sha256": "630b64af1b058628cd1b1a467de05654c54ef9bc19c4887c45699c4076249c37",
+      "bytes": 1443697
+    },
+    {
+      "path": "config/improvement-policy.v1.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "config/improvement-policy.v1.json",
+        "mapping": "config"
+      },
+      "sha256": "76841313ba7a8091dc0c400d02b55858cbd25ce081609ed00997f44a239c0547",
+      "bytes": 808
+    },
+    {
+      "path": "config/quality-scorecard.v1.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "config/quality-scorecard.v1.json",
+        "mapping": "config"
+      },
+      "sha256": "f557606e858bd3d6077588539511a6bc9f19a1dd8f05f990610fee75dfcab3f6",
+      "bytes": 2848
+    },
+    {
+      "path": "config/recipe-packs.v1.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "config/recipe-packs.v1.json",
+        "mapping": "config"
+      },
+      "sha256": "1d1a8c004d57cf4858c477a23f32bf05584c6289be1e4973930721495579970f",
+      "bytes": 52
+    },
+    {
+      "path": "config/runtime-bundle.v1.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "config/runtime-bundle.v1.json",
+        "mapping": "config"
+      },
+      "sha256": "02b331c863523d8a1ed16e8d4612a1412a6bf089a13648e2ae6314dc88ea412b",
+      "bytes": 2039
+    },
+    {
+      "path": "config/toolchain.v1.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "config/toolchain.v1.json",
+        "mapping": "config"
+      },
+      "sha256": "85206090c48ddcfd544af5d050d15f9396f41d40ae88d9932c0b5a6304616326",
+      "bytes": 5042
+    },
+    {
+      "path": "config/workflow.v1.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "config/workflow.v1.json",
+        "mapping": "config"
+      },
+      "sha256": "f44549dad3f1f7977b80be59038ccd3e5e2d8a8d23caf3778a55d4919d601ae2",
+      "bytes": 23236
+    },
+    {
+      "path": "customizations/.github/agents/apex-codegen.agent.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/agents/apex-codegen.agent.md",
+        "mapping": "customizations"
+      },
+      "sha256": "82ba0be03b4b5cd684a556b05709aeb568b3e5e83fefc11c3115fcce1150a5b7",
+      "bytes": 2149
+    },
+    {
+      "path": "customizations/.github/agents/apex-validator.agent.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/agents/apex-validator.agent.md",
+        "mapping": "customizations"
+      },
+      "sha256": "91713c49ea8aa003a8144075fbac5f58d085d75c8d4398d82dd5a3d5a5e437fd",
+      "bytes": 2838
+    },
+    {
+      "path": "customizations/.github/agents/apex.agent.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/agents/apex.agent.md",
+        "mapping": "customizations"
+      },
+      "sha256": "4c2059dfe0df453045b4d1f58866acc36ad920260941b9bfff5f2f45d8c922fc",
+      "bytes": 7937
+    },
+    {
+      "path": "customizations/.github/copilot-instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/copilot-instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "d4127b7bbce20fe8fbf9e1dde5aed4ac8d918fee643cfb58dd32a4e016990dbb",
+      "bytes": 748
+    },
+    {
+      "path": "customizations/.github/copilot/settings.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/copilot/settings.json",
+        "mapping": "customizations"
+      },
+      "sha256": "b18dd41ff50f5249c25b1875403eb98c85b840c20ed243b9c61938ccdfebac37",
+      "bytes": 223
+    },
+    {
+      "path": "customizations/.github/instructions/apex-agent-authoring.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-agent-authoring.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "4fbe0c08ade6a7ff7179347a3393db20fdf5089530d85ec34d987741eae44193",
+      "bytes": 760
+    },
+    {
+      "path": "customizations/.github/instructions/apex-artifact-contracts.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-artifact-contracts.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "1af7c34d3ca7c8d6ec41fb7c301d8770c84aa0858d2eb60f44d09fb1aaab6853",
+      "bytes": 566
+    },
+    {
+      "path": "customizations/.github/instructions/apex-automation.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-automation.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "69433467b72ff8a3787757c278f00d3d5a4fb41af424e188c8bfefa6e03f4ff0",
+      "bytes": 658
+    },
+    {
+      "path": "customizations/.github/instructions/apex-azure-yaml.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-azure-yaml.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "9e2b1bbc7c833c6bb684d4a9325342deada00723d88d72ea4cf444748f6dd967",
+      "bytes": 489
+    },
+    {
+      "path": "customizations/.github/instructions/apex-bicep.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-bicep.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "45580568a04ff441e526e08090adb53f3b6e37d14d76439dda1787ba93c48fd4",
+      "bytes": 550
+    },
+    {
+      "path": "customizations/.github/instructions/apex-code-quality.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-code-quality.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "4532b05eb44cb9ea14b6ed77dc6d9e14eb33e697768a0809cf64989b362bd0d1",
+      "bytes": 520
+    },
+    {
+      "path": "customizations/.github/instructions/apex-context.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-context.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "35e8375bcf736d43946aec7ebb19965caedf6696618d9a9b9b3723921fd67d49",
+      "bytes": 634
+    },
+    {
+      "path": "customizations/.github/instructions/apex-documentation.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-documentation.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "7fb003ee9d2e415b41790dc2d91e71638d3004e2178fabc45c7ebec3b941ac87",
+      "bytes": 581
+    },
+    {
+      "path": "customizations/.github/instructions/apex-governance.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-governance.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "b1aca5733b1ad35ec22524a213cea07e03d634909441aedc3e0616d01531b289",
+      "bytes": 656
+    },
+    {
+      "path": "customizations/.github/instructions/apex-instruction-authoring.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-instruction-authoring.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "6066d54fddc92f45c472a2dc2026320f89900a5bc6f947add10e999314980945",
+      "bytes": 558
+    },
+    {
+      "path": "customizations/.github/instructions/apex-javascript.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-javascript.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "53c527b2a7936cafa9dd09424764dd6fed61d217addf845da612b83265483e2f",
+      "bytes": 418
+    },
+    {
+      "path": "customizations/.github/instructions/apex-json.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-json.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "326ac7cab2530de6f8277039ba65900f9ad86f5b147b34c246b709a96d6e3683",
+      "bytes": 430
+    },
+    {
+      "path": "customizations/.github/instructions/apex-markdown.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-markdown.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "e3f6d68f6624a3aa085d803df1d932b31f4d273fe921d2753b68f5e9b7b7a940",
+      "bytes": 575
+    },
+    {
+      "path": "customizations/.github/instructions/apex-powershell.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-powershell.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "6533bb1fabbaaa7a0552ba26bbb2c59dc9c933d60ee646a04255dfa1bba738e7",
+      "bytes": 428
+    },
+    {
+      "path": "customizations/.github/instructions/apex-prompt-authoring.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-prompt-authoring.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "559528f64b4c0acdbde1968a0f42fa9e5b6144fb043f550cd2cd601c8b2abca2",
+      "bytes": 602
+    },
+    {
+      "path": "customizations/.github/instructions/apex-python.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-python.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "6955b3b3140d1cd4c808dce9358e594f727dcdebeef0e204c2eaba7384b9ee04",
+      "bytes": 402
+    },
+    {
+      "path": "customizations/.github/instructions/apex-safe-file-edits.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-safe-file-edits.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "8472bd1eb78a879fd7f94f6d5139c44d742576bf3db41ac2b5a3d81e1a8d8e4c",
+      "bytes": 514
+    },
+    {
+      "path": "customizations/.github/instructions/apex-safe-shell.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-safe-shell.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "0f1462caf913a7297cc02a74991deb0a59e0c70b8efc105c10776d0415bc225f",
+      "bytes": 565
+    },
+    {
+      "path": "customizations/.github/instructions/apex-shell.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-shell.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "2026e9434fb4cd182b7aebedb7bd3541763163e4dceea609f1f87827d17f0290",
+      "bytes": 388
+    },
+    {
+      "path": "customizations/.github/instructions/apex-skill-authoring.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-skill-authoring.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "3c95f8011e6411c47f7112ebd045d13423f016995c872915eca622050cfd7850",
+      "bytes": 625
+    },
+    {
+      "path": "customizations/.github/instructions/apex-terraform.instructions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/instructions/apex-terraform.instructions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "07ce657700440bdb06e82c9edd673004f071a8f96bd7ebb59b3698d5a36596d2",
+      "bytes": 544
+    },
+    {
+      "path": "customizations/.github/skills/apex-architecture/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-architecture/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "0a42be1fdfa206b3e58715ba7d0c34c765dcc4442dc5408b3c9f4bccba76b68b",
+      "bytes": 5955
+    },
+    {
+      "path": "customizations/.github/skills/apex-artifacts/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-artifacts/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "1032b81ae17f418a01d86a7f45598b59717e188cbea7ca26be7d0500af7b26ec",
+      "bytes": 6171
+    },
+    {
+      "path": "customizations/.github/skills/apex-artifacts/references/presentation-conventions.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-artifacts/references/presentation-conventions.md",
+        "mapping": "customizations"
+      },
+      "sha256": "f4b155b2da52507d9757178675c805fde894337b488bc38b4e905aa59e080b52",
+      "bytes": 2930
+    },
+    {
+      "path": "customizations/.github/skills/apex-artifacts/references/reference-only-outlines.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-artifacts/references/reference-only-outlines.md",
+        "mapping": "customizations"
+      },
+      "sha256": "05a0da485933d38297df918821699a61e7c37bac0f1a1f0d0357c0c931e95ff5",
+      "bytes": 3053
+    },
+    {
+      "path": "customizations/.github/skills/apex-artifacts/templates/architecture-assessment.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-artifacts/templates/architecture-assessment.md",
+        "mapping": "customizations"
+      },
+      "sha256": "6254e481b175916ab98f8562277ef3002bdacfcb44e638c21aa53db78736f98a",
+      "bytes": 508
+    },
+    {
+      "path": "customizations/.github/skills/apex-artifacts/templates/cost-estimate.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-artifacts/templates/cost-estimate.md",
+        "mapping": "customizations"
+      },
+      "sha256": "fc1ad745a864ede522ab0a34b0d779a10642d284f56f2fb9a25b52af1fe8c67a",
+      "bytes": 641
+    },
+    {
+      "path": "customizations/.github/skills/apex-artifacts/templates/deployment-summary.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-artifacts/templates/deployment-summary.md",
+        "mapping": "customizations"
+      },
+      "sha256": "7cf9a38f416fcad4c82e741a459e78ce53dbec3cdea41c6674c54eaaf18e0fed",
+      "bytes": 439
+    },
+    {
+      "path": "customizations/.github/skills/apex-artifacts/templates/governance-constraints.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-artifacts/templates/governance-constraints.md",
+        "mapping": "customizations"
+      },
+      "sha256": "aa544c116a06f6e6fdb23c95bce8701ae4b64e697c660cc1a1daef47659cb56f",
+      "bytes": 556
+    },
+    {
+      "path": "customizations/.github/skills/apex-artifacts/templates/implementation-plan.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-artifacts/templates/implementation-plan.md",
+        "mapping": "customizations"
+      },
+      "sha256": "ebbf93448965d3499ff91c6c2383c148d91d6858f43361f1d656f7e500b0bfa3",
+      "bytes": 617
+    },
+    {
+      "path": "customizations/.github/skills/apex-artifacts/templates/operations-runbook.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-artifacts/templates/operations-runbook.md",
+        "mapping": "customizations"
+      },
+      "sha256": "092726c098ed3484b89312519ef41a6233eaa7db96246dcf25398311789142cb",
+      "bytes": 517
+    },
+    {
+      "path": "customizations/.github/skills/apex-artifacts/templates/requirements.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-artifacts/templates/requirements.md",
+        "mapping": "customizations"
+      },
+      "sha256": "80255cb874c7df8b9c8bb4d8261b58a2a9bf9d0d227ed0cc784e781399e7bdf2",
+      "bytes": 687
+    },
+    {
+      "path": "customizations/.github/skills/apex-artifacts/templates/resource-inventory.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-artifacts/templates/resource-inventory.md",
+        "mapping": "customizations"
+      },
+      "sha256": "6e3e8d21ada62928ba88f870c664645f9a39c0c6de422ea81f916e42dde13f9e",
+      "bytes": 606
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-adr/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-adr/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "97840db2015b47829861414b3c956c1fdba07f0982a3be55a2e7ba0431f6e4ed",
+      "bytes": 3096
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-adr/references/decision-examples.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-adr/references/decision-examples.md",
+        "mapping": "customizations"
+      },
+      "sha256": "e3a5c6bb8859faa7f78ff367ad3974b21d6fc736d973cb70c0c916d2db2df7cc",
+      "bytes": 2185
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-adr/references/decision-guardrails.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-adr/references/decision-guardrails.md",
+        "mapping": "customizations"
+      },
+      "sha256": "73ab7b3c2a1ac311571adab714585c08bf31a70a4e5d5ac0b020f67994d833f2",
+      "bytes": 2063
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-adr/references/decision-quality.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-adr/references/decision-quality.md",
+        "mapping": "customizations"
+      },
+      "sha256": "e93e1284b24a46aea8f820b0954e5dd66824e5752065253e692f7191540cf10f",
+      "bytes": 1324
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-adr/references/decision-record-fields.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-adr/references/decision-record-fields.md",
+        "mapping": "customizations"
+      },
+      "sha256": "ba9c52448d9e42bb344bdee59cb7de215f335b138f7e0d308b444e18ee6e7ed4",
+      "bytes": 2958
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-cloud-migrate/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-cloud-migrate/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "b98f59a137d60968da57f0c849e61a9cb02ff450f93ac81a1159e1116ef008b4",
+      "bytes": 3586
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/lambda-to-functions-assessment.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/lambda-to-functions-assessment.md",
+        "mapping": "customizations"
+      },
+      "sha256": "8e1744686e271afb045d45f8175f37ed62cd2ae4f3cc1b851807f60089c1a3e3",
+      "bytes": 1646
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/migration-readiness.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/migration-readiness.md",
+        "mapping": "customizations"
+      },
+      "sha256": "12f783cdd4421a01cd37742785ce34631c194579f162ebfd85745853fae407c4",
+      "bytes": 1576
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/staged-validation-handoff.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/staged-validation-handoff.md",
+        "mapping": "customizations"
+      },
+      "sha256": "24a0c0d2d1113c1f50227b08159367d8b4fcdcd1c58574a6fadc034d7707e569",
+      "bytes": 1537
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/workload-mapping.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/workload-mapping.md",
+        "mapping": "customizations"
+      },
+      "sha256": "2e5a442bc0d8e8ae6085bd4448c3ba003e349f3da30f9ade0785d97964c68f20",
+      "bytes": 1642
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-compliance/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-compliance/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "2c8b28584fe59a6a62ddb561c95bac1abcc91dbf8f160511389fcaa7a6e61328",
+      "bytes": 2949
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-compliance/references/compliance-finding-criteria.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-compliance/references/compliance-finding-criteria.md",
+        "mapping": "customizations"
+      },
+      "sha256": "47825e259dacc5eb88869ce959fb11e57fbc4e74b264270cde109db5b392c63a",
+      "bytes": 3394
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-compliance/references/operational-checklist.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-compliance/references/operational-checklist.md",
+        "mapping": "customizations"
+      },
+      "sha256": "e23f54be27fc196b38c1ce425a93b88b6b1db1c86f99e8f174b3e4e5efa4b5f8",
+      "bytes": 1076
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-compute/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-compute/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "27022aadc471acac9602de3e67734eaaaa96d9d8e88a719571fae5c886882aa6",
+      "bytes": 2054
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-compute/references/compute-selection.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-compute/references/compute-selection.md",
+        "mapping": "customizations"
+      },
+      "sha256": "d6fe9f0f0879fd6a1fb3d5b00a2f8bad36d5fbbb8a4293199d015028e0a7eae2",
+      "bytes": 1244
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-compute/references/pricing-evidence.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-compute/references/pricing-evidence.md",
+        "mapping": "customizations"
+      },
+      "sha256": "1b9b31518b5b5fbd9f54848a64b3abe1a797f2966a4acb2bc4fe7d3312cd7621",
+      "bytes": 692
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-compute/references/recommendation-and-scale-rules.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-compute/references/recommendation-and-scale-rules.md",
+        "mapping": "customizations"
+      },
+      "sha256": "5fffe1783bfbfcf13dc9b4e76f60af7d03ca40ad3c13f0c1c0caf6865dc9f0df",
+      "bytes": 2666
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-cost-optimization/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-cost-optimization/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "2ee3ca741391ef2f9643cd577f47fab2e0127976f6554358ce435c65dd4fbd35",
+      "bytes": 3116
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-cost-optimization/references/cost-assessment-criteria.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-cost-optimization/references/cost-assessment-criteria.md",
+        "mapping": "customizations"
+      },
+      "sha256": "3beb9d47a0efb448e50a7913529f1e624683b862972cb863a938c9f893465bca",
+      "bytes": 3445
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-cost-optimization/references/operational-checklist.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-cost-optimization/references/operational-checklist.md",
+        "mapping": "customizations"
+      },
+      "sha256": "db24fe81411b5e7aedde5df1ea1c6298f19bd3a9d5a5b2f52a54965a397cb237",
+      "bytes": 1099
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-defaults/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-defaults/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "cc890cb3f801fe6260204e74cdef5538dd9087757dfc539cfef860308ba20535",
+      "bytes": 3973
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-defaults/references/avm-binding-guidance.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-defaults/references/avm-binding-guidance.md",
+        "mapping": "customizations"
+      },
+      "sha256": "582e270e651d6ca662a1eb5f2a80f35fe59b75b6d2bee5769a77d6bb689d313b",
+      "bytes": 1671
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-defaults/references/baseline-fallbacks.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-defaults/references/baseline-fallbacks.md",
+        "mapping": "customizations"
+      },
+      "sha256": "7a0b55563ee0558edd9194f53fdd3debc40c050e0258d995ab2d6d17fe0ae99b",
+      "bytes": 2477
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-defaults/references/cost-monitoring.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-defaults/references/cost-monitoring.md",
+        "mapping": "customizations"
+      },
+      "sha256": "223cc94422bae90058a0d1306d0c77bc5a422078f4640fd28d2a03812c8dc9c9",
+      "bytes": 3279
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-defaults/references/decision-boundaries.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-defaults/references/decision-boundaries.md",
+        "mapping": "customizations"
+      },
+      "sha256": "1fbb293e329f131aff697ffa7b083a6337ee9f0dbec0a8db69f4d69173c3abe0",
+      "bytes": 1157
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-defaults/references/governance-effects.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-defaults/references/governance-effects.md",
+        "mapping": "customizations"
+      },
+      "sha256": "ac860695f80a98fff98550384ff222544baf357062ecf7ec3ffec9d2a8f929d6",
+      "bytes": 1992
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-defaults/references/naming.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-defaults/references/naming.md",
+        "mapping": "customizations"
+      },
+      "sha256": "b4caa805bde33c5e715f809999a601ddf1254ee1e33bdddcc9432241a84e4423",
+      "bytes": 2810
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-defaults/references/network-planning.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-defaults/references/network-planning.md",
+        "mapping": "customizations"
+      },
+      "sha256": "13992e31991e7cd8ace9e16c98c4258d12ed04d69e97f8c427c3d8750a983309",
+      "bytes": 3016
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-defaults/references/security-baseline.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-defaults/references/security-baseline.md",
+        "mapping": "customizations"
+      },
+      "sha256": "ad26ce5867c70fb9f9e31d8898d3e78bf46a5c0cffca45e88e70d1de3aeac278",
+      "bytes": 2332
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-defaults/references/service-selection.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-defaults/references/service-selection.md",
+        "mapping": "customizations"
+      },
+      "sha256": "79cb92a9c86db8d16d04723824a1d5c70dc282970eb4a272b4e48923c8869f38",
+      "bytes": 2687
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-defaults/references/tag-precedence.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-defaults/references/tag-precedence.md",
+        "mapping": "customizations"
+      },
+      "sha256": "3272ff988d4dc772dae7f4b79511c172e909e4638277b86c40d8b537062640c6",
+      "bytes": 1796
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-deploy/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-deploy/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "76ebee23477b827d2079354ce4d2e62dfba3ed478ba0497ba208fbbc50850db1",
+      "bytes": 3084
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-deploy/references/operational-checklist.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-deploy/references/operational-checklist.md",
+        "mapping": "customizations"
+      },
+      "sha256": "646864aae98f54f0d3d453aea7eb4df7d2ef29060cc09e309358cd74a0e03a4c",
+      "bytes": 1282
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-deploy/references/preview-recovery-verification.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-deploy/references/preview-recovery-verification.md",
+        "mapping": "customizations"
+      },
+      "sha256": "ca7c4446d9604fbb54cfcb1ecc39fd33933c01ee5123de0092b27e8870c2c434",
+      "bytes": 2952
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-diagnostics/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-diagnostics/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "433fa7022703f8abdae57ec578a23e433ef1b410a016c435f88fcf51c2ee3151",
+      "bytes": 2909
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-diagnostics/references/diagnostic-interpretation.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-diagnostics/references/diagnostic-interpretation.md",
+        "mapping": "customizations"
+      },
+      "sha256": "9d4ac911f3cf95455406970417b0e59951ed959a94c74ab17aaba9650dd2b2b9",
+      "bytes": 2228
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-diagnostics/references/operational-checklist.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-diagnostics/references/operational-checklist.md",
+        "mapping": "customizations"
+      },
+      "sha256": "1dddb99b25d3c7ead1a1318ca13ba834ad6bf986a2071a968ec200027a80b8dd",
+      "bytes": 1091
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-governance/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-governance/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "16e1653ab22cb724b668f547960066f85e1cef8339259de1fc201cae6e9aa388",
+      "bytes": 3737
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-governance/references/evidence-interpretation.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-governance/references/evidence-interpretation.md",
+        "mapping": "customizations"
+      },
+      "sha256": "2e8385164ae127b953cf6ff8d5ef41f0e4f9a9a7812507516e8df7a66b25c7d3",
+      "bytes": 5953
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-governance/references/operational-checklist.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-governance/references/operational-checklist.md",
+        "mapping": "customizations"
+      },
+      "sha256": "6ac0d76884311a519b799553fdcb4dcb90761f6e7ac653e0b0b6c976ec5b265a",
+      "bytes": 1174
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-kusto/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-kusto/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "7a7151cc437dc7b88431d84e4af2671c89a40cd579315cf533dc99bb305f72d8",
+      "bytes": 2885
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-kusto/references/kql-evidence-interpretation.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-kusto/references/kql-evidence-interpretation.md",
+        "mapping": "customizations"
+      },
+      "sha256": "58e530ce80bcdc6ea4f3482fb7d0e4eea0e1afffe0cf219efcddfb266029ad44",
+      "bytes": 2424
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-kusto/references/operational-checklist.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-kusto/references/operational-checklist.md",
+        "mapping": "customizations"
+      },
+      "sha256": "5a8f6f125ef0c0935ee5946c2181569b3072a2ff3f811432cd0b0c09fb041453",
+      "bytes": 1090
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-prepare/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-prepare/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "1720a5e01d6217dfb50964212e7f1acd79dff09aa33aca5b1cb1e464ad636994",
+      "bytes": 3223
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-prepare/references/preparation-lineage.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-prepare/references/preparation-lineage.md",
+        "mapping": "customizations"
+      },
+      "sha256": "27b6cada12710602812a7aeff84512018b75fd1b53c2b81f55b4e265c607df89",
+      "bytes": 2065
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-quotas/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-quotas/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "4542d93e3b9f57087d63a460c80d4fbcf1ac37739dbd76a68582c96991213317",
+      "bytes": 2510
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-quotas/references/capacity-decision-rules.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-quotas/references/capacity-decision-rules.md",
+        "mapping": "customizations"
+      },
+      "sha256": "e7f638cc89b8824c0992684cbb07a1cd187883d8d5433c7a68d2d8940ca223ac",
+      "bytes": 2262
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-quotas/references/operational-checklist.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-quotas/references/operational-checklist.md",
+        "mapping": "customizations"
+      },
+      "sha256": "dfacc42126f01687714073fc189364a8b94a6551d5103d2bcdebe4ac2cce196a",
+      "bytes": 1051
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-rbac/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-rbac/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "8e6a3ad81cbcf50db4bce489b506249537d36126cb54b042bda33058bd4c5a94",
+      "bytes": 2548
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-rbac/references/assignment-intent.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-rbac/references/assignment-intent.md",
+        "mapping": "customizations"
+      },
+      "sha256": "f59b7278075b37540b5907bcc952f558b0dcb0d1362ae2ef23e970d5db293706",
+      "bytes": 2542
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-rbac/references/least-privilege-selection.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-rbac/references/least-privilege-selection.md",
+        "mapping": "customizations"
+      },
+      "sha256": "bcf5a70f0f97884a6f73ce514010de278dc8b14f0443e42a7fc2be54c36f7ce3",
+      "bytes": 3231
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-resources/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-resources/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "ecc96984739ea2afe7a21b8fe3af9f0ea114fe57d68cc15600bfb4b5945f41a6",
+      "bytes": 2557
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-resources/references/inventory-query-patterns.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-resources/references/inventory-query-patterns.md",
+        "mapping": "customizations"
+      },
+      "sha256": "3faf9d2a7f919a46456eacdef2eff4f06af8015e6a990a99c46fceb7e449c443",
+      "bytes": 2409
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-resources/references/operational-checklist.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-resources/references/operational-checklist.md",
+        "mapping": "customizations"
+      },
+      "sha256": "424ff5fca80bae7a01c54fcb726d04196cec05b8c974a5da3e79e58cbe7518cb",
+      "bytes": 1075
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-storage/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-storage/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "b1d308b4a3f86617069ea84593f59f700237ad1f1bf6833372c326bd12ec6243",
+      "bytes": 1895
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-storage/references/security-and-governance.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-storage/references/security-and-governance.md",
+        "mapping": "customizations"
+      },
+      "sha256": "197b2cf88c17e06e42b41fa0194c20f9adfa68406f7e3c0ff2f94ca9757eabe3",
+      "bytes": 827
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-storage/references/service-auth-and-sdk-boundary.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-storage/references/service-auth-and-sdk-boundary.md",
+        "mapping": "customizations"
+      },
+      "sha256": "37bc19372ffb27cf109a73a23e0049e665943fc2516716c095529c1e45be55b1",
+      "bytes": 2135
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-storage/references/storage-selection.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-storage/references/storage-selection.md",
+        "mapping": "customizations"
+      },
+      "sha256": "64f0ab6f32d54439c2f3912062315ddd3e5615ff766184dd824452fd84af22c2",
+      "bytes": 865
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-validate/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-validate/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "fe9b3365454f6f2ba5a139d26e157d47ee0e146cfdeb212305e074235b3fc855",
+      "bytes": 2814
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-validate/references/operational-checklist.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-validate/references/operational-checklist.md",
+        "mapping": "customizations"
+      },
+      "sha256": "f111f22fa373d9257fbe9a537cb00d5381a5757413d2623f425888d4b91150b2",
+      "bytes": 1096
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-validate/references/preflight-evidence.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-validate/references/preflight-evidence.md",
+        "mapping": "customizations"
+      },
+      "sha256": "4b0ed7e30cfa553d5392d855b574a2644ddcac79f23ddc66eb87c53c613ed624",
+      "bytes": 2455
+    },
+    {
+      "path": "customizations/.github/skills/apex-bicep-patterns/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-bicep-patterns/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "5fa12b6879fbc34c3d757ff67c2f1036e7591af028df7a74fc14a8a2af5ce731",
+      "bytes": 2569
+    },
+    {
+      "path": "customizations/.github/skills/apex-bicep-patterns/references/avm-and-codegen-acceptance.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-bicep-patterns/references/avm-and-codegen-acceptance.md",
+        "mapping": "customizations"
+      },
+      "sha256": "7e280e7e5ae45710e28d40fa0016845f2a39b77c6c033cc60327b0085d3ff1bf",
+      "bytes": 858
+    },
+    {
+      "path": "customizations/.github/skills/apex-bicep-patterns/references/codegen-acceptance-checklist.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-bicep-patterns/references/codegen-acceptance-checklist.md",
+        "mapping": "customizations"
+      },
+      "sha256": "3ef80fb44b94714e64af78104be59df0e24ac56735b603dcc52d6d02df7eb9eb",
+      "bytes": 2713
+    },
+    {
+      "path": "customizations/.github/skills/apex-bicep-patterns/references/compiler-and-provider-gotchas.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-bicep-patterns/references/compiler-and-provider-gotchas.md",
+        "mapping": "customizations"
+      },
+      "sha256": "ddb39c2f56b3e5954aac6b5548baca8682ef4b662856adc16c0903d050b34c1c",
+      "bytes": 4857
+    },
+    {
+      "path": "customizations/.github/skills/apex-bicep-patterns/references/module-interfaces-and-parameters.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-bicep-patterns/references/module-interfaces-and-parameters.md",
+        "mapping": "customizations"
+      },
+      "sha256": "86fb3b00c1dbc6f2e9d259fdb157574dcfe03cbd18cf82f6ffb494aa080d15d2",
+      "bytes": 2486
+    },
+    {
+      "path": "customizations/.github/skills/apex-bicep-patterns/references/network-and-observability.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-bicep-patterns/references/network-and-observability.md",
+        "mapping": "customizations"
+      },
+      "sha256": "e7a1c44c2a9b7e32bda83c7e67f2a93d385a6957439e02f00a015b36921cd8bd",
+      "bytes": 2925
+    },
+    {
+      "path": "customizations/.github/skills/apex-codegen/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-codegen/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "54f76b9843fd13d29a6ee1ead6b71683a927641b3c7a2f615d9d7014b310b3ef",
+      "bytes": 1534
+    },
+    {
+      "path": "customizations/.github/skills/apex-entra-app-registration/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-entra-app-registration/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "9b8f47a2d1db2548b1c37781c0a0d7827a309c2d0075f5eeebcfab5132d05998",
+      "bytes": 3497
+    },
+    {
+      "path": "customizations/.github/skills/apex-entra-app-registration/references/capability-receipts.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-entra-app-registration/references/capability-receipts.md",
+        "mapping": "customizations"
+      },
+      "sha256": "6bfe747ff136bd65f11cef46998fd78923d4603edbee497f7f00530f245af143",
+      "bytes": 1002
+    },
+    {
+      "path": "customizations/.github/skills/apex-entra-app-registration/references/design-and-diagnostics.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-entra-app-registration/references/design-and-diagnostics.md",
+        "mapping": "customizations"
+      },
+      "sha256": "992ac04cc574fed9126f17562a9f8a513adf181a9d64baf0b20a31c57b754444",
+      "bytes": 2494
+    },
+    {
+      "path": "customizations/.github/skills/apex-entra-app-registration/references/oauth-registration-model.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-entra-app-registration/references/oauth-registration-model.md",
+        "mapping": "customizations"
+      },
+      "sha256": "f46c675077c8d311f7cc2a992dc49ecb03e86bc54703e1d7e4ebea7c0cfe4794",
+      "bytes": 1425
+    },
+    {
+      "path": "customizations/.github/skills/apex-entra-app-registration/references/permissions-and-credentials.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-entra-app-registration/references/permissions-and-credentials.md",
+        "mapping": "customizations"
+      },
+      "sha256": "9ca4dfea20f040dc504d33c6f5295827b795164fb7284258ebd34f9235e2c057",
+      "bytes": 1267
+    },
+    {
+      "path": "customizations/.github/skills/apex-mermaid/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-mermaid/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "b85e2e9ddb9ac22bd3f2900f4661b862beb194a9a1c36f1d4c09abec4e0ef371",
+      "bytes": 2620
+    },
+    {
+      "path": "customizations/.github/skills/apex-mermaid/references/styling.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-mermaid/references/styling.md",
+        "mapping": "customizations"
+      },
+      "sha256": "2613e30191b47a59e7a0341470fbc5bb52fc233d3500151444975ad067526df6",
+      "bytes": 1671
+    },
+    {
+      "path": "customizations/.github/skills/apex-mermaid/references/syntax.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-mermaid/references/syntax.md",
+        "mapping": "customizations"
+      },
+      "sha256": "140583ae5de80b3487e8a8f8d915d40e87c2a5e284ecb28d6a68f60ba29e0579",
+      "bytes": 3543
+    },
+    {
+      "path": "customizations/.github/skills/apex-microsoft-docs/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-microsoft-docs/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "0f76c6860ee667a4c2697f973755cfd375fd38fb1a3d2455b5c3689704278986",
+      "bytes": 3242
+    },
+    {
+      "path": "customizations/.github/skills/apex-microsoft-docs/references/research-method.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-microsoft-docs/references/research-method.md",
+        "mapping": "customizations"
+      },
+      "sha256": "240dfe0ad6263bf20c37fa54294a0c5b4a87a59673544fc16a0ea19dfb20e0a8",
+      "bytes": 4899
+    },
+    {
+      "path": "customizations/.github/skills/apex-next/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-next/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "dde87d088c9a97ce9252c17da893522c3b33f466e85c080e947be93742f77d98",
+      "bytes": 6924
+    },
+    {
+      "path": "customizations/.github/skills/apex-operations/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-operations/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "f3cb609febf5e8c0517f8d05eb172b97783a9bb385e206b5e1efd867c4b474ed",
+      "bytes": 4383
+    },
+    {
+      "path": "customizations/.github/skills/apex-planning/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-planning/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "e1d369510f514ca1534f028143520c25fecc65eb54dc569ef704c037925d9a63",
+      "bytes": 4425
+    },
+    {
+      "path": "customizations/.github/skills/apex-requirements/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-requirements/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "fa9cf1456195f8852a4cb6e19515a08193f749f1242b9af57401b1fa90f700d3",
+      "bytes": 6092
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-import/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-import/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "cf4c51bbcc04f888edd2afff5b45da12f551bf658c0ad5f99bdb4172258cce5d",
+      "bytes": 2925
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-import/references/adoption-attestation.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-import/references/adoption-attestation.md",
+        "mapping": "customizations"
+      },
+      "sha256": "0b24eb0f34249d5ca96de020831049c0ea6bcc93aa69f0d36dd14c23710eed89",
+      "bytes": 752
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-import/references/import-assessment.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-import/references/import-assessment.md",
+        "mapping": "customizations"
+      },
+      "sha256": "0e2ac42c5b076ad9c0375c92ec6e8919d123f07cf5bd32df399028ee91655099",
+      "bytes": 1049
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-import/references/import-mapping.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-import/references/import-mapping.md",
+        "mapping": "customizations"
+      },
+      "sha256": "0438513cdb492208d6d976bab1ca8474cfa1aeab44a921a4a866825b57076112",
+      "bytes": 1164
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-import/references/mapping-and-adoption-attestation.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-import/references/mapping-and-adoption-attestation.md",
+        "mapping": "customizations"
+      },
+      "sha256": "a791d3db58ae01fb57abe7ef0bff7551b33487f8d4cafeaf151b7c8f97dc47ec",
+      "bytes": 860
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-patterns/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-patterns/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "1cdccbcb1e419a8a21b95cf1b935a33c0a490e00a3b92b255d9cf343342b3831",
+      "bytes": 2992
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-patterns/references/module-composition-and-refactor.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-patterns/references/module-composition-and-refactor.md",
+        "mapping": "customizations"
+      },
+      "sha256": "5dc59fbf5418ef239263f208c11b69c7b7cc188e8fd655d286235ef4a0e7dde9",
+      "bytes": 1125
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-patterns/references/module-composition-and-state-boundaries.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-patterns/references/module-composition-and-state-boundaries.md",
+        "mapping": "customizations"
+      },
+      "sha256": "5aa20bfe2d79382ecad8e9ece3ac361d8b83331f761ca39c77f7efc3ba7a8137",
+      "bytes": 805
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-patterns/references/module-locks-and-codegen-acceptance.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-patterns/references/module-locks-and-codegen-acceptance.md",
+        "mapping": "customizations"
+      },
+      "sha256": "8e34de50fd383805bbfd81cbc3464536f35cfdca20268fa6d3087dac3e61e6d8",
+      "bytes": 1044
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-patterns/references/network-and-observability.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-patterns/references/network-and-observability.md",
+        "mapping": "customizations"
+      },
+      "sha256": "632a0f9b4d4ec38a285fb8f090a2ab94427d6ed69ea849f3d9105b3188721d0a",
+      "bytes": 852
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-patterns/references/plan-and-change-assessment.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-patterns/references/plan-and-change-assessment.md",
+        "mapping": "customizations"
+      },
+      "sha256": "3f71d4098c64caacbbd5267bd87f48e751834410936fd642b9d668b62fa54269",
+      "bytes": 1319
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-test/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-test/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "18241ceca9380b5e907df957023a3816505b047d48a8cbdca5f6cfc31e4fe1e5",
+      "bytes": 2736
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-test/references/evidence-acceptance.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-test/references/evidence-acceptance.md",
+        "mapping": "customizations"
+      },
+      "sha256": "ae106acd03512987f22b3927f942040ba2ff17a024aad70dde5a48838bde17fd",
+      "bytes": 753
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-test/references/plan-mode-and-mock-design.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-test/references/plan-mode-and-mock-design.md",
+        "mapping": "customizations"
+      },
+      "sha256": "639675017eebdb17887280e80af9873b987c82f1283174ba19f032b3442a5767",
+      "bytes": 754
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-test/references/plan-mode-test-design.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-test/references/plan-mode-test-design.md",
+        "mapping": "customizations"
+      },
+      "sha256": "bbd16ff3fdfe0c4fe88d7425361af97d8256bdb0e346aef5b4a2e19d95b0716a",
+      "bytes": 1187
+    },
+    {
+      "path": "customizations/.github/skills/apex-terraform-test/references/test-design.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-terraform-test/references/test-design.md",
+        "mapping": "customizations"
+      },
+      "sha256": "ff6b9e3e2c53eee1e1326f3cb8485553ac9d89465f0bc7f2991fb67ce3ce568b",
+      "bytes": 960
+    },
+    {
+      "path": "customizations/.github/skills/apex-unslop/LICENSE.txt",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-unslop/LICENSE.txt",
+        "mapping": "customizations"
+      },
+      "sha256": "bc957ca6bee02792566a1a028d105e02e247c6e77cf057061674273da77b200e",
+      "bytes": 1067
+    },
+    {
+      "path": "customizations/.github/skills/apex-unslop/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-unslop/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "5b369313fb63fd45f0dd1e5dda15a5d468174578448e2d2ffda3d83c3bff0da3",
+      "bytes": 6229
+    },
+    {
+      "path": "customizations/.github/skills/apex-workflow/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-workflow/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "4c5dbf4a4a6803c5497acc1d4cff19523defb22da17e0f147c7fc3cb76c314f3",
+      "bytes": 2552
+    },
+    {
+      "path": "customizations/.github/workflows/governance-policy-baseline.yml",
+      "source": {
+        "kind": "repository-file",
+        "path": ".github/workflows/governance-policy-baseline.yml",
+        "mapping": "governance-shared-0"
+      },
+      "sha256": "b002b9b3371e23e903bb3fd33c4439269e916c670e3fd78b9da53e9fc6367a69",
+      "bytes": 4589
+    },
+    {
+      "path": "customizations/README.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/README.md",
+        "mapping": "customizations"
+      },
+      "sha256": "14076d5f3a4f4e6673825e26106180e59dd8266922ec6235eb6026ab88dd2297",
+      "bytes": 1310
+    },
+    {
+      "path": "customizations/manifest.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/manifest.json",
+        "mapping": "customizations"
+      },
+      "sha256": "fbb48048657cd2172a01bfdb19b1a9cff50ebdc2e3d835c0614f015b025a04e9",
+      "bytes": 11788
+    },
+    {
+      "path": "customizations/tools/schemas/governance-baseline.schema.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "tools/schemas/governance-baseline.schema.json",
+        "mapping": "governance-shared-2"
+      },
+      "sha256": "dc09b83f142c9e03e366f35d43e95eaa9fc37d93b8c38275c3f0509a30830249",
+      "bytes": 3903
+    },
+    {
+      "path": "customizations/tools/scripts/collect-governance-baseline.ps1",
+      "source": {
+        "kind": "repository-file",
+        "path": "tools/scripts/collect-governance-baseline.ps1",
+        "mapping": "governance-shared-1"
+      },
+      "sha256": "ff5642cb768f130c04aaace50549bfab156a563d1d4cdea4dfb40d92330f408e",
+      "bytes": 38498
+    },
+    {
+      "path": "schemas/governance-baseline.schema.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "tools/schemas/governance-baseline.schema.json",
+        "mapping": "governance-baseline-schema"
+      },
+      "sha256": "dc09b83f142c9e03e366f35d43e95eaa9fc37d93b8c38275c3f0509a30830249",
+      "bytes": 3903
+    }
+  ],
+  "lock": {
+    "algorithm": "sha256",
+    "canonicalization": "apex-bundled-assets-v1",
+    "digest": "abb9ece91fab6908cd858ca198d0524957a97d7a78e49178ace20f6d3542d52d"
+  }
+}

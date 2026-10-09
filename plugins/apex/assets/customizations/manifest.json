@@ -1,0 +1,230 @@
+{
+  "version": "0.11.0-next.2",
+  "bundle": {
+    "id": "apex-managed-workspace",
+    "authority": "npm:@apexops/cli",
+    "composition": "copy-tree",
+    "sourceRoot": "customizations",
+    "generatedRoot": "customizations"
+  },
+  "managedFiles": [
+    ".github/workflows/governance-policy-baseline.yml",
+    "tools/scripts/collect-governance-baseline.ps1",
+    "tools/schemas/governance-baseline.schema.json",
+    ".github/instructions/apex-agent-authoring.instructions.md",
+    ".github/instructions/apex-skill-authoring.instructions.md",
+    ".github/instructions/apex-artifact-contracts.instructions.md",
+    ".github/instructions/apex-azure-yaml.instructions.md",
+    ".github/instructions/apex-code-quality.instructions.md",
+    ".github/instructions/apex-context.instructions.md",
+    ".github/instructions/apex-documentation.instructions.md",
+    ".github/instructions/apex-automation.instructions.md",
+    ".github/instructions/apex-governance.instructions.md",
+    ".github/instructions/apex-bicep.instructions.md",
+    ".github/instructions/apex-terraform.instructions.md",
+    ".github/instructions/apex-instruction-authoring.instructions.md",
+    ".github/instructions/apex-javascript.instructions.md",
+    ".github/instructions/apex-json.instructions.md",
+    ".github/instructions/apex-markdown.instructions.md",
+    ".github/instructions/apex-safe-file-edits.instructions.md",
+    ".github/instructions/apex-safe-shell.instructions.md",
+    ".github/instructions/apex-powershell.instructions.md",
+    ".github/instructions/apex-prompt-authoring.instructions.md",
+    ".github/instructions/apex-python.instructions.md",
+    ".github/instructions/apex-shell.instructions.md",
+    ".github/copilot-instructions.md",
+    ".github/copilot/settings.json"
+  ],
+  "sharedFiles": [
+    ".github/copilot-instructions.md",
+    ".github/workflows/governance-policy-baseline.yml",
+    "tools/scripts/collect-governance-baseline.ps1",
+    "tools/schemas/governance-baseline.schema.json"
+  ],
+  "sharedDirectories": [
+    ".github/instructions"
+  ],
+  "clientProjections": [
+    {
+      "id": "github-copilot-cli",
+      "generatedRoot": "client-projections/github-copilot-cli",
+      "files": [
+        ".github/copilot/settings.json"
+      ]
+    }
+  ],
+  "plugin": {
+    "name": "apex",
+    "marketplace": "apex-plugins",
+    "marketplaceRepository": "jonathan-vella/apex-plugins",
+    "ownedFiles": [
+      ".mcp.json"
+    ],
+    "ownedDirectories": [
+      ".github/agents",
+      ".github/skills"
+    ],
+    "files": [
+      ".github/agents/apex.agent.md",
+      ".github/agents/apex-codegen.agent.md",
+      ".github/agents/apex-validator.agent.md",
+      ".github/skills/apex-workflow/SKILL.md",
+      ".github/skills/apex-next/SKILL.md",
+      ".github/skills/apex-requirements/SKILL.md",
+      ".github/skills/apex-architecture/SKILL.md",
+      ".github/skills/apex-planning/SKILL.md",
+      ".github/skills/apex-codegen/SKILL.md",
+      ".github/skills/apex-operations/SKILL.md",
+      ".github/skills/apex-artifacts/SKILL.md",
+      ".github/skills/apex-azure-defaults/SKILL.md",
+      ".github/skills/apex-azure-defaults/references/baseline-fallbacks.md",
+      ".github/skills/apex-azure-defaults/references/naming.md",
+      ".github/skills/apex-azure-defaults/references/tag-precedence.md",
+      ".github/skills/apex-azure-defaults/references/security-baseline.md",
+      ".github/skills/apex-azure-defaults/references/avm-binding-guidance.md",
+      ".github/skills/apex-azure-defaults/references/service-selection.md",
+      ".github/skills/apex-azure-defaults/references/governance-effects.md",
+      ".github/skills/apex-azure-defaults/references/network-planning.md",
+      ".github/skills/apex-azure-defaults/references/cost-monitoring.md",
+      ".github/skills/apex-azure-defaults/references/decision-boundaries.md",
+      ".github/skills/apex-azure-adr/SKILL.md",
+      ".github/skills/apex-azure-adr/references/decision-record-fields.md",
+      ".github/skills/apex-azure-adr/references/decision-quality.md",
+      ".github/skills/apex-azure-adr/references/decision-guardrails.md",
+      ".github/skills/apex-azure-adr/references/decision-examples.md",
+      ".github/skills/apex-azure-rbac/SKILL.md",
+      ".github/skills/apex-azure-rbac/references/least-privilege-selection.md",
+      ".github/skills/apex-azure-rbac/references/assignment-intent.md",
+      ".github/skills/apex-microsoft-docs/SKILL.md",
+      ".github/skills/apex-microsoft-docs/references/research-method.md",
+      ".github/skills/apex-azure-compute/SKILL.md",
+      ".github/skills/apex-azure-compute/references/compute-selection.md",
+      ".github/skills/apex-azure-compute/references/pricing-evidence.md",
+      ".github/skills/apex-azure-compute/references/recommendation-and-scale-rules.md",
+      ".github/skills/apex-azure-storage/SKILL.md",
+      ".github/skills/apex-azure-storage/references/storage-selection.md",
+      ".github/skills/apex-azure-storage/references/security-and-governance.md",
+      ".github/skills/apex-azure-storage/references/service-auth-and-sdk-boundary.md",
+      ".github/skills/apex-bicep-patterns/SKILL.md",
+      ".github/skills/apex-bicep-patterns/references/network-and-observability.md",
+      ".github/skills/apex-bicep-patterns/references/avm-and-codegen-acceptance.md",
+      ".github/skills/apex-bicep-patterns/references/module-interfaces-and-parameters.md",
+      ".github/skills/apex-bicep-patterns/references/compiler-and-provider-gotchas.md",
+      ".github/skills/apex-bicep-patterns/references/codegen-acceptance-checklist.md",
+      ".github/skills/apex-azure-prepare/SKILL.md",
+      ".github/skills/apex-azure-prepare/references/preparation-lineage.md",
+      ".github/skills/apex-azure-validate/SKILL.md",
+      ".github/skills/apex-azure-validate/references/preflight-evidence.md",
+      ".github/skills/apex-azure-validate/references/operational-checklist.md",
+      ".github/skills/apex-azure-deploy/SKILL.md",
+      ".github/skills/apex-azure-deploy/references/preview-recovery-verification.md",
+      ".github/skills/apex-azure-deploy/references/operational-checklist.md",
+      ".github/skills/apex-azure-governance/SKILL.md",
+      ".github/skills/apex-azure-governance/references/evidence-interpretation.md",
+      ".github/skills/apex-azure-governance/references/operational-checklist.md",
+      ".github/skills/apex-azure-quotas/SKILL.md",
+      ".github/skills/apex-azure-quotas/references/capacity-decision-rules.md",
+      ".github/skills/apex-azure-quotas/references/operational-checklist.md",
+      ".github/skills/apex-azure-resources/SKILL.md",
+      ".github/skills/apex-azure-resources/references/inventory-query-patterns.md",
+      ".github/skills/apex-azure-resources/references/operational-checklist.md",
+      ".github/skills/apex-azure-cost-optimization/SKILL.md",
+      ".github/skills/apex-azure-cost-optimization/references/cost-assessment-criteria.md",
+      ".github/skills/apex-azure-cost-optimization/references/operational-checklist.md",
+      ".github/skills/apex-azure-compliance/SKILL.md",
+      ".github/skills/apex-azure-compliance/references/compliance-finding-criteria.md",
+      ".github/skills/apex-azure-compliance/references/operational-checklist.md",
+      ".github/skills/apex-azure-diagnostics/SKILL.md",
+      ".github/skills/apex-azure-diagnostics/references/diagnostic-interpretation.md",
+      ".github/skills/apex-azure-diagnostics/references/operational-checklist.md",
+      ".github/skills/apex-azure-kusto/SKILL.md",
+      ".github/skills/apex-azure-kusto/references/kql-evidence-interpretation.md",
+      ".github/skills/apex-azure-kusto/references/operational-checklist.md",
+      ".github/skills/apex-entra-app-registration/SKILL.md",
+      ".github/skills/apex-entra-app-registration/references/oauth-registration-model.md",
+      ".github/skills/apex-entra-app-registration/references/permissions-and-credentials.md",
+      ".github/skills/apex-entra-app-registration/references/capability-receipts.md",
+      ".github/skills/apex-entra-app-registration/references/design-and-diagnostics.md",
+      ".github/skills/apex-azure-cloud-migrate/SKILL.md",
+      ".github/skills/apex-azure-cloud-migrate/references/migration-readiness.md",
+      ".github/skills/apex-azure-cloud-migrate/references/workload-mapping.md",
+      ".github/skills/apex-azure-cloud-migrate/references/staged-validation-handoff.md",
+      ".github/skills/apex-azure-cloud-migrate/references/lambda-to-functions-assessment.md",
+      ".github/skills/apex-terraform-patterns/SKILL.md",
+      ".github/skills/apex-terraform-patterns/references/network-and-observability.md",
+      ".github/skills/apex-terraform-patterns/references/module-composition-and-state-boundaries.md",
+      ".github/skills/apex-terraform-patterns/references/module-locks-and-codegen-acceptance.md",
+      ".github/skills/apex-terraform-patterns/references/module-composition-and-refactor.md",
+      ".github/skills/apex-terraform-patterns/references/plan-and-change-assessment.md",
+      ".github/skills/apex-terraform-test/SKILL.md",
+      ".github/skills/apex-terraform-test/references/test-design.md",
+      ".github/skills/apex-terraform-test/references/plan-mode-and-mock-design.md",
+      ".github/skills/apex-terraform-test/references/evidence-acceptance.md",
+      ".github/skills/apex-terraform-test/references/plan-mode-test-design.md",
+      ".github/skills/apex-terraform-import/SKILL.md",
+      ".github/skills/apex-terraform-import/references/import-assessment.md",
+      ".github/skills/apex-terraform-import/references/mapping-and-adoption-attestation.md",
+      ".github/skills/apex-terraform-import/references/adoption-attestation.md",
+      ".github/skills/apex-terraform-import/references/import-mapping.md",
+      ".github/skills/apex-mermaid/SKILL.md",
+      ".github/skills/apex-mermaid/references/syntax.md",
+      ".github/skills/apex-mermaid/references/styling.md",
+      ".github/skills/apex-unslop/SKILL.md",
+      ".github/skills/apex-unslop/LICENSE.txt",
+      ".github/skills/apex-artifacts/references/presentation-conventions.md",
+      ".github/skills/apex-artifacts/references/reference-only-outlines.md",
+      ".github/skills/apex-artifacts/templates/requirements.md",
+      ".github/skills/apex-artifacts/templates/architecture-assessment.md",
+      ".github/skills/apex-artifacts/templates/cost-estimate.md",
+      ".github/skills/apex-artifacts/templates/governance-constraints.md",
+      ".github/skills/apex-artifacts/templates/implementation-plan.md",
+      ".github/skills/apex-artifacts/templates/deployment-summary.md",
+      ".github/skills/apex-artifacts/templates/operations-runbook.md",
+      ".github/skills/apex-artifacts/templates/resource-inventory.md"
+    ]
+  },
+  "roles": [
+    {
+      "id": "coordinator",
+      "source": ".github/agents/apex.agent.md",
+      "agent": "APEX",
+      "role": "coordinator",
+      "supportedTargets": [
+        "github-copilot"
+      ],
+      "interactionType": "interactive-handoff"
+    },
+    {
+      "id": "code-generation",
+      "source": ".github/agents/apex-codegen.agent.md",
+      "agent": "APEX CodeGen",
+      "role": "code-generation",
+      "supportedTargets": [
+        "github-copilot"
+      ],
+      "interactionType": "autonomous-subagent"
+    },
+    {
+      "id": "validation",
+      "source": ".github/agents/apex-validator.agent.md",
+      "agent": "APEX Validator",
+      "role": "validation",
+      "supportedTargets": [
+        "github-copilot"
+      ],
+      "interactionType": "autonomous-subagent"
+    }
+  ],
+  "invocationEdges": [
+    {
+      "from": "APEX",
+      "to": "APEX CodeGen",
+      "type": "subagent"
+    },
+    {
+      "from": "APEX",
+      "to": "APEX Validator",
+      "type": "subagent"
+    }
+  ]
+}

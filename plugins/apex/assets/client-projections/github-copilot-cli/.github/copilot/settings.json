@@ -1,0 +1,13 @@
+{
+  "enabledPlugins": {
+    "apex@apex-plugins": true
+  },
+  "extraKnownMarketplaces": {
+    "apex-plugins": {
+      "source": {
+        "source": "github",
+        "repo": "jonathan-vella/apex-plugins"
+      }
+    }
+  }
+}

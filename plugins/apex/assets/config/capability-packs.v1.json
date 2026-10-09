@@ -1,0 +1,12 @@
+{
+  "schemaVersion": "1.0.0",
+  "protocolVersion": "1.0.0",
+  "installationPolicy": {
+    "mode": "lazy",
+    "coreRemainsUsableWhenOptionalPackAbsent": true,
+    "exactLocksRequired": true,
+    "transitiveLocksRequired": true,
+    "installOnlyForDeclaredWorkflow": true
+  },
+  "packs": []
+}
