@@ -1,7 +1,8 @@
 ---
 name: apex-artifacts
-description: "Presents accepted APEX typed artifacts as bounded Markdown views. Use for renderer templates, document slots, provenance receipts, resource inventories, cost views, runbooks, and reference-only document outlines."
+description: '**UTILITY SKILL** — Present accepted APEX artifacts as bounded Markdown views. WHEN: "generate artifact", "check H2 structure", "artifact template", "as-built docs", "cost view", "runbook". DO NOT USE FOR: Azure configuration (use apex-azure-defaults), Bicep patterns (use apex-bicep-patterns), Terraform patterns (use apex-terraform-patterns).'
 user-invocable: false
+disable-model-invocation: false
 ---
 
 When calling any `apex/*` MCP tool, include the current session checkout or worktree as the required absolute
@@ -11,6 +12,7 @@ When calling any `apex/*` MCP tool, include the current session checkout or work
 
 Present accepted typed artifacts without creating a second source of truth. The artifact schema, accepted values,
 kernel decisions, and accepted object hash remain canonical; Markdown is a derived view.
+Read [the authority boundary](references/kernel-boundary.md) before using an upstream outline.
 
 ## Prerequisites
 
@@ -37,6 +39,8 @@ kernel decisions, and accepted object hash remain canonical; Markdown is a deriv
 5. Correct the bounded request and re-render until the renderer accepts it; otherwise return the blocker.
 
 Read [presentation conventions](references/presentation-conventions.md) before preparing any document request.
+Read [styling standards](references/styling-standards.md) for navigation, tables, status language and collapsible detail;
+the current renderer registry, not an upstream heading table, decides supported slots and heading order.
 
 ## Available Documents
 
@@ -72,6 +76,15 @@ All are read-only views of accepted typed sources.
 - [Deployment summary](templates/deployment-summary.md) remains an advisory outline; the direct renderer derives its
     supported sections from completed operation evidence instead of claiming every outline slot is available.
 - [Additional document outlines](references/reference-only-outlines.md) preserve useful source-document semantics.
+- [Upstream outline index](references/content-index.md) preserves full requirements, architecture, planning, CodeGen,
+  deployment, design, inventory, operations, backup/DR, compliance, cost, lessons and README presentation examples.
+  They are advisory design references, not new renderer registrations or artifact/state formats.
+- Outline navigation: [requirements](references/01-requirements-template.md),
+  [architecture](references/02-architecture-template.md), [planning](references/04-plan-template.md),
+  [CodeGen](references/05-code-template.md), [deployment](references/06-deploy-template.md) and
+  [documentation](references/07-docs-template.md).
+- [Cost sections](references/cost-estimate-sections.md), [workload-manifest presentation](references/sku-manifest-details.md)
+  and [revision boundaries](references/revision-workflow.md) - preserve accepted facts, provenance and exact hashes.
 
 Reference-only outlines never authorize rendering, file creation, cloud queries, repository reads, or state changes.
 If a caller needs one, require a supported custom-document capability or clearly report that the capability is absent.

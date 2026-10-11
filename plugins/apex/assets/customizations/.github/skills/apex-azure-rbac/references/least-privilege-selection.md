@@ -18,6 +18,32 @@ that manages a resource does not necessarily read its data, and a data role need
 5. Check accepted governance, deny assignments, conditions, and separation-of-duties constraints.
 6. Record the selected role definition identifier and why narrower candidates or scopes were insufficient.
 
+## Effective-Permission Evaluation
+
+Evaluate every permission block of each candidate role definition against the requested provider operation:
+
+- Management-plane access is `actions` minus `notActions`; data-plane access is `dataActions` minus `notDataActions`.
+- Match wildcards against the full operation string, for example `Microsoft.Storage/storageAccounts/*`.
+- Combine grants across blocks and across every applicable assignment. A `notActions` or `notDataActions` entry removes
+  only from its own block's grant; it is not a deny and does not cancel another role's grant.
+- A management `*/read` does not grant blob, secret, or other data access.
+- Assignment scope and inheritance, conditions, deny assignments, and the activation state of eligible assignments are
+  separate checks. A role definition alone never proves effective access.
+- A permission missing from the evidence, or catalog evidence that is unavailable, means unverified, not granted.
+
+## Common Plane Splits
+
+These well-known built-in roles illustrate why the plane matters. Confirm each against current role-definition evidence
+before selecting it.
+
+| Need | Management-plane role | Data-plane role |
+| --- | --- | --- |
+| Read blobs | Reader does not suffice | Storage Blob Data Reader |
+| Write blobs | Contributor does not suffice through Entra authorization | Storage Blob Data Contributor |
+| Read Key Vault secrets | Key Vault Reader reads metadata only | Key Vault Secrets User |
+| Pull container images | Reader does not suffice | AcrPull |
+| Grant access to others | User Access Administrator (least privilege for assignment) | - |
+
 Use a custom role only when accepted catalog evidence shows no built-in role satisfies the requirement. Define only the
 required `actions` and `dataActions`, use `notActions` or `notDataActions` where justified, avoid wildcards, and keep
 assignable scopes as narrow as future assignment needs permit.

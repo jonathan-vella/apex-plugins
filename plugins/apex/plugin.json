@@ -1,7 +1,7 @@
 {
   "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
   "name": "apex",
-  "version": "0.11.0-next.2",
+  "version": "0.11.0-next.3",
   "description": "APEX vNext Azure workflow agent, hidden workers, skills, managed hooks, the bundled MCP server and read-only Azure pricing tools.",
   "author": {
     "name": "Jonathan Vella",

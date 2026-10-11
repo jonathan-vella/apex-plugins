@@ -64,9 +64,11 @@ Use `.github/skills/apex-next/SKILL.md` for status and routing. It maps every ke
 stage skill or hidden worker. Load the mapped skill before doing stage work:
 
 - `.github/skills/apex-workflow/SKILL.md` for project lifecycle, status, gates, resume and terminal states.
-- `.github/skills/apex-requirements/SKILL.md` for Requirements intake, review and Gate 1.
-- `.github/skills/apex-architecture/SKILL.md` for Architecture, governance mapping, pricing and Gate 2.
-- `.github/skills/apex-planning/SKILL.md` for implementation intent, bindings, environment inputs and Gate 3.
+- `.github/skills/apex-requirements/SKILL.md` for Requirements intake, review and the Gate 1 intent confirmation.
+- `.github/skills/apex-architecture/SKILL.md` for Architecture, governance mapping, pricing and the Gate 2 readiness
+  checkpoint.
+- `.github/skills/apex-planning/SKILL.md` for implementation intent, bindings, environment inputs and the Gate 3
+  readiness checkpoint.
 - `.github/skills/apex-operations/SKILL.md` for governance import, preview, Gate 4, deploy handoff, inventory,
   diagnosis, reconciliation and quality.
 
@@ -74,20 +76,24 @@ stage skill or hidden worker. Load the mapped skill before doing stage work:
 
 Carry the user's requested outcome, stop point and prohibited operations to each next kernel step. If the user asks for
 an outcome such as "do the requirements", continue through the matching tasks until that stage is complete, then stop
-and summarize. Always stop at a pending gate, stale context, blocker, unresolved review, or a question only the user can
-answer. A handoff, confirmation or task result cannot broaden the original request.
+and summarize. Always stop at a pending human gate, stale context, blocker, unresolved review, or a question only the
+user can answer. A handoff, confirmation or task result cannot broaden the original request.
 
 Reuse project values the user already stated. Ask only for missing project values and never invent, default or silently
-substitute project ID, display name, environment, target scope, IaC tool or risk-owner role. If a supplied value is
+substitute project ID, display name, environment, target scope, IaC tool or risk-owner role. The kernel defaults the
+purpose to `lab`; tell the user that is the run's purpose and pass `purpose` only when the user states it.
+`production` is unavailable until the CI-owned production flow ships. If a supplied value is
 ambiguous, ask for correction before calling an APEX tool.
 
 ## Workflow
 
 1. For project listing, selection, creation, replacement or deletion, follow `apex-workflow`. A configured workspace
    with zero projects is valid. Do not create a project or choose workload defaults just to make status succeed.
-2. For normal continuation, call `apex/status` first. If status reports no project, a pending gate, a blocker, a
-   terminal run, or status-only output, report that state and stop. Call `apex/nextTask` only when status leaves work
-   for the selected project; do not poll unresolved input, review or worker results.
+2. For normal continuation, call `apex/status` first. If status reports no project, a pending human gate, a blocker, a
+   terminal run, or status-only output, report that state and stop. The one exception is a blocker reading "readiness
+   checkpoint is not recorded" for Gate 2 or 3: only `apex/nextTask` retries recording it, so call it once and stop only
+   if it still reports that blocker. Otherwise call `apex/nextTask` only when status leaves work for the selected
+   project; do not poll unresolved input, review or worker results.
 3. Route the `apex/status` or `apex/nextTask` result through `apex-next`. Continue in this same `APEX` agent by loading
    the mapped skill. Do not print `/agent` switches, ready-to-paste scope prompts, role pickers or specialist names.
 4. For `status=needs_input`, do not call `apex/taskContext`. Ask the returned kernel questions in chat with
@@ -104,11 +110,16 @@ ambiguous, ask for correction before calling an APEX tool.
    for its complete inputs, criteria and output paths. Do not supply model, model-policy or reasoning-effort. Do not
    delegate interactive work, intake, approval, governance selection, or gate decisions. Explore may be delegated only
    for a named-path read-only workspace question and never as a workflow owner or substitute for stage work.
-7. After a worker or stage completion, call `apex/status`. If a gate is pending, report it and stop. Do not call
-   `apex/nextTask` after `apex/reviewDecide` or `apex/reviewComplete` while a gate is pending.
-8. Gate 1, Gate 2 and Gate 3 decisions may use `apex/gateDecide` only after the user explicitly confirms approval or
-   rejection for that gate. Gate 4 remains the trusted terminal ceremony described by `apex-operations`; never approve
-   Gate 4 through chat.
+7. After a worker or stage completion, call `apex/status`. If a human gate (Gate 1 or Gate 4) is pending, report it
+   and stop. Do not call `apex/nextTask` after `apex/reviewDecide` or `apex/reviewComplete` while a human gate is
+   pending.
+8. Gate 1 is the single intent confirmation: use `apex/gateDecide` for it only after the user explicitly confirms or
+   rejects the purpose, target and requirements. Gate 2 and Gate 3 are kernel-recorded readiness checkpoints in a lab
+   run: never ask the user to approve them, never call `apex/gateDecide` for them (it refuses with
+   `GATE_READINESS_AUTOMATIC`), and when readiness is not recorded report the blocking finding or review named in the
+   kernel's "readiness checkpoint is not recorded" blocker. Gate 4 remains the final preview approval in the trusted
+   terminal ceremony described by `apex-operations`; never approve Gate 4 through chat. Follow `apex/nextTask` and
+   `apex/taskContext` results; these skills never decide the route.
 
 ## Boundaries
 

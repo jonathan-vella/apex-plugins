@@ -1,6 +1,6 @@
 ---
 name: apex-planning
-description: "Provides internal APEX planning guidance for implementation intent, controls, dependencies, bindings and Gate 3."
+description: "Provides internal APEX planning guidance for implementation intent, controls, dependencies, bindings and the Gate 3 readiness checkpoint."
 user-invocable: false
 ---
 
@@ -40,15 +40,17 @@ Use this skill only when the kernel routes the active foreground `APEX` agent to
 8. Complete planning through `apex/planComplete` with implementation intent, binding without `intentHash`, and
    environment inputs. The kernel derives the canonical intent hash and atomically validates all three outputs. Do not
    call `apex/completeTask` with a partial plan bundle or placeholder hash.
-9. Report the read-only Gate 3 package under `agent-output/<project>/<run>/plan/`, including implementation plan,
-   IaC binding, environment inputs and challenger findings.
+9. Report the read-only Gate 3 review package under `agent-output/<project>/<run>/plan/`, including implementation
+   plan, IaC binding, environment inputs and challenger findings.
 10. When the `plan-review` task appears, run the rubber-duck review steps in `apex-next` with the exact `task.taskId`.
     For `needs_review`, do not request task context or run rubber-duck again; record a disposition for every finding.
     For accept-risk, show `owner: <project risk owner>, expires in 90 days`, draft the rationale and ask only for
     confirmation.
-11. After `apex/reviewDecide`, call `apex/status`. If Gate 3 is pending, report it and stop. Do not call
-    `apex/nextTask` while a gate is pending. If the user's scope permits approval and the user explicitly approves or
-    rejects Gate 3, call `apex/gateDecide` with `confirm: true`.
+11. After `apex/reviewDecide`, call `apex/status`. In a lab run Gate 3 is an automatic readiness checkpoint that the
+    kernel records once the review and deterministic checks pass. Never ask the user to approve Gate 3 and never call
+    `apex/gateDecide` for it. If status shows a "readiness checkpoint is not recorded" blocker, call `apex/nextTask` once
+    to retry recording it; if it still reports the blocker, report the blocking finding, review or validator result and
+    stop. Otherwise follow `apex/nextTask`.
 12. Invoke `APEX CodeGen` or `APEX Validator` only for an explicit worker task in the kernel envelope, and rubber-duck
     only for a kernel review task.
 

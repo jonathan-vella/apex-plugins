@@ -17,8 +17,15 @@ traceable design choice that an authorized capability may later implement and va
 
 ## Redirect URI Intent
 
-Record the owning application, URI class, environment boundary, and exact-match requirement. Unknown redirect URIs
-block implementation intent; do not substitute placeholders or broaden accepted callback locations.
+Record the owning application, URI class, environment boundary, and exact-match requirement. Redirect URIs use HTTPS
+outside local development. Unknown redirect URIs block implementation intent; do not substitute placeholders or
+broaden accepted callback locations.
+
+## Exposed APIs
+
+When the workload is itself an API, record the application ID URI, each delegated scope with its consent audience
+(admins only, or admins and users), and any app roles for application callers. Clients request only these scopes.
+Resource APIs validate the token issuer, audience, and expiry on every call.
 
 ## Tenant And Audience
 

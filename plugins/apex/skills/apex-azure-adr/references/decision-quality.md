@@ -7,7 +7,7 @@ Before completing an architecture or plan artifact, verify:
 - Context separates the problem from the proposed solution.
 - Drivers name mandatory requirements, assumptions, and accepted evidence.
 - The selected option is precise, scoped, and unambiguous.
-- Viable alternatives are compared against the same criteria and have rejection rationales.
+- At least two viable alternatives are compared against the same criteria and have rejection rationales.
 - Positive, negative, and neutral consequences are honest and measurable where evidence permits.
 - Every WAF pillar is addressed or explicitly marked as having no material effect with rationale.
 - Compliance and governance implications use accepted constraints.
@@ -16,6 +16,7 @@ Before completing an architecture or plan artifact, verify:
 - Reversal cost, residual risk, and decision ownership are visible.
 - Unknown and deferred values remain explicit.
 - The decision does not claim live state or results that are absent from task context.
+- No placeholder text remains, and a reviewer can follow the record in about five minutes.
 
 If a mandatory requirement has no supported option, evidence is stale or absent, or a user-owned trade-off remains
 unresolved, return a blocker instead of weakening the record.

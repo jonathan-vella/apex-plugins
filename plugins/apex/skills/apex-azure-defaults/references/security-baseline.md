@@ -29,6 +29,23 @@ always wins.
 Do not treat compilation or preview success as proof that provider-side feature/SKU combinations are valid. Require the
 validation receipt owned by the active track.
 
+## Recurring Module And Lifecycle Pitfalls
+
+These patterns recur across modules and versions. Treat each as a check against the exact pinned interface, not as a
+fixed fact about any one version.
+
+| Pattern | Example | Decision rule |
+| --- | --- | --- |
+| Module default exceeds the chosen SKU | A registry module defaults network rule properties that only a premium tier supports, so a basic tier fails at deployment even though build and preview pass. | Validate module defaults against the selected SKU like explicit values. A tier upgrade or relaxed network rule is a proposed change for approval, never an automatic fix. |
+| Immutable first-deployment setting | Key Vault soft-delete retention cannot change after the vault exists. | Decide it before the first deployment and record it as migration-sensitive. |
+| Deprecated configuration surface | An instrumentation-key setting replaced by a connection string. | Bind the supported replacement from current service guidance. |
+| Parameter shape differs from the provider API | A module parameter typed as a string where the provider property is numeric, or a renamed nested object. | Bind to the exact-version module interface evidence; if it is unavailable, block the affected binding. |
+| Region-limited service | A service or model offered in a subset of regions, which can force a service-specific region override. | Require current availability evidence and record the cross-region consequence. |
+| Retiring family or SKU | "Classic" services, v1 SKUs, and outdated API versions. | Exclude for greenfield; confirm the retirement horizon outlasts any reservation or commitment term before recommending one. |
+
+AVM provenance does not prove SKU compatibility, regional support, or current lifecycle status. Missing lifecycle
+evidence stays unknown and blocks the affected production choice.
+
 ## Exceptions
 
 An exception must identify the requirement, affected resource and environment, rationale, compensating control, owner,

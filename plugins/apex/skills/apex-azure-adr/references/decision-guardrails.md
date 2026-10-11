@@ -14,7 +14,8 @@
 
 - Create or number ADR files.
 - Replace typed architecture decisions with Markdown as authority.
-- Use placeholder text, fabricated evidence, or generic implementation guidance.
+- Use placeholder text such as "TBD", fabricated evidence, or generic implementation guidance such as "deploy to
+  Azure".
 - Combine unrelated data, networking, identity, and deployment choices into one decision.
 - Present a predetermined selection with token alternatives that were never viable.
 - Treat a planned benchmark, migration, validation, or deployment as an observed result.
@@ -26,7 +27,8 @@
 | Failure | Correction |
 | --- | --- |
 | Vague selected option | Name the service, posture, or constraint and its requirement traceability. |
-| Missing alternative | Record a viable option and why accepted evidence or constraints rejected it. |
+| Missing alternative | Record at least two viable options and why accepted evidence or constraints rejected each. |
+| Incomplete context | Explain the problem, constraints, and forces before the selected option. |
 | False alternative | Remove the option or explain the mandatory constraint it violates. |
 | One-sided consequence | Include both benefits and costs, risks, or operational obligations. |
 | Missing WAF impact | State the relevant affected pillars and the resulting trade-off. |

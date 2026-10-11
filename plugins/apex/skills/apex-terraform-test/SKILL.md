@@ -1,7 +1,8 @@
 ---
 name: apex-terraform-test
-description: "Design receipt-gated Terraform test intent in APEX. Use for unit and integration coverage, assertions, mocks, negative cases, and test-evidence acceptance."
+description: '**WORKFLOW SKILL** — Design receipt-gated Terraform tests. WHEN: "create terraform test", "write tftest", ".tftest.hcl", "mock provider", "test module", "test assertion". DO NOT USE FOR: Bicep (use apex-bicep-patterns), architecture decisions (use apex-azure-adr), deployment (use apex-azure-deploy).'
 user-invocable: false
+disable-model-invocation: false
 ---
 
 When calling any `apex/*` MCP tool, include the current session checkout or worktree as the required absolute
@@ -11,6 +12,19 @@ When calling any `apex/*` MCP tool, include the current session checkout or work
 
 Use this skill for an active Terraform test-design or validation task. It specifies coverage and assertion intent;
 authorized capabilities own test materialization, execution, environment access, and evidence production.
+Read [the authority boundary](references/kernel-boundary.md) before loading test examples.
+
+## Test Syntax and Safety
+
+- `.tftest.hcl` tests require Terraform 1.6+, mocks 1.7+; check parallel-execution support against the accepted version.
+- A file can contain a test-wide `test` block, file variables, providers/mocks and one or more named `run` blocks.
+  Assertions describe observable expected state; variable precedence is run-block, file-level, then other inputs.
+- **`command` defaults to `apply`**. Explicitly use `command = plan` for unit tests and mocks for offline execution.
+  A real-provider plan can still read Azure; it is not a no-network guarantee.
+- Use `expect_failures` for invalid inputs; chain `run.<name>.<output>` only when the dependency is intentional.
+- `-filter` selects files, not run names. Inspect all selected runs/providers before requesting execution.
+- Apply-mode tests and their automatic cleanup change infrastructure. A broad `terraform test` command is not safe
+  merely because one file uses plan mode. Missing bounded live-test authorization is a blocker, not a direct-run route.
 
 ## Prerequisites
 
@@ -36,10 +50,16 @@ authorized capabilities own test materialization, execution, environment access,
 ## Boundaries
 
 - Do not write or run test files, configure providers, access environments, or mutate files.
-- Do not invoke Terraform, inspect provider registries, query cloud state, or create infrastructure.
+- Do not independently invoke Terraform, configure providers, mutate state or create infrastructure.
+  Authorized read diagnostics explain failures but never replace test receipts.
 - A mock-backed result does not establish live-service behavior; an integration result does not authorize deployment.
 
 ## References
+
+- [Test examples](references/test-examples.md) - assertions, variables, module blocks, prior runs and negative tests.
+- [Mock providers](references/mock-providers.md) - resource/data defaults, overrides and provider aliases.
+- [Test patterns](references/test-patterns.md) - unit/integration coverage and CI sketches; mock results are not live proof.
+- [Test execution](references/test-execution.md) - filters, parallelism, diagnostics and cleanup hazards.
 
 - [Test design](references/test-design.md) - coverage classification, assertion quality, mocks, and negative cases.
 - [Plan-mode and mock design](references/plan-mode-and-mock-design.md) - deterministic coverage and mock boundaries.

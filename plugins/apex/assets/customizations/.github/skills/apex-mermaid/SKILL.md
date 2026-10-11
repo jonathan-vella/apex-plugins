@@ -1,7 +1,8 @@
 ---
 name: apex-mermaid
-description: "Requests safe inline Mermaid for supported APEX Markdown slots. Use for compact flowcharts, sequences, state machines, ER models, Gantt views, renderer validation, accessible theming, and syntax troubleshooting from accepted artifact data."
+description: '**UTILITY SKILL** — Guides safe inline Mermaid in supported APEX Markdown slots. WHEN: "mermaid flowchart", "sequence diagram", "state diagram", "ER diagram", "class diagram", "Gantt chart", "inline markdown diagram". DO NOT USE FOR: standalone architecture, network, runtime, as-built, WAF, cost or compliance diagrams (Python diagram path), IaC generation (use apex-codegen).'
 user-invocable: false
+disable-model-invocation: false
 ---
 
 When calling any `apex/*` MCP tool, include the current session checkout or worktree as the required absolute
@@ -24,8 +25,13 @@ When a renderer-supported slot exists, select the simplest diagram type that pre
 [syntax guidance](references/syntax.md) and [styling guidance](references/styling.md), then submit only the bounded
 fence to that renderer. The renderer, rather than this skill, must validate syntax and return the document receipt.
 
+The upstream [syntax cheatsheet](references/syntax-cheatsheet.md) preserves flowchart, sequence, Gantt, class, state
+and ER examples. Use a `mermaid` fence, descriptive relationship labels, simple subgraphs, escaped text and theming
+appropriate for the renderer. Prefer readable vertical or horizontal flow over gratuitous styling.
+
 Syntax and styling references are guidance targets, not active renderer slots. They do not make Mermaid output
 available until a typed source, renderer registration, and receipt exist.
+The [coverage record](references/upstream-coverage.md) pins the upstream syntax and styling source.
 
 ## Boundaries
 

@@ -17,14 +17,18 @@ Represent a future role assignment as typed intent, not direct execution.
 | Caller prerequisite | Evidence that the delivery principal can write role assignments at the target scope. |
 | Conditions and expiry | Accepted conditional-access expression, eligible duration, or review point when required. |
 | Ordering | Identity and target dependencies that must exist before assignment validation. |
-| Delivery path | Selected IaC binding or explicitly approved capability. |
+| Delivery path | Selected IaC binding, preferably the AVM module's role-assignment input on the target resource. |
 
 ## Idempotence And Authorization
 
 The selected binding must derive assignment identity deterministically from target scope, principal, and role definition.
-Random assignment names create duplicates and unstable imports. The future delivery principal needs the
-`Microsoft.Authorization/roleAssignments/write` permission at or above the target scope; record missing authorization as
-a blocker rather than proposing a broader role for the workload principal.
+Random assignment names create duplicates and unstable imports. Reference the role by its definition identifier rather
+than a display name so imports and refreshes stay stable. Set the principal type from accepted identity evidence;
+managed identities are service principals.
+
+The future delivery principal needs the `Microsoft.Authorization/roleAssignments/write` permission at or above the target
+scope. User Access Administrator grants it with the least privilege; Owner also grants it with far broader access.
+Record missing authorization as a blocker rather than proposing a broader role for the workload principal.
 
 ## Propagation And Validation
 
@@ -34,6 +38,8 @@ indefinitely or to add a second broader assignment.
 
 ## Delivery Constraint
 
-Role assignment changes must be represented through the selected IaC binding and approved deployment workflow. Do not
-produce Azure CLI commands, raw Bicep/Terraform role-assignment resources, custom-role JSON, or credential material in
-the advisory skill output.
+Role assignment changes must be represented through the selected IaC binding and approved deployment workflow
+(`apex deploy` after Gate 4; a CI-owned production run is a planned target, not available today). The `az role`
+commands and IaC shapes in
+[role CLI commands and delivery shapes](role-cli-and-iac.md) document the operation; the agent never runs a command that
+creates a role or an assignment. Never put credential material in the advisory output.

@@ -11040,6 +11040,7 @@ var ProjectIdSchema = Type.String({ pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" });
 var RunIdSchema = Type.String({ pattern: "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$" });
 var TaskIdSchema = Type.String({ pattern: "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$" });
 var EnvironmentSchema = Type.String({ pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" });
+var DeploymentPurposeSchema = Type.Union([Type.Literal("lab"), Type.Literal("production")]);
 var IacToolSchema = Type.Union([Type.Literal("bicep"), Type.Literal("terraform")]);
 var OperationSchema = Type.Union([Type.Literal("apply"), Type.Literal("destroy")]);
 var RiskOwnerSchema = Type.Union([Type.Literal("partner"), Type.Literal("customer")]);
@@ -15258,6 +15259,142 @@ function hasValidArchetypeSourceProposal(value) {
   }
 }
 
+// packages/contracts/dist/azd-binding.js
+var AZD_BINDING_LIMITS = {
+  roots: 16,
+  hooks: 128,
+  extensions: 32,
+  remoteModules: 256,
+  hookRunLength: 4096
+};
+var AZD_ENVIRONMENT_KEYS = [
+  "AZURE_ENV_NAME",
+  "AZURE_LOCATION",
+  "AZURE_PRINCIPAL_ID",
+  "AZURE_PRINCIPAL_TYPE",
+  "AZURE_RESOURCE_GROUP",
+  "AZURE_SUBSCRIPTION_ID",
+  "AZURE_TENANT_ID"
+];
+var AZD_EXACT_TAG_PATTERN = "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-[0-9A-Za-z][0-9A-Za-z.-]{0,63})?$";
+var AzdVersionSchema = Type.String({ pattern: "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)$" });
+var AzdRelativePathSchema = Type.String({
+  minLength: 1,
+  maxLength: 512,
+  pattern: "^(?!(?:.*/)?\\.{1,2}(?:/|$))[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$"
+});
+var AzdNameSchema = Type.String({ pattern: "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" });
+var AzdHookV1Schema = Type.Object({
+  scope: Type.String({ pattern: "^(?:project|(?:service|layer):[A-Za-z0-9][A-Za-z0-9._-]{0,63})$" }),
+  event: Type.String({ pattern: "^(?:pre|post)[a-z]{2,16}$" }),
+  /** Zero-based position among the hooks declared for the same scope and event. */
+  order: Type.Integer({ minimum: 0, maximum: 31 }),
+  platform: Type.Union([Type.Literal("all"), Type.Literal("windows"), Type.Literal("posix")]),
+  shell: Type.Optional(Type.Union([Type.Literal("sh"), Type.Literal("pwsh")])),
+  /** The declared `run` text. */
+  run: Type.String({ minLength: 1, maxLength: AZD_BINDING_LIMITS.hookRunLength }),
+  workingDirectory: Type.Optional(AzdRelativePathSchema),
+  /** Set when `run` is a plain project-relative script path. */
+  path: Type.Optional(AzdRelativePathSchema),
+  /** SHA-256 of the file `path` names; present exactly when `path` is. */
+  contentHash: Type.Optional(Sha256Schema),
+  continueOnError: Type.Boolean(),
+  interactive: Type.Boolean()
+}, { additionalProperties: false });
+var AzdExtensionV1Schema = Type.Object({
+  id: Type.String({ pattern: "^[a-z0-9][a-z0-9._-]{0,127}$" }),
+  /** The declared version or constraint, unparsed. */
+  version: Type.String({ minLength: 1, maxLength: 64 }),
+  source: Type.Literal("azd")
+}, { additionalProperties: false });
+var AzdInfraRootV1Schema = Type.Object({
+  /** `default` for an unlayered project, otherwise the declared layer name. */
+  name: AzdNameSchema,
+  path: AzdRelativePathSchema,
+  module: AzdNameSchema,
+  provider: Type.Literal("bicep"),
+  dependsOn: Type.Array(AzdNameSchema, { uniqueItems: true, maxItems: AZD_BINDING_LIMITS.roots }),
+  /** Digest of every file under `path`, so azd's recompilation sees the accepted source. */
+  treeHash: Sha256Schema,
+  parametersPath: Type.Optional(AzdRelativePathSchema),
+  parametersFileHash: Type.Optional(Sha256Schema),
+  /** Digest of the parameter object after azd environment substitution. */
+  resolvedParametersHash: Sha256Schema
+}, { additionalProperties: false });
+var AzdEnvironmentKeySchema = Type.Union(AZD_ENVIRONMENT_KEYS.map((key) => Type.Literal(key)));
+var AZD_AZURE_CLOUDS = ["AzureCloud", "AzureUSGovernment", "AzureChinaCloud"];
+var AzdEnvironmentV1Schema = Type.Object({
+  name: EnvironmentSchema,
+  target: Type.Object({
+    subscriptionId: Type.String({
+      pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    }),
+    location: Type.String({ pattern: "^[a-z0-9]{2,64}$" }),
+    /** Required: the identity preflight compares the signed-in tenant with it. */
+    tenantId: Type.String({ pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" }),
+    resourceGroup: Type.Optional(Type.String({ minLength: 1, maxLength: 90 }))
+  }, { additionalProperties: false }),
+  /** Allowlisted azd-managed keys present in the environment; no other key can exist. */
+  keys: Type.Array(AzdEnvironmentKeySchema, { uniqueItems: true, maxItems: AZD_ENVIRONMENT_KEYS.length }),
+  /** Digest over the allowlisted key/value pairs only; custom values are refused, never hashed. */
+  valuesHash: Sha256Schema,
+  /** Digest of `.azure/<name>/config.json`, which azd consults for stored parameter values; only `{}` is accepted. */
+  configHash: Type.Optional(Sha256Schema),
+  /** Digest of `.azure/config.json` (azd's default environment pointer). */
+  projectConfigHash: Type.Optional(Sha256Schema)
+}, { additionalProperties: false });
+var AzdRemoteModuleV1Schema = Type.Object({
+  root: AzdNameSchema,
+  file: AzdRelativePathSchema,
+  kind: Type.Union([Type.Literal("br"), Type.Literal("ts")]),
+  /** The reference exactly as written in the Bicep file. */
+  reference: Type.String({ minLength: 1, maxLength: 512 }),
+  /** Registry host for `br`; `<subscriptionId>/<resourceGroup>` for `ts`. */
+  registry: Type.String({ minLength: 1, maxLength: 256 }),
+  path: Type.String({ minLength: 1, maxLength: 256 }),
+  pin: Type.Union([
+    Type.Object({ type: Type.Literal("tag"), value: Type.String({ pattern: AZD_EXACT_TAG_PATTERN }) }, { additionalProperties: false }),
+    Type.Object({ type: Type.Literal("digest"), value: Sha256Schema }, { additionalProperties: false }),
+    Type.Object({ type: Type.Literal("version"), value: Type.String({ minLength: 1, maxLength: 64 }) }, { additionalProperties: false })
+  ])
+}, { additionalProperties: false });
+var AzdExecutionEnvelopeV1Schema = Type.Object({
+  workingDirectory: Type.Literal("project-root"),
+  /** Passed explicitly with `--environment`; the default-environment pointer is never consulted. */
+  environmentName: EnvironmentSchema,
+  prompts: Type.Literal("disabled"),
+  /** The executor must observe exactly this identity before provisioning and stop on any difference. */
+  identityPreflight: Type.Object({
+    cloud: Type.Union(AZD_AZURE_CLOUDS.map((cloud) => Type.Literal(cloud))),
+    tenantId: Type.String({ pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" }),
+    subscriptionId: Type.String({ pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" }),
+    onMismatch: Type.Literal("stop")
+  }, { additionalProperties: false })
+}, { additionalProperties: false });
+var AzdBindingV1Schema = Type.Object({
+  schemaVersion: ContractVersionSchema,
+  projectId: ProjectIdSchema,
+  runId: RunIdSchema,
+  track: Type.Literal("bicep"),
+  executor: Type.Literal("azd"),
+  azdVersion: AzdVersionSchema,
+  projectName: NonEmptyStringSchema,
+  /** Digest of the exact `azure.yaml` bytes. */
+  configHash: Sha256Schema,
+  infra: Type.Object({
+    provider: Type.Literal("bicep"),
+    layered: Type.Boolean(),
+    roots: Type.Array(AzdInfraRootV1Schema, { minItems: 1, maxItems: AZD_BINDING_LIMITS.roots })
+  }, { additionalProperties: false }),
+  environment: AzdEnvironmentV1Schema,
+  parametersHash: Sha256Schema,
+  hooks: Type.Array(AzdHookV1Schema, { maxItems: AZD_BINDING_LIMITS.hooks }),
+  extensions: Type.Array(AzdExtensionV1Schema, { maxItems: AZD_BINDING_LIMITS.extensions }),
+  remoteModules: Type.Array(AzdRemoteModuleV1Schema, { maxItems: AZD_BINDING_LIMITS.remoteModules }),
+  executionEnvelope: AzdExecutionEnvelopeV1Schema,
+  bindingHash: Sha256Schema
+}, { $id: "https://schemas.apexops.dev/azd-binding-v1.json", additionalProperties: false });
+
 // packages/contracts/dist/deployment.js
 var PreviewChangeV1Schema = Type.Object({
   resourceId: NonEmptyStringSchema,
@@ -16000,6 +16137,7 @@ var OnboardingConfigV1Schema = Type.Object({
   displayName: Type.Optional(NonEmptyStringSchema),
   client: Type.Optional(BootstrapClientSchema),
   environment: Type.Optional(EnvironmentSchema),
+  purpose: Type.Optional(DeploymentPurposeSchema),
   targetScope: Type.Optional(NonEmptyStringSchema),
   iacTool: Type.Optional(IacToolSchema),
   riskOwner: Type.Optional(RiskOwnerSchema),
@@ -16308,24 +16446,41 @@ var ProjectConfigV1Schema = Type.Object({
 var GateStateSchema = Type.Union([
   Type.Literal("closed"),
   Type.Literal("open"),
+  Type.Literal("ready"),
   Type.Literal("approved"),
   Type.Literal("inherited"),
   Type.Literal("rejected"),
   Type.Literal("invalidated")
 ]);
-var GateRecordV1Schema = Type.Object({
-  gate: Type.Integer({ minimum: 1, maximum: 4 }),
-  state: GateStateSchema,
-  dependencyHash: Sha256Schema,
-  decidedAt: Type.Optional(IsoDateTimeSchema),
-  inheritedFromRunId: Type.Optional(RunIdSchema),
-  reason: Type.Optional(NonEmptyStringSchema)
-}, { additionalProperties: false });
+var GateRecordV1Schema = Type.Union([
+  Type.Object({
+    gate: Type.Integer({ minimum: 1, maximum: 4 }),
+    state: Type.Union([
+      Type.Literal("closed"),
+      Type.Literal("open"),
+      Type.Literal("approved"),
+      Type.Literal("inherited"),
+      Type.Literal("rejected"),
+      Type.Literal("invalidated")
+    ]),
+    dependencyHash: Sha256Schema,
+    decidedAt: Type.Optional(IsoDateTimeSchema),
+    inheritedFromRunId: Type.Optional(RunIdSchema),
+    reason: Type.Optional(NonEmptyStringSchema)
+  }, { additionalProperties: false }),
+  Type.Object({
+    gate: Type.Integer({ minimum: 2, maximum: 3 }),
+    state: Type.Literal("ready"),
+    dependencyHash: Sha256Schema,
+    readyAt: IsoDateTimeSchema
+  }, { additionalProperties: false })
+]);
 var RunConfigV1Schema = Type.Object({
   schemaVersion: ContractVersionSchema,
   projectId: ProjectIdSchema,
   runId: RunIdSchema,
   environment: EnvironmentSchema,
+  purpose: DeploymentPurposeSchema,
   targetScope: NonEmptyStringSchema,
   iacTool: IacToolSchema,
   createdAt: IsoDateTimeSchema,
@@ -16541,6 +16696,7 @@ var contractSchemas = [
   RequirementsChangeProposalV1Schema,
   ImplementationIntentV1Schema,
   IacBindingV1Schema,
+  AzdBindingV1Schema,
   ApprovalEvidenceV1Schema,
   DeploymentPreviewV1Schema,
   OperationRecordV1Schema,
@@ -16612,6 +16768,7 @@ var contractMetadata = {
   "https://schemas.apexops.dev/requirements-change-proposal-v1.json": metadata(524288, "confidential"),
   "https://schemas.apexops.dev/implementation-intent-v1.json": metadata(524288),
   "https://schemas.apexops.dev/iac-binding-v1.json": metadata(524288, "confidential"),
+  "https://schemas.apexops.dev/azd-binding-v1.json": metadata(524288, "confidential"),
   "https://schemas.apexops.dev/approval-evidence-v1.json": metadata(32768, "confidential"),
   "https://schemas.apexops.dev/deployment-preview-v1.json": metadata(2097152, "confidential"),
   "https://schemas.apexops.dev/operation-record-v1.json": metadata(65536, "confidential"),
@@ -16684,10 +16841,22 @@ async function readEventFile(path2) {
     await handle.close();
   }
 }
-var EventJournal = class {
+var JournalIdentityError = class extends Error {
+  constructor(sequence) {
+    super(`Journal event ${sequence} belongs to a different project or run than the one that loaded it`);
+    this.name = "JournalIdentityError";
+  }
+};
+var EventJournal = class _EventJournal {
+  identity;
   directory;
-  constructor(directory) {
+  /** With an identity, `replay` rejects any event written for another project or run. */
+  constructor(directory, identity) {
+    this.identity = identity;
     this.directory = resolve4(directory);
+  }
+  bound(identity) {
+    return new _EventJournal(this.directory, identity);
   }
   async head() {
     const events = await this.replay();
@@ -16775,6 +16944,9 @@ var EventJournal = class {
       if (event.projectId !== identity.projectId || event.runId !== identity.runId) {
         throw new Error(`Corrupt journal identity at sequence ${event.sequence}`);
       }
+      if (this.identity !== void 0 && (event.projectId !== this.identity.projectId || event.runId !== this.identity.runId)) {
+        throw new JournalIdentityError(event.sequence);
+      }
       events.push(event);
       previousHash = hash2;
     }
@@ -16789,6 +16961,18 @@ function openGate(gate, dependencyHash) {
   }
   return { gate: gate.gate, state: "open", dependencyHash };
 }
+function isReadinessGate(purpose, gateNumber) {
+  return purpose === "lab" && (gateNumber === 2 || gateNumber === 3);
+}
+function markGateReady(gate, purpose, readyAt) {
+  if (!isReadinessGate(purpose, gate.gate)) {
+    throw new Error(`Gate ${gate.gate} cannot be recorded as ready for a ${purpose} run`);
+  }
+  if (gate.state !== "open") {
+    throw new Error(`Gate ${gate.gate} is not open`);
+  }
+  return { gate: gate.gate, state: "ready", dependencyHash: gate.dependencyHash, readyAt };
+}
 function decideGate(gate, decision, decidedAt, reason) {
   if (gate.state !== "open") {
     throw new Error(`Gate ${gate.gate} is not open`);
@@ -16801,6 +16985,9 @@ function invalidateGate(gate, dependencyHash, reason) {
 function inheritGate(gate, fromRunId, dependencyHash, decidedAt) {
   if (gate.gate === 4) {
     throw new Error("Gate 4 cannot be inherited");
+  }
+  if (gate.state === "ready") {
+    throw new Error(`Gate ${gate.gate} readiness is recomputed in the new run and cannot be inherited`);
   }
   if (gate.dependencyHash !== dependencyHash || gate.state !== "approved" && gate.state !== "inherited") {
     throw new Error(`Gate ${gate.gate} dependencies are not approved for inheritance`);
@@ -17173,6 +17360,38 @@ var LeaseStore = class {
 // packages/kernel/dist/project-store.js
 import { mkdir as mkdir5, readFile as readFile6 } from "node:fs/promises";
 import { join as join7, resolve as resolve7 } from "node:path";
+
+// packages/kernel/dist/run-config.js
+var RunConfigInvalidError = class extends Error {
+  issues;
+  constructor(issues) {
+    super(`Run configuration does not match the current contract (${issues.join("; ")}); runs created by an earlier APEX version are not supported, so start a new run with apex project create`);
+    this.issues = issues;
+    this.name = "RunConfigInvalidError";
+  }
+};
+function parseRunConfig(raw) {
+  registerContractFormats();
+  let value;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    throw new RunConfigInvalidError(["/: not valid JSON"]);
+  }
+  if (value_exports2.Check(RunConfigV1Schema, value)) {
+    const gateIssues = readinessGateIssues(value);
+    if (gateIssues.length > 0)
+      throw new RunConfigInvalidError(gateIssues);
+    return value;
+  }
+  const issues = [...value_exports2.Errors(RunConfigV1Schema, value)].slice(0, 3).map((error62) => `${error62.path === "" ? "/" : error62.path}: ${error62.message}`);
+  throw new RunConfigInvalidError(issues);
+}
+function readinessGateIssues(run) {
+  return run.gates.flatMap((gate, index) => gate.state === "ready" && !isReadinessGate(run.purpose, gate.gate) ? [`/gates/${index}/state: ready is only valid for lab Gates 2 and 3`] : []);
+}
+
+// packages/kernel/dist/project-store.js
 var ProjectStore = class {
   clock;
   idSource;
@@ -17204,6 +17423,7 @@ var ProjectStore = class {
       projectId,
       runId,
       environment: input2.environment,
+      purpose: input2.purpose,
       targetScope: input2.targetScope,
       iacTool: input2.iacTool ?? project.defaultIacTool,
       createdAt: this.clock().toISOString(),
@@ -17222,7 +17442,7 @@ var ProjectStore = class {
     return this.readJson(join7(this.projectDirectory(projectId), "project.json"));
   }
   async getRun(projectId, runId) {
-    return this.readJson(join7(this.runDirectory(projectId, runId), "run.json"));
+    return parseRunConfig(await readFile6(join7(this.runDirectory(projectId, runId), "run.json"), "utf8"));
   }
   projectDirectory(projectId) {
     this.assertIdentifier(projectId);
@@ -18046,7 +18266,8 @@ var RunRepository = class {
       const actualHash = sha256Json(current);
       if (actualHash !== input2.expectedRunHash)
         throw new Error(`Stale run hash: expected ${input2.expectedRunHash}, found ${actualHash}`);
-      const journalHead = await this.journal.head();
+      const journal = this.journal.bound({ projectId: current.projectId, runId: current.runId });
+      const journalHead = await journal.head();
       if (input2.expectedJournalHead !== void 0 && input2.expectedJournalHead !== journalHead) {
         throw new Error(`Stale journal head: expected ${String(input2.expectedJournalHead)}, found ${String(journalHead)}`);
       }
@@ -18063,7 +18284,7 @@ var RunRepository = class {
       };
       await atomicWriteJson(this.intentPath, intent, { refuseOverwrite: true });
       await this.faultInjector?.("intent");
-      const event = await this.journal.append({
+      const event = await journal.append({
         ...input2.event,
         expectedHead: journalHead,
         payload: {
@@ -18188,7 +18409,7 @@ var RunRepository = class {
     await rm7(this.intentPath, { force: true });
   }
   async readRaw() {
-    return JSON.parse(await readFile7(this.runPath, "utf8"));
+    return parseRunConfig(await readFile7(this.runPath, "utf8"));
   }
   async readWriterLease() {
     const bytes = await readPublishedFile(this.writerLeasePath, {
@@ -19409,7 +19630,9 @@ var WorkflowEngine = class {
       return true;
     if (root.startsWith("gate-")) {
       const gateState = state.gateStates?.[root];
-      return gateState === "approved" || gateState === "inherited";
+      if (gateState === "approved" || gateState === "inherited")
+        return true;
+      return gateState === "ready" && (root === "gate-2" || root === "gate-3") && getPath(state.run, "purpose") === "lab";
     }
     if (dependency.startsWith("run-config.")) {
       return getPath(state.run, dependency.slice("run-config.".length)) !== void 0;
@@ -20520,6 +20743,1129 @@ async function inspectArchetypeSource(request) {
   if (!hasValidArchetypeSourceProposal(proposal))
     throw new Error("Archetype proposal is invalid");
   return { proposal, contents };
+}
+
+// node_modules/js-yaml/dist/js-yaml.mjs
+var NOT_RESOLVED = /* @__PURE__ */ Symbol("NOT_RESOLVED");
+function defineScalarTag(tagName, options) {
+  return {
+    tagName,
+    nodeKind: "scalar",
+    implicit: options.implicit ?? false,
+    matchByTagPrefix: options.matchByTagPrefix ?? false,
+    implicitFirstChars: options.implicitFirstChars ?? null,
+    resolve: options.resolve,
+    identify: options.identify,
+    represent: options.represent ?? ((data) => String(data)),
+    representTagName: options.representTagName ?? (() => tagName)
+  };
+}
+function defineSequenceTag(tagName, options) {
+  const carrierIsResult = options.finalize === void 0;
+  return {
+    tagName,
+    nodeKind: "sequence",
+    implicit: false,
+    matchByTagPrefix: options.matchByTagPrefix ?? false,
+    create: options.create,
+    addItem: options.addItem,
+    finalize: options.finalize ?? ((carrier) => carrier),
+    carrierIsResult,
+    identify: options.identify,
+    represent: options.represent ?? ((data) => data),
+    representTagName: options.representTagName ?? (() => tagName)
+  };
+}
+function defineMappingTag(tagName, options) {
+  const carrierIsResult = options.finalize === void 0;
+  return {
+    tagName,
+    nodeKind: "mapping",
+    implicit: false,
+    matchByTagPrefix: options.matchByTagPrefix ?? false,
+    create: options.create,
+    addPair: options.addPair,
+    has: options.has,
+    keys: options.keys,
+    get: options.get,
+    finalize: options.finalize ?? ((carrier) => carrier),
+    carrierIsResult,
+    identify: options.identify,
+    represent: options.represent ?? ((data) => data),
+    representTagName: options.representTagName ?? (() => tagName)
+  };
+}
+var strTag = defineScalarTag("tag:yaml.org,2002:str", {
+  resolve: (source2) => source2,
+  identify: (data) => typeof data === "string"
+});
+var NULL_VALUES$1 = [
+  "",
+  "~",
+  "null",
+  "Null",
+  "NULL"
+];
+var nullCoreTag = defineScalarTag("tag:yaml.org,2002:null", {
+  implicit: true,
+  implicitFirstChars: [
+    "",
+    "~",
+    "n",
+    "N"
+  ],
+  resolve: (source2) => {
+    if (NULL_VALUES$1.indexOf(source2) !== -1) return null;
+    return NOT_RESOLVED;
+  },
+  identify: (object6) => object6 === null,
+  represent: () => "null"
+});
+var nullJsonTag = defineScalarTag("tag:yaml.org,2002:null", {
+  implicit: true,
+  implicitFirstChars: ["n"],
+  resolve: (source2, isExplicit) => {
+    if (source2 === "null" || isExplicit && source2 === "") return null;
+    return NOT_RESOLVED;
+  },
+  identify: (object6) => object6 === null,
+  represent: () => "null"
+});
+var NULL_VALUES = [
+  "",
+  "~",
+  "null",
+  "Null",
+  "NULL"
+];
+var nullYaml11Tag = defineScalarTag("tag:yaml.org,2002:null", {
+  implicit: true,
+  implicitFirstChars: [
+    "",
+    "~",
+    "n",
+    "N"
+  ],
+  resolve: (source2) => {
+    if (NULL_VALUES.indexOf(source2) !== -1) return null;
+    return NOT_RESOLVED;
+  },
+  identify: (object6) => object6 === null,
+  represent: () => "null"
+});
+var TRUE_VALUES$2 = [
+  "true",
+  "True",
+  "TRUE"
+];
+var FALSE_VALUES$2 = [
+  "false",
+  "False",
+  "FALSE"
+];
+var boolCoreTag = defineScalarTag("tag:yaml.org,2002:bool", {
+  implicit: true,
+  implicitFirstChars: [
+    "t",
+    "T",
+    "f",
+    "F"
+  ],
+  resolve: (source2) => {
+    if (TRUE_VALUES$2.indexOf(source2) !== -1) return true;
+    if (FALSE_VALUES$2.indexOf(source2) !== -1) return false;
+    return NOT_RESOLVED;
+  },
+  identify: (object6) => Object.prototype.toString.call(object6) === "[object Boolean]",
+  represent: (object6) => object6 ? "true" : "false"
+});
+var TRUE_VALUES$1 = ["true"];
+var FALSE_VALUES$1 = ["false"];
+var boolJsonTag = defineScalarTag("tag:yaml.org,2002:bool", {
+  implicit: true,
+  implicitFirstChars: ["t", "f"],
+  resolve: (source2) => {
+    if (TRUE_VALUES$1.indexOf(source2) !== -1) return true;
+    if (FALSE_VALUES$1.indexOf(source2) !== -1) return false;
+    return NOT_RESOLVED;
+  },
+  identify: (object6) => Object.prototype.toString.call(object6) === "[object Boolean]",
+  represent: (object6) => object6 ? "true" : "false"
+});
+var TRUE_VALUES = [
+  "true",
+  "True",
+  "TRUE",
+  "y",
+  "Y",
+  "yes",
+  "Yes",
+  "YES",
+  "on",
+  "On",
+  "ON"
+];
+var FALSE_VALUES = [
+  "false",
+  "False",
+  "FALSE",
+  "n",
+  "N",
+  "no",
+  "No",
+  "NO",
+  "off",
+  "Off",
+  "OFF"
+];
+var boolYaml11Tag = defineScalarTag("tag:yaml.org,2002:bool", {
+  implicit: true,
+  implicitFirstChars: [
+    "y",
+    "Y",
+    "n",
+    "N",
+    "t",
+    "T",
+    "f",
+    "F",
+    "o",
+    "O"
+  ],
+  resolve: (source2) => {
+    if (TRUE_VALUES.indexOf(source2) !== -1) return true;
+    if (FALSE_VALUES.indexOf(source2) !== -1) return false;
+    return NOT_RESOLVED;
+  },
+  identify: (object6) => Object.prototype.toString.call(object6) === "[object Boolean]",
+  represent: (object6) => object6 ? "true" : "false"
+});
+var YAML_INTEGER_IMPLICIT_PATTERN$1 = /* @__PURE__ */ new RegExp("^(?:0o[0-7]+|0x[0-9a-fA-F]+|[-+]?[0-9]+)$");
+var YAML_INTEGER_EXPLICIT_PATTERN$1 = /* @__PURE__ */ new RegExp("^(?:[-+]?0b[0-1]+|[-+]?0o[0-7]+|[-+]?0x[0-9a-fA-F]+|[-+]?[0-9]+)$");
+function parseYamlInteger$2(source2) {
+  let value = source2;
+  let sign = 1;
+  if (value[0] === "-" || value[0] === "+") {
+    if (value[0] === "-") sign = -1;
+    value = value.slice(1);
+  }
+  if (value.startsWith("0b")) return sign * parseInt(value.slice(2), 2);
+  if (value.startsWith("0o")) return sign * parseInt(value.slice(2), 8);
+  if (value.startsWith("0x")) return sign * parseInt(value.slice(2), 16);
+  return sign * parseInt(value, 10);
+}
+function resolveYamlInteger$2(source2, isExplicit) {
+  if (isExplicit) {
+    if (!YAML_INTEGER_EXPLICIT_PATTERN$1.test(source2)) return NOT_RESOLVED;
+  } else if (!YAML_INTEGER_IMPLICIT_PATTERN$1.test(source2)) return NOT_RESOLVED;
+  const result = parseYamlInteger$2(source2);
+  return Number.isFinite(result) ? result : NOT_RESOLVED;
+}
+var intCoreTag = defineScalarTag("tag:yaml.org,2002:int", {
+  implicit: true,
+  implicitFirstChars: [
+    "-",
+    "+",
+    ..."0123456789"
+  ],
+  resolve: resolveYamlInteger$2,
+  identify: (object6) => Number.isInteger(object6) && !Object.is(object6, -0) && object6.toString(10).indexOf("e") < 0,
+  represent: (object6) => object6.toString(10)
+});
+var YAML_INTEGER_IMPLICIT_PATTERN = /* @__PURE__ */ new RegExp("^-?(?:0|[1-9][0-9]*)$");
+var YAML_INTEGER_EXPLICIT_PATTERN = /* @__PURE__ */ new RegExp("^(?:[-+]?0b[0-1]+|[-+]?0o[0-7]+|[-+]?0x[0-9a-fA-F]+|[-+]?[0-9]+)$");
+function parseYamlInteger$1(source2) {
+  let value = source2;
+  let sign = 1;
+  if (value[0] === "-" || value[0] === "+") {
+    if (value[0] === "-") sign = -1;
+    value = value.slice(1);
+  }
+  if (value.startsWith("0b")) return sign * parseInt(value.slice(2), 2);
+  if (value.startsWith("0o")) return sign * parseInt(value.slice(2), 8);
+  if (value.startsWith("0x")) return sign * parseInt(value.slice(2), 16);
+  return sign * parseInt(value, 10);
+}
+function resolveYamlInteger$1(source2, isExplicit) {
+  if (isExplicit) {
+    if (!YAML_INTEGER_EXPLICIT_PATTERN.test(source2)) return NOT_RESOLVED;
+  } else if (!YAML_INTEGER_IMPLICIT_PATTERN.test(source2)) return NOT_RESOLVED;
+  const result = parseYamlInteger$1(source2);
+  return Number.isFinite(result) ? result : NOT_RESOLVED;
+}
+var intJsonTag = defineScalarTag("tag:yaml.org,2002:int", {
+  implicit: true,
+  implicitFirstChars: ["-", ..."0123456789"],
+  resolve: resolveYamlInteger$1,
+  identify: (object6) => Number.isInteger(object6) && !Object.is(object6, -0) && object6.toString(10).indexOf("e") < 0,
+  represent: (object6) => object6.toString(10)
+});
+var YAML_INTEGER_PATTERN = /* @__PURE__ */ new RegExp("^(?:[-+]?0b[0-1_]+|[-+]?0[0-7_]+|[-+]?0x[0-9a-fA-F_]+|[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+|[-+]?(?:0|[1-9][0-9_]*))$");
+function parseYamlInteger(source2) {
+  let value = source2.replace(/_/g, "");
+  let sign = 1;
+  if (value[0] === "-" || value[0] === "+") {
+    if (value[0] === "-") sign = -1;
+    value = value.slice(1);
+  }
+  if (value.startsWith("0b")) return sign * parseInt(value.slice(2), 2);
+  if (value.startsWith("0x")) return sign * parseInt(value.slice(2), 16);
+  if (value.includes(":")) {
+    let result = 0;
+    for (const part of value.split(":")) result = result * 60 + Number(part);
+    return sign * result;
+  }
+  if (value !== "0" && value[0] === "0") return sign * parseInt(value, 8);
+  return sign * parseInt(value, 10);
+}
+function resolveYamlInteger(source2) {
+  if (!YAML_INTEGER_PATTERN.test(source2)) return NOT_RESOLVED;
+  const result = parseYamlInteger(source2);
+  return Number.isFinite(result) ? result : NOT_RESOLVED;
+}
+var intYaml11Tag = defineScalarTag("tag:yaml.org,2002:int", {
+  implicit: true,
+  implicitFirstChars: [
+    "-",
+    "+",
+    ..."0123456789"
+  ],
+  resolve: resolveYamlInteger,
+  identify: (object6) => Number.isInteger(object6) && !Object.is(object6, -0) && object6.toString(10).indexOf("e") < 0,
+  represent: (object6) => object6.toString(10)
+});
+var YAML_FLOAT_PATTERN$1 = /* @__PURE__ */ new RegExp("^(?:[-+]?[0-9]+(?:\\.[0-9]*)?(?:[eE][-+]?[0-9]+)?|[-+]?\\.[0-9]+(?:[eE][-+]?[0-9]+)?|[-+]?\\.(?:inf|Inf|INF)|\\.(?:nan|NaN|NAN))$");
+var YAML_FLOAT_SPECIAL_PATTERN$1 = /* @__PURE__ */ new RegExp("^(?:[-+]?\\.(?:inf|Inf|INF)|\\.(?:nan|NaN|NAN))$");
+function resolveYamlFloat$2(source2) {
+  if (!YAML_FLOAT_PATTERN$1.test(source2)) return NOT_RESOLVED;
+  let value = source2.toLowerCase();
+  const sign = value[0] === "-" ? -1 : 1;
+  if ("+-".includes(value[0])) value = value.slice(1);
+  if (value === ".inf") return sign === 1 ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+  if (value === ".nan") return NaN;
+  const result = sign * parseFloat(value);
+  if (Number.isFinite(result) || YAML_FLOAT_SPECIAL_PATTERN$1.test(source2)) return result;
+  return NOT_RESOLVED;
+}
+function representYamlFloat$2(object6) {
+  if (isNaN(object6)) return ".nan";
+  if (object6 === Number.POSITIVE_INFINITY) return ".inf";
+  if (object6 === Number.NEGATIVE_INFINITY) return "-.inf";
+  if (Object.is(object6, -0)) return "-0.0";
+  const result = object6.toString(10);
+  return /^[-+]?[0-9]+e/.test(result) ? result.replace("e", ".e") : result;
+}
+var floatCoreTag = defineScalarTag("tag:yaml.org,2002:float", {
+  implicit: true,
+  implicitFirstChars: [
+    "-",
+    "+",
+    ".",
+    ..."0123456789"
+  ],
+  resolve: resolveYamlFloat$2,
+  identify: (object6) => typeof object6 === "number" && (!Number.isInteger(object6) || Object.is(object6, -0) || object6.toString(10).indexOf("e") >= 0),
+  represent: representYamlFloat$2
+});
+var YAML_FLOAT_IMPLICIT_PATTERN = /* @__PURE__ */ new RegExp("^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]*)?(?:[eE][-+]?[0-9]+)?$");
+var YAML_FLOAT_EXPLICIT_PATTERN = /* @__PURE__ */ new RegExp("^(?:[-+]?[0-9]+(?:\\.[0-9]*)?(?:[eE][-+]?[0-9]+)?|[-+]?\\.[0-9]+(?:[eE][-+]?[0-9]+)?|[-+]?\\.(?:inf|Inf|INF)|\\.(?:nan|NaN|NAN))$");
+function resolveYamlFloat$1(source2, isExplicit) {
+  if (isExplicit) {
+    if (!YAML_FLOAT_EXPLICIT_PATTERN.test(source2)) return NOT_RESOLVED;
+    let value = source2.toLowerCase();
+    const sign = value[0] === "-" ? -1 : 1;
+    if ("+-".includes(value[0])) value = value.slice(1);
+    if (value === ".inf") return sign === 1 ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+    if (value === ".nan") return NaN;
+    const result2 = sign * parseFloat(value);
+    return Number.isFinite(result2) ? result2 : NOT_RESOLVED;
+  }
+  if (!YAML_FLOAT_IMPLICIT_PATTERN.test(source2)) return NOT_RESOLVED;
+  const result = Number(source2);
+  if (Number.isFinite(result)) return result;
+  return NOT_RESOLVED;
+}
+function representYamlFloat$1(object6) {
+  if (isNaN(object6)) return ".nan";
+  if (object6 === Number.POSITIVE_INFINITY) return ".inf";
+  if (object6 === Number.NEGATIVE_INFINITY) return "-.inf";
+  if (Object.is(object6, -0)) return "-0.0";
+  const result = object6.toString(10);
+  return /^[-+]?[0-9]+e/.test(result) ? result.replace("e", ".e") : result;
+}
+var floatJsonTag = defineScalarTag("tag:yaml.org,2002:float", {
+  implicit: true,
+  implicitFirstChars: ["-", ..."0123456789"],
+  resolve: resolveYamlFloat$1,
+  identify: (object6) => typeof object6 === "number" && (!Number.isInteger(object6) || Object.is(object6, -0) || object6.toString(10).indexOf("e") >= 0),
+  represent: representYamlFloat$1
+});
+var YAML_FLOAT_PATTERN = /* @__PURE__ */ new RegExp("^(?:[-+]?(?:(?:[0-9][0-9_]*)?\\.[0-9_]*)(?:[eE][-+][0-9]+)?|[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\\.[0-9_]*|[-+]?\\.(?:inf|Inf|INF)|\\.(?:nan|NaN|NAN))$");
+var YAML_FLOAT_SPECIAL_PATTERN = /* @__PURE__ */ new RegExp("^(?:[-+]?\\.(?:inf|Inf|INF)|\\.(?:nan|NaN|NAN))$");
+function resolveYamlFloat(source2) {
+  if (!YAML_FLOAT_PATTERN.test(source2)) return NOT_RESOLVED;
+  let value = source2.toLowerCase().replace(/_/g, "");
+  const sign = value[0] === "-" ? -1 : 1;
+  if ("+-".includes(value[0])) value = value.slice(1);
+  if (value === ".inf") return sign === 1 ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+  if (value === ".nan") return NaN;
+  let result = 0;
+  if (value.includes(":")) {
+    for (const part of value.split(":")) result = result * 60 + Number(part);
+    result *= sign;
+  } else result = sign * parseFloat(value);
+  if (Number.isFinite(result) || YAML_FLOAT_SPECIAL_PATTERN.test(source2)) return result;
+  return NOT_RESOLVED;
+}
+function representYamlFloat(object6) {
+  if (isNaN(object6)) return ".nan";
+  if (object6 === Number.POSITIVE_INFINITY) return ".inf";
+  if (object6 === Number.NEGATIVE_INFINITY) return "-.inf";
+  if (Object.is(object6, -0)) return "-0.0";
+  const result = object6.toString(10);
+  return /^[-+]?[0-9]+e/.test(result) ? result.replace("e", ".e") : result;
+}
+var floatYaml11Tag = defineScalarTag("tag:yaml.org,2002:float", {
+  implicit: true,
+  implicitFirstChars: [
+    "-",
+    "+",
+    ".",
+    ..."0123456789"
+  ],
+  resolve: resolveYamlFloat,
+  identify: (object6) => typeof object6 === "number" && (!Number.isInteger(object6) || Object.is(object6, -0) || object6.toString(10).indexOf("e") >= 0),
+  represent: representYamlFloat
+});
+var mergeTag = defineScalarTag("tag:yaml.org,2002:merge", {
+  implicit: true,
+  implicitFirstChars: ["<"],
+  resolve: (source2, isExplicit) => {
+    if (source2 === "<<" || isExplicit && source2 === "") return "<<";
+    return NOT_RESOLVED;
+  },
+  identify: () => false
+});
+var BASE64_PATTERN = /^[A-Za-z0-9+/]*={0,2}$/;
+function resolveYamlBinary(source2) {
+  const input2 = source2.replace(/\s/g, "");
+  if (input2.length % 4 !== 0 || !BASE64_PATTERN.test(input2)) return NOT_RESOLVED;
+  const binary = atob(input2);
+  const result = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index++) result[index] = binary.charCodeAt(index);
+  return result;
+}
+function representYamlBinary(object6) {
+  let binary = "";
+  for (let index = 0; index < object6.length; index++) binary += String.fromCharCode(object6[index]);
+  return btoa(binary);
+}
+var binaryTag = defineScalarTag("tag:yaml.org,2002:binary", {
+  resolve: resolveYamlBinary,
+  identify: (object6) => Object.prototype.toString.call(object6) === "[object Uint8Array]",
+  represent: representYamlBinary
+});
+var YAML_DATE_REGEXP = /* @__PURE__ */ new RegExp("^([0-9][0-9][0-9][0-9])-([0-9][0-9])-([0-9][0-9])$");
+var YAML_TIMESTAMP_REGEXP = /* @__PURE__ */ new RegExp("^([0-9][0-9][0-9][0-9])-([0-9][0-9]?)-([0-9][0-9]?)(?:[Tt]|[ \\t]+)([0-9][0-9]?):([0-9][0-9]):([0-9][0-9])(?:\\.([0-9]*))?(?:[ \\t]*(Z|([-+])([0-9][0-9]?)(?::([0-9][0-9]))?))?$");
+function makeUtcDate(year, month, day, hour = 0, minute = 0, second = 0, fraction = 0) {
+  const date5 = new Date(Date.UTC(year, month, day, hour, minute, second, fraction));
+  date5.setUTCFullYear(year, month, day);
+  return date5;
+}
+function resolveYamlTimestamp(source2) {
+  let match = YAML_DATE_REGEXP.exec(source2);
+  if (match === null) match = YAML_TIMESTAMP_REGEXP.exec(source2);
+  if (match === null) return NOT_RESOLVED;
+  const year = +match[1];
+  const month = +match[2] - 1;
+  const day = +match[3];
+  if (!match[4]) {
+    const date6 = makeUtcDate(year, month, day);
+    if (date6.getUTCFullYear() !== year || date6.getUTCMonth() !== month || date6.getUTCDate() !== day) return NOT_RESOLVED;
+    return date6;
+  }
+  const hour = +match[4];
+  const minute = +match[5];
+  const second = +match[6];
+  let fraction = 0;
+  if (hour > 23 || minute > 59 || second > 59) return NOT_RESOLVED;
+  if (match[7]) {
+    let value = match[7].slice(0, 3);
+    while (value.length < 3) value += "0";
+    fraction = +value;
+  }
+  const date5 = makeUtcDate(year, month, day, hour, minute, second, fraction);
+  if (date5.getUTCFullYear() !== year || date5.getUTCMonth() !== month || date5.getUTCDate() !== day) return NOT_RESOLVED;
+  if (match[9]) {
+    const offsetHour = +match[10];
+    const offsetMinute = +(match[11] || 0);
+    if (offsetHour > 23 || offsetMinute > 59) return NOT_RESOLVED;
+    const offset = (offsetHour * 60 + offsetMinute) * 6e4;
+    date5.setTime(date5.getTime() - (match[9] === "-" ? -offset : offset));
+  }
+  return date5;
+}
+var timestampTag = defineScalarTag("tag:yaml.org,2002:timestamp", {
+  implicit: true,
+  implicitFirstChars: [..."0123456789"],
+  resolve: resolveYamlTimestamp,
+  identify: (object6) => object6 instanceof Date,
+  represent: (object6) => object6.toISOString()
+});
+var seqTag = defineSequenceTag("tag:yaml.org,2002:seq", {
+  create: () => [],
+  addItem: (container, item) => {
+    container.push(item);
+  },
+  identify: Array.isArray
+});
+function isPlainObject2(data) {
+  if (data === null || typeof data !== "object" || Array.isArray(data)) return false;
+  const prototype = Object.getPrototypeOf(data);
+  return prototype === null || prototype === Object.prototype;
+}
+var omapTag = defineSequenceTag("tag:yaml.org,2002:omap", {
+  create: () => ({
+    list: [],
+    seen: /* @__PURE__ */ new Set()
+  }),
+  addItem: (carrier, item) => {
+    let key;
+    if (item instanceof Map) {
+      if (item.size !== 1) return "cannot resolve an ordered map item";
+      key = item.keys().next().value;
+    } else if (isPlainObject2(item)) {
+      const itemKeys = Object.keys(item);
+      if (itemKeys.length !== 1) return "cannot resolve an ordered map item";
+      key = itemKeys[0];
+    } else return "cannot resolve an ordered map item";
+    if (carrier.seen.has(key)) return "duplicate key in ordered map";
+    carrier.seen.add(key);
+    carrier.list.push(item);
+    return "";
+  },
+  finalize: (carrier) => carrier.list,
+  identify: () => false
+});
+var pairsTag = defineSequenceTag("tag:yaml.org,2002:pairs", {
+  create: () => [],
+  addItem: (container, item) => {
+    if (item instanceof Map) {
+      if (item.size !== 1) return "cannot resolve a pairs item";
+      container.push(item.entries().next().value);
+      return "";
+    }
+    if (Object.prototype.toString.call(item) !== "[object Object]") return "cannot resolve a pairs item";
+    const object6 = item;
+    const keys = Object.keys(object6);
+    if (keys.length !== 1) return "cannot resolve a pairs item";
+    container.push([keys[0], object6[keys[0]]]);
+    return "";
+  },
+  identify: () => false
+});
+var mapTag = defineMappingTag("tag:yaml.org,2002:map", {
+  create: () => ({}),
+  identify: isPlainObject2,
+  represent: (o) => {
+    const map4 = /* @__PURE__ */ new Map();
+    for (const key of Object.keys(o)) map4.set(key, o[key]);
+    return map4;
+  },
+  addPair: (container, key, value) => {
+    if (key !== null && typeof key === "object") return "object-based map does not support complex keys";
+    const normalizedKey = String(key);
+    if (normalizedKey === "__proto__") Object.defineProperty(container, normalizedKey, {
+      value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    else container[normalizedKey] = value;
+    return "";
+  },
+  has: (container, key) => {
+    if (key !== null && typeof key === "object") return false;
+    return Object.prototype.hasOwnProperty.call(container, String(key));
+  },
+  keys: (container) => Object.keys(container),
+  get: (container, key) => {
+    const normalizedKey = String(key);
+    if (!Object.prototype.hasOwnProperty.call(container, normalizedKey)) return null;
+    return container[normalizedKey];
+  }
+});
+var setTag = defineMappingTag("tag:yaml.org,2002:set", {
+  create: () => /* @__PURE__ */ new Set(),
+  identify: (data) => data instanceof Set,
+  represent: (data) => {
+    const map4 = /* @__PURE__ */ new Map();
+    for (const key of data) map4.set(key, null);
+    return map4;
+  },
+  addPair: (container, key, value) => {
+    if (value !== null) return "cannot resolve a set item";
+    container.add(key);
+    return "";
+  },
+  has: (container, key) => container.has(key),
+  keys: (container) => container.keys(),
+  get: () => null
+});
+function createTagDefinitionMap() {
+  return {
+    scalar: /* @__PURE__ */ Object.create(null),
+    sequence: /* @__PURE__ */ Object.create(null),
+    mapping: /* @__PURE__ */ Object.create(null)
+  };
+}
+function createTagDefinitionListMap() {
+  return {
+    scalar: [],
+    sequence: [],
+    mapping: []
+  };
+}
+function compileTags(tags) {
+  const result = [];
+  for (const tag of tags) {
+    let index = result.length;
+    for (let previousIndex = 0; previousIndex < result.length; previousIndex++) {
+      const previous = result[previousIndex];
+      if (previous.nodeKind === tag.nodeKind && previous.tagName === tag.tagName && previous.matchByTagPrefix === tag.matchByTagPrefix) {
+        index = previousIndex;
+        break;
+      }
+    }
+    result[index] = tag;
+  }
+  return result;
+}
+var Schema = class Schema2 {
+  tags;
+  /** @internal */
+  implicitScalarTags;
+  /**
+  * Dispatch implicit scalar resolvers by `source.charAt(0)`. Each bucket holds
+  * the resolvers that may match that key, in schema order; a key absent from
+  * the map uses
+  * {@link Schema.implicitScalarAnyFirstChar}
+  * (resolvers that declared no first-char constraint, so they apply to any
+  * first character).
+  */
+  implicitScalarByFirstChar;
+  implicitScalarAnyFirstChar;
+  /**
+  * The default scalar tag (`!!str`), resolved once so the composer's fallback
+  * for unresolved plain scalars avoids a keyed lookup per scalar.
+  *
+  * @internal
+  */
+  defaultScalarTag;
+  /**
+  * The default container tags (`!!seq` / `!!map`), used by the dumper: when a
+  * value is identified by its default tag, the tag is implicit and not
+  * printed. Undefined if the schema does not define them (then such values
+  * can't be dumped).
+  *
+  * @internal
+  */
+  defaultSequenceTag;
+  /** @internal */
+  defaultMappingTag;
+  exact;
+  prefix;
+  constructor(tags) {
+    const compiledTags = compileTags(tags);
+    const implicitScalarTags = [];
+    const exact = createTagDefinitionMap();
+    const prefix = createTagDefinitionListMap();
+    for (const tag of compiledTags) {
+      if (tag.nodeKind === "scalar" && tag.implicit) {
+        if (tag.matchByTagPrefix) throw new Error("Implicit scalar tags cannot match by tag prefix");
+        implicitScalarTags.push(tag);
+      }
+      switch (tag.nodeKind) {
+        case "scalar":
+          if (tag.matchByTagPrefix) prefix.scalar.push(tag);
+          else exact.scalar[tag.tagName] = tag;
+          break;
+        case "sequence":
+          if (tag.matchByTagPrefix) prefix.sequence.push(tag);
+          else exact.sequence[tag.tagName] = tag;
+          break;
+        case "mapping":
+          if (tag.matchByTagPrefix) prefix.mapping.push(tag);
+          else exact.mapping[tag.tagName] = tag;
+          break;
+      }
+    }
+    const implicitScalarAnyFirstChar = implicitScalarTags.filter((tag) => tag.implicitFirstChars === null);
+    const keys = /* @__PURE__ */ new Set();
+    for (const tag of implicitScalarTags) if (tag.implicitFirstChars !== null) for (const key of tag.implicitFirstChars) keys.add(key);
+    const implicitScalarByFirstChar = /* @__PURE__ */ new Map();
+    for (const key of keys) implicitScalarByFirstChar.set(key, implicitScalarTags.filter((tag) => tag.implicitFirstChars === null || tag.implicitFirstChars.indexOf(key) !== -1));
+    const defaultScalarTag = exact.scalar["tag:yaml.org,2002:str"];
+    if (!defaultScalarTag) throw new Error("schema does not define the default scalar tag (tag:yaml.org,2002:str)");
+    this.tags = compiledTags;
+    this.implicitScalarTags = implicitScalarTags;
+    this.implicitScalarByFirstChar = implicitScalarByFirstChar;
+    this.implicitScalarAnyFirstChar = implicitScalarAnyFirstChar;
+    this.defaultScalarTag = defaultScalarTag;
+    this.defaultSequenceTag = exact.sequence["tag:yaml.org,2002:seq"];
+    this.defaultMappingTag = exact.mapping["tag:yaml.org,2002:map"];
+    this.exact = exact;
+    this.prefix = prefix;
+  }
+  /** @internal */
+  lookupScalarTag(tagName) {
+    const exactTag = this.exact.scalar[tagName];
+    if (exactTag) return exactTag;
+    for (const tag of this.prefix.scalar) if (tagName.startsWith(tag.tagName)) return tag;
+  }
+  /** @internal */
+  lookupSequenceTag(tagName) {
+    const exactTag = this.exact.sequence[tagName];
+    if (exactTag) return exactTag;
+    for (const tag of this.prefix.sequence) if (tagName.startsWith(tag.tagName)) return tag;
+  }
+  /** @internal */
+  lookupMappingTag(tagName) {
+    const exactTag = this.exact.mapping[tagName];
+    if (exactTag) return exactTag;
+    for (const tag of this.prefix.mapping) if (tagName.startsWith(tag.tagName)) return tag;
+  }
+  /** @internal */
+  resolveImplicitScalarTag(source2) {
+    const candidates = this.implicitScalarByFirstChar.get(source2.charAt(0)) ?? this.implicitScalarAnyFirstChar;
+    for (const tag2 of candidates) {
+      const value = tag2.resolve(source2, false, tag2.tagName);
+      if (value !== NOT_RESOLVED) return {
+        value,
+        tag: tag2
+      };
+    }
+    const tag = this.defaultScalarTag;
+    return {
+      value: tag.resolve(source2, false, tag.tagName),
+      tag
+    };
+  }
+  /**
+  * Creates a new schema with the specified tags added. If a tag already
+  * exists, it is replaced by the specified tag.
+  *
+  * @example
+  *
+  * ```javascript
+  * import { CORE_SCHEMA, mergeTag, realMapTag } from 'js-yaml'
+  *
+  * const schema = CORE_SCHEMA.withTags(mergeTag, realMapTag)
+  * ```
+  */
+  withTags(...tags) {
+    let flatTags = [];
+    for (const tag of tags) flatTags = flatTags.concat(tag);
+    return new Schema2([...this.tags, ...flatTags]);
+  }
+};
+var FAILSAFE_SCHEMA = new Schema([
+  strTag,
+  seqTag,
+  mapTag
+]);
+var JSON_SCHEMA = new Schema([
+  ...FAILSAFE_SCHEMA.tags,
+  nullJsonTag,
+  boolJsonTag,
+  intJsonTag,
+  floatJsonTag
+]);
+var CORE_SCHEMA = new Schema([
+  ...FAILSAFE_SCHEMA.tags,
+  nullCoreTag,
+  boolCoreTag,
+  intCoreTag,
+  floatCoreTag
+]);
+var YAML11_SCHEMA = new Schema([
+  ...FAILSAFE_SCHEMA.tags,
+  nullYaml11Tag,
+  boolYaml11Tag,
+  intYaml11Tag,
+  floatYaml11Tag,
+  timestampTag,
+  mergeTag,
+  binaryTag,
+  omapTag,
+  pairsTag,
+  setTag
+]);
+var DUMP_SCHEMA = YAML11_SCHEMA.withTags({
+  ...intYaml11Tag,
+  resolve: (source2, isExplicit, tagName) => {
+    const result = intYaml11Tag.resolve(source2, isExplicit, tagName);
+    return result === NOT_RESOLVED ? intCoreTag.resolve(source2, isExplicit, tagName) : result;
+  }
+}, {
+  ...floatYaml11Tag,
+  resolve: (source2, isExplicit, tagName) => {
+    const result = floatYaml11Tag.resolve(source2, isExplicit, tagName);
+    return result === NOT_RESOLVED ? floatCoreTag.resolve(source2, isExplicit, tagName) : result;
+  }
+});
+var realMapTag = defineMappingTag("tag:yaml.org,2002:map", {
+  create: () => /* @__PURE__ */ new Map(),
+  addPair: (container, key, value) => {
+    container.set(key, value);
+    return "";
+  },
+  has: (container, key) => container.has(key),
+  keys: (container) => container.keys(),
+  get: (container, key) => container.get(key),
+  identify: (data) => data instanceof Map || isPlainObject2(data),
+  represent: (data) => {
+    if (data instanceof Map) return data;
+    const map4 = /* @__PURE__ */ new Map();
+    const obj = data;
+    for (const key of Object.keys(obj)) map4.set(key, obj[key]);
+    return map4;
+  }
+});
+function normalizeKey(key) {
+  if (Array.isArray(key)) {
+    const array5 = Array.prototype.slice.call(key);
+    for (let index = 0; index < array5.length; index++) {
+      if (Array.isArray(array5[index])) return null;
+      if (typeof array5[index] === "object" && Object.prototype.toString.call(array5[index]) === "[object Object]") array5[index] = "[object Object]";
+    }
+    return String(array5);
+  }
+  if (typeof key === "object" && Object.prototype.toString.call(key) === "[object Object]") return "[object Object]";
+  return String(key);
+}
+var legacyMapTag = defineMappingTag("tag:yaml.org,2002:map", {
+  create: () => ({}),
+  identify: isPlainObject2,
+  represent: (o) => {
+    const map4 = /* @__PURE__ */ new Map();
+    for (const key of Object.keys(o)) map4.set(key, o[key]);
+    return map4;
+  },
+  addPair: (container, key, value) => {
+    const normalizedKey = normalizeKey(key);
+    if (normalizedKey === null) return "nested arrays are not supported inside keys";
+    if (normalizedKey === "__proto__") Object.defineProperty(container, normalizedKey, {
+      value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    else container[normalizedKey] = value;
+    return "";
+  },
+  has: (container, key) => {
+    const normalizedKey = normalizeKey(key);
+    return normalizedKey !== null && Object.prototype.hasOwnProperty.call(container, normalizedKey);
+  },
+  keys: (container) => Object.keys(container),
+  get: (container, key) => {
+    const normalizedKey = String(key);
+    if (!Object.prototype.hasOwnProperty.call(container, normalizedKey)) return null;
+    return container[normalizedKey];
+  }
+});
+var EVENT_ID = {
+  DOCUMENT: 1,
+  SEQUENCE: 2,
+  MAPPING: 3,
+  SCALAR: 4,
+  ALIAS: 5,
+  POP: 6
+};
+var SCALAR_STYLE = {
+  PLAIN: 1,
+  SINGLE_QUOTED: 2,
+  DOUBLE_QUOTED: 3,
+  LITERAL_BLOCK: 4,
+  FOLDED_BLOCK: 5
+};
+var COLLECTION_STYLE = {
+  BLOCK: 1,
+  FLOW: 2
+};
+var CHOMPING_MODE = {
+  CLIP: 1,
+  STRIP: 2,
+  KEEP: 3
+};
+function simpleEscapeSequence(c) {
+  switch (c) {
+    case 48:
+      return "\0";
+    case 97:
+      return "\x07";
+    case 98:
+      return "\b";
+    case 116:
+      return "	";
+    case 9:
+      return "	";
+    case 110:
+      return "\n";
+    case 118:
+      return "\v";
+    case 102:
+      return "\f";
+    case 114:
+      return "\r";
+    case 101:
+      return "\x1B";
+    case 32:
+      return " ";
+    case 34:
+      return '"';
+    case 47:
+      return "/";
+    case 92:
+      return "\\";
+    case 78:
+      return "\x85";
+    case 95:
+      return "\xA0";
+    case 76:
+      return "\u2028";
+    case 80:
+      return "\u2029";
+    default:
+      return "";
+  }
+}
+var simpleEscapeCheck = new Array(256);
+var simpleEscapeMap = new Array(256);
+for (let i = 0; i < 256; i++) {
+  simpleEscapeCheck[i] = simpleEscapeSequence(i) ? 1 : 0;
+  simpleEscapeMap[i] = simpleEscapeSequence(i);
+}
+var DEFAULT_TAG_HANDLERS = Object.assign(/* @__PURE__ */ Object.create(null), {
+  "!": "!",
+  "!!": "tag:yaml.org,2002:"
+});
+var DEFAULT_CONSTRUCTOR_OPTIONS = {
+  filename: "",
+  schema: CORE_SCHEMA,
+  json: false,
+  maxTotalMergeKeys: 1e4,
+  maxAliases: -1
+};
+var NS_URI_CHAR = String.raw`(?:%[0-9A-Fa-f]{2}|[0-9A-Za-z\-#;/?:@&=+$,_.!~*'()\[\]])`;
+var NS_TAG_CHAR = String.raw`(?:%[0-9A-Fa-f]{2}|[0-9A-Za-z\-#;/?:@&=+$.~*'()_])`;
+var PATTERN_TAG_URI = new RegExp(`^(?:${NS_URI_CHAR})*$`);
+var PATTERN_TAG_SUFFIX = new RegExp(`^(?:${NS_TAG_CHAR})+$`);
+var PATTERN_TAG_PREFIX = new RegExp(`^(?:!(?:${NS_URI_CHAR})*|${NS_TAG_CHAR}(?:${NS_URI_CHAR})*)$`);
+var DEFAULT_PARSER_OPTIONS = {
+  filename: "",
+  maxDepth: 100
+};
+var DEFAULT_LOAD_OPTIONS = {
+  ...DEFAULT_PARSER_OPTIONS,
+  ...DEFAULT_CONSTRUCTOR_OPTIONS
+};
+function hasBit(mask, bit) {
+  return (mask & 1 << bit) !== 0;
+}
+var DEFAULT_SCALAR_STYLE_RULES = {
+  applyQuoteFlowKeysOption,
+  doubleQuoteForInvisibles,
+  doubleQuoteWhitespaceOnly,
+  applyForceQuotesOption,
+  tryLongOrMultilineAsBlock,
+  quoteInvalidPlain,
+  fallbackToDoubleQuoted
+};
+function _preferredQuotedStyle(layout) {
+  if (layout.presenterOptions.quoteStyle === "single" && hasBit(layout.allowedStylesMask, SCALAR_STYLE.SINGLE_QUOTED)) return SCALAR_STYLE.SINGLE_QUOTED;
+  return SCALAR_STYLE.DOUBLE_QUOTED;
+}
+function applyQuoteFlowKeysOption(layout) {
+  if (!layout.presenterOptions.quoteFlowKeys) return;
+  if (!layout.isKey || !layout.flowOnly || layout.style !== SCALAR_STYLE.PLAIN) return;
+  layout.style = SCALAR_STYLE.DOUBLE_QUOTED;
+}
+function doubleQuoteForInvisibles(layout) {
+  if (layout.style === SCALAR_STYLE.PLAIN && /[\t\x7F-\xA0\u2028\u2029\uFEFF\uFFFE\uFFFF]/.test(layout.node.value)) layout.style = SCALAR_STYLE.DOUBLE_QUOTED;
+}
+function doubleQuoteWhitespaceOnly(layout) {
+  if (layout.style === SCALAR_STYLE.PLAIN && /^\s+$/.test(layout.node.value)) layout.style = SCALAR_STYLE.DOUBLE_QUOTED;
+}
+function applyForceQuotesOption(layout) {
+  if (!layout.presenterOptions.forceQuotes) return;
+  if (layout.isKey || layout.style !== SCALAR_STYLE.PLAIN) return;
+  if (layout.node.tag !== layout.presenterOptions.schema.defaultScalarTag.tagName) return;
+  layout.style = layout.node.value.includes("\n") ? SCALAR_STYLE.DOUBLE_QUOTED : _preferredQuotedStyle(layout);
+}
+function tryLongOrMultilineAsBlock(layout) {
+  if (layout.style !== SCALAR_STYLE.PLAIN || layout.isKey) return;
+  const value = layout.node.value;
+  const multiline = value.indexOf("\n") !== -1;
+  if (!hasBit(layout.allowedStylesMask, SCALAR_STYLE.LITERAL_BLOCK)) {
+    if (multiline) layout.style = SCALAR_STYLE.DOUBLE_QUOTED;
+    return;
+  }
+  const w = layout.presenterOptions.lineWidth;
+  if (w === -1) {
+    if (multiline) layout.style = SCALAR_STYLE.LITERAL_BLOCK;
+    return;
+  }
+  const availableWidth = Math.max(Math.min(w, 40), w - layout.shiftOfContent);
+  let position = 0;
+  let shouldFold = false;
+  while (position <= value.length) {
+    let lineEnd = value.length;
+    const nextLineBreak = value.indexOf("\n", position);
+    if (nextLineBreak !== -1) lineEnd = nextLineBreak;
+    const line = value.slice(position, lineEnd);
+    if (line.length > availableWidth && line[0] !== " " && / [^ \t]/.test(line)) shouldFold = true;
+    if (nextLineBreak === -1) break;
+    position = nextLineBreak + 1;
+  }
+  if (shouldFold) layout.style = SCALAR_STYLE.FOLDED_BLOCK;
+  else if (multiline) layout.style = SCALAR_STYLE.LITERAL_BLOCK;
+}
+function quoteInvalidPlain(layout) {
+  if (layout.style === SCALAR_STYLE.PLAIN && !hasBit(layout.allowedStylesMask, SCALAR_STYLE.PLAIN)) layout.style = _preferredQuotedStyle(layout);
+}
+function fallbackToDoubleQuoted(layout) {
+  if (!hasBit(layout.allowedStylesMask, layout.style)) layout.style = SCALAR_STYLE.DOUBLE_QUOTED;
+}
+var SRC_C_PRINTABLE = "[\\x09\\x0A\\x0D\\x20-\\x7E\\x85\\xA0-\\uD7FF\\uE000-\\uFFFD\\u{10000}-\\u{10FFFF}]";
+var SRC_B_CHAR = "[\\n\\r]";
+var SRC_C_BYTE_ORDER_MARK = "\\uFEFF";
+var SRC_S_WHITE = "[ \\t]";
+var SRC_NB_CHAR = `(?:(?!(?:${SRC_B_CHAR}|${SRC_C_BYTE_ORDER_MARK}))${SRC_C_PRINTABLE})`;
+var SRC_NS_CHAR = `(?:(?!${SRC_S_WHITE})${SRC_NB_CHAR})`;
+var SRC_NB_JSON = "[\\x09\\x20-\\uD7FF\\uE000-\\uFFFF\\u{10000}-\\u{10FFFF}]";
+var SRC_C_INDICATOR = "[-?:,\\[\\]{}#&*!|>'\"%@`]";
+var SRC_C_FLOW_INDICATOR = "[,\\[\\]{}]";
+var SRC_NS_PLAIN_SAFE_FLOW_OUT = SRC_NS_CHAR;
+var SRC_NS_PLAIN_SAFE_FLOW_IN = `(?:(?!${SRC_C_FLOW_INDICATOR})${SRC_NS_CHAR})`;
+var SRC_NS_PLAIN_FIRST_FLOW_OUT = `(?:(?:(?!${SRC_C_INDICATOR})${SRC_NS_CHAR})|[?:-](?=${SRC_NS_PLAIN_SAFE_FLOW_OUT}))`;
+var SRC_NS_PLAIN_FIRST_FLOW_IN = `(?:(?:(?!${SRC_C_INDICATOR})${SRC_NS_CHAR})|[?:-](?=${SRC_NS_PLAIN_SAFE_FLOW_IN}))`;
+var SRC_NS_PLAIN_CHAR_FLOW_OUT = `(?:(?:(?![:#])${SRC_NS_PLAIN_SAFE_FLOW_OUT})|:(?=${SRC_NS_PLAIN_SAFE_FLOW_OUT}))#*`;
+var SRC_NS_PLAIN_CHAR_FLOW_IN = `(?:(?:(?![:#])${SRC_NS_PLAIN_SAFE_FLOW_IN})|:(?=${SRC_NS_PLAIN_SAFE_FLOW_IN}))#*`;
+var SRC_NB_NS_PLAIN_IN_LINE_FLOW_OUT = `(?:${SRC_S_WHITE}*${SRC_NS_PLAIN_CHAR_FLOW_OUT})*`;
+var SRC_NB_NS_PLAIN_IN_LINE_FLOW_IN = `(?:${SRC_S_WHITE}*${SRC_NS_PLAIN_CHAR_FLOW_IN})*`;
+var SRC_NS_PLAIN_ONE_LINE_FLOW_OUT = `${SRC_NS_PLAIN_FIRST_FLOW_OUT}#*${SRC_NB_NS_PLAIN_IN_LINE_FLOW_OUT}`;
+var SRC_NS_PLAIN_ONE_LINE_FLOW_IN = `${SRC_NS_PLAIN_FIRST_FLOW_IN}#*${SRC_NB_NS_PLAIN_IN_LINE_FLOW_IN}`;
+var SRC_NS_PLAIN_ONE_LINE_BLOCK_KEY = SRC_NS_PLAIN_ONE_LINE_FLOW_OUT;
+var SRC_NS_PLAIN_ONE_LINE_FLOW_KEY = SRC_NS_PLAIN_ONE_LINE_FLOW_IN;
+var SRC_S_NS_PLAIN_NEXT_LINE_FLOW_OUT = `\\n+${SRC_NS_PLAIN_CHAR_FLOW_OUT}${SRC_NB_NS_PLAIN_IN_LINE_FLOW_OUT}`;
+var SRC_S_NS_PLAIN_NEXT_LINE_FLOW_IN = `\\n+${SRC_NS_PLAIN_CHAR_FLOW_IN}${SRC_NB_NS_PLAIN_IN_LINE_FLOW_IN}`;
+var SRC_NS_PLAIN_MULTI_LINE_FLOW_OUT = `${SRC_NS_PLAIN_ONE_LINE_FLOW_OUT}(?:${SRC_S_NS_PLAIN_NEXT_LINE_FLOW_OUT})*`;
+var SRC_NS_PLAIN_MULTI_LINE_FLOW_IN = `${SRC_NS_PLAIN_ONE_LINE_FLOW_IN}(?:${SRC_S_NS_PLAIN_NEXT_LINE_FLOW_IN})*`;
+var NS_PLAIN_FLOW_OUT = new RegExp(`^(?:${SRC_NS_PLAIN_MULTI_LINE_FLOW_OUT})$`, "u");
+var NS_PLAIN_FLOW_IN = new RegExp(`^(?:${SRC_NS_PLAIN_MULTI_LINE_FLOW_IN})$`, "u");
+var NS_PLAIN_BLOCK_KEY = new RegExp(`^(?:${SRC_NS_PLAIN_ONE_LINE_BLOCK_KEY})$`, "u");
+var NS_PLAIN_FLOW_KEY = new RegExp(`^(?:${SRC_NS_PLAIN_ONE_LINE_FLOW_KEY})$`, "u");
+var NB_SINGLE_ONE_LINE = new RegExp(`^(?:${SRC_NB_JSON})*$`, "u");
+var NB_SINGLE_MULTI_LINE = new RegExp(`^(?:${SRC_NB_JSON}|\\n)*$`, "u");
+var BLOCK_SCALAR_CONTENT = new RegExp(`^(?:${SRC_NB_CHAR}|\\n)*$`, "u");
+var DEFAULT_PRESENTER_OPTIONS = {
+  indent: 2,
+  seqNoIndent: false,
+  seqInlineFirst: true,
+  lineWidth: 80,
+  flowBracketPadding: false,
+  flowSkipCommaSpace: false,
+  flowSkipColonSpace: false,
+  quoteFlowKeys: false,
+  quoteStyle: "single",
+  forceQuotes: false,
+  scalarStyleRules: Object.keys(DEFAULT_SCALAR_STYLE_RULES).map((name) => Reflect.get(DEFAULT_SCALAR_STYLE_RULES, name)),
+  tagBeforeAnchor: false
+};
+var DEFAULT_DUMP_OPTIONS = {
+  ...DEFAULT_PRESENTER_OPTIONS,
+  schema: DUMP_SCHEMA,
+  skipInvalid: false,
+  noRefs: false,
+  flowLevel: -1,
+  sortKeys: false,
+  transform: () => {
+  }
+};
+var EVENT_DOCUMENT = EVENT_ID.DOCUMENT;
+var EVENT_SEQUENCE = EVENT_ID.SEQUENCE;
+var EVENT_MAPPING = EVENT_ID.MAPPING;
+var EVENT_SCALAR = EVENT_ID.SCALAR;
+var EVENT_ALIAS = EVENT_ID.ALIAS;
+var EVENT_POP = EVENT_ID.POP;
+var SCALAR_STYLE_PLAIN = SCALAR_STYLE.PLAIN;
+var SCALAR_STYLE_SINGLE_QUOTED = SCALAR_STYLE.SINGLE_QUOTED;
+var SCALAR_STYLE_DOUBLE_QUOTED = SCALAR_STYLE.DOUBLE_QUOTED;
+var SCALAR_STYLE_LITERAL_BLOCK = SCALAR_STYLE.LITERAL_BLOCK;
+var SCALAR_STYLE_FOLDED_BLOCK = SCALAR_STYLE.FOLDED_BLOCK;
+var COLLECTION_STYLE_BLOCK = COLLECTION_STYLE.BLOCK;
+var COLLECTION_STYLE_FLOW = COLLECTION_STYLE.FLOW;
+var CHOMPING_CLIP = CHOMPING_MODE.CLIP;
+var CHOMPING_STRIP = CHOMPING_MODE.STRIP;
+var CHOMPING_KEEP = CHOMPING_MODE.KEEP;
+
+// packages/capabilities/dist/azd-project-files.js
+var AZD_FILE_LIMITS = Object.freeze({
+  /** `azure.yaml`, hook scripts, parameter files and environment files. */
+  fileBytes: 256 * 1024,
+  treeBytes: 16 * 1024 * 1024,
+  treeEntries: 2048,
+  treeDepth: 16
+});
+
+// packages/capabilities/dist/azd-bicep-references.js
+var EXACT_TAG = new RegExp(AZD_EXACT_TAG_PATTERN, "u");
+
+// packages/capabilities/dist/azd-prerequisites.js
+var INSTALL_DOCS = "https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd";
+function releaseUrl(version2) {
+  return `https://github.com/Azure/azure-dev/releases/tag/azure-dev-cli_${version2}`;
+}
+function compareVersions(left, right) {
+  const a = left.split(".").map(Number);
+  const b = right.split(".").map(Number);
+  for (let index = 0; index < 3; index++) {
+    const difference = (a[index] ?? 0) - (b[index] ?? 0);
+    if (difference !== 0)
+      return difference;
+  }
+  return 0;
+}
+function evaluateAzdPrerequisite(input2) {
+  const { pinnedVersion, found, installedVersion } = input2;
+  if (pinnedVersion === void 0)
+    return {
+      ok: false,
+      code: "AZD_PIN_UNAVAILABLE",
+      value: "bundled azd version unavailable",
+      remedy: "Reinstall the apex CLI package"
+    };
+  const install = `Install azd ${pinnedVersion} (${releaseUrl(pinnedVersion)}; install guide ${INSTALL_DOCS}), add it to PATH, then rerun doctor`;
+  if (!found)
+    return { ok: false, code: "AZD_NOT_FOUND", value: "not found on PATH; Bicep runs require azd", remedy: install };
+  if (installedVersion === void 0)
+    return {
+      ok: false,
+      code: "AZD_VERSION_UNAVAILABLE",
+      value: "version unavailable from azd version",
+      remedy: `Run azd version to confirm it reports a stable release; ${install}`
+    };
+  if (installedVersion === pinnedVersion)
+    return { ok: true, value: installedVersion };
+  const direction = compareVersions(installedVersion, pinnedVersion) < 0 ? "older" : "newer";
+  return {
+    ok: false,
+    code: "AZD_VERSION_MISMATCH",
+    value: `${installedVersion} is ${direction} than the pinned ${pinnedVersion}`,
+    remedy: `Bicep runs bind the exact azd version; ${install}`
+  };
 }
 
 // packages/capabilities/dist/bound-envelope-transport.js
@@ -24970,7 +26316,7 @@ function renderDeploymentGuide(input2) {
     "## Deployment Procedure",
     "",
     "1. Inspect `apex status --json` and `apex doctor --json`; resolve missing prerequisites and stale inputs.",
-    "2. Complete required reviews, Gates 1 through 3, source generation and all native source validators for this accepted plan.",
+    "2. Complete required reviews, the Gate 1 intent confirmation, the Gate 2 and 3 readiness checkpoints, source generation and all native source validators for this accepted plan.",
     `3. With explicit cloud-operation authorization, request \`apex preview --operation apply --provider ${binding.track} --json\`. Terraform preview may perform authenticated planning.`,
     "4. Review the exact preview, resource ownership, replacements, deletions, policy results and blockers. A human must approve Gate 4 for that exact fresh preview and recipient.",
     "5. Execute only the approved preview through `apex deploy --preview PREVIEW_HASH --json`; never substitute an unbound provider command.",
@@ -24990,14 +26336,18 @@ function renderDeploymentGuide(input2) {
   ].join("\n");
 }
 function renderRunStatus(run) {
-  const gates = [...run.gates].sort((left, right) => left.gate - right.gate).map((gate) => [
-    gate.gate,
-    gate.state,
-    gate.state === "inherited" ? optional(gate.inheritedFromRunId) : "-",
-    optional(gate.decidedAt),
-    optional(gate.reason),
-    gate.dependencyHash
-  ]);
+  const gates = [...run.gates].sort((left, right) => left.gate - right.gate).map((gate) => {
+    const fields = gate;
+    return [
+      gate.gate,
+      gate.state,
+      gate.state === "inherited" ? optional(fields.inheritedFromRunId) : "-",
+      optional(fields.decidedAt),
+      optional(fields.readyAt),
+      optional(fields.reason),
+      gate.dependencyHash
+    ];
+  });
   return [
     "# Run Status",
     "",
@@ -25005,6 +26355,7 @@ function renderRunStatus(run) {
       ["Project", run.projectId],
       ["Run", run.runId],
       ["Environment", run.environment],
+      ["Purpose", run.purpose],
       ["Target scope", run.targetScope],
       ["IaC tool", run.iacTool],
       ["Parent run", optional(run.parentRunId)],
@@ -25014,7 +26365,7 @@ function renderRunStatus(run) {
     "",
     "## Gates",
     "",
-    markdownTable(["Gate", "State", "Inherited From", "Decided", "Reason", "Dependency Hash"], gates)
+    markdownTable(["Gate", "State", "Inherited From", "Decided", "Readiness Recorded", "Reason", "Dependency Hash"], gates)
   ].join("\n");
 }
 function previewAction(action) {
@@ -25612,7 +26963,7 @@ function renderCostUncertaintyDiagram(cost) {
 import { join as join25, resolve as resolve21 } from "node:path";
 
 // packages/cli/dist/version.js
-var APEX_VERSION = "0.11.0-next.2";
+var APEX_VERSION = "0.11.0-next.3";
 var MINIMUM_NODE_VERSION = "24.21.0";
 function meetsMinimumVersion(current, minimum) {
   const currentParts = current.split(".").map(Number);
@@ -25685,6 +27036,9 @@ function normalizeError(error62) {
     return error62;
   if (error62 instanceof GovernanceBaselineError)
     return governanceBaselineApexError(error62);
+  if (error62 instanceof RunConfigInvalidError) {
+    return new ApexError("APEX_VALIDATION", error62.message, EXIT_CODES.validation, { issues: error62.issues }, { cause: error62 });
+  }
   if (error62 instanceof RunWriterConflictError) {
     return new ApexError("APEX_WRITER_CONFLICT", `${error62.message}; retry from that worktree, release the writer lease there, or wait for it to expire`, EXIT_CODES.conflict, { ownerWorktree: error62.ownerWorktree, expiresAt: error62.expiresAt }, { cause: error62 });
   }
@@ -25734,11 +27088,23 @@ function dependencyRevision(run, events) {
   return sha256Json({
     projectId: run.projectId,
     runId: run.runId,
+    purpose: run.purpose,
     targetScope: run.targetScope,
     iacTool: run.iacTool,
     runtimeLockHash: run.runtimeLockHash,
     artifacts
   });
+}
+
+// packages/cli/dist/purpose.js
+var DEFAULT_DEPLOYMENT_PURPOSE = "lab";
+var PURPOSE_PRODUCTION_UNAVAILABLE = "PURPOSE_PRODUCTION_UNAVAILABLE";
+function isDeploymentPurpose(value) {
+  return value_exports2.Check(DeploymentPurposeSchema, value);
+}
+function assertDeploymentPurposeUsable(purpose) {
+  if (purpose === "production")
+    throw new ApexError("APEX_VALIDATION", "Deployment purpose 'production' is unavailable until CP-28/CP-29 (#457/#458) ship the CI-owned production flow; use purpose 'lab'", EXIT_CODES.validation, { reason: PURPOSE_PRODUCTION_UNAVAILABLE, purpose });
 }
 
 // packages/cli/dist/target-scope.js
@@ -26432,7 +27798,7 @@ __export(util_exports, {
   hide: () => hide,
   installLazyProp: () => installLazyProp,
   isObject: () => isObject,
-  isPlainObject: () => isPlainObject2,
+  isPlainObject: () => isPlainObject3,
   issue: () => issue,
   joinValues: () => joinValues,
   jsonStringifyReplacer: () => jsonStringifyReplacer,
@@ -26673,7 +28039,7 @@ var allowsEval = /* @__PURE__ */ cached(() => {
     return false;
   }
 });
-function isPlainObject2(o) {
+function isPlainObject3(o) {
   if (isObject(o) === false)
     return false;
   const ctor = o.constructor;
@@ -26690,7 +28056,7 @@ function isPlainObject2(o) {
   return true;
 }
 function shallowClone(o) {
-  if (isPlainObject2(o))
+  if (isPlainObject3(o))
     return { ...o };
   if (Array.isArray(o))
     return [...o];
@@ -26879,7 +28245,7 @@ function omit(schema, mask) {
   return clone(schema, mergeDefs(currDef, { shape: newShape, checks: [] }));
 }
 function extend(schema, shape) {
-  if (!isPlainObject2(shape)) {
+  if (!isPlainObject3(shape)) {
     throw new Error("Invalid input to extend: expected a plain object");
   }
   const checks = schema._zod.def.checks;
@@ -26901,7 +28267,7 @@ function extended(schema, shape) {
   return newShape;
 }
 function safeExtend(schema, shape) {
-  if (!isPlainObject2(shape)) {
+  if (!isPlainObject3(shape)) {
     throw new Error("Invalid input to safeExtend: expected a plain object");
   }
   return clone(schema, mergeDefs(schema._zod.def, { shape: extended(schema, shape) }));
@@ -29743,7 +31109,7 @@ function mergeValues(a, b) {
   if (a instanceof Date && b instanceof Date && +a === +b) {
     return { valid: true, data: a };
   }
-  if (isPlainObject2(a) && isPlainObject2(b)) {
+  if (isPlainObject3(a) && isPlainObject3(b)) {
     const bKeys = Object.keys(b);
     const sharedKeys = Object.keys(a).filter((key) => bKeys.indexOf(key) !== -1);
     const newObj = { ...a, ...b };
@@ -29964,7 +31330,7 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
   memo3?.attach(inst);
   inst._zod.parse = (payload, ctx) => {
     const input2 = payload.value;
-    if (!isPlainObject2(input2)) {
+    if (!isPlainObject3(input2)) {
       payload.issues.push({
         expected: "record",
         code: "invalid_type",
@@ -40045,7 +41411,7 @@ function generateIntersectionCheck(doc, ctx, schema, accessor) {
 }
 function generateRecordCheck(doc, ctx, schema, accessor) {
   const def = schema._zod.def;
-  const isPlainObjectConst = addConstant(ctx, isPlainObject2);
+  const isPlainObjectConst = addConstant(ctx, isPlainObject3);
   doc.write(`if (!${isPlainObjectConst}(${accessor})) return INVALID;`);
   const outputVar = newVar(ctx);
   const kVar = newVar(ctx);
@@ -45049,7 +46415,7 @@ function convertBaseSchema(schema, ctx) {
           const patterns = patternKeys.map((p) => new RegExp(p));
           const basePatternSchema = zodSchema;
           zodSchema = zodSchema.check((payload) => {
-            if (!isPlainObject2(payload.value))
+            if (!isPlainObject3(payload.value))
               return;
             const unrecognized = [];
             for (const key of Object.keys(payload.value)) {
@@ -50897,18 +52263,18 @@ function mergeCapabilities(base, additional) {
   }
   return result;
 }
-function isPlainObject3(value) {
+function isPlainObject4(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 function partitionInputResponses(inputResponses) {
   const accepted = {};
   const droppedKeys = [];
-  if (!isPlainObject3(inputResponses)) return {
+  if (!isPlainObject4(inputResponses)) return {
     accepted,
     droppedKeys
   };
   for (const [key, entry] of Object.entries(inputResponses)) {
-    if (!isPlainObject3(entry) || "method" in entry || "result" in entry) {
+    if (!isPlainObject4(entry) || "method" in entry || "result" in entry) {
       droppedKeys.push(key);
       continue;
     }
@@ -61051,7 +62417,11 @@ function gateReady(expectedGate, value) {
   if (context.expectedDependencyHash === void 0 || context.gate.dependencyHash !== context.expectedDependencyHash) {
     issues.push({ path: "/gate/dependencyHash", message: "Gate is not bound to the current review dependency" });
   }
-  if (context.approval.dependencyHash !== context.gate.dependencyHash) {
+  if (context.approval === void 0) {
+    if (!isReadinessGate(context.run.purpose, expectedGate)) {
+      issues.push({ path: "/approval", message: "Human approval evidence is required for this gate" });
+    }
+  } else if (context.approval.dependencyHash !== context.gate.dependencyHash) {
     issues.push({ path: "/approval/dependencyHash", message: "Approval is not bound to the open gate" });
   }
   return issues;
@@ -61090,6 +62460,8 @@ function gateApprovalBindingComplete(value) {
   if (preview === void 0)
     return issue2("/preview", "Current deployment preview is required");
   const approval = context.approval;
+  if (approval === void 0)
+    return issue2("/approval", "Human approval evidence is required");
   const valid = approval.gate === 4 && approval.decision === "approved" && approval.projectId === context.run.projectId && approval.runId === context.run.runId && approval.previewHash === preview.previewHash && approval.dependencyHash === preview.previewHash && approval.writerEpoch === context.run.ownerEpoch && approval.writerTransferClaimHash === context.provedPreviewTransferClaimHash && approval.recipientIdentity === context.expectedApprovalRecipientIdentity && approval.expiresAt !== void 0 && Date.parse(approval.expiresAt) > Date.parse(context.now);
   return valid ? [] : issue2("/approval", "Approval does not completely bind the current preview and writer");
 }
@@ -61948,6 +63320,8 @@ var ApexService = class _ApexService {
     return this.capabilityPacks(manifestPath).uninstall(id);
   }
   async init(input2) {
+    if (input2.purpose !== void 0)
+      assertDeploymentPurposeUsable(input2.purpose);
     await this.initializeWorkspace(input2);
     return this.createProject(input2);
   }
@@ -62427,6 +63801,8 @@ var ApexService = class _ApexService {
     config2 = structuredClone(config2);
     if (!value_exports2.Check(OnboardingConfigV1Schema, config2) || Buffer.byteLength(JSON.stringify(config2)) > 16384)
       throw new ApexError("APEX_VALIDATION", "Onboarding configuration is malformed or oversized", EXIT_CODES.validation);
+    if (config2.purpose !== void 0)
+      assertDeploymentPurposeUsable(config2.purpose);
     const checks = [];
     const inspect = async (path2) => {
       await this.assertSafeDestination(this.root, path2);
@@ -62524,9 +63900,10 @@ var ApexService = class _ApexService {
       throw new ApexError("APEX_CONFLICT", "Bootstrap selection does not match the requested project", EXIT_CODES.conflict);
     await this.assertSafeDestination(this.root, this.projects.runDirectory(selection2.projectId, selection2.runId));
     const run = await this.run(selection2, { readOnly: true });
+    assertDeploymentPurposeUsable(run.purpose);
     const project = await this.projects.getProject(selection2.projectId);
     const customization = await this.customizationSelection();
-    if (config2.projectId !== selection2.projectId || config2.displayName !== void 0 && config2.displayName !== project.displayName || config2.environment !== void 0 && config2.environment !== run.environment || config2.targetScope !== void 0 && config2.targetScope !== run.targetScope || config2.iacTool !== void 0 && config2.iacTool !== run.iacTool || config2.riskOwner !== void 0 && config2.riskOwner !== project.riskOwner || config2.client !== void 0 && config2.client !== customization.clientId || customization.sourceMode !== "bundled-projection")
+    if (config2.projectId !== selection2.projectId || config2.displayName !== void 0 && config2.displayName !== project.displayName || config2.environment !== void 0 && config2.environment !== run.environment || config2.purpose !== void 0 && config2.purpose !== run.purpose || config2.targetScope !== void 0 && config2.targetScope !== run.targetScope || config2.iacTool !== void 0 && config2.iacTool !== run.iacTool || config2.riskOwner !== void 0 && config2.riskOwner !== project.riskOwner || config2.client !== void 0 && config2.client !== customization.clientId || customization.sourceMode !== "bundled-projection")
       throw new ApexError("APEX_CONFLICT", "Bootstrap settings conflict with the selected initialized workspace", EXIT_CODES.conflict);
     const checks = [
       ...await this.managedFileChecks(),
@@ -62539,11 +63916,13 @@ var ApexService = class _ApexService {
     return selection2;
   }
   async bootstrap(input2) {
-    if (input2.projectId === void 0 && [input2.displayName, input2.environment, input2.targetScope, input2.iacTool, input2.riskOwner].some((value) => value !== void 0))
+    if (input2.projectId === void 0 && [input2.displayName, input2.environment, input2.purpose, input2.targetScope, input2.iacTool, input2.riskOwner].some((value) => value !== void 0))
       throw new ApexError("APEX_USAGE", "Project settings belong to explicit project creation, not workspace bootstrap", EXIT_CODES.usage);
     if (input2.projectId !== void 0 && input2.riskOwner === void 0) {
       throw new ApexError("APEX_VALIDATION", "Project risk owner must be partner or customer", EXIT_CODES.validation);
     }
+    if (input2.purpose !== void 0)
+      assertDeploymentPurposeUsable(input2.purpose);
     const riskOwner2 = input2.riskOwner;
     if (await this.pathExistsLstat(join18(this.root, ".apex"))) {
       const { clientId: clientId2, ...settings } = input2;
@@ -62578,6 +63957,8 @@ var ApexService = class _ApexService {
     };
   }
   async createProject(input2) {
+    const purpose = input2.purpose ?? DEFAULT_DEPLOYMENT_PURPOSE;
+    assertDeploymentPurposeUsable(purpose);
     let runtimeLock;
     try {
       runtimeLock = JSON.parse(await readFile14(join18(this.root, ".apex", "apex.lock.json"), "utf8"));
@@ -62599,6 +63980,7 @@ var ApexService = class _ApexService {
     });
     const run = await this.projects.createRun(input2.projectId, {
       environment: input2.environment ?? "dev",
+      purpose,
       targetScope: input2.targetScope ?? "local",
       runtimeLockHash
     });
@@ -63328,13 +64710,14 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       head: events.at(-1)?.hash ?? null,
       events: events.length,
       task: route.task?.id ?? null,
-      blockers: route.blockers
+      blockers: route.blockers,
+      satisfiedGates: run.gates.flatMap((gate) => this.gateSatisfied(run, gate.gate, events) ? [gate.gate] : [])
     };
   }
   async nextTask() {
     const selection2 = await this.selection();
-    const run = await this.run(selection2);
-    const events = await this.journal(run).replay();
+    let run = await this.run(selection2);
+    let events = await this.journal(run).replay();
     await this.sweepCaptures(events);
     const requirements = this.artifactHash(events, "requirements");
     const governanceInput = await this.governanceInputState(run, events);
@@ -63358,7 +64741,12 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         task: await this.currentIssuedTask(run, events, TASKS[0].id) ?? await this.issueTask(run, TASKS[0], [])
       };
     }
-    const route = await this.route(run, events);
+    let route = await this.route(run, events);
+    if (route.blockers.length > 0 && route.reviewGate === void 0 && await this.retryLabReadiness(run)) {
+      run = await this.run(selection2);
+      events = await this.journal(run).replay();
+      route = await this.route(run, events);
+    }
     if (route.blockers.length > 0 && route.reviewGate !== void 0) {
       return { status: "needs_review", review: await this.pendingReview(events, route.reviewGate) };
     }
@@ -64112,7 +65500,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       if (typeof snapshot.contentHash !== "string")
         throw new ApexError("APEX_VALIDATION", "Governance snapshot has no content digest; start a new run", EXIT_CODES.validation);
       if (snapshot.contentHash !== selection2.snapshot.contentHash || governance.constraintsRef.digest !== sha256Json(selectedSnapshot))
-        throw new ApexError("APEX_VALIDATION", "Governance content changed; reconcile governance and obtain new policy, plan and gate approvals before proceeding", EXIT_CODES.validation);
+        throw new ApexError("APEX_VALIDATION", "Governance content changed; reconcile governance and obtain new policy and plan results; Gate 2 and 3 readiness is then re-recorded and Gate 4 needs a new approval before proceeding", EXIT_CODES.validation);
       const latest = await this.latestGovernanceObservation(run, events, governanceHash, governance, snapshot);
       const observedAt = selection2.constraints.discoveredAt;
       const rawSourceDigest = sha256Bytes(bytes);
@@ -65472,7 +66860,7 @@ User constraints only. Architecture owns SKU selection.
 - Budget posture: ${requirements.budgetAndOperations === void 0 ? text4(input2.budget) : this.reviewMarkdownText(requirements.budgetAndOperations)}
 - Scale: ${text4(input2.scale)}
 `, "utf8")),
-      this.writeGeneratedReview(join18(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nRequirements challenger review is pending. Gate 1 cannot be approved until the reviewer completes this document.\n", "utf8"))
+      this.writeGeneratedReview(join18(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nRequirements challenger review is pending. The Gate 1 intent confirmation cannot be given until the reviewer completes this document.\n", "utf8"))
     ]);
   }
   async materializeRequirementsChallengeFindings(run, review2) {
@@ -65638,7 +67026,7 @@ ${table(["Logical ID", "Service", "Selected SKU", "Quantity", "Rationale"], skuR
 
 These are user-confirmed Architecture decisions. Alternatives and rejected options must be recorded in the architecture assessment before Gate 2 approval.
 `, "utf8")),
-      this.writeGeneratedReview(join18(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nArchitecture challenger review is pending. Gate 2 cannot be approved until the reviewer completes this document.\n", "utf8")),
+      this.writeGeneratedReview(join18(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nArchitecture challenger review is pending. Gate 2 readiness cannot be recorded until the reviewer completes this document.\n", "utf8")),
       ...diagrams.flatMap((diagram) => "error" in diagram ? [] : [
         this.writeGeneratedReview(join18(directory, `${diagram.name}.py`), Buffer.from(diagram.source.python, "utf8")),
         this.writeGeneratedReview(join18(directory, `${diagram.name}.svg`), Buffer.from(diagram.source.svg, "utf8")),
@@ -65725,7 +67113,7 @@ Physical scope declares intended managed and protected resources; it is not evid
 
 ${table(["Name", "Kind", "Reference or Value"], inputRows)}
 `, "utf8")),
-      this.writeGeneratedReview(join18(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nImplementation-plan challenger review is pending. Gate 3 cannot be approved until the reviewer completes this document.\n", "utf8"))
+      this.writeGeneratedReview(join18(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nImplementation-plan challenger review is pending. Gate 3 readiness cannot be recorded until the reviewer completes this document.\n", "utf8"))
     ]);
   }
   async materializePlanChallengeFindings(run, review2) {
@@ -66011,8 +67399,15 @@ Only native entries reference runtime-executed source-bound command receipts. Si
   async decideGateNumber(gateNumber, decision, actor, options = {}) {
     await this.assertNoPendingReview("gateDecide");
     const run = await this.currentRun();
+    if (isReadinessGate(run.purpose, gateNumber)) {
+      throw new ApexError("APEX_VALIDATION", `Gate ${gateNumber} is a kernel readiness checkpoint for a ${run.purpose} run: it is recorded automatically once its required reviews and checks pass and has no human decision; resolve blocking review findings or validation failures instead, and confirm Gate 1 and the final Gate 4 preview`, EXIT_CODES.validation, { reason: "GATE_READINESS_AUTOMATIC", gate: gateNumber, purpose: run.purpose });
+    }
     if (gateNumber === 4)
-      await this.assertGeneratedReviewUnmodified(join18(this.operationsReviewDirectory(run), "approval.md"));
+      assertDeploymentPurposeUsable(run.purpose);
+    if (gateNumber === 4) {
+      for (const name of ["README.md", "deployment-preview.md", "approval.md"])
+        await this.assertGeneratedReviewUnmodified(join18(this.operationsReviewDirectory(run), name));
+    }
     const gate = run.gates.find(({ gate: gate2 }) => gate2 === gateNumber);
     if (gate === void 0)
       throw new ApexError("APEX_USAGE", `Unknown gate ${gateNumber}`, EXIT_CODES.usage);
@@ -66292,6 +67687,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       const detail = details === void 0 ? "" : `: ${this.reviewMarkdownText(details)}`;
       return `- ${this.reviewMarkdownText(action)} ${this.reviewMarkdownText(resourceId)}${material ? " (material)" : ""}${detail}`;
     }).join("\n");
+    const approvalContext = await this.approvalContextMarkdown(run, await this.journal(run).replay());
     const previewContent = [
       "# Deployment Preview",
       "",
@@ -66307,7 +67703,8 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       "## Blockers",
       "",
       preview.blockers.length === 0 ? "- None." : preview.blockers.map((blocker) => `- ${this.reviewMarkdownText(blocker)}`).join("\n"),
-      ""
+      "",
+      approvalContext
     ].join("\n");
     await mkdir11(directory, { recursive: true });
     await Promise.all([
@@ -66321,6 +67718,61 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
 `, "utf8")),
       this.writeGeneratedReview(join18(directory, "deployment-preview.md"), Buffer.from(previewContent, "utf8"))
     ]);
+  }
+  /** Deterministic, bounded summary so the single final approval is informed by accepted evidence. */
+  async approvalContextMarkdown(run, events) {
+    const text4 = (value, max = 240) => this.reviewMarkdownText(value.length > max ? `${value.slice(0, max - 1)}\u2026` : value);
+    const gateState = (gateNumber) => run.gates.find(({ gate }) => gate === gateNumber)?.state ?? "unknown";
+    const gateLines = run.purpose === "lab" ? [
+      `- Gate 1: human intent confirmation (${gateState(1)})`,
+      `- Gates 2 and 3: kernel readiness checkpoints (${gateState(2)}, ${gateState(3)}); not human approvals`
+    ] : [1, 2, 3].map((gateNumber) => `- Gate ${gateNumber}: ${gateState(gateNumber)}`);
+    const lines = [
+      "## Approval Context",
+      "",
+      `- Purpose: ${text4(run.purpose)}`,
+      `- Target: ${text4(run.targetScope)}`,
+      `- Environment: ${text4(run.environment)}`,
+      `- IaC track: ${text4(run.iacTool)}`,
+      ...gateLines,
+      "",
+      "## Architecture",
+      ""
+    ];
+    const architectureHash = this.artifactHash(events, "architecture");
+    if (architectureHash === void 0) {
+      lines.push("- Accepted architecture is unavailable.", "");
+    } else {
+      const architecture = await this.objects.getJson(architectureHash);
+      lines.push(`- Title: ${text4(architecture.title)}`, `- Summary: ${text4(architecture.summary, 600)}`, `- Architecture hash: ${architectureHash}`, "", "### Components", "", ...architecture.components.slice(0, 25).map(({ id, service, purpose }) => `- ${text4(id)} (${text4(service)}): ${text4(purpose)}`), ...architecture.components.length > 25 ? [`- ${architecture.components.length - 25} more components`] : [], "", "### Architecture Risks", "", ...architecture.risks.length === 0 ? ["- None recorded."] : architecture.risks.slice(0, 10).map((risk) => `- ${text4(risk)}`), ...architecture.risks.length > 10 ? [`- ${architecture.risks.length - 10} more risks`] : [], "");
+    }
+    lines.push("## Cost Estimate", "");
+    const costHash = this.artifactHash(events, "cost-estimate");
+    if (costHash === void 0) {
+      lines.push("- Accepted cost estimate is unavailable.", "");
+    } else {
+      const cost = await this.objects.getJson(costHash);
+      const items = [...cost.lineItems].sort((left, right) => right.monthlyCost - left.monthlyCost || (left.id < right.id ? -1 : 1));
+      lines.push(`- Estimated monthly total: ${cost.totalMonthlyCost} ${text4(cost.currency)}`, `- Pricing date: ${text4(cost.pricingDate)}`, `- Pricing status: ${cost.pricingStatus ?? "complete"}`, `- Unpriced items: ${cost.unpricedItems?.length ?? 0}`, `- Cost estimate hash: ${costHash}`, "", ...items.slice(0, 20).map(({ id, service, sku, monthlyCost }) => `- ${text4(id)} (${text4(service)}, ${text4(sku)}): ${monthlyCost}`), ...items.length > 20 ? [`- ${items.length - 20} more line items`] : [], "", ...cost.assumptions.length === 0 ? [] : ["### Cost Assumptions", "", ...cost.assumptions.slice(0, 10).map((item) => `- ${text4(item)}`), ""]);
+    }
+    lines.push("## Accepted Risks", "");
+    const currentReviewHashes = new Set(["requirements-review", "architecture-review", "plan-review"].flatMap((nodeId) => {
+      const hash2 = this.latestPayloadHash(events, "task.completed", "reviewHash", (payload) => payload.nodeId === nodeId);
+      return hash2 === void 0 ? [] : [hash2];
+    }));
+    const now = this.clock().getTime();
+    const accepted = /* @__PURE__ */ new Map();
+    for (const event of events) {
+      if (event.type !== "review.resolved")
+        continue;
+      const resolution = event.payload.resolution;
+      if (resolution?.disposition === "accepted-risk" && currentReviewHashes.has(resolution.reviewHash) && resolution.expiresAt !== void 0 && Date.parse(resolution.expiresAt) > now) {
+        accepted.set(`${resolution.reviewHash}:${resolution.findingId}`, resolution);
+      }
+    }
+    const risks = [...accepted.values()].sort((left, right) => left.findingId < right.findingId ? -1 : 1);
+    lines.push(...risks.length === 0 ? ["- None."] : risks.slice(0, 20).map((risk) => `- ${text4(risk.findingId)} (expires ${text4(risk.expiresAt ?? "")}, owner ${text4(risk.owner ?? risk.actor)}): ${text4(risk.rationale)}`), ...risks.length > 20 ? [`- ${risks.length - 20} more accepted risks`] : [], "");
+    return lines.join("\n");
   }
   async materializeOperationsApprovalPackage(run, approval, approvalHash) {
     const content = [
@@ -66553,15 +68005,22 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       throw new ApexError("APEX_NOT_FOUND", "No inventory exists for this run", EXIT_CODES.notFound);
     return this.objects.getJson(hash2);
   }
-  async promote(environment, targetScope) {
+  async promote(environment, targetScope, purpose) {
     await this.assertNoPendingReview("promote");
     const source2 = await this.currentRun();
+    assertDeploymentPurposeUsable(source2.purpose);
+    if (purpose !== void 0) {
+      assertDeploymentPurposeUsable(purpose);
+      if (purpose !== source2.purpose)
+        throw new ApexError("APEX_VALIDATION", `Deployment purpose cannot change within a run (this run is '${source2.purpose}'); start a new project with the purpose you need`, EXIT_CODES.validation);
+    }
     const sourceEvents = await this.journal(source2).replay();
-    if (![1, 2, 3].every((gate) => this.gateApproved(source2, gate)))
-      throw new ApexError("APEX_AUTHORIZATION", "Promotion requires approved Gates 1-3", EXIT_CODES.authorization);
+    if (![1, 2, 3].every((gate) => this.gateSatisfied(source2, gate, sourceEvents)))
+      throw new ApexError("APEX_AUTHORIZATION", "Promotion requires an approved Gate 1 and approved or recorded-ready Gates 2 and 3", EXIT_CODES.authorization);
     await this.acquireRunWriterLease(source2);
     const promoted = await this.projects.createRun(source2.projectId, {
       environment,
+      purpose: source2.purpose,
       targetScope,
       runtimeLockHash: source2.runtimeLockHash,
       iacTool: source2.iacTool,
@@ -66570,15 +68029,14 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     const sameScope = source2.targetScope === targetScope;
     const inherited = promoted.gates.map((gate) => {
       const sourceGate = source2.gates.find(({ gate: number4 }) => number4 === gate.gate);
-      const inheritable = gate.gate === 1 || sameScope && gate.gate <= 3;
+      const inheritable = sameScope && gate.gate <= 3;
       return inheritable && (sourceGate.state === "approved" || sourceGate.state === "inherited") ? inheritGate(sourceGate, source2.runId, sourceGate.dependencyHash, this.clock().toISOString()) : gate;
     });
     const updated = { ...promoted, gates: inherited };
     await atomicWriteJson(this.runPath(updated), updated);
     const neutralNodes = /* @__PURE__ */ new Set([
       "requirements",
-      "requirements-review",
-      ...sameScope ? ["governance-discovery", "architecture", "architecture-review", "plan", "plan-review"] : []
+      ...sameScope ? ["requirements-review", "governance-discovery", "architecture", "architecture-review", "plan", "plan-review"] : []
     ]);
     const inheritedReviewHashes = /* @__PURE__ */ new Set();
     for (const event of sourceEvents) {
@@ -66630,7 +68088,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       sourceDependencyRevision: this.dependencyRevision(source2, sourceEvents),
       targetScopeChanged: !sameScope,
       invalidated: [
-        ...!sameScope ? ["governance", "gate-2", "gate-3"] : [],
+        ...!sameScope ? ["requirements-review", "governance", "gate-1", "gate-2", "gate-3"] : [],
         "codegen",
         "validation",
         "preview",
@@ -66639,8 +68097,25 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         "inventory"
       ]
     });
+    const reopen = [];
+    if (sameScope) {
+      for (const [gateNumber, reviewNode] of [
+        [2, "architecture-review"],
+        [3, "plan-review"]
+      ]) {
+        if (source2.gates.find(({ gate }) => gate === gateNumber)?.state === "ready")
+          reopen.push([gateNumber, reviewNode]);
+      }
+    }
+    for (const [gateNumber, reviewNode] of reopen) {
+      const promotedEvents = await this.journal(updated).replay();
+      const reviewDependencyHash = this.latestPayloadHash(promotedEvents, "task.completed", "dependencyHash", (payload) => payload.nodeId === reviewNode);
+      if (reviewDependencyHash === void 0 || this.reviewBlockers(promotedEvents, reviewNode).length > 0)
+        break;
+      await this.openRunGate(await this.runRepository(updated).read(), gateNumber, reviewDependencyHash);
+    }
     await this.writeSelection({ projectId: updated.projectId, runId: updated.runId });
-    return updated;
+    return this.runRepository(updated).read();
   }
   async doctor(fix = false, yes = false, live = false) {
     const apexExists = await this.exists(join18(this.root, ".apex"));
@@ -66687,6 +68162,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
           remedy: `Install ${executable} and add it to PATH`
         });
       }
+      if (run.iacTool === "bicep")
+        checks.push(await this.azdPrerequisiteCheck());
       const auth = await this.azureAuthStatus(live);
       checks.push({
         id: "azure-auth",
@@ -67074,6 +68551,36 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       dependencyHash,
       ...reopened ? { previousState: gate.state } : {}
     });
+    if (isReadinessGate(run.purpose, gateNumber))
+      await this.recordGateReadiness(run, gateNumber);
+  }
+  /**
+   * Records the lab Gate 2/3 readiness checkpoint once the gate validators and required reviews pass.
+   * It is a kernel record, not a decision: no actor, no approval evidence and no `gate.decided` event.
+   * A failing validator or open review finding leaves the gate open and unrecorded.
+   */
+  async recordGateReadiness(run, gateNumber) {
+    if (!isReadinessGate(run.purpose, gateNumber))
+      return false;
+    const current = await this.runRepository(run).read();
+    const gate = current.gates.find((item) => item.gate === gateNumber);
+    if (gate === void 0 || gate.state !== "open")
+      return false;
+    const events = await this.journal(current).replay();
+    let validatorIds;
+    try {
+      validatorIds = await this.validateGateValidators(current, gate, events, void 0, void 0);
+    } catch (error62) {
+      if (error62 instanceof ApexError && error62.code === "APEX_VALIDATION")
+        return false;
+      throw error62;
+    }
+    await this.assertCurrentWriterAuthority(current, new WriterTransferStore(this.projects.runDirectory(current.projectId, current.runId), this.clock));
+    await this.mutateRun(current, {
+      ...current,
+      gates: current.gates.map((item) => item.gate === gateNumber ? markGateReady(item, current.purpose, this.clock().toISOString()) : item)
+    }, "gate.readiness-recorded", { gate: gateNumber, dependencyHash: gate.dependencyHash, validatorIds }, events.at(-1)?.hash ?? null);
+    return true;
   }
   async mutateRun(before, after, eventType, payload, expectedJournalHead) {
     this.assertNotSnapshotRead();
@@ -67305,7 +68812,10 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     });
   }
   journal(run) {
-    return new EventJournal(join18(this.projects.runDirectory(run.projectId, run.runId), "journal"));
+    return new EventJournal(join18(this.projects.runDirectory(run.projectId, run.runId), "journal"), {
+      projectId: run.projectId,
+      runId: run.runId
+    });
   }
   runPath(run) {
     return join18(this.projects.runDirectory(run.projectId, run.runId), "run.json");
@@ -67328,8 +68838,15 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         throw new ApexError("APEX_CONFLICT", "Run transaction recovery is required", EXIT_CODES.conflict);
       }
     }
-    const run = readOnly ? JSON.parse(await readFile14(join18(directory, "run.json"), "utf8")) : await this.runRepository(selection2).read();
-    const events = await this.journal(run).replay();
+    const run = readOnly ? parseRunConfig(await readFile14(join18(directory, "run.json"), "utf8")) : await this.runRepository(selection2).read();
+    let events;
+    try {
+      events = await this.journal(run).replay();
+    } catch (error62) {
+      if (error62 instanceof JournalIdentityError)
+        throw new ApexError("APEX_CONFLICT", "The run journal belongs to a different project or run; restore the run state from its own backup", EXIT_CODES.conflict, void 0, { cause: error62 });
+      throw error62;
+    }
     this.assertRequirementsIntakeAdmitted(events, run.ownerEpoch);
     const retired = events.some((event) => {
       if (event.type !== "task.completed")
@@ -67968,8 +69485,12 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
             blockers: reviewBlockers,
             ...descriptor.gate === void 0 && descriptor.id !== "architecture-review" ? {} : { reviewGate: descriptor.gate ?? 2 }
           };
-        if (descriptor.gate !== void 0 && !this.gateApproved(run, descriptor.gate)) {
-          return { blockers: [`Gate ${descriptor.gate} approval is required`] };
+        if (descriptor.gate !== void 0 && !this.gateSatisfied(run, descriptor.gate, events)) {
+          return {
+            blockers: [
+              isReadinessGate(run.purpose, descriptor.gate) ? `Gate ${descriptor.gate} readiness checkpoint is not recorded${await this.readinessBlockedReason(run, descriptor.gate, events)}` : `Gate ${descriptor.gate} approval is required`
+            ]
+          };
         }
         continue;
       }
@@ -67980,7 +69501,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         const preview = this.latestPayloadHash(events, "preview.created", "previewHash");
         if (preview === void 0)
           return { blockers: ["Deployment preview is required"] };
-        if (!this.gateApproved(run, 4))
+        if (!this.gateSatisfied(run, 4, events))
           return { blockers: ["Gate 4 approval is required"] };
         return { blockers: ["Deployment and inventory are required"] };
       }
@@ -67988,9 +69509,69 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
     return { blockers: [] };
   }
-  gateApproved(run, gateNumber) {
-    const state = run.gates.find(({ gate }) => gate === gateNumber)?.state;
-    return state === "approved" || state === "inherited";
+  async retryLabReadiness(run) {
+    let recorded = false;
+    for (const gateNumber of [2, 3]) {
+      if (run.gates.find(({ gate }) => gate === gateNumber)?.state !== "open")
+        continue;
+      recorded = await this.recordGateReadiness(run, gateNumber) || recorded;
+    }
+    return recorded;
+  }
+  async readinessBlockedReason(run, gateNumber, events) {
+    const gate = run.gates.find((item) => item.gate === gateNumber);
+    if (gate?.state !== "open")
+      return "";
+    try {
+      await this.validateGateValidators(run, gate, events, void 0, void 0);
+      return "";
+    } catch (error62) {
+      if (!(error62 instanceof ApexError) || !Array.isArray(error62.details))
+        return "";
+      const messages = error62.details.map(({ message }) => message).slice(0, 5);
+      return messages.length === 0 ? "" : `: ${messages.join("; ")}`;
+    }
+  }
+  /**
+   * Human approval, inheritance, or (lab Gates 2 and 3 only) a kernel readiness checkpoint.
+   *
+   * An approved gate is trusted from the run file, which sits inside the local state directory this process owns, so
+   * raw tampering with that directory is outside the threat model. Readiness is held to a stronger standard because
+   * no human vouches for it: it must be proven by the journal (see {@link readinessProven}).
+   */
+  gateSatisfied(run, gateNumber, events) {
+    const gate = run.gates.find((candidate) => candidate.gate === gateNumber);
+    if (gate?.state === "approved" || gate?.state === "inherited")
+      return true;
+    if (gate?.state !== "ready" || !isReadinessGate(run.purpose, gateNumber))
+      return false;
+    return this.readinessProven(run, gate, events);
+  }
+  /**
+   * A `ready` gate counts only when the latest journal event touching that gate is the kernel's own readiness record
+   * for this run, the record's committed post-state contains exactly this gate record, and the gate is still bound to
+   * the current review dependency. A later invalidation, open, reopen or decision therefore revokes it, and a copied
+   * older record or a foreign journal cannot restore it.
+   */
+  readinessProven(run, gate, events) {
+    const reviewNode = { 2: "architecture-review", 3: "plan-review" }[gate.gate];
+    if (reviewNode === void 0)
+      return false;
+    const latest = events.findLast((event) => {
+      const payload2 = event.payload;
+      return event.type === "workflow.invalidated" ? Array.isArray(payload2.nodeIds) && payload2.nodeIds.includes(`gate-${gate.gate}`) : event.type.startsWith("gate.") && payload2.gate === gate.gate;
+    });
+    if (latest?.type !== "gate.readiness-recorded")
+      return false;
+    if (latest.projectId !== run.projectId || latest.runId !== run.runId)
+      return false;
+    const payload = latest.payload;
+    if (payload.dependencyHash !== gate.dependencyHash)
+      return false;
+    const committed = Array.isArray(payload.transaction?.after?.gates) ? payload.transaction.after.gates.find((candidate) => candidate.gate === gate.gate) : void 0;
+    if (committed === void 0 || sha256Json(committed) !== sha256Json(gate))
+      return false;
+    return this.latestPayloadHash(events, "task.completed", "dependencyHash", (item) => item.nodeId === reviewNode) === gate.dependencyHash;
   }
   reviewBlockers(events, nodeId) {
     const event = [...events].reverse().find((candidate) => candidate.type === "task.completed" && candidate.payload.nodeId === nodeId);
@@ -68012,10 +69593,11 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return dependencyRevision(run, events);
   }
   async assertPreviewReady(run, events) {
+    assertDeploymentPurposeUsable(run.purpose);
     events = this.governanceWorkflowEvents(events);
     await this.assertImportedGovernanceCurrent(run, events);
-    if (!this.gateApproved(run, 3))
-      throw new ApexError("APEX_AUTHORIZATION", "Gate 3 approval is required before preview", EXIT_CODES.authorization);
+    if (!this.gateSatisfied(run, 3, events))
+      throw new ApexError("APEX_AUTHORIZATION", isReadinessGate(run.purpose, 3) ? "Gate 3 readiness checkpoint must be recorded before preview" : "Gate 3 approval is required before preview", EXIT_CODES.authorization);
     const engine = await this.lockedWorkflowEngine(run);
     const aliases = {
       requirements: "requirements-v1",
@@ -68059,11 +69641,12 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
     const completedNodes = [
       ...this.completedNodeIds(events),
-      ...run.gates.flatMap((gate) => gate.state === "approved" || gate.state === "inherited" ? [`gate-${gate.gate}`] : [])
+      ...run.gates.flatMap((gate) => this.gateSatisfied(run, gate.gate, events) ? [`gate-${gate.gate}`] : [])
     ];
     const route = engine.route({
       run: {
         iacTool: run.iacTool,
+        purpose: run.purpose,
         targetScope: run.targetScope,
         governanceRefreshRequired: await this.referenceGovernanceNeedsRefresh(run, events),
         policyRefreshRequired: await this.policyMapNeedsRefresh(events)
@@ -68604,12 +70187,12 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       now: this.clock().toISOString(),
       run,
       gate,
-      approval,
+      ...approval === void 0 ? {} : { approval },
       artifactHashes: artifactHashes2,
       completedNodes,
       reviewBlockers: reviewNodes.flatMap((reviewNode) => this.reviewBlockers(events, reviewNode)),
       currentDependencyRevision: this.dependencyRevision(run, events),
-      expectedApprovalRecipientIdentity,
+      ...expectedApprovalRecipientIdentity === void 0 ? {} : { expectedApprovalRecipientIdentity },
       ...provedPreviewTransferClaimHash === void 0 ? {} : { provedPreviewTransferClaimHash },
       ...expectedDependencyHash === void 0 ? {} : { expectedDependencyHash },
       ...preview === void 0 ? {} : { preview }
@@ -68799,7 +70382,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       }
     }
     const activeValidatorIds = workflow.activeValidatorIds({
-      run: { iacTool: run.iacTool, targetScope: run.targetScope },
+      run: { iacTool: run.iacTool, purpose: run.purpose, targetScope: run.targetScope },
       artifacts
     });
     const executedValidatorIds = /* @__PURE__ */ new Set();
@@ -69043,18 +70626,35 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         return {};
       const set2 = JSON.parse(bytes.toString("utf8")).compatibilitySet;
       const release2 = (value) => typeof value === "string" && RELEASE_VERSION2.test(value) ? value : void 0;
-      return { vscode: release2(set2?.minimumVscode), copilotCli: release2(set2?.copilotCli) };
+      return { vscode: release2(set2?.minimumVscode), copilotCli: release2(set2?.copilotCli), azd: release2(set2?.azd) };
     } catch {
       return {};
     }
   }
-  async hostToolVersion(executable, args) {
+  // Bicep deploys through the native path until the azd executor ships (CP-26 PR B), so a missing or different azd is
+  // an advisory warning for now and never makes doctor unhealthy. The exact pinned release will be required then.
+  async azdPrerequisiteCheck() {
+    const pinnedVersion = (await this.bundledToolchainMinimums()).azd;
+    const found = await this.executableChecker("azd");
+    const installedVersion = found ? await this.hostToolVersion("azd", ["version"], { AZD_SKIP_UPDATE_CHECK: "true" }) : void 0;
+    const { ok, value, remedy } = evaluateAzdPrerequisite({ pinnedVersion, found, installedVersion });
+    if (ok)
+      return { id: "executable:azd", ok: true, value };
+    return {
+      id: "executable:azd",
+      ok: true,
+      severity: "warning",
+      value: `${value.replace(/; Bicep runs require azd$/u, "")} (advisory: Bicep will require azd once the azd executor ships)`,
+      remedy: `Not needed yet: Bicep still deploys with the native path until the azd executor ships. ${remedy ?? ""}`.trim()
+    };
+  }
+  async hostToolVersion(executable, args, env = {}) {
     try {
       const result = await this.processRunner.run({
         executable,
         args,
         cwd: this.root,
-        env: this.host.env,
+        env: { ...this.host.env, ...env },
         timeoutMs: 15e3,
         maxOutputBytes: 4096
       });
@@ -69741,7 +71341,8 @@ var status = object5({
   head: Type.Union([Sha256Schema, Type.Null()]),
   events: count2,
   task: Type.Union([NonEmptyStringSchema, Type.Null()]),
-  blockers: strings3
+  blockers: strings3,
+  satisfiedGates: Type.Array(Type.Integer({ minimum: 1, maximum: 4 }), { uniqueItems: true, maxItems: 4 })
 });
 var MCP_DOCTOR_CHECK_LIMIT = 32;
 var doctorCheck = object5({
@@ -70140,6 +71741,7 @@ var MCP_SERVER_INSTRUCTIONS = [
   "Call status first, then use returned task, run, expected head, and owner epoch values exactly.",
   "Do not retry mutations blindly after timeout, cancellation, or conflict; refresh status and confirm intent first.",
   "Use ask_user for human approvals, risk decisions, missing inputs, and any choice the kernel requires.",
+  "Never ask the user to approve a kernel-recorded readiness checkpoint (Gates 2 and 3 in a lab run); report the blocking review or validation finding instead.",
   "Large read results may include nextCursor; call the same tool with the same workspace and cursor until it is absent."
 ].join(" ");
 var MCP_MAX_SERIALIZED_RESULT_BYTES = 64 * 1024;
@@ -70449,6 +72051,7 @@ var projectCreateInput = external_exports.object({
   projectId: external_exports.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   displayName: external_exports.string().min(1).max(256),
   environment: external_exports.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  purpose: external_exports.enum(["lab", "production"]).optional(),
   targetScope: external_exports.string().max(1024).regex(TARGET_SCOPE_PATTERN, `Use ${TARGET_SCOPE_HINT}`),
   iacTool: external_exports.enum(["bicep", "terraform"]),
   riskOwner: external_exports.enum(["partner", "customer"])
@@ -70719,7 +72322,7 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     inputSchema: { path: external_exports.string().min(1), reopen: external_exports.boolean().optional() }
   }, async ({ path: path2, reopen }) => result(await service.selectGovernanceBaseline(path2, ...reopen === void 0 ? [] : [{ reopen }])));
   registerTool("projectCreate", {
-    description: "Create and select a new project with its initial environment run. targetScope is the user's explicit choice: local, or a full /subscriptions/<id>/resourceGroups/<name> path.",
+    description: "Create and select a new project with its initial environment run. targetScope is the user's explicit choice: local, or a full /subscriptions/<id>/resourceGroups/<name> path. purpose is lab (default) or production; production is unavailable until CP-28/CP-29 ship and is rejected.",
     inputSchema: projectCreateInput
   }, async (input2) => result(await service.createProject(input2)));
   registerTool("projectList", { description: "List projects in the current workspace", inputSchema: { cursor: cursorInput } }, async () => result({ projects: await service.listProjects() }));
@@ -70729,7 +72332,7 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     inputSchema: projectDeleteInput
   }, async ({ projectId, confirm }) => result(await service.deleteProject(projectId, confirm)));
   registerTool("gateDecide", {
-    description: "Record an explicitly confirmed human decision for Gate 1, 2, or 3 using the local OS username as actor. Gate 4 remains CLI-only.",
+    description: "Record the explicitly confirmed human Gate 1 intent confirmation (purpose, target and requirements) using the local OS username as actor. In a lab run Gates 2 and 3 are kernel-recorded readiness checkpoints, not human decisions, and are refused here with reason GATE_READINESS_AUTOMATIC: resolve the reported review or validation blocker instead. Gate 4, the final preview approval, remains CLI-only.",
     inputSchema: gateDecisionInput
   }, async ({ gate, decision }) => result(await service.decideInteractiveGate(gate, decision)));
   registerTool("reviewDecide", {
@@ -70890,9 +72493,9 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     }
   }, async ({ kind }) => result({ markdown: await service.render(kind) }));
   registerTool("promote", {
-    description: "Promote the selected run to a target environment through kernel checks; does not approve or execute deployment.",
-    inputSchema: { environment: external_exports.string(), target: external_exports.string() }
-  }, async ({ environment, target }) => result(await service.promote(environment, target)));
+    description: "Promote the selected run to a target environment through kernel checks; does not approve or execute deployment. The run's purpose is kept; a different purpose needs a new project.",
+    inputSchema: { environment: external_exports.string(), target: external_exports.string(), purpose: external_exports.enum(["lab", "production"]).optional() }
+  }, async ({ environment, target, purpose }) => result(await service.promote(environment, target, purpose)));
   registerTool("doctor", {
     description: "Inspect local APEX installation health; request repairs with fix and explicit confirmation with yes. Returns counts, remedies, and a bounded check list with failing checks first; when truncated, read every check with doctorChecks.",
     inputSchema: { fix: external_exports.boolean().optional(), yes: external_exports.boolean().optional() }
@@ -71205,7 +72808,7 @@ var PROVIDER_TRANSFER_KIND = "apex-provider-authority";
 var PROVIDER_TRANSFER_MAX_BUNDLE_BYTES = 8 * 1024 * 1024;
 var PROVIDER_TRANSFER_MAX_FILE_BYTES = 4 * 1024 * 1024;
 var HASH_PATTERN3 = /^[0-9a-f]{64}$/;
-var BASE64_PATTERN = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+var BASE64_PATTERN2 = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 var BINDING_PATH_PATTERN = /^bindings\/[0-9a-f]{64}\.json$/;
 var ARTIFACT_PATH_PATTERN = /^artifacts\/[0-9a-f]{64}\.json$/;
 var PLAN_KEY_PATH = "plan-transport.key";
@@ -71228,7 +72831,7 @@ function requireHash2(value, label) {
   return value;
 }
 function requireBase64(value, bytes, label) {
-  if (typeof value !== "string" || !BASE64_PATTERN.test(value))
+  if (typeof value !== "string" || !BASE64_PATTERN2.test(value))
     throw new Error(`${label} is invalid`);
   const decoded = Buffer.from(value, "base64");
   if (decoded.byteLength !== bytes || decoded.toString("base64") !== value)
@@ -71451,7 +73054,7 @@ function parseStoredArtifact(value, authority) {
   requireTimestamp(metadata2.createdAt, "Terraform artifact createdAt");
   const expiresAt = requireTimestamp(metadata2.expiresAt, "Terraform artifact expiresAt");
   const ciphertext = requireNonempty(artifact.ciphertext, "Terraform artifact ciphertext");
-  if (!BASE64_PATTERN.test(ciphertext) || Buffer.from(ciphertext, "base64").toString("base64") !== ciphertext) {
+  if (!BASE64_PATTERN2.test(ciphertext) || Buffer.from(ciphertext, "base64").toString("base64") !== ciphertext) {
     throw new Error("Terraform artifact ciphertext is invalid");
   }
   return { reference: stored.reference, artifact, expiresAt };
@@ -71564,7 +73167,7 @@ function decodeFile(entry) {
     throw new Error(`Provider transfer file size is invalid: ${file2.path}`);
   }
   requireHash2(file2.sha256, "Provider transfer file hash");
-  if (!BASE64_PATTERN.test(file2.content))
+  if (!BASE64_PATTERN2.test(file2.content))
     throw new Error(`Provider transfer file encoding is invalid: ${file2.path}`);
   const bytes = Buffer.from(file2.content, "base64");
   if (bytes.toString("base64") !== file2.content || bytes.byteLength !== file2.bytes || sha256Bytes(bytes) !== file2.sha256) {
@@ -72543,6 +74146,13 @@ function riskOwner(flags) {
     throw new ApexError("APEX_USAGE", "--risk-owner must be partner or customer", EXIT_CODES.usage);
   return value;
 }
+function purposeFlag(flags) {
+  if (flags.purpose === void 0)
+    return {};
+  if (!isDeploymentPurpose(flags.purpose))
+    throw new ApexError("APEX_USAGE", "--purpose must be lab or production", EXIT_CODES.usage);
+  return { purpose: flags.purpose };
+}
 async function inputJson(flags) {
   return JSON.parse(await readFile20(required2(flags, "file"), "utf8"));
 }
@@ -72553,6 +74163,7 @@ async function onboardingConfig(flags, _root) {
     ...typeof flags.name === "string" ? { displayName: flags.name } : {},
     ...typeof flags.client === "string" ? { client: flags.client } : {},
     ...typeof flags.environment === "string" ? { environment: flags.environment } : {},
+    ...purposeFlag(flags),
     ...typeof flags.target === "string" ? { targetScope: flags.target } : {},
     ...flags.iac === "terraform" ? { iacTool: "terraform" } : {},
     ...typeof flags["risk-owner"] === "string" ? { riskOwner: flags["risk-owner"] } : {},
@@ -72599,7 +74210,7 @@ async function configuredProviders(root, flags) {
   const currentAuthority = async () => {
     const selection2 = JSON.parse(await readFile20(join25(root, ".apex", "config.json"), "utf8"));
     const runDirectory = join25(root, ".apex", "projects", selection2.projectId, "runs", selection2.runId);
-    const run = JSON.parse(await readFile20(join25(runDirectory, "run.json"), "utf8"));
+    const run = parseRunConfig(await readFile20(join25(runDirectory, "run.json"), "utf8"));
     const journal = new EventJournal(join25(runDirectory, "journal"));
     const events = await journal.replay();
     const dependencyRevision2 = dependencyRevision(run, events);
@@ -72843,6 +74454,7 @@ async function dispatch(service, command, flags, root, options, interaction) {
         projectId: required2(flags, "project"),
         ...typeof flags.name === "string" ? { displayName: flags.name } : {},
         ...typeof flags.environment === "string" ? { environment: flags.environment } : {},
+        ...purposeFlag(flags),
         targetScope: assertTargetScope(required2(flags, "target")),
         iacTool: flags.iac === "terraform" ? "terraform" : "bicep",
         riskOwner: riskOwner(flags),
@@ -72883,6 +74495,7 @@ async function dispatch(service, command, flags, root, options, interaction) {
         ...config2.projectId === void 0 ? {} : { projectId: config2.projectId },
         ...config2.displayName === void 0 ? {} : { displayName: config2.displayName },
         ...config2.environment === void 0 ? {} : { environment: config2.environment },
+        ...config2.purpose === void 0 ? {} : { purpose: config2.purpose },
         ...config2.targetScope === void 0 ? {} : { targetScope: config2.targetScope },
         ...config2.iacTool === void 0 ? {} : { iacTool: config2.iacTool },
         ...config2.riskOwner === void 0 ? {} : { riskOwner: config2.riskOwner },
@@ -72921,6 +74534,7 @@ async function dispatch(service, command, flags, root, options, interaction) {
         projectId: required2(flags, "project"),
         ...typeof flags.name === "string" ? { displayName: flags.name } : {},
         ...typeof flags.environment === "string" ? { environment: flags.environment } : {},
+        ...purposeFlag(flags),
         targetScope: assertTargetScope(required2(flags, "target")),
         iacTool: flags.iac === "terraform" ? "terraform" : "bicep",
         riskOwner: riskOwner(flags)
@@ -72937,7 +74551,7 @@ async function dispatch(service, command, flags, root, options, interaction) {
     case "project history":
       return service.history(typeof flags.limit === "string" ? Number(flags.limit) : void 0);
     case "project promote":
-      return service.promote(required2(flags, "environment"), required2(flags, "target"));
+      return service.promote(required2(flags, "environment"), required2(flags, "target"), purposeFlag(flags).purpose);
     case "state transfer-export": {
       confirmed(flags, "state transfer-export");
       const ttlSeconds = Number(required2(flags, "ttl-seconds"));
@@ -73175,6 +74789,9 @@ try {
   process.exitCode = normalized.exitCode;
 }
 /*! Bundled license information:
+
+js-yaml/dist/js-yaml.mjs:
+  (*! js-yaml 5.4.3 https://github.com/nodeca/js-yaml @license MIT *)
 
 @modelcontextprotocol/server/dist/src-Cqbh3MYc.mjs:
   (*!

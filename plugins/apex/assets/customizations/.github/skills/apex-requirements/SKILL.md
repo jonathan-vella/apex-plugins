@@ -1,6 +1,6 @@
 ---
 name: apex-requirements
-description: "Provides internal APEX requirements guidance for typed intake, scope, constraints, service preferences and Gate 1."
+description: "Provides internal APEX requirements guidance for typed intake, scope, constraints, service preferences and the Gate 1 intent confirmation."
 user-invocable: false
 ---
 
@@ -66,8 +66,11 @@ or task.
     blocking findings require the normal correction and fresh review path; do not automatically acknowledge, dismiss or
     accept risk.
 12. After `apex/reviewDecide`, call `apex/status`. If Gate 1 is pending, report it and stop. Do not call
-    `apex/nextTask` while a gate is pending. If the user's scope permits approval and the user explicitly approves or
-    rejects Gate 1, call `apex/gateDecide` with `confirm: true`.
+    `apex/nextTask` while Gate 1 is pending. Gate 1 is the single intent confirmation: show the user the run's
+    purpose (`lab` by default; `production` is unavailable until the CI-owned production flow ships), its target scope
+    and the accepted requirements, and say that confirming binds all three. If the user's scope permits it and the
+    user explicitly confirms or rejects, call `apex/gateDecide` with `gate: 1` and `confirm: true`. Changing the
+    purpose or target needs a new project or run; changed requirements reopen Gate 1.
 
 ## Boundaries
 
