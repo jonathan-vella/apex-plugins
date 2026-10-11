@@ -17,8 +17,18 @@ traceable design choice that an authorized capability may later implement and va
 
 ## Redirect URI Intent
 
-Record the owning application, URI class, environment boundary, and exact-match requirement. Unknown redirect URIs
-block implementation intent; do not substitute placeholders or broaden accepted callback locations.
+Record the owning application, URI class, environment boundary, and exact-match requirement. Web and SPA redirect URIs
+use HTTPS outside local development (loopback `http` is for local development only). Native and mobile public clients
+use the platform-registered redirect URI the identity platform issues, such as `msauth.<bundle-id>://auth` on iOS or
+`msauth://<package>/<signature>` on Android, or an `http://localhost` loopback for desktop; never a broadened or
+wildcard URI. Unknown redirect URIs block implementation intent; do not substitute placeholders or
+broaden accepted callback locations.
+
+## Exposed APIs
+
+When the workload is itself an API, record the application ID URI, each delegated scope with its consent audience
+(admins only, or admins and users), and any app roles for application callers. Clients request only these scopes.
+Resource APIs validate the token issuer, audience, and expiry on every call.
 
 ## Tenant And Audience
 

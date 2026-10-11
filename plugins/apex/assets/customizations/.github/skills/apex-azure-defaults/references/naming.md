@@ -33,6 +33,28 @@ analysis.
 Illustrative patterns are `kv-{short-workload}-{env}-{suffix}` and `st{shortworkload}{env}{suffix}`. They are not
 availability claims and do not override an accepted organization pattern.
 
+## Abbreviation And Length Hints
+
+These hints come from the Cloud Adoption Framework abbreviation list. Confirm each binding against the provider naming
+rules for the exact resource type; an accepted organization pattern always wins.
+
+| Resource | CAF abbreviation | Binding note |
+| --- | --- | --- |
+| Resource group | `rg` | Readable project, environment and purpose segments. |
+| Virtual network and subnet | `vnet`, `snet` | Reserved subnet names override the pattern when the matching service is in scope. |
+| Network security group | `nsg` | One per subnet unless governance or service support says otherwise. |
+| Key Vault | `kv` | Short limit; globally unique; reserve room for the uniqueness token. |
+| Storage account | `st` | Short limit; lowercase letters and digits only, no separators; globally unique. |
+| Log Analytics workspace | `log` | Readable pattern. |
+| Application Insights | `appi` | Readable pattern. |
+| User-assigned managed identity | `id` | Name by workload purpose, not by principal. |
+| Container app and environment | `ca`, `cae` | Check the shorter container-app limit before appending segments. |
+| API Management | `apim` | Globally unique endpoint name. |
+| Azure Cosmos DB | `cosmos` | Globally unique account endpoint name. |
+
+Shorten the semantic portion first, then the environment segment, and never the uniqueness token. Template compilation
+does not reject an overlong or invalid name; only accepted validation or deployment evidence proves a name is valid.
+
 ## Collision And Change Handling
 
 - If truncation makes two semantic names equal, increase disambiguation through the selected naming capability.

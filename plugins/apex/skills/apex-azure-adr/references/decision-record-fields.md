@@ -25,8 +25,8 @@ evidence. Include scope and posture, not just a product name. Do not use vague s
 
 ## Alternatives
 
-Record at least one viable alternative when the choice materially affects the workload. For each alternative, state its
-fit against the same drivers, benefits, drawbacks, evidence, rejection rationale, and affected WAF pillars. Do not pad
+Record at least two viable alternatives when the choice materially affects the workload. For each alternative, state
+its fit against the same drivers, benefits, drawbacks, evidence, rejection rationale, and affected WAF pillars. Do not pad
 the record with options that violate mandatory constraints unless the violation itself explains the rejection.
 
 ## Consequences
@@ -38,7 +38,16 @@ obligations when they affect later planning.
 ## WAF And Compliance
 
 Describe effects on Security, Reliability, Performance Efficiency, Cost Optimization, and Operational Excellence. Record
-direction, rationale, mitigation, and evidence for each material effect. Record compliance, residency, identity,
+direction, rationale, mitigation, and evidence for each material effect. Use one direction per pillar:
+
+| Direction | Meaning |
+| --- | --- |
+| Improves | The selected option strengthens the pillar compared with the rejected alternatives. |
+| Degrades | The selected option weakens the pillar; name the mitigation or accepted risk. |
+| Neutral | No material effect; state why. |
+
+Show the same comparison for each alternative so the trade-off is visible, for example "Security improves, Cost
+degrades". Record compliance, residency, identity,
 governance, audit, and exception implications from accepted constraints; do not infer live policy.
 
 ## Implementation Constraints

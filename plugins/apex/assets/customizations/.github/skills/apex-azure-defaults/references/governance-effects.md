@@ -2,15 +2,18 @@
 
 Use accepted governance constraints to determine how policy effects change architecture and binding decisions.
 
-| Effect | Decision treatment |
-| --- | --- |
-| Deny | Required implementation constraint. Do not propose a noncompliant configuration. |
-| Modify | Model the resulting property or tag behavior and avoid a conflicting binding. |
-| Audit or AuditIfNotExists | Record the finding, evidence obligation, and validation input; do not call it compliant. |
-| DeployIfNotExists | Account for the dependent resource, identity, remediation ownership, and possible cost. |
-| Append | Model the appended field and ensure the selected module does not conflict with it. |
-| Disabled | Preserve the definition but apply no control from that assignment. |
-| Exempt | Preserve exemption scope, category, expiry, and evidence; do not remove the control globally. |
+| Effect | Decision treatment | Binding treatment for CodeGen |
+| --- | --- | --- |
+| Deny | Required implementation constraint. Do not propose a noncompliant configuration. | Bind the compliant value on the translated track property, not only the Azure property path. |
+| Modify | Model the resulting property or tag behavior and avoid a conflicting binding. | Record the expected mutation; never bind a value that fights it. |
+| Audit or AuditIfNotExists | Record the finding, evidence obligation, and validation input; do not call it compliant. | Bind the compliant value where feasible; record any accepted gap. |
+| DeployIfNotExists | Account for the dependent resource, identity, remediation ownership, and possible cost. | Avoid duplicating a verified policy-owned resource; remediation is asynchronous and an assignment is not proof that the resource exists. |
+| Append | Model the appended field and ensure the selected module does not conflict with it. | Keep module defaults from overwriting the appended field. |
+| Disabled | Preserve the definition but apply no control from that assignment. | No binding change. |
+| Exempt | Preserve exemption scope, category, expiry, and evidence; do not remove the control globally. | Bind the control everywhere outside the exemption scope. |
+
+For Terraform, a `Deny` maps to the translated provider argument; an Azure property path or Bicep path alone is not a
+Terraform binding. Private DNS ownership stays explicit even when a `DeployIfNotExists` policy provisions some zones.
 
 ## Definition Analysis
 

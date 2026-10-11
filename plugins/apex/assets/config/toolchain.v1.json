@@ -8,6 +8,7 @@
     "typescript": "newest-stable-ga-compatible-with-selected-node-and-npm",
     "vscode": "newest-stable-release-qualified-by-manual-host-tests",
     "copilotCli": "newest-stable-github-release-qualified-by-client-matrix",
+    "azd": "newest-stable-github-release-exact-pin-qualified-by-bicep-executor",
     "postCutoffReleases": "next-candidate",
     "exceptionsRequire": ["owner", "evidence", "expiry", "upgradeTarget"]
   },
@@ -98,6 +99,28 @@
         "managed-customization-lifecycle"
       ],
       "cloudCodingAgentRequired": false
+    },
+    "azd": {
+      "authoritativeSource": "https://github.com/Azure/azure-dev/releases",
+      "authoritativeReleaseSource": "https://github.com/Azure/azure-dev/releases/tag/azure-dev-cli_1.35.1",
+      "releaseChannel": "stable",
+      "newestObservedVersion": "1.35.1",
+      "selectedExactVersion": "1.35.1",
+      "observedAt": "2026-10-11",
+      "selectionStatus": "selected-qualification-required",
+      "requiredFor": ["bicep"],
+      "notRequiredFor": ["terraform"],
+      "releaseArtifact": {
+        "name": "azd-linux-amd64.tar.gz",
+        "sha256": "1b4844e195b6ca0da8d9d2a615f1fc0c9ea8e10920690652caf90e42edfa5385",
+        "verification": "github-release-asset-digest"
+      },
+      "requiredQualification": [
+        "bound-provision-preview",
+        "bound-hook-extension-layer-inventory",
+        "exact-version-gate",
+        "live-lab-bicep-provision"
+      ]
     }
   },
   "compatibilitySet": {
@@ -105,7 +128,8 @@
     "npm": "12.0.2",
     "typescript": "7.0.2",
     "minimumVscode": "1.140.0",
-    "copilotCli": "1.0.86"
+    "copilotCli": "1.0.86",
+    "azd": "1.35.1"
   },
   "clientQualificationPolicy": {
     "mode": "rolling-observed",

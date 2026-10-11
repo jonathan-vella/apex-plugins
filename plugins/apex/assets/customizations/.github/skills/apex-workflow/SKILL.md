@@ -24,7 +24,9 @@ Use this skill to orient an interactive agent without reconstructing workflow st
    fails with `APEX_RUNTIME_MISMATCH` until the user fixes the runtime or workspace version.
 2. If the selected project is wrong or absent, use the active client question mechanism to select a project, then repeat
    `apex/status`.
-3. If status identifies blockers, gates, or a terminal run, report that kernel state and do not infer a task.
+3. If status identifies blockers, gates, or a terminal run, report that kernel state and do not infer a task. For a Gate
+   2 or 3 "readiness checkpoint is not recorded" blocker, call `apex/nextTask` once (it retries recording) and report
+   the blocker only if it persists.
 4. Otherwise route the next step with the `apex-next` skill (`.github/skills/apex-next/SKILL.md`). It maps
    `needs_input`, `needs_review` and `status=task` results to their owner and preserves the exact request, review hash
    or `task.taskId` for that owner task only. It must not add later-stage prerequisites to an earlier task, and it
