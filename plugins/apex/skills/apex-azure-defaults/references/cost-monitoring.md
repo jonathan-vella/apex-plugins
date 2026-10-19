@@ -33,6 +33,8 @@ governance, environment policy, provider evidence, and runtime configuration det
 
 ## Cost Evidence Rules
 
+Obtain prices through the read-only pricing tool as described in [retail pricing](retail-pricing.md).
+
 - Every amount needs accepted price evidence with service, SKU, meter, region, currency, quantity, usage, and timestamp.
 - Distinguish regional and global meters using accepted pricing metadata; never substitute a region from memory.
 - Disambiguate products and meters explicitly and preserve the original requested SKU when normalization is accepted.

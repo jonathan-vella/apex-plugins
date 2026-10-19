@@ -1,7 +1,8 @@
 ---
 name: apex-terraform-patterns
-description: "Apply approved Terraform architecture intent in APEX. Use for hub-spoke, private endpoints, diagnostics, AVM module locks, and CodeGen acceptance."
+description: '**UTILITY SKILL** — Apply Terraform patterns to accepted APEX intent. WHEN: "hub-spoke Terraform", "private endpoint module", "AVM-TF composition", "diagnostic settings", "plan interpretation", "module refactor". DO NOT USE FOR: Bicep (use apex-bicep-patterns), decisions (use apex-azure-adr), execution (use apex-azure-deploy).'
 user-invocable: false
+disable-model-invocation: false
 ---
 
 When calling any `apex/*` MCP tool, include the current session checkout or worktree as the required absolute
@@ -11,6 +12,21 @@ When calling any `apex/*` MCP tool, include the current session checkout or work
 
 Use this skill for an active Terraform-bound planning or CodeGen task. It records approved architecture intent and
 acceptance criteria; authorized capabilities own source inspection, generation, validation, and lifecycle changes.
+Read [the authority boundary](references/kernel-boundary.md) and
+[Azure defaults](../apex-azure-defaults/SKILL.md) before adapting a sample.
+
+## Pattern Rules
+
+- Use AVM first and exact accepted module pins. Provider constraints and the lockfile must match the binding;
+  upstream `~> 4.0`/Terraform version floors are compatibility context, not permission to upgrade.
+- Wire outputs to inputs; use stable keyed `for_each` for named resources, and guard optional outputs.
+- Preserve platform and private-DNS ownership. Do not duplicate central or DINE-managed components.
+- Prefer managed identity and Entra/OIDC backend authentication; never fall back to access keys or SAS.
+- Preserve moved-block migration intent; state adoption and migration are separate authorized operations.
+- Inspect set-type phantom diffs against actual actions. Use `ignore_changes` only for explicitly external ownership,
+  not to hide Terraform-owned drift.
+- Keep diagnostics, budget inputs and telemetry decisions aligned with the accepted policy and workload contracts.
+- Apply only the exact saved plan approved at Gate 4. A script prompt or bootstrap flag is never approval.
 
 ## Prerequisites
 
@@ -34,12 +50,25 @@ acceptance criteria; authorized capabilities own source inspection, generation, 
 
 ## Boundaries
 
-- Do not write Terraform, inspect provider sources, resolve versions, invoke Terraform, or mutate files.
-- Do not discover cloud resources, validate infrastructure, preview changes, or deploy.
+- Do not independently write Terraform, initialize providers, mutate state, validate or deploy.
+- Direct read/diagnostic `az` and registry reads may explain accepted inputs, not replace receipts or freshness.
 - CodeGen, validation, and operations remain responsible for their own authorized receipts; pattern selection does not
   bypass policy, cost, approval, or deployment gates.
 
 ## References
+
+- [Hub-spoke](references/hub-spoke-pattern.md), [private endpoints](references/private-endpoint-pattern.md),
+  [common patterns](references/common-patterns.md), [budget](references/budget-pattern.md) and
+  [module composition](references/module-composition.md) - full HCL patterns.
+- [Plan interpretation](references/plan-interpretation.md), [AVM pitfalls](references/avm-pitfalls.md),
+  [provider compatibility](references/avm-provider-compatibility.md) and
+  [AVM authoring](references/avm-authoring-requirements.md) - action review and exact-schema requirements.
+- [Refactoring](references/refactor-module.md), [Entra provider](references/azuread-pattern.md),
+  [scaffold](references/project-scaffold.md), [best-practice examples](references/tf-best-practices-examples.md) and
+  [CodeGen checklist](references/codegen-validation-checklist.md) - bounded generation inputs.
+- [Backend bootstrap](references/bootstrap-backend-template.md) and
+  [deployment script adaptation](references/deploy-script-template.md) - security and phase/state requirements,
+  not direct mutation scripts.
 
 - [Network and observability](references/network-and-observability.md) - hub-spoke, private endpoints, and diagnostics.
 - [Module locks and CodeGen acceptance](references/module-locks-and-codegen-acceptance.md) - AVM binding, exact

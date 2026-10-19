@@ -20,17 +20,20 @@ copy a region literal from guidance or silently move one service without documen
 
 ## Tag Fallback
 
-When the runtime explicitly authorizes the greenfield tag fallback, use these lowercase semantic keys:
+When the runtime explicitly authorizes the greenfield tag fallback, use these lowercase semantic keys. Every key must
+be present on the resource group, matching the organization resource-group tag-deny pattern this set mirrors.
 
-- `environment`
-- `owner`
-- `costcenter`
-- `application`
-- `workload`
-- `sla`
-- `backup-policy`
-- `maint-window`
-- `technical-contact`
+| Key | Purpose |
+| --- | --- |
+| `environment` | Lifecycle stage; drives policy scoping and service level. |
+| `owner` | Accountable team or individual. |
+| `costcenter` | Finance attribution for showback or chargeback. |
+| `application` | Application identifier. |
+| `workload` | Workload identifier that groups related resources. |
+| `sla` | Service-level tier. |
+| `backup-policy` | Backup policy descriptor, including an explicit `none`. |
+| `maint-window` | Agreed maintenance window. |
+| `technical-contact` | Technical escalation contact. |
 
 Values still require projected inputs. Missing ownership, finance, or contact values are blockers. Optional provenance
 tags remain optional and must not be represented as policy requirements.

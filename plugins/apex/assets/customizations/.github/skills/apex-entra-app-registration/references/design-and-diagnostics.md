@@ -32,5 +32,31 @@ accepted configuration evidence. Classify invalid-client or expired-credential f
 blocker. Classify application-not-found or tenant failures as an identity-boundary mismatch. Do not expose tokens or
 use diagnostic observations as authority to change an application registration.
 
-Return the evidence gap, responsible owner, and required kernel-authorized next task. Direct configuration, consent,
-credential, SDK, CLI, IaC, and HTTP remediation stays outside this skill.
+### Sign-In Error Codes
+
+| Code | Meaning | Classification |
+| --- | --- | --- |
+| `AADSTS50011` | Reply address missing or not registered for the app | Registration intent; compare exact URI and platform |
+| `AADSTS50020` | User from another identity provider does not exist in the tenant | Tenant boundary; guest access is an owner decision |
+| `AADSTS50059` | No tenant-identifying information in the request | Identity-boundary mismatch in the authority |
+| `AADSTS50034`, `AADSTS50057` | User account not found in the directory, or disabled | Directory or user lifecycle, not app design |
+| `AADSTS50053`, `AADSTS50055` | Account locked or password expired | User credential state, not app design |
+| `AADSTS50058` | Session information insufficient for single sign-on | Expected before sign-in; check that the flow allows interaction |
+| `AADSTS65001` | User or administrator has not consented | Consent owner and permission type |
+| `AADSTS65004` | User declined consent | User decision; not a configuration defect |
+| `AADSTS70000` | Invalid grant, such as an invalid refresh token | Token lifecycle; re-authentication, not registration change |
+| `AADSTS70001` | Application is disabled | Registration lifecycle owner |
+| `AADSTS700016` | Application not found in the tenant | Identity-boundary mismatch, or no service principal in that tenant |
+| `AADSTS7000215` | Invalid client secret | Credential-lifecycle blocker |
+| `AADSTS90014` | Expected field missing from the request or credential | Client compatibility or credential format |
+| `AADSTS90072` | External account does not exist in the tenant, so MFA cannot be satisfied | Tenant boundary for external users |
+
+The meanings follow the [Entra error code reference](https://learn.microsoft.com/entra/identity-platform/reference-error-codes).
+Report an unlisted code as unclassified rather than guessing its meaning.
+
+A tenant without a service principal for the application cannot sign in to it even though the registration exists;
+classify that as an identity-boundary gap for the tenant owner.
+
+Return the evidence gap, responsible owner, and required kernel-authorized next task. The read-only checks in
+[troubleshooting commands](cli-commands.md#troubleshooting-commands) may run directly; configuration, consent and
+credential fixes are routed changes, and SDK and HTTP remediation stays outside this skill.

@@ -1,7 +1,8 @@
 ---
 name: apex-azure-kusto
-description: "Interpret APEX Azure Data Explorer evidence and KQL analysis. Use for Kusto, ADX, KQL, schema, aggregation, time-series, correlation, and anomaly findings."
+description: '**ANALYSIS SKILL** — Guides bounded Azure Data Explorer queries and KQL analytics. WHEN: "Kusto database queries", "ADX cluster", "KQL time series", "IoT telemetry", "anomaly detection", "schema exploration". DO NOT USE FOR: App Insights or Log Analytics incidents (use apex-azure-diagnostics), spending analysis (use apex-azure-cost-optimization).'
 user-invocable: false
+disable-model-invocation: false
 ---
 
 When calling any `apex/*` MCP tool, include the current session checkout or worktree as the required absolute
@@ -10,15 +11,16 @@ When calling any `apex/*` MCP tool, include the current session checkout or work
 # APEX Azure Data Explorer Analysis
 
 Use this skill for an active APEX task that interprets accepted Azure Data
-Explorer evidence and KQL analysis results. It does not discover schemas,
-execute queries, export data, or mutate clusters.
+Explorer evidence and KQL analysis results. Scoped read-only discovery, schema inspection and queries are allowed;
+load [execution boundaries](references/execution-boundaries.md) before the query references. Never mutate clusters,
+retention, access or data.
 
 ## Prerequisites
 
 - `apex/taskContext` identifies the cluster and database boundary, approved
   table scope, analytic question, time range, result limit, and data handling
   constraints.
-- Capability-produced evidence carries its producer, query intent or pattern,
+- Evidence carries its producer, query intent or pattern,
   evidence hash, target scope, observation time, freshness, completeness,
   sampling or truncation status, and redaction boundary.
 - Schema evidence is accepted for the same target and sufficiently fresh for
@@ -26,22 +28,30 @@ execute queries, export data, or mutate clusters.
 
 ## Workflow
 
-1. Confirm the analytic question and select the applicable interpretation
+1. Confirm the analytic question and accepted target. Read only the selected cluster/database/table schema;
+   do not enumerate unrelated subscriptions to discover a target.
+2. Select a [query pattern](references/query-patterns.md) and the applicable interpretation
    pattern in [KQL evidence interpretation](references/kql-evidence-interpretation.md).
-2. Verify that time bounds, filters, projections, joins, and aggregation grain
+3. Verify that time bounds, filters, projections, joins, and aggregation grain
    answer that question without silently excluding relevant records.
-3. Distinguish record retrieval, aggregate trend, correlated event, and anomaly
+4. Use installed and authorized Kusto tools only. Tool names such as `kusto_query` and `kusto_table_schema_get` are
+   hints, not promised plugin tools. For unavailable tools, see the [CLI/REST fallback](references/fallback-strategy.md);
+   fallback never expands access or evades a denied query.
+5. Distinguish record retrieval, aggregate trend, correlated event, and anomaly
    evidence. State what the pattern establishes and what it cannot establish.
-4. Carry evidence hash, target scope, time window, result completeness,
+6. Carry evidence hash, target scope, time window, result completeness,
    redactions, and uncertainty into the result.
-5. Return observations and an authorized next-assessment request when evidence
+7. Submit observations through the task's evidence contract and return an authorized next-assessment request when evidence
    is insufficient. Route operational incidents to diagnostics and cost
    questions to cost assessment.
 
 ## Boundaries
 
-- Do not invoke external queries, inspect schemas, retrieve data, or export
-  results. All inputs are scoped capability-produced evidence.
+- Bound scans by start/end timestamps on both sides of joins; filter early, project necessary columns, use
+  `take`/`limit` for exploration and `summarize`/`bin()` for aggregates and trends.
+- Read/diagnostic `az` calls may run directly within task scope. REST POST to `/v1/rest/query` is a read **only**
+  with ordinary bounded KQL; management commands, ingestion, export and remote writes are not a query fallback.
+- Do not export or persist sensitive results outside the task's approved data-handling boundary.
 - Do not treat sampled, limited, partial, or stale results as population-wide
   truth. Do not recover redacted values through correlation or inference.
 - Do not create mutation, retention, access, or cluster-management decisions.
@@ -59,3 +69,5 @@ kernel-provided next action. Use `indeterminate` for incomplete support.
   query pattern meaning, quality checks, and analytic limits.
 - [Operational checklist](references/operational-checklist.md) -
   schema, query-shape, result-limit, and redaction checks.
+- [Common issues](references/common-issues.md) - access, syntax, timeout, ingestion lag and empty-result diagnosis.
+- [Upstream coverage](references/upstream-coverage.md) - query and fallback inventory.

@@ -1,33 +1,33 @@
-# Storage Service, Authentication, And SDK Boundary
+# Storage Authentication And SDK Boundary
 
-Use this reference to record storage design intent. It is not permission to access a storage account, install an SDK,
-or create, read, upload, or delete data.
+Use this reference to record storage access intent. It is not permission to install an SDK or to create, upload, or
+delete data. Read-only `az storage` commands follow [storage CLI commands](storage-cli-commands.md).
 
-## Service And Lifecycle Intent
+## Credential Posture
 
-Select Blob for object data, backup, and static content; Files for managed SMB or NFS shares; Queues for simple
-asynchronous work; Tables for basic key-value data; and Data Lake Storage for analytics requiring a hierarchical
-namespace. Record an alternative when a database, eventing service, or messaging service better fits the workload.
+| Workload location | Preferred posture |
+| --- | --- |
+| Azure-hosted production | Managed identity with least-privilege Azure RBAC |
+| Outside Azure, production | Workload identity federation or certificate-based service principal |
+| CI/CD pipeline | The pipeline's federated workload identity |
+| Local development | Developer sign-in through a credential chain; never a production design |
 
-Select Standard unless an accepted latency or IOPS requirement supports Premium. Choose Hot, Cool, Cold, or Archive
-from actual access frequency and rehydration tolerance. A lifecycle policy must name the eligible object set, age or
-access basis, action, and retention constraint; lifecycle transitions do not replace backup or retention design.
+Credential chains that try several sources in turn are for local development only; production needs a deterministic
+credential. Never include account keys, connection strings, SAS tokens, or credential values in an APEX artifact.
 
-Select LRS for recreatable noncritical data, ZRS for zonal resiliency, and GRS or GZRS only when the recovery strategy
-requires regional replication. Redundancy alone does not establish RPO, RTO, retention, or restore capability.
+## Data-Plane Access
 
-## Authentication Posture
+Data access is granted by data-plane roles, not management roles. Reader or Contributor on the account does not grant
+blob, queue, or table data access through Entra authorization; Contributor can still list account keys, which is one
+more reason to disable shared-key access. Record the required data operation
+and let `apex-azure-rbac` choose the narrowest role, for example a blob data reader role for reads and a blob data
+contributor role for writes, at the narrowest scope such as the container.
 
-Use managed identity and least-privilege Azure RBAC for Azure-hosted production workloads. For external production
-workloads, record a deterministic workload-identity, federation, or certificate posture. Local development credentials
-are not a production authentication design. Never include account keys, connection strings, credential values, or SDK
-configuration in an APEX artifact.
-
-Record the required data-plane role, identity owner, scope, network posture, and evidence needed for the selected
-service. Missing classification, policy, network, or recovery evidence is a blocker.
+Record the identity owner, scope, network posture, and evidence needed for the selected service. Missing
+classification, policy, network, or recovery evidence is a blocker.
 
 ## SDK Boundary
 
 Language SDK installation, client construction, and data-operation samples remain implementation work outside this
-skill. An authorized implementation capability must select libraries, acquire its own approved identity evidence, and
-perform any data operation. This architecture reference supplies service and authentication intent only.
+skill. An authorized implementation capability selects libraries, acquires its own approved identity evidence, and
+performs any data operation. This architecture reference supplies service and authentication intent only.

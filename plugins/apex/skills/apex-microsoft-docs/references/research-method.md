@@ -19,7 +19,8 @@ for service boundaries, and `version support` or `retirement` for lifecycle ques
 
 | Question | Preferred official source |
 | --- | --- |
-| Exact property, API, SDK, limit, or supported value | Product reference for the target version |
+| Exact resource property, allowed value, or API version | Azure resource reference for the provider and type |
+| Exact SDK API, limit, or supported value | Product reference for the target version |
 | Setup sequence or learning task | Current quickstart or tutorial for the target platform |
 | Architecture trade-off | Azure Architecture Center or Well-Architected guidance |
 | Lifecycle or compatibility | Product support, release, or retirement policy |
@@ -33,6 +34,10 @@ for service boundaries, and `version support` or `retirement` for lifecycle ques
 4. Stop at the excerpt when it directly answers the question and supplies a citable URL.
 5. Fetch one page or named section when qualifiers, tables, prerequisites, or exceptions are missing from the excerpt.
 6. Run code-sample search only when the user or decision needs code; bind language, SDK, and version in the query.
+
+For a resource property, allowed value, or API version, the exact resource reference page
+`https://learn.microsoft.com/azure/templates/<provider>/<type>` is the preferred source and the only Learn page the APEX
+agent may fetch without a documentation capability. Read the API version the binding targets, not only the latest one.
 
 Do not load an entire documentation tree. A second page is justified only when the first page explicitly delegates a
 material prerequisite, limit, or exception to it.

@@ -18,8 +18,9 @@ active and loads the mapped skill, delegates one hidden worker, or runs one capt
 
 ## Workflow
 
-1. Call `apex/status` first. For a status-only request, no selected project, a pending gate, a blocker, or a terminal
-   run, report the kernel state and stop.
+1. Call `apex/status` first. For a status-only request, no selected project, a pending human gate, a blocker, or a
+   terminal run, report the kernel state and stop. A Gate 2 or 3 "readiness checkpoint is not recorded" blocker is the
+   exception: only `apex/nextTask` retries recording it, so call it once and stop only if it still reports the blocker.
 2. Call `apex/nextTask` only after status leaves runnable work for the selected project. Do not call it again for the
    same unanswered input request or unresolved review, and do not poll.
 3. Map the kernel result to a same-agent skill or hidden worker. Do not ask the user to choose a role and do not search
@@ -60,8 +61,12 @@ active and loads the mapped skill, delegates one hidden worker, or runs one capt
 5. For a worker task, delegate through `task` with the exact `task.taskId`. Tell the worker to call
    `apex/taskContext` with that task ID for complete inputs, acceptance criteria and output paths. Include the user's
    requested outcome and stop boundary. Do not provide model, model-policy or reasoning-effort.
-6. After worker completion or same-agent stage completion, call `apex/status`. If a gate is pending, report it and stop.
-   Never call `apex/nextTask` after `apex/reviewDecide` or `apex/reviewComplete` while a gate is pending.
+6. After worker completion or same-agent stage completion, call `apex/status`. If a human gate (Gate 1 or Gate 4) is
+   pending, report it and stop. Never call `apex/nextTask` after `apex/reviewDecide` or `apex/reviewComplete` while a
+   human gate is pending. Gate 2 and 3 are kernel-recorded readiness checkpoints in a lab run: add no prompt for them,
+   never call `apex/gateDecide` for them, and follow what status or `apex/nextTask` returns. If status shows a
+   "readiness checkpoint is not recorded" blocker, call `apex/nextTask` once to retry recording it; if it still reports
+   the blocker, report that blocking review or validation finding and stop.
 
 ## Rubber-duck reviews
 
@@ -81,7 +86,8 @@ output and the kernel derives the findings from that capture; this agent never w
    findings yourself.
 5. When `apex/nextTask` returns `needs_review`, load the stage skill for that gate. Record a disposition for every
    finding through `apex/reviewDecide`: fix (`revise`), accept (`accept-risk`), or dismiss with a reason; Requirements
-   obligations may also be acknowledged with an owner. Gates still need the user's explicit approval.
+   obligations may also be acknowledged with an owner. Only Gate 1 (intent) and Gate 4 (final preview) need the user's
+   explicit decision; Gate 2 and 3 readiness is recorded by the kernel.
 
 ## Boundaries
 

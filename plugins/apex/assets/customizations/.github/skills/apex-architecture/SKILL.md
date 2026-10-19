@@ -53,9 +53,10 @@ review or task.
    cost/SKU bindings. Before submitting, check common rejection causes: WAF statuses use the allowed values; dates use
    UTC milliseconds; ADR alternative fields are strings; policy mappings have property paths; and SKU decision
    logical IDs match component IDs.
-9. Report the read-only Gate 2 package under `agent-output/<project>/<run>/architecture/`, including Architecture,
-   WAF, cost breakdown, uncertainty diagrams, assessment, SKU comparison and challenger findings. Diagrams are derived
-   views, not gate evidence.
+9. Report the read-only Gate 2 review package under `agent-output/<project>/<run>/architecture/`, including
+   Architecture, WAF, cost breakdown, uncertainty diagrams, assessment, SKU comparison and challenger findings.
+   Diagrams are derived views, not gate evidence. The same architecture, cost estimate and accepted risks are shown
+   again at the final Gate 4 approval.
 10. When the `architecture-review` task appears, run the rubber-duck review steps in `apex-next` with the exact
     `task.taskId`. For `needs_review`, do not request task context or run rubber-duck again. Present findings in one
     decision panel and record a disposition for every finding through `apex/reviewDecide`. Automatically
@@ -63,9 +64,12 @@ review or task.
 11. For a `policy-refresh` task after Gate 2, start from the `policy-property-map` template in task context. Decide only
     rows listed in `governanceFindings`, submit the complete map through `apex/completeTask`, and let blocked rows
     reopen Architecture and Gate 2.
-12. After `apex/reviewDecide`, call `apex/status`. If Gate 2 is pending, report it and stop. Do not call
-    `apex/nextTask` while a gate is pending. If the user's scope permits approval and the user explicitly approves or
-    rejects Gate 2, call `apex/gateDecide` with `confirm: true`.
+12. After `apex/reviewDecide`, call `apex/status`. In a lab run Gate 2 is an automatic readiness checkpoint that the
+    kernel records once the review and deterministic checks pass. Never ask the user to approve Gate 2 and never call
+    `apex/gateDecide` for it. If status shows a "readiness checkpoint is not recorded" blocker, call `apex/nextTask` once
+    to retry recording it; if it still reports the blocker, report the blocking finding, review or validator result and
+    stop. Otherwise follow `apex/nextTask`. The user's later confirmations are Gate 1 (intent) and Gate 4 (final
+    preview).
 
 ## Boundaries
 
