@@ -6,39 +6,53 @@ SKU specifications, or price; bind those claims to accepted current evidence.
 ## Recommendation Inputs
 
 Record workload type, CPU and memory demand, accelerator or local I/O requirements, operating system, region,
-availability target, budget, and expected instance range. Missing inputs are blockers rather than reasons to select a
-default SKU.
+availability target, budget, instance range, scaling trigger, and load-balancing need. Missing inputs are blockers or
+kernel input requests rather than reasons to select a default SKU.
 
-## Model And Family Selection
+## Scale Set Orchestration
 
-Use a single VM for a distinct, stateful, long-lived, or individually configured workload. Use VM Scale Sets for an
-interchangeable fleet with an evidenced capacity range and metric or schedule-based scaling need. A stateless web or
-API tier, parallel batch work, and homogeneous replicas are scale-set signals; a jump host, domain controller, or
-unique per-instance configuration is a single-VM signal. Prefer Flexible orchestration for a new scale set unless an
-accepted constraint requires Uniform; orchestration mode is a durable design decision.
+Prefer Flexible orchestration for every new scale set unless an accepted constraint requires Uniform. The mode is fixed
+at creation, so it is a durable design decision.
 
-Select compatible candidates from the workload shape:
+| Capability | Flexible | Uniform |
+| --- | --- | --- |
+| Mixed sizes in one set | Yes | No |
+| Add existing VMs | Yes | No |
+| Single-instance scale set | Yes | No |
+| Zone spread and fault-domain control | Yes | Yes |
+| Spot instances | Yes | Yes |
 
-- General-purpose families for balanced workloads; burstable families only when the credit and throttling trade-off is
-  acceptable.
-- Compute-optimized families for sustained CPU demand, memory-optimized families for memory-bound data workloads,
-  and storage-optimized families for high local I/O.
-- GPU, confidential-computing, or HPC families only when an explicit accelerator, isolation, or interconnect
-  requirement exists.
-- Treat Spot capacity as interruptible. It is not suitable for work that cannot tolerate eviction.
+Take instance-count and per-region scale-set limits from current documentation evidence, not from memory.
 
-## Scale And Cost Evidence
+## Autoscale
 
-For scale sets, record minimum and maximum capacity, scale triggers, cool-down intent, availability design, and the
-load-balancing or work-pull model. Do not infer production availability from a VMSS choice alone.
+| Pattern | Trigger | Example |
+| --- | --- | --- |
+| Metric | CPU, memory, queue length, or a custom metric | Scale out when average CPU stays high for several minutes |
+| Schedule | Time of day or day of week | Larger baseline during business hours |
+| Combined | Schedule baseline plus metric bursts | Predictable floor with headroom for spikes |
 
-Compare at least two viable candidates when requirements permit. Cost comparisons must identify region, operating
-system, price type, unit, collection time, candidate SKU, and instance range. VMSS cost is the underlying instance
-cost across its range; include baseline and peak estimates. Retail price lookup is capability-supplied evidence, not a
-skill operation, and a stale or incomplete result blocks a final cost claim.
+- Keep at least two instances for production high availability.
+- Use a cool-down period so rules do not flap.
+- Scale out aggressively and scale in conservatively.
+- Treat predictive autoscale as preview unless current documentation says otherwise.
+
+Record minimum and maximum capacity, triggers, cool-down intent, and availability design. A scale set alone does not
+establish production availability.
+
+## Load Balancing
+
+| Component | Use when |
+| --- | --- |
+| Azure Load Balancer | Layer 4 TCP or UDP distribution for backend services. |
+| Application Gateway | Layer 7 HTTP or HTTPS with TLS termination, path routing, or WAF. |
+| No load balancer | Batch or HPC instances that pull work from a queue. |
 
 ## Recommendation Record
 
-Record the selected model, candidate families, assumptions, rejected alternatives, capacity range, availability
-intent, current-evidence references, and unresolved risks. Escalate missing quota, capacity, or documentation evidence
-instead of treating published SKU names as deployment feasibility.
+Present two or three options with hosting model and orchestration mode, size, vCPU and memory, instance count or range,
+unit and monthly price, fit, and trade-off. For a scale set, also state the autoscale strategy and load-balancer type.
+
+Record the selected model, candidate families, assumptions, rejected alternatives, capacity range, availability intent,
+current-evidence references, and unresolved risks. Escalate missing quota, capacity, or documentation evidence instead
+of treating published SKU names as deployment feasibility.

@@ -4,11 +4,12 @@ Use these as decision-shape examples, not as automatic service recommendations.
 
 | Area | Example trade-off |
 | --- | --- |
-| Compute | Container Apps versus App Service for an API with variable demand. |
-| Data | Azure SQL Database versus Cosmos DB for transactional consistency and scale. |
-| Networking | Private endpoints versus approved public access for a data service. |
+| Compute | Container Apps versus App Service for an API with variable demand; AKS versus a managed host. |
+| Data | Azure SQL Database versus Cosmos DB for transactional consistency and scale; cache versus table storage. |
+| Networking | Private endpoints versus approved public access or service endpoints; hub-spoke versus a flat topology. |
 | Identity | Managed identity versus application credential for service-to-service access. |
-| Integration | Service Bus versus Event Grid for ordered, durable processing. |
+| Configuration | Key Vault versus App Configuration for settings that are not secrets. |
+| Integration | Service Bus versus Event Grid for ordered, durable processing; API Management tier selection. |
 
 For each example, bind the final choice to projected requirements, cost/availability evidence, governance constraints,
 and any kernel-recorded user decision.

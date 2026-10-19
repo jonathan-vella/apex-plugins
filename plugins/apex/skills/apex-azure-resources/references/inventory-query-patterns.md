@@ -32,9 +32,25 @@ rather than widening the claim.
 - **Which resources expose a setting?** Request configuration posture for the
   named property. A missing or dynamic property is not a security conclusion.
 
+## Orphan Candidate Definitions
+
+An evidence request for unused resources should name the condition it tests. These conditions identify candidates only.
+
+| Resource | Candidate condition |
+| --- | --- |
+| Managed disk | No `managedBy` owner |
+| Network interface | Not attached to a virtual machine or a private endpoint |
+| Public IP address | No IP configuration and no NAT gateway association |
+| Load balancer or Application Gateway | Empty backend pools |
+| Network security group | Not associated with a subnet or network interface |
+
+A disk detached for a planned rebuild, an address reserved for a cutover, or a resource owned by another team all
+match these conditions. Confirm with dependency and owner evidence before any recommendation.
+
 ## Interpretation Rules
 
-- Preserve case-insensitive resource-type matching in the capability request.
+- Preserve case-insensitive resource-type matching in the capability request; resource types are stored in lowercase.
+- Keep resource ID and subscription ID in every result so duplicate names across subscriptions stay distinct.
 - Use joins only when accepted evidence identifies both datasets and their
   shared scope.
 - Treat index latency, pagination, and field redaction as result limitations.
@@ -43,7 +59,8 @@ rather than widening the claim.
 
 ## Resource Graph Boundary
 
-Azure Resource Graph lookup and provider-specific resource discovery are deferred capabilities. Request a bounded query
-pattern and result shape, but do not execute KQL, invoke CLI or SDK tools, or infer omitted pages. Architecture diagram
+Read-only Resource Graph queries and provider `list` or `show` commands may run directly, following
+[Azure Resource Graph queries](azure-resource-graph.md). Their output is an observation until accepted as inventory
+evidence. Request a bounded query pattern and result shape, and never infer omitted pages. Architecture diagram
 templates and visualization assets are excluded from inventory guidance; visual output requires separately accepted
 inventory evidence and an authorized presentation path.

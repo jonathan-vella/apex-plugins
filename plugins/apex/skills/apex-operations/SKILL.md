@@ -36,8 +36,10 @@ inventory, diagnosis, reconciliation or quality work.
 5. If policy content changed, explain invalidation scope and direct the user to the trusted CLI governance revision
    ceremony. Never infer revision confirmation or use deployment reconciliation for governance revision.
 6. Use `apex/preview` only to read the current preview and explain recorded semantic changes, target, expiry,
-   destructive actions, unevaluated items and uncertainty. Gate 4 requires review of the exact preview, target, expiry
-   and approval recipient through the trusted terminal ceremony; never approve Gate 4 through chat.
+   destructive actions, unevaluated items and uncertainty. Gate 4 is the final approval for a lab: summarize the
+   architecture, cost estimate and accepted risks so it is informed, and require review of the exact preview, target,
+   expiry and approval recipient through the trusted terminal ceremony; never approve Gate 4 through chat. Each apply
+   and each destroy has its own preview and approval; a changed preview or intent needs a new one.
 7. Use `apex/reconcile` only for an indeterminate operation authorized by the kernel. If no execution receipt exists,
    report that reconciliation cannot establish outcome and keep the blocker for operator or provider resolution. Do not
    repeat deployment or reconciliation.
@@ -49,8 +51,8 @@ inventory, diagnosis, reconciliation or quality work.
 10. When a validation worker task appears, delegate `APEX Validator` with the exact `task.taskId` and tell the worker to
     call `apex/taskContext`. When a code generation worker task appears, delegate `APEX CodeGen` the same way. Do not
     delegate Gate 4, governance selection or deployment decisions.
-11. After worker completion, `apex/reviewDecide` or any operation completion, call `apex/status`. If a gate is pending,
-    report it and stop. Do not call `apex/nextTask` while a gate is pending.
+11. After worker completion, `apex/reviewDecide` or any operation completion, call `apex/status`. If a human gate
+    (Gate 1 or Gate 4) is pending, report it and stop. Do not call `apex/nextTask` while a human gate is pending.
 
 ## Boundaries
 

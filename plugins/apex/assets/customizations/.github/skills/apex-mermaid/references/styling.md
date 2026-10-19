@@ -1,33 +1,43 @@
-# Styling Guidance
+<!-- ref:mermaid-styling-v1 -->
 
-Use a renderer-compatible neutral theme and limited semantic classes. Meaning must remain clear without color.
+# Mermaid Styling and Theming
+
+## Theming (Dark Mode Compatible)
+
+Include a neutral theme directive for dark mode compatibility:
 
 ```mermaid
-%%{init: {'theme': 'neutral'}}%%
+%%{
+  init: {
+    'theme': 'base',
+    'themeVariables': {
+      'primaryColor': '#ffffff',
+      'primaryTextColor': '#333333',
+      'primaryBorderColor': '#e91e63',
+      'lineColor': '#475569',
+      'fontFamily': 'ui-sans-serif, system-ui, -apple-system, sans-serif'
+    }
+  }
+}%%
 graph LR
-    classDef gate stroke:#2563eb,stroke-width:2px;
-    INPUT["Accepted data"] --> GATE{"Supported slot"}:::gate
-    GATE --> OUTPUT["Rendered inline view"]
+    A --> B
 ```
 
-## Styling Rules
+## Node Styling
 
-- Prefer one layout direction, consistent node shapes, and a small semantic class set.
-- Use shape, border, and text labels together; never encode status or severity by color alone.
-- Keep contrast readable in light and dark Markdown renderers. Use renderer-projected colors when available.
-- Use subgraphs only for accepted ownership, trust, lifecycle, or resource boundaries.
-- Keep edge labels short and place detail in surrounding prose when the slot permits it.
-- Avoid service icons, custom SVG, background images, animations, click actions, and external CSS.
-- Do not use emoji as the only identifier; assistive text must carry the meaning.
+Use `classDef` for consistent node styling:
 
-## Complexity Limits
+```mermaid
+graph TB
+    classDef default fill:#ffffff,stroke:#e91e63,stroke-width:2px,color:#1f2937,rx:8px,ry:8px;
+    classDef gate fill:#ffffff,stroke:#3b82f6,stroke-width:2px,color:#1f2937,rx:8px,ry:8px;
 
-When labels overlap, crossings obscure meaning, or the renderer cannot fit the slot, reduce the diagram to its primary
-accepted relationship. Split independent concerns into supported slots or use a standalone diagram capability. Do not
-hide nodes or drop material edges merely to make the view attractive.
+    S1["Step 1"]
+    G1{{"Gate"}}:::gate
+```
 
-## Renderer Validation
+## Port Source
 
-The renderer decides whether the slot accepts Mermaid, the theme directive is supported, syntax parses, and the result
-fits the document. Inspect the renderer receipt for validation errors. Model inspection, Markdown source appearance, or
-a successful document request is not visual-validation evidence.
+Adapted from [the pinned upstream
+file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-mermaid/references/styling.md).
+Load only the reference needed for the active task.

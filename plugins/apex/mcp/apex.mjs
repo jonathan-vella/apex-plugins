@@ -411,11 +411,11 @@ var require_codegen2 = __commonJS({
         const rhs = this.rhs === void 0 ? "" : ` = ${this.rhs}`;
         return `${varKind} ${this.name}${rhs};` + _n;
       }
-      optimizeNames(names, constants15) {
+      optimizeNames(names, constants16) {
         if (!names[this.name.str])
           return;
         if (this.rhs)
-          this.rhs = optimizeExpr(this.rhs, names, constants15);
+          this.rhs = optimizeExpr(this.rhs, names, constants16);
         return this;
       }
       get names() {
@@ -432,10 +432,10 @@ var require_codegen2 = __commonJS({
       render({ _n }) {
         return `${this.lhs} = ${this.rhs};` + _n;
       }
-      optimizeNames(names, constants15) {
+      optimizeNames(names, constants16) {
         if (this.lhs instanceof code_1.Name && !names[this.lhs.str] && !this.sideEffects)
           return;
-        this.rhs = optimizeExpr(this.rhs, names, constants15);
+        this.rhs = optimizeExpr(this.rhs, names, constants16);
         return this;
       }
       get names() {
@@ -496,8 +496,8 @@ var require_codegen2 = __commonJS({
       optimizeNodes() {
         return `${this.code}` ? this : void 0;
       }
-      optimizeNames(names, constants15) {
-        this.code = optimizeExpr(this.code, names, constants15);
+      optimizeNames(names, constants16) {
+        this.code = optimizeExpr(this.code, names, constants16);
         return this;
       }
       get names() {
@@ -526,12 +526,12 @@ var require_codegen2 = __commonJS({
         }
         return nodes.length > 0 ? this : void 0;
       }
-      optimizeNames(names, constants15) {
+      optimizeNames(names, constants16) {
         const { nodes } = this;
         let i = nodes.length;
         while (i--) {
           const n = nodes[i];
-          if (n.optimizeNames(names, constants15))
+          if (n.optimizeNames(names, constants16))
             continue;
           subtractNames(names, n.names);
           nodes.splice(i, 1);
@@ -584,12 +584,12 @@ var require_codegen2 = __commonJS({
           return void 0;
         return this;
       }
-      optimizeNames(names, constants15) {
+      optimizeNames(names, constants16) {
         var _a3;
-        this.else = (_a3 = this.else) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names, constants15);
-        if (!(super.optimizeNames(names, constants15) || this.else))
+        this.else = (_a3 = this.else) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names, constants16);
+        if (!(super.optimizeNames(names, constants16) || this.else))
           return;
-        this.condition = optimizeExpr(this.condition, names, constants15);
+        this.condition = optimizeExpr(this.condition, names, constants16);
         return this;
       }
       get names() {
@@ -612,10 +612,10 @@ var require_codegen2 = __commonJS({
       render(opts) {
         return `for(${this.iteration})` + super.render(opts);
       }
-      optimizeNames(names, constants15) {
-        if (!super.optimizeNames(names, constants15))
+      optimizeNames(names, constants16) {
+        if (!super.optimizeNames(names, constants16))
           return;
-        this.iteration = optimizeExpr(this.iteration, names, constants15);
+        this.iteration = optimizeExpr(this.iteration, names, constants16);
         return this;
       }
       get names() {
@@ -651,10 +651,10 @@ var require_codegen2 = __commonJS({
       render(opts) {
         return `for(${this.varKind} ${this.name} ${this.loop} ${this.iterable})` + super.render(opts);
       }
-      optimizeNames(names, constants15) {
-        if (!super.optimizeNames(names, constants15))
+      optimizeNames(names, constants16) {
+        if (!super.optimizeNames(names, constants16))
           return;
-        this.iterable = optimizeExpr(this.iterable, names, constants15);
+        this.iterable = optimizeExpr(this.iterable, names, constants16);
         return this;
       }
       get names() {
@@ -696,11 +696,11 @@ var require_codegen2 = __commonJS({
         (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNodes();
         return this;
       }
-      optimizeNames(names, constants15) {
+      optimizeNames(names, constants16) {
         var _a3, _b;
-        super.optimizeNames(names, constants15);
-        (_a3 = this.catch) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names, constants15);
-        (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNames(names, constants15);
+        super.optimizeNames(names, constants16);
+        (_a3 = this.catch) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names, constants16);
+        (_b = this.finally) === null || _b === void 0 ? void 0 : _b.optimizeNames(names, constants16);
         return this;
       }
       get names() {
@@ -1001,7 +1001,7 @@ var require_codegen2 = __commonJS({
     function addExprNames(names, from) {
       return from instanceof code_1._CodeOrName ? addNames(names, from.names) : names;
     }
-    function optimizeExpr(expr, names, constants15) {
+    function optimizeExpr(expr, names, constants16) {
       if (expr instanceof code_1.Name)
         return replaceName(expr);
       if (!canOptimize(expr))
@@ -1016,14 +1016,14 @@ var require_codegen2 = __commonJS({
         return items;
       }, []));
       function replaceName(n) {
-        const c = constants15[n.str];
+        const c = constants16[n.str];
         if (c === void 0 || names[n.str] !== 1)
           return n;
         delete names[n.str];
         return c;
       }
       function canOptimize(e) {
-        return e instanceof code_1._Code && e._items.some((c) => c instanceof code_1.Name && names[c.str] === 1 && constants15[c.str] !== void 0);
+        return e instanceof code_1._Code && e._items.some((c) => c instanceof code_1.Name && names[c.str] === 1 && constants16[c.str] !== void 0);
       }
     }
     function subtractNames(names, from) {
@@ -2985,7 +2985,7 @@ var require_compile2 = __commonJS({
       const schOrFunc = root.refs[ref];
       if (schOrFunc)
         return schOrFunc;
-      let _sch = resolve22.call(this, root, ref);
+      let _sch = resolve23.call(this, root, ref);
       if (_sch === void 0) {
         const schema = (_a3 = root.localRefs) === null || _a3 === void 0 ? void 0 : _a3[ref];
         const { schemaId } = this.opts;
@@ -3012,7 +3012,7 @@ var require_compile2 = __commonJS({
     function sameSchemaEnv(s1, s2) {
       return s1.schema === s2.schema && s1.root === s2.root && s1.baseId === s2.baseId;
     }
-    function resolve22(root, ref) {
+    function resolve23(root, ref) {
       let sch;
       while (typeof (sch = this.refs[ref]) == "string")
         ref = sch;
@@ -4133,7 +4133,7 @@ var require_fast_uri2 = __commonJS({
       }
       return uri;
     }
-    function resolve22(baseURI, relativeURI, options) {
+    function resolve23(baseURI, relativeURI, options) {
       const schemelessOptions = options ? Object.assign({ scheme: "null" }, options) : { scheme: "null" };
       const {
         parsed: baseParsed,
@@ -4172,49 +4172,49 @@ var require_fast_uri2 = __commonJS({
         target.ipv6Zone = source2.ipv6Zone;
       }
     }
-    function resolveComponent(base, relative11, options, skipNormalization) {
+    function resolveComponent(base, relative12, options, skipNormalization) {
       const target = {};
       if (!skipNormalization) {
         base = parse4(serialize2(base, options), options);
-        relative11 = parse4(serialize2(relative11, options), options);
+        relative12 = parse4(serialize2(relative12, options), options);
       }
       options = options || {};
-      if (!options.tolerant && relative11.scheme) {
-        target.scheme = relative11.scheme;
-        target.userinfo = relative11.userinfo;
-        copyHost(target, relative11);
-        target.port = relative11.port;
-        target.path = removeDotSegments(relative11.path || "");
-        target.query = relative11.query;
+      if (!options.tolerant && relative12.scheme) {
+        target.scheme = relative12.scheme;
+        target.userinfo = relative12.userinfo;
+        copyHost(target, relative12);
+        target.port = relative12.port;
+        target.path = removeDotSegments(relative12.path || "");
+        target.query = relative12.query;
       } else {
-        if (relative11.userinfo !== void 0 || relative11.host !== void 0 || relative11.port !== void 0) {
-          target.userinfo = relative11.userinfo;
-          copyHost(target, relative11);
-          target.port = relative11.port;
-          target.path = removeDotSegments(relative11.path || "");
-          target.query = relative11.query;
+        if (relative12.userinfo !== void 0 || relative12.host !== void 0 || relative12.port !== void 0) {
+          target.userinfo = relative12.userinfo;
+          copyHost(target, relative12);
+          target.port = relative12.port;
+          target.path = removeDotSegments(relative12.path || "");
+          target.query = relative12.query;
         } else {
-          if (!relative11.path) {
+          if (!relative12.path) {
             target.path = base.path;
-            if (relative11.query !== void 0) {
-              target.query = relative11.query;
+            if (relative12.query !== void 0) {
+              target.query = relative12.query;
             } else {
               target.query = base.query;
             }
           } else {
-            if (relative11.path[0] === "/") {
-              target.path = removeDotSegments(relative11.path);
+            if (relative12.path[0] === "/") {
+              target.path = removeDotSegments(relative12.path);
             } else {
               if ((base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0) && !base.path) {
-                target.path = "/" + relative11.path;
+                target.path = "/" + relative12.path;
               } else if (!base.path) {
-                target.path = relative11.path;
+                target.path = relative12.path;
               } else {
-                target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative11.path;
+                target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative12.path;
               }
               target.path = removeDotSegments(target.path);
             }
-            target.query = relative11.query;
+            target.query = relative12.query;
           }
           target.userinfo = base.userinfo;
           copyHost(target, base);
@@ -4222,7 +4222,7 @@ var require_fast_uri2 = __commonJS({
         }
         target.scheme = base.scheme;
       }
-      target.fragment = relative11.fragment;
+      target.fragment = relative12.fragment;
       return target;
     }
     function equal(uriA, uriB, options) {
@@ -4517,7 +4517,7 @@ var require_fast_uri2 = __commonJS({
     var fastUri = {
       SCHEMES,
       normalize,
-      resolve: resolve22,
+      resolve: resolve23,
       resolveComponent,
       equal,
       serialize: serialize2,
@@ -4932,7 +4932,7 @@ var require_core2 = __commonJS({
       errorsText(errors = this.errors, { separator = ", ", dataVar = "data" } = {}) {
         if (!errors || errors.length === 0)
           return "No errors";
-        return errors.map((e) => `${dataVar}${e.instancePath} ${e.message}`).reduce((text4, msg) => text4 + separator + msg);
+        return errors.map((e) => `${dataVar}${e.instancePath} ${e.message}`).reduce((text5, msg) => text5 + separator + msg);
       }
       $dataMetaSchema(metaSchema, keywordsJsonPointers) {
         const rules = this.RULES.all;
@@ -7924,13 +7924,13 @@ var WriteFence = class {
     }
   }
   changed() {
-    return new Promise((resolve22) => this.waiters.push(resolve22));
+    return new Promise((resolve23) => this.waiters.push(resolve23));
   }
   notify() {
     const waiters = this.waiters;
     this.waiters = [];
-    for (const resolve22 of waiters)
-      resolve22();
+    for (const resolve23 of waiters)
+      resolve23();
   }
 };
 var writeFences = new AsyncLocalStorage();
@@ -8256,8 +8256,8 @@ var EvidenceStore = class {
 function isSafeText(bytes) {
   if (bytes.includes(0))
     return false;
-  const text4 = bytes.toString("utf8");
-  return Buffer.from(text4, "utf8").equals(bytes) && !/[\u0001-\u0008\u000B\u000C\u000E-\u001F]/.test(text4);
+  const text5 = bytes.toString("utf8");
+  return Buffer.from(text5, "utf8").equals(bytes) && !/[\u0001-\u0008\u000B\u000C\u000E-\u001F]/.test(text5);
 }
 function redact(value) {
   if (Array.isArray(value)) {
@@ -10338,8 +10338,8 @@ function FromNumberKey(_, type, options) {
 function Record(key, type, options = {}) {
   return IsUnion(key) ? FromUnionKey(key.anyOf, type, options) : IsTemplateLiteral(key) ? FromTemplateLiteralKey(key, type, options) : IsLiteral(key) ? FromLiteralKey(key.const, type, options) : IsBoolean3(key) ? FromBooleanKey(key, type, options) : IsInteger2(key) ? FromIntegerKey(key, type, options) : IsNumber3(key) ? FromNumberKey(key, type, options) : IsRegExp2(key) ? FromRegExpKey(key, type, options) : IsString3(key) ? FromStringKey(key, type, options) : IsAny(key) ? FromAnyKey(key, type, options) : IsNever(key) ? FromNeverKey(key, type, options) : Never(options);
 }
-function RecordPattern(record5) {
-  return globalThis.Object.getOwnPropertyNames(record5.patternProperties)[0];
+function RecordPattern(record6) {
+  return globalThis.Object.getOwnPropertyNames(record6.patternProperties)[0];
 }
 function RecordKey2(type) {
   const pattern = RecordPattern(type);
@@ -11040,6 +11040,7 @@ var ProjectIdSchema = Type.String({ pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" });
 var RunIdSchema = Type.String({ pattern: "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$" });
 var TaskIdSchema = Type.String({ pattern: "^[a-zA-Z0-9][a-zA-Z0-9_-]{0,127}$" });
 var EnvironmentSchema = Type.String({ pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$" });
+var DeploymentPurposeSchema = Type.Union([Type.Literal("lab"), Type.Literal("production")]);
 var IacToolSchema = Type.Union([Type.Literal("bicep"), Type.Literal("terraform")]);
 var OperationSchema = Type.Union([Type.Literal("apply"), Type.Literal("destroy")]);
 var RiskOwnerSchema = Type.Union([Type.Literal("partner"), Type.Literal("customer")]);
@@ -13005,10 +13006,10 @@ function FromArray11(schema, references, value) {
   const casted = maximum.map((value2) => Visit8(schema.items, references, value2));
   if (schema.uniqueItems !== true)
     return casted;
-  const unique = [...new Set(casted)];
-  if (!Check(schema, references, unique))
+  const unique2 = [...new Set(casted)];
+  if (!Check(schema, references, unique2))
     throw new ValueCastError(schema, "Array cast produced invalid data due to uniqueItems constraint");
-  return unique;
+  return unique2;
 }
 function FromConstructor7(schema, references, value) {
   if (Check(schema, references, value))
@@ -15258,6 +15259,234 @@ function hasValidArchetypeSourceProposal(value) {
   }
 }
 
+// packages/contracts/dist/azd-binding.js
+var AZD_BINDING_LIMITS = {
+  roots: 16,
+  hooks: 128,
+  extensions: 32,
+  remoteModules: 256,
+  hookRunLength: 4096
+};
+var AZD_ENVIRONMENT_KEYS = [
+  "AZURE_ENV_NAME",
+  "AZURE_LOCATION",
+  "AZURE_PRINCIPAL_ID",
+  "AZURE_PRINCIPAL_TYPE",
+  "AZURE_RESOURCE_GROUP",
+  "AZURE_SUBSCRIPTION_ID",
+  "AZURE_TENANT_ID"
+];
+var AZD_PUBLIC_BICEP_REGISTRY = "mcr.microsoft.com";
+var AZD_EXACT_TAG_PATTERN = "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)(?:-[0-9A-Za-z][0-9A-Za-z.-]{0,63})?$";
+var AzdVersionSchema = Type.String({ pattern: "^(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)\\.(?:0|[1-9]\\d*)$" });
+var AzdRelativePathSchema = Type.String({
+  minLength: 1,
+  maxLength: 512,
+  pattern: "^(?!(?:.*/)?\\.{1,2}(?:/|$))[A-Za-z0-9._-]+(?:/[A-Za-z0-9._-]+)*$"
+});
+var AzdNameSchema = Type.String({ pattern: "^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$" });
+var AzdHookV1Schema = Type.Object({
+  scope: Type.String({ pattern: "^(?:project|(?:service|layer):[A-Za-z0-9][A-Za-z0-9._-]{0,63})$" }),
+  event: Type.String({ pattern: "^(?:pre|post)[a-z]{2,16}$" }),
+  /** Zero-based position among the hooks declared for the same scope and event. */
+  order: Type.Integer({ minimum: 0, maximum: 31 }),
+  platform: Type.Union([Type.Literal("all"), Type.Literal("windows"), Type.Literal("posix")]),
+  shell: Type.Optional(Type.Union([Type.Literal("sh"), Type.Literal("pwsh")])),
+  /** The declared `run` text. */
+  run: Type.String({ minLength: 1, maxLength: AZD_BINDING_LIMITS.hookRunLength }),
+  workingDirectory: Type.Optional(AzdRelativePathSchema),
+  /** Set when `run` is a plain project-relative script path. */
+  path: Type.Optional(AzdRelativePathSchema),
+  /** SHA-256 of the file `path` names; present exactly when `path` is. */
+  contentHash: Type.Optional(Sha256Schema),
+  continueOnError: Type.Boolean(),
+  interactive: Type.Boolean()
+}, { additionalProperties: false });
+var AzdExtensionV1Schema = Type.Object({
+  id: Type.String({ pattern: "^[a-z0-9][a-z0-9._-]{0,127}$" }),
+  /** The declared version or constraint, unparsed. */
+  version: Type.String({ minLength: 1, maxLength: 64 }),
+  source: Type.Literal("azd")
+}, { additionalProperties: false });
+var AzdInfraRootV1Schema = Type.Object({
+  /** `default` for an unlayered project, otherwise the declared layer name. */
+  name: AzdNameSchema,
+  path: AzdRelativePathSchema,
+  module: AzdNameSchema,
+  provider: Type.Literal("bicep"),
+  dependsOn: Type.Array(AzdNameSchema, { uniqueItems: true, maxItems: AZD_BINDING_LIMITS.roots }),
+  /** Digest of every file under `path`, so azd's recompilation sees the accepted source. */
+  treeHash: Sha256Schema,
+  parametersPath: Type.Optional(AzdRelativePathSchema),
+  parametersFileHash: Type.Optional(Sha256Schema),
+  /** Digest of the parameter object after azd environment substitution. */
+  resolvedParametersHash: Sha256Schema
+}, { additionalProperties: false });
+var AzdEnvironmentKeySchema = Type.Union(AZD_ENVIRONMENT_KEYS.map((key) => Type.Literal(key)));
+var AZD_AZURE_CLOUDS = ["AzureCloud", "AzureUSGovernment", "AzureChinaCloud"];
+var AzdEnvironmentV1Schema = Type.Object({
+  name: EnvironmentSchema,
+  target: Type.Object({
+    subscriptionId: Type.String({
+      pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    }),
+    location: Type.String({ pattern: "^[a-z0-9]{2,64}$" }),
+    /** Required: the identity preflight compares the signed-in tenant with it. */
+    tenantId: Type.String({ pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" }),
+    resourceGroup: Type.Optional(Type.String({ minLength: 1, maxLength: 90 }))
+  }, { additionalProperties: false }),
+  /** Allowlisted azd-managed keys present in the environment; no other key can exist. */
+  keys: Type.Array(AzdEnvironmentKeySchema, { uniqueItems: true, maxItems: AZD_ENVIRONMENT_KEYS.length }),
+  /** Digest over the allowlisted key/value pairs only; custom values are refused, never hashed. */
+  valuesHash: Sha256Schema,
+  /** Digest of `.azure/<name>/config.json`, which azd consults for stored parameter values; only `{}` is accepted. */
+  configHash: Type.Optional(Sha256Schema),
+  /** Digest of `.azure/config.json` (azd's default environment pointer). */
+  projectConfigHash: Type.Optional(Sha256Schema)
+}, { additionalProperties: false });
+var AzdRemoteModuleV1Schema = Type.Object({
+  root: AzdNameSchema,
+  file: AzdRelativePathSchema,
+  kind: Type.Union([Type.Literal("br"), Type.Literal("ts")]),
+  /** The reference exactly as written in the Bicep file. */
+  reference: Type.String({ minLength: 1, maxLength: 512 }),
+  /** Registry host for `br`; `<subscriptionId>/<resourceGroup>` for `ts`. */
+  registry: Type.String({ minLength: 1, maxLength: 256 }),
+  path: Type.String({ minLength: 1, maxLength: 256 }),
+  pin: Type.Union([
+    Type.Object({ type: Type.Literal("tag"), value: Type.String({ pattern: AZD_EXACT_TAG_PATTERN }) }, { additionalProperties: false }),
+    Type.Object({ type: Type.Literal("digest"), value: Sha256Schema }, { additionalProperties: false }),
+    Type.Object({ type: Type.Literal("version"), value: Type.String({ minLength: 1, maxLength: 64 }) }, { additionalProperties: false })
+  ])
+}, { additionalProperties: false });
+var AzdExecutionEnvelopeV1Schema = Type.Object({
+  workingDirectory: Type.Literal("project-root"),
+  /** Passed explicitly with `--environment`; the default-environment pointer is never consulted. */
+  environmentName: EnvironmentSchema,
+  prompts: Type.Literal("disabled"),
+  /** The executor must observe exactly this identity before provisioning and stop on any difference. */
+  identityPreflight: Type.Object({
+    cloud: Type.Union(AZD_AZURE_CLOUDS.map((cloud) => Type.Literal(cloud))),
+    tenantId: Type.String({ pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" }),
+    subscriptionId: Type.String({ pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" }),
+    onMismatch: Type.Literal("stop")
+  }, { additionalProperties: false })
+}, { additionalProperties: false });
+var AzdBindingV1Schema = Type.Object({
+  schemaVersion: ContractVersionSchema,
+  projectId: ProjectIdSchema,
+  runId: RunIdSchema,
+  track: Type.Literal("bicep"),
+  executor: Type.Literal("azd"),
+  azdVersion: AzdVersionSchema,
+  projectName: NonEmptyStringSchema,
+  /** Digest of the exact `azure.yaml` bytes. */
+  configHash: Sha256Schema,
+  infra: Type.Object({
+    provider: Type.Literal("bicep"),
+    layered: Type.Boolean(),
+    roots: Type.Array(AzdInfraRootV1Schema, { minItems: 1, maxItems: AZD_BINDING_LIMITS.roots })
+  }, { additionalProperties: false }),
+  environment: AzdEnvironmentV1Schema,
+  parametersHash: Sha256Schema,
+  hooks: Type.Array(AzdHookV1Schema, { maxItems: AZD_BINDING_LIMITS.hooks }),
+  extensions: Type.Array(AzdExtensionV1Schema, { maxItems: AZD_BINDING_LIMITS.extensions }),
+  remoteModules: Type.Array(AzdRemoteModuleV1Schema, { maxItems: AZD_BINDING_LIMITS.remoteModules }),
+  executionEnvelope: AzdExecutionEnvelopeV1Schema,
+  bindingHash: Sha256Schema
+}, { $id: "https://schemas.apexops.dev/azd-binding-v1.json", additionalProperties: false });
+function calculateAzdBindingHash(binding) {
+  return calculatePolicyValidationDigest(binding);
+}
+function unique(values) {
+  return new Set(values).size === values.length;
+}
+function hasValidInfra(infra, hooks) {
+  const roots = infra.roots;
+  const names = roots.map(({ name }) => name);
+  if (!unique(names.map((name) => name.toLowerCase())) || !unique(roots.map(({ path: path2 }) => path2.toLowerCase())))
+    return false;
+  if (infra.layered === (names.length === 1 && names[0] === "default"))
+    return false;
+  const dependencies = new Map(roots.map((root) => [root.name, root.dependsOn]));
+  for (const root of roots) {
+    if (root.dependsOn.some((name) => name === root.name || !dependencies.has(name)))
+      return false;
+    if (root.parametersPath === void 0 !== (root.parametersFileHash === void 0))
+      return false;
+    if (root.parametersPath !== void 0 && root.parametersPath !== `${root.path}/${root.module}.parameters.json`)
+      return false;
+  }
+  const state = /* @__PURE__ */ new Map();
+  const cyclic = (name) => {
+    if (state.get(name) === "done")
+      return false;
+    if (state.get(name) === "visiting")
+      return true;
+    state.set(name, "visiting");
+    if ((dependencies.get(name) ?? []).some(cyclic))
+      return true;
+    state.set(name, "done");
+    return false;
+  };
+  if (names.some(cyclic))
+    return false;
+  return hooks.every((hook) => !hook.scope.startsWith("layer:") || infra.layered && names.includes(hook.scope.slice("layer:".length)));
+}
+function hasValidRemoteModules(binding) {
+  const roots = new Set(binding.infra.roots.map(({ name }) => name));
+  const exact = new RegExp(AZD_EXACT_TAG_PATTERN, "u");
+  const keys = [];
+  for (const module of binding.remoteModules) {
+    if (!roots.has(module.root))
+      return false;
+    keys.push(`${module.root}
+${module.file}
+${module.reference}`);
+    const { pin } = module;
+    if (module.kind === "ts") {
+      if (pin.type !== "version")
+        return false;
+    } else if (pin.type === "version")
+      return false;
+    else if (pin.type === "tag") {
+      if (module.registry !== AZD_PUBLIC_BICEP_REGISTRY || !module.path.startsWith("bicep/") || !exact.test(pin.value))
+        return false;
+    }
+  }
+  return unique(keys);
+}
+function hasValidEnvelope(binding) {
+  const envelope = binding.executionEnvelope;
+  const target = binding.environment.target;
+  return envelope.environmentName === binding.environment.name && envelope.identityPreflight.subscriptionId === target.subscriptionId && envelope.identityPreflight.tenantId === target.tenantId;
+}
+function hasValidAzdBinding(value) {
+  try {
+    if (!value_exports2.Check(AzdBindingV1Schema, value))
+      return false;
+    const { bindingHash, ...binding } = value;
+    if (!hasValidInfra(binding.infra, binding.hooks))
+      return false;
+    if (!hasValidRemoteModules(binding) || !hasValidEnvelope(binding))
+      return false;
+    if (!unique(binding.extensions.map(({ id }) => id)))
+      return false;
+    if (!unique(binding.environment.keys))
+      return false;
+    if (!unique(binding.hooks.map((hook) => `${hook.scope}
+${hook.event}
+${hook.platform}
+${hook.order}`)))
+      return false;
+    if (binding.hooks.some((hook) => hook.path === void 0 !== (hook.contentHash === void 0)))
+      return false;
+    return bindingHash === calculateAzdBindingHash(binding);
+  } catch {
+    return false;
+  }
+}
+
 // packages/contracts/dist/deployment.js
 var PreviewChangeV1Schema = Type.Object({
   resourceId: NonEmptyStringSchema,
@@ -15783,7 +16012,7 @@ var ImprovementPolicyV1Schema = Type.Object({
 var NATIVE_VALIDATION_COMMANDS = {
   bicep: [
     { validatorId: "bicep:format", executable: "bicep", args: ["format", "--pattern", "**/*.bicep"] },
-    { validatorId: "bicep:build", executable: "bicep", args: ["build", "main.bicep", "--stdout"] },
+    { validatorId: "bicep:build", executable: "bicep", args: ["build", "infra/main.bicep", "--stdout"] },
     { validatorId: "bicep:lint", executable: "bicep", args: ["lint", "--pattern", "**/*.bicep", "--no-restore"] }
   ],
   terraform: [
@@ -16000,6 +16229,7 @@ var OnboardingConfigV1Schema = Type.Object({
   displayName: Type.Optional(NonEmptyStringSchema),
   client: Type.Optional(BootstrapClientSchema),
   environment: Type.Optional(EnvironmentSchema),
+  purpose: Type.Optional(DeploymentPurposeSchema),
   targetScope: Type.Optional(NonEmptyStringSchema),
   iacTool: Type.Optional(IacToolSchema),
   riskOwner: Type.Optional(RiskOwnerSchema),
@@ -16308,24 +16538,41 @@ var ProjectConfigV1Schema = Type.Object({
 var GateStateSchema = Type.Union([
   Type.Literal("closed"),
   Type.Literal("open"),
+  Type.Literal("ready"),
   Type.Literal("approved"),
   Type.Literal("inherited"),
   Type.Literal("rejected"),
   Type.Literal("invalidated")
 ]);
-var GateRecordV1Schema = Type.Object({
-  gate: Type.Integer({ minimum: 1, maximum: 4 }),
-  state: GateStateSchema,
-  dependencyHash: Sha256Schema,
-  decidedAt: Type.Optional(IsoDateTimeSchema),
-  inheritedFromRunId: Type.Optional(RunIdSchema),
-  reason: Type.Optional(NonEmptyStringSchema)
-}, { additionalProperties: false });
+var GateRecordV1Schema = Type.Union([
+  Type.Object({
+    gate: Type.Integer({ minimum: 1, maximum: 4 }),
+    state: Type.Union([
+      Type.Literal("closed"),
+      Type.Literal("open"),
+      Type.Literal("approved"),
+      Type.Literal("inherited"),
+      Type.Literal("rejected"),
+      Type.Literal("invalidated")
+    ]),
+    dependencyHash: Sha256Schema,
+    decidedAt: Type.Optional(IsoDateTimeSchema),
+    inheritedFromRunId: Type.Optional(RunIdSchema),
+    reason: Type.Optional(NonEmptyStringSchema)
+  }, { additionalProperties: false }),
+  Type.Object({
+    gate: Type.Integer({ minimum: 2, maximum: 3 }),
+    state: Type.Literal("ready"),
+    dependencyHash: Sha256Schema,
+    readyAt: IsoDateTimeSchema
+  }, { additionalProperties: false })
+]);
 var RunConfigV1Schema = Type.Object({
   schemaVersion: ContractVersionSchema,
   projectId: ProjectIdSchema,
   runId: RunIdSchema,
   environment: EnvironmentSchema,
+  purpose: DeploymentPurposeSchema,
   targetScope: NonEmptyStringSchema,
   iacTool: IacToolSchema,
   createdAt: IsoDateTimeSchema,
@@ -16541,6 +16788,7 @@ var contractSchemas = [
   RequirementsChangeProposalV1Schema,
   ImplementationIntentV1Schema,
   IacBindingV1Schema,
+  AzdBindingV1Schema,
   ApprovalEvidenceV1Schema,
   DeploymentPreviewV1Schema,
   OperationRecordV1Schema,
@@ -16612,6 +16860,7 @@ var contractMetadata = {
   "https://schemas.apexops.dev/requirements-change-proposal-v1.json": metadata(524288, "confidential"),
   "https://schemas.apexops.dev/implementation-intent-v1.json": metadata(524288),
   "https://schemas.apexops.dev/iac-binding-v1.json": metadata(524288, "confidential"),
+  "https://schemas.apexops.dev/azd-binding-v1.json": metadata(524288, "confidential"),
   "https://schemas.apexops.dev/approval-evidence-v1.json": metadata(32768, "confidential"),
   "https://schemas.apexops.dev/deployment-preview-v1.json": metadata(2097152, "confidential"),
   "https://schemas.apexops.dev/operation-record-v1.json": metadata(65536, "confidential"),
@@ -16684,10 +16933,22 @@ async function readEventFile(path2) {
     await handle.close();
   }
 }
-var EventJournal = class {
+var JournalIdentityError = class extends Error {
+  constructor(sequence) {
+    super(`Journal event ${sequence} belongs to a different project or run than the one that loaded it`);
+    this.name = "JournalIdentityError";
+  }
+};
+var EventJournal = class _EventJournal {
+  identity;
   directory;
-  constructor(directory) {
+  /** With an identity, `replay` rejects any event written for another project or run. */
+  constructor(directory, identity) {
+    this.identity = identity;
     this.directory = resolve4(directory);
+  }
+  bound(identity) {
+    return new _EventJournal(this.directory, identity);
   }
   async head() {
     const events = await this.replay();
@@ -16775,6 +17036,9 @@ var EventJournal = class {
       if (event.projectId !== identity.projectId || event.runId !== identity.runId) {
         throw new Error(`Corrupt journal identity at sequence ${event.sequence}`);
       }
+      if (this.identity !== void 0 && (event.projectId !== this.identity.projectId || event.runId !== this.identity.runId)) {
+        throw new JournalIdentityError(event.sequence);
+      }
       events.push(event);
       previousHash = hash2;
     }
@@ -16789,6 +17053,18 @@ function openGate(gate, dependencyHash) {
   }
   return { gate: gate.gate, state: "open", dependencyHash };
 }
+function isReadinessGate(purpose, gateNumber) {
+  return purpose === "lab" && (gateNumber === 2 || gateNumber === 3);
+}
+function markGateReady(gate, purpose, readyAt) {
+  if (!isReadinessGate(purpose, gate.gate)) {
+    throw new Error(`Gate ${gate.gate} cannot be recorded as ready for a ${purpose} run`);
+  }
+  if (gate.state !== "open") {
+    throw new Error(`Gate ${gate.gate} is not open`);
+  }
+  return { gate: gate.gate, state: "ready", dependencyHash: gate.dependencyHash, readyAt };
+}
 function decideGate(gate, decision, decidedAt, reason) {
   if (gate.state !== "open") {
     throw new Error(`Gate ${gate.gate} is not open`);
@@ -16801,6 +17077,9 @@ function invalidateGate(gate, dependencyHash, reason) {
 function inheritGate(gate, fromRunId, dependencyHash, decidedAt) {
   if (gate.gate === 4) {
     throw new Error("Gate 4 cannot be inherited");
+  }
+  if (gate.state === "ready") {
+    throw new Error(`Gate ${gate.gate} readiness is recomputed in the new run and cannot be inherited`);
   }
   if (gate.dependencyHash !== dependencyHash || gate.state !== "approved" && gate.state !== "inherited") {
     throw new Error(`Gate ${gate.gate} dependencies are not approved for inheritance`);
@@ -17173,6 +17452,38 @@ var LeaseStore = class {
 // packages/kernel/dist/project-store.js
 import { mkdir as mkdir5, readFile as readFile6 } from "node:fs/promises";
 import { join as join7, resolve as resolve7 } from "node:path";
+
+// packages/kernel/dist/run-config.js
+var RunConfigInvalidError = class extends Error {
+  issues;
+  constructor(issues) {
+    super(`Run configuration does not match the current contract (${issues.join("; ")}); runs created by an earlier APEX version are not supported, so start a new run with apex project create`);
+    this.issues = issues;
+    this.name = "RunConfigInvalidError";
+  }
+};
+function parseRunConfig(raw) {
+  registerContractFormats();
+  let value;
+  try {
+    value = JSON.parse(raw);
+  } catch {
+    throw new RunConfigInvalidError(["/: not valid JSON"]);
+  }
+  if (value_exports2.Check(RunConfigV1Schema, value)) {
+    const gateIssues = readinessGateIssues(value);
+    if (gateIssues.length > 0)
+      throw new RunConfigInvalidError(gateIssues);
+    return value;
+  }
+  const issues = [...value_exports2.Errors(RunConfigV1Schema, value)].slice(0, 3).map((error62) => `${error62.path === "" ? "/" : error62.path}: ${error62.message}`);
+  throw new RunConfigInvalidError(issues);
+}
+function readinessGateIssues(run) {
+  return run.gates.flatMap((gate, index) => gate.state === "ready" && !isReadinessGate(run.purpose, gate.gate) ? [`/gates/${index}/state: ready is only valid for lab Gates 2 and 3`] : []);
+}
+
+// packages/kernel/dist/project-store.js
 var ProjectStore = class {
   clock;
   idSource;
@@ -17204,6 +17515,7 @@ var ProjectStore = class {
       projectId,
       runId,
       environment: input2.environment,
+      purpose: input2.purpose,
       targetScope: input2.targetScope,
       iacTool: input2.iacTool ?? project.defaultIacTool,
       createdAt: this.clock().toISOString(),
@@ -17222,7 +17534,7 @@ var ProjectStore = class {
     return this.readJson(join7(this.projectDirectory(projectId), "project.json"));
   }
   async getRun(projectId, runId) {
-    return this.readJson(join7(this.runDirectory(projectId, runId), "run.json"));
+    return parseRunConfig(await readFile6(join7(this.runDirectory(projectId, runId), "run.json"), "utf8"));
   }
   projectDirectory(projectId) {
     this.assertIdentifier(projectId);
@@ -17276,7 +17588,7 @@ async function snapshotRepeatFiles(roots, options = {}) {
     ...options.attempts === void 0 ? {} : { attempts: options.attempts },
     ...options.sleep === void 0 ? {} : { sleep: options.sleep }
   };
-  const unique = [...new Set(roots.map((root) => resolve8(root)))].sort();
+  const unique2 = [...new Set(roots.map((root) => resolve8(root)))].sort();
   const entries = {};
   let count3 = 0;
   let bytes = 0;
@@ -17356,8 +17668,8 @@ async function snapshotRepeatFiles(roots, options = {}) {
     if (entry !== void 0)
       add(path2, entry);
   };
-  for (const root of unique) {
-    if (!unique.some((other) => other !== root && within(other, root)))
+  for (const root of unique2) {
+    if (!unique2.some((other) => other !== root && within(other, root)))
       continue;
     try {
       const metadata2 = await retrySharingViolations(() => lstat5(root, { bigint: true }), retry);
@@ -17368,12 +17680,12 @@ async function snapshotRepeatFiles(roots, options = {}) {
         throw error62;
     }
   }
-  for (const root of unique) {
-    if (unique.some((other) => other !== root && within(other, root)))
+  for (const root of unique2) {
+    if (unique2.some((other) => other !== root && within(other, root)))
       continue;
     await visit2(root, true);
   }
-  return { roots: unique, entries };
+  return { roots: unique2, entries };
 }
 function repeatFilesDigest(snapshot) {
   return sha256Json({ version: 1, roots: snapshot.roots, entries: snapshot.entries });
@@ -17566,8 +17878,8 @@ var DirectoryLock = class {
         if (window === void 0) {
           let resolveClosed;
           let rejectClosed;
-          const closed = new Promise((resolve22, reject) => {
-            resolveClosed = resolve22;
+          const closed = new Promise((resolve23, reject) => {
+            resolveClosed = resolve23;
             rejectClosed = reject;
           });
           const previous = closing;
@@ -18046,7 +18358,8 @@ var RunRepository = class {
       const actualHash = sha256Json(current);
       if (actualHash !== input2.expectedRunHash)
         throw new Error(`Stale run hash: expected ${input2.expectedRunHash}, found ${actualHash}`);
-      const journalHead = await this.journal.head();
+      const journal = this.journal.bound({ projectId: current.projectId, runId: current.runId });
+      const journalHead = await journal.head();
       if (input2.expectedJournalHead !== void 0 && input2.expectedJournalHead !== journalHead) {
         throw new Error(`Stale journal head: expected ${String(input2.expectedJournalHead)}, found ${String(journalHead)}`);
       }
@@ -18063,7 +18376,7 @@ var RunRepository = class {
       };
       await atomicWriteJson(this.intentPath, intent, { refuseOverwrite: true });
       await this.faultInjector?.("intent");
-      const event = await this.journal.append({
+      const event = await journal.append({
         ...input2.event,
         expectedHead: journalHead,
         payload: {
@@ -18188,7 +18501,7 @@ var RunRepository = class {
     await rm7(this.intentPath, { force: true });
   }
   async readRaw() {
-    return JSON.parse(await readFile7(this.runPath, "utf8"));
+    return parseRunConfig(await readFile7(this.runPath, "utf8"));
   }
   async readWriterLease() {
     const bytes = await readPublishedFile(this.writerLeasePath, {
@@ -18292,7 +18605,7 @@ function repeatStateToken(input2) {
 }
 function validRecords(value) {
   registerContractFormats();
-  return value_exports2.Check(RepeatGuardRecordsV1Schema, value) && value.records.length <= MAX_REPEAT_RECORDS && value.records.every((record5) => Number.isFinite(Date.parse(record5.recordedAt)) && Number.isFinite(Date.parse(record5.expiresAt)) && Buffer.byteLength(record5.result) <= MAX_REPEAT_RESULT_BYTES);
+  return value_exports2.Check(RepeatGuardRecordsV1Schema, value) && value.records.length <= MAX_REPEAT_RECORDS && value.records.every((record6) => Number.isFinite(Date.parse(record6.recordedAt)) && Number.isFinite(Date.parse(record6.expiresAt)) && Buffer.byteLength(record6.result) <= MAX_REPEAT_RESULT_BYTES);
 }
 async function readRepeatRecords(runDirectory) {
   const path2 = join11(runDirectory, REPEAT_GUARD_FILE);
@@ -18315,15 +18628,15 @@ async function readRepeatRecords(runDirectory) {
     return [];
   }
 }
-function replayable(record5) {
+function replayable(record6) {
   try {
-    const value = JSON.parse(record5.result);
+    const value = JSON.parse(record6.result);
     return value !== null && typeof value === "object" && !Array.isArray(value) ? value : void 0;
   } catch {
     return void 0;
   }
 }
-async function appendRepeatEvent(scope2, record5, call, fingerprint, now, idSource) {
+async function appendRepeatEvent(scope2, record6, call, fingerprint, now, idSource) {
   const journal = new EventJournal(join11(scope2.runDirectory, REPEAT_JOURNAL_DIRECTORY));
   for (let attempt = 1; ; attempt += 1) {
     try {
@@ -18336,15 +18649,15 @@ async function appendRepeatEvent(scope2, record5, call, fingerprint, now, idSour
         ownerEpoch: scope2.ownerEpoch,
         expectedHead: await journal.head(),
         payload: {
-          operation: record5.operation,
+          operation: record6.operation,
           // Record the worktree as the caller sees it; the case-folded comparison key belongs only in callHash.
           workspace: resolve10(call.workspace),
-          callHash: record5.callHash,
+          callHash: record6.callHash,
           fingerprint,
-          originalFingerprint: record5.fingerprint,
+          originalFingerprint: record6.fingerprint,
           state: scope2.state,
-          originalRecordedAt: record5.recordedAt,
-          resultHash: sha256Text(record5.result)
+          originalRecordedAt: record6.recordedAt,
+          resultHash: sha256Text(record6.result)
         }
       });
       return;
@@ -18355,7 +18668,7 @@ async function appendRepeatEvent(scope2, record5, call, fingerprint, now, idSour
   }
 }
 async function storeRepeatRecord(scope2, candidate, callHash, now, maxRecords) {
-  const live = (await readRepeatRecords(scope2.runDirectory)).filter((record5) => record5.stateAfter === scope2.state && Date.parse(record5.expiresAt) > now.getTime() && record5.callHash !== callHash);
+  const live = (await readRepeatRecords(scope2.runDirectory)).filter((record6) => record6.stateAfter === scope2.state && Date.parse(record6.expiresAt) > now.getTime() && record6.callHash !== callHash);
   const records = [...live, ...candidate === void 0 ? [] : [candidate]].slice(-maxRecords);
   const file2 = { schemaVersion: CONTRACT_VERSION, records };
   if (!validRecords(file2))
@@ -18512,11 +18825,11 @@ async function guardedCall(call, callHash, hooks, clock, idSource, windowMs, max
   if (before !== void 0) {
     const now = clock();
     const records = await readRepeatRecords(before.runDirectory);
-    const record5 = records.findLast((candidate) => candidate.callHash === callHash && candidate.stateAfter === before.state && Date.parse(candidate.expiresAt) > now.getTime());
-    const original = record5 === void 0 ? void 0 : replayable(record5);
-    if (record5 !== void 0 && original !== void 0 && (hooks.identityStable === void 0 || await hooks.identityStable()) && (await hooks.scope().catch(() => void 0))?.state === before.state) {
+    const record6 = records.findLast((candidate) => candidate.callHash === callHash && candidate.stateAfter === before.state && Date.parse(candidate.expiresAt) > now.getTime());
+    const original = record6 === void 0 ? void 0 : replayable(record6);
+    if (record6 !== void 0 && original !== void 0 && (hooks.identityStable === void 0 || await hooks.identityStable()) && (await hooks.scope().catch(() => void 0))?.state === before.state) {
       await hooks.assertReplayAllowed(before);
-      await appendRepeatEvent(before, record5, call, fingerprint, now, idSource);
+      await appendRepeatEvent(before, record6, call, fingerprint, now, idSource);
       return { value: original, repeated: true, fingerprint };
     }
   }
@@ -18880,30 +19193,30 @@ async function reviewCaptureKey(home = reviewHome()) {
     throw new Error(`Review capture key is not a regular file: ${path2}`);
   if (process.platform !== "win32" && (info.mode & 63) !== 0)
     throw new Error(`Review capture key permissions must be 0600: ${path2}`);
-  const text4 = (await readRegularFile(path2, 1024)).toString("utf8").trim();
-  if (!/^[0-9a-f]{64}$/u.test(text4))
+  const text5 = (await readRegularFile(path2, 1024)).toString("utf8").trim();
+  if (!/^[0-9a-f]{64}$/u.test(text5))
     throw new Error(`Review capture key is malformed: ${path2}`);
-  return Buffer.from(text4, "hex");
+  return Buffer.from(text5, "hex");
 }
-function reviewCaptureSignature(record5, key) {
-  return createHmac("sha256", key).update(canonicalJson(record5)).digest("hex");
+function reviewCaptureSignature(record6, key) {
+  return createHmac("sha256", key).update(canonicalJson(record6)).digest("hex");
 }
 function verifyReviewCapture(value, key) {
   registerContractFormats();
   if (!value_exports2.Check(ReviewCaptureV1Schema, value))
     throw new ReviewCaptureError("malformed", "Review capture record is malformed");
-  const record5 = value;
-  const { signature, ...unsigned } = record5;
+  const record6 = value;
+  const { signature, ...unsigned } = record6;
   const expected = Buffer.from(reviewCaptureSignature(unsigned, key), "hex");
   if (!timingSafeEqual(expected, Buffer.from(signature, "hex")))
     throw new ReviewCaptureError("signature", "Review capture signature does not verify; the record was edited or forged");
-  if (sha256Text(record5.prompt) !== record5.requestSha256 || sha256Text(record5.response) !== record5.responseSha256)
+  if (sha256Text(record6.prompt) !== record6.requestSha256 || sha256Text(record6.response) !== record6.responseSha256)
     throw new ReviewCaptureError("signature", "Review capture hashes do not match its prompt or response");
-  if (!TASK_TOOLS.has(record5.toolName) || record5.agentType.trim().toLowerCase() !== REVIEW_AGENT)
+  if (!TASK_TOOLS.has(record6.toolName) || record6.agentType.trim().toLowerCase() !== REVIEW_AGENT)
     throw new ReviewCaptureError("not-rubber-duck", "Review capture is not from a rubber-duck task call");
-  if (reviewNonceFromPrompt(record5.prompt) !== record5.nonce)
+  if (reviewNonceFromPrompt(record6.prompt) !== record6.nonce)
     throw new ReviewCaptureError("nonce-mismatch", "Review capture nonce does not match its prompt header");
-  return record5;
+  return record6;
 }
 var REJECTED_REVIEW_CAPTURE_SCHEMA = "apex.rejected-review-capture.v1";
 function rejectedReviewCapture(bytes) {
@@ -19001,12 +19314,12 @@ function assertSingleReviewCapture(files2) {
 }
 function verifyIssuedReviewCapture(request, files2, key) {
   assertSingleReviewCapture(files2);
-  const record5 = verifyReviewCapture(files2[0].value, key);
-  if (record5.nonce !== request.nonce)
+  const record6 = verifyReviewCapture(files2[0].value, key);
+  if (record6.nonce !== request.nonce)
     throw new ReviewCaptureError("nonce-mismatch", "Review capture belongs to a different review request");
-  if (reviewPromptSha256(record5.prompt) !== request.promptSha256)
+  if (reviewPromptSha256(record6.prompt) !== request.promptSha256)
     throw new ReviewCaptureError("prompt-mismatch", "Rubber-duck received a prompt that differs from the issued review prompt");
-  return record5;
+  return record6;
 }
 
 // packages/kernel/dist/tasks.js
@@ -19283,9 +19596,9 @@ var ownershipGroups = [
     boundary: "deploy"
   },
   {
-    ids: ["deploy:bicep-stack-ownership"],
+    ids: ["deploy:bicep-azd-execution"],
     owner: "@apexops/capabilities",
-    entrypoint: "NativeBicepProvider.apply",
+    entrypoint: "AzdBicepProvider.apply",
     execution: "capability",
     boundary: "deploy"
   },
@@ -19409,7 +19722,9 @@ var WorkflowEngine = class {
       return true;
     if (root.startsWith("gate-")) {
       const gateState = state.gateStates?.[root];
-      return gateState === "approved" || gateState === "inherited";
+      if (gateState === "approved" || gateState === "inherited")
+        return true;
+      return gateState === "ready" && (root === "gate-2" || root === "gate-3") && getPath(state.run, "purpose") === "lab";
     }
     if (dependency.startsWith("run-config.")) {
       return getPath(state.run, dependency.slice("run-config.".length)) !== void 0;
@@ -19869,10 +20184,10 @@ function assertContained(root, path2) {
     throw new Error(`Unsafe bundled asset path: ${path2}`);
   }
 }
-async function readBundledFile(root, relativePath, beforeOpen = async () => {
+async function readBundledFile(root, relativePath2, beforeOpen = async () => {
 }, expectedIdentity) {
   const absoluteRoot = resolve13(root);
-  const path2 = resolve13(absoluteRoot, relativePath);
+  const path2 = resolve13(absoluteRoot, relativePath2);
   assertContained(absoluteRoot, path2);
   const canonicalRoot = await realpath3(absoluteRoot);
   const resolved = await realpath3(path2);
@@ -19880,23 +20195,23 @@ async function readBundledFile(root, relativePath, beforeOpen = async () => {
   const initialMetadata = await lstat9(path2, { bigint: true });
   const identity = expectedIdentity ?? { dev: initialMetadata.dev, ino: initialMetadata.ino };
   if (initialMetadata.isSymbolicLink() || !initialMetadata.isFile()) {
-    throw new Error(`Unsupported bundled asset entry: ${relativePath}`);
+    throw new Error(`Unsupported bundled asset entry: ${relativePath2}`);
   }
   await beforeOpen();
   const handle = await open10(path2, constants10.O_RDONLY | (constants10.O_NOFOLLOW ?? 0));
   try {
     const descriptorMetadata = await handle.stat({ bigint: true });
     if (!descriptorMetadata.isFile())
-      throw new Error(`Unsupported bundled asset entry: ${relativePath}`);
+      throw new Error(`Unsupported bundled asset entry: ${relativePath2}`);
     const pathMetadata = await lstat9(path2, { bigint: true });
     if (pathMetadata.isSymbolicLink() || descriptorMetadata.dev !== identity.dev || descriptorMetadata.ino !== identity.ino || pathMetadata.dev !== descriptorMetadata.dev || pathMetadata.ino !== descriptorMetadata.ino) {
-      throw new Error(`Bundled asset path changed during verification: ${relativePath}`);
+      throw new Error(`Bundled asset path changed during verification: ${relativePath2}`);
     }
     const descriptorPath = process.platform === "linux" ? `/proc/self/fd/${handle.fd}` : path2;
     const openedPath = await realpath3(descriptorPath);
     assertContained(canonicalRoot, openedPath);
     if (!samePath(openedPath, resolved)) {
-      throw new Error(`Bundled asset path changed during verification: ${relativePath}`);
+      throw new Error(`Bundled asset path changed during verification: ${relativePath2}`);
     }
     return await handle.readFile();
   } finally {
@@ -20136,7 +20451,7 @@ async function resolveBundledAssets() {
 }
 
 // packages/cli/dist/cli.js
-import { mkdir as mkdir14, readFile as readFile20, realpath as realpath10, writeFile as writeFile4 } from "node:fs/promises";
+import { mkdir as mkdir14, readFile as readFile20, realpath as realpath11, writeFile as writeFile4 } from "node:fs/promises";
 
 // packages/capabilities/dist/capability.js
 var CapabilityError = class extends Error {
@@ -20522,10 +20837,3606 @@ async function inspectArchetypeSource(request) {
   return { proposal, contents };
 }
 
-// packages/capabilities/dist/bound-envelope-transport.js
+// node_modules/js-yaml/dist/js-yaml.mjs
+var NOT_RESOLVED = /* @__PURE__ */ Symbol("NOT_RESOLVED");
+function defineScalarTag(tagName, options) {
+  return {
+    tagName,
+    nodeKind: "scalar",
+    implicit: options.implicit ?? false,
+    matchByTagPrefix: options.matchByTagPrefix ?? false,
+    implicitFirstChars: options.implicitFirstChars ?? null,
+    resolve: options.resolve,
+    identify: options.identify,
+    represent: options.represent ?? ((data) => String(data)),
+    representTagName: options.representTagName ?? (() => tagName)
+  };
+}
+function defineSequenceTag(tagName, options) {
+  const carrierIsResult = options.finalize === void 0;
+  return {
+    tagName,
+    nodeKind: "sequence",
+    implicit: false,
+    matchByTagPrefix: options.matchByTagPrefix ?? false,
+    create: options.create,
+    addItem: options.addItem,
+    finalize: options.finalize ?? ((carrier) => carrier),
+    carrierIsResult,
+    identify: options.identify,
+    represent: options.represent ?? ((data) => data),
+    representTagName: options.representTagName ?? (() => tagName)
+  };
+}
+function defineMappingTag(tagName, options) {
+  const carrierIsResult = options.finalize === void 0;
+  return {
+    tagName,
+    nodeKind: "mapping",
+    implicit: false,
+    matchByTagPrefix: options.matchByTagPrefix ?? false,
+    create: options.create,
+    addPair: options.addPair,
+    has: options.has,
+    keys: options.keys,
+    get: options.get,
+    finalize: options.finalize ?? ((carrier) => carrier),
+    carrierIsResult,
+    identify: options.identify,
+    represent: options.represent ?? ((data) => data),
+    representTagName: options.representTagName ?? (() => tagName)
+  };
+}
+var strTag = defineScalarTag("tag:yaml.org,2002:str", {
+  resolve: (source2) => source2,
+  identify: (data) => typeof data === "string"
+});
+var NULL_VALUES$1 = [
+  "",
+  "~",
+  "null",
+  "Null",
+  "NULL"
+];
+var nullCoreTag = defineScalarTag("tag:yaml.org,2002:null", {
+  implicit: true,
+  implicitFirstChars: [
+    "",
+    "~",
+    "n",
+    "N"
+  ],
+  resolve: (source2) => {
+    if (NULL_VALUES$1.indexOf(source2) !== -1) return null;
+    return NOT_RESOLVED;
+  },
+  identify: (object6) => object6 === null,
+  represent: () => "null"
+});
+var nullJsonTag = defineScalarTag("tag:yaml.org,2002:null", {
+  implicit: true,
+  implicitFirstChars: ["n"],
+  resolve: (source2, isExplicit) => {
+    if (source2 === "null" || isExplicit && source2 === "") return null;
+    return NOT_RESOLVED;
+  },
+  identify: (object6) => object6 === null,
+  represent: () => "null"
+});
+var NULL_VALUES = [
+  "",
+  "~",
+  "null",
+  "Null",
+  "NULL"
+];
+var nullYaml11Tag = defineScalarTag("tag:yaml.org,2002:null", {
+  implicit: true,
+  implicitFirstChars: [
+    "",
+    "~",
+    "n",
+    "N"
+  ],
+  resolve: (source2) => {
+    if (NULL_VALUES.indexOf(source2) !== -1) return null;
+    return NOT_RESOLVED;
+  },
+  identify: (object6) => object6 === null,
+  represent: () => "null"
+});
+var TRUE_VALUES$2 = [
+  "true",
+  "True",
+  "TRUE"
+];
+var FALSE_VALUES$2 = [
+  "false",
+  "False",
+  "FALSE"
+];
+var boolCoreTag = defineScalarTag("tag:yaml.org,2002:bool", {
+  implicit: true,
+  implicitFirstChars: [
+    "t",
+    "T",
+    "f",
+    "F"
+  ],
+  resolve: (source2) => {
+    if (TRUE_VALUES$2.indexOf(source2) !== -1) return true;
+    if (FALSE_VALUES$2.indexOf(source2) !== -1) return false;
+    return NOT_RESOLVED;
+  },
+  identify: (object6) => Object.prototype.toString.call(object6) === "[object Boolean]",
+  represent: (object6) => object6 ? "true" : "false"
+});
+var TRUE_VALUES$1 = ["true"];
+var FALSE_VALUES$1 = ["false"];
+var boolJsonTag = defineScalarTag("tag:yaml.org,2002:bool", {
+  implicit: true,
+  implicitFirstChars: ["t", "f"],
+  resolve: (source2) => {
+    if (TRUE_VALUES$1.indexOf(source2) !== -1) return true;
+    if (FALSE_VALUES$1.indexOf(source2) !== -1) return false;
+    return NOT_RESOLVED;
+  },
+  identify: (object6) => Object.prototype.toString.call(object6) === "[object Boolean]",
+  represent: (object6) => object6 ? "true" : "false"
+});
+var TRUE_VALUES = [
+  "true",
+  "True",
+  "TRUE",
+  "y",
+  "Y",
+  "yes",
+  "Yes",
+  "YES",
+  "on",
+  "On",
+  "ON"
+];
+var FALSE_VALUES = [
+  "false",
+  "False",
+  "FALSE",
+  "n",
+  "N",
+  "no",
+  "No",
+  "NO",
+  "off",
+  "Off",
+  "OFF"
+];
+var boolYaml11Tag = defineScalarTag("tag:yaml.org,2002:bool", {
+  implicit: true,
+  implicitFirstChars: [
+    "y",
+    "Y",
+    "n",
+    "N",
+    "t",
+    "T",
+    "f",
+    "F",
+    "o",
+    "O"
+  ],
+  resolve: (source2) => {
+    if (TRUE_VALUES.indexOf(source2) !== -1) return true;
+    if (FALSE_VALUES.indexOf(source2) !== -1) return false;
+    return NOT_RESOLVED;
+  },
+  identify: (object6) => Object.prototype.toString.call(object6) === "[object Boolean]",
+  represent: (object6) => object6 ? "true" : "false"
+});
+var YAML_INTEGER_IMPLICIT_PATTERN$1 = /* @__PURE__ */ new RegExp("^(?:0o[0-7]+|0x[0-9a-fA-F]+|[-+]?[0-9]+)$");
+var YAML_INTEGER_EXPLICIT_PATTERN$1 = /* @__PURE__ */ new RegExp("^(?:[-+]?0b[0-1]+|[-+]?0o[0-7]+|[-+]?0x[0-9a-fA-F]+|[-+]?[0-9]+)$");
+function parseYamlInteger$2(source2) {
+  let value = source2;
+  let sign = 1;
+  if (value[0] === "-" || value[0] === "+") {
+    if (value[0] === "-") sign = -1;
+    value = value.slice(1);
+  }
+  if (value.startsWith("0b")) return sign * parseInt(value.slice(2), 2);
+  if (value.startsWith("0o")) return sign * parseInt(value.slice(2), 8);
+  if (value.startsWith("0x")) return sign * parseInt(value.slice(2), 16);
+  return sign * parseInt(value, 10);
+}
+function resolveYamlInteger$2(source2, isExplicit) {
+  if (isExplicit) {
+    if (!YAML_INTEGER_EXPLICIT_PATTERN$1.test(source2)) return NOT_RESOLVED;
+  } else if (!YAML_INTEGER_IMPLICIT_PATTERN$1.test(source2)) return NOT_RESOLVED;
+  const result = parseYamlInteger$2(source2);
+  return Number.isFinite(result) ? result : NOT_RESOLVED;
+}
+var intCoreTag = defineScalarTag("tag:yaml.org,2002:int", {
+  implicit: true,
+  implicitFirstChars: [
+    "-",
+    "+",
+    ..."0123456789"
+  ],
+  resolve: resolveYamlInteger$2,
+  identify: (object6) => Number.isInteger(object6) && !Object.is(object6, -0) && object6.toString(10).indexOf("e") < 0,
+  represent: (object6) => object6.toString(10)
+});
+var YAML_INTEGER_IMPLICIT_PATTERN = /* @__PURE__ */ new RegExp("^-?(?:0|[1-9][0-9]*)$");
+var YAML_INTEGER_EXPLICIT_PATTERN = /* @__PURE__ */ new RegExp("^(?:[-+]?0b[0-1]+|[-+]?0o[0-7]+|[-+]?0x[0-9a-fA-F]+|[-+]?[0-9]+)$");
+function parseYamlInteger$1(source2) {
+  let value = source2;
+  let sign = 1;
+  if (value[0] === "-" || value[0] === "+") {
+    if (value[0] === "-") sign = -1;
+    value = value.slice(1);
+  }
+  if (value.startsWith("0b")) return sign * parseInt(value.slice(2), 2);
+  if (value.startsWith("0o")) return sign * parseInt(value.slice(2), 8);
+  if (value.startsWith("0x")) return sign * parseInt(value.slice(2), 16);
+  return sign * parseInt(value, 10);
+}
+function resolveYamlInteger$1(source2, isExplicit) {
+  if (isExplicit) {
+    if (!YAML_INTEGER_EXPLICIT_PATTERN.test(source2)) return NOT_RESOLVED;
+  } else if (!YAML_INTEGER_IMPLICIT_PATTERN.test(source2)) return NOT_RESOLVED;
+  const result = parseYamlInteger$1(source2);
+  return Number.isFinite(result) ? result : NOT_RESOLVED;
+}
+var intJsonTag = defineScalarTag("tag:yaml.org,2002:int", {
+  implicit: true,
+  implicitFirstChars: ["-", ..."0123456789"],
+  resolve: resolveYamlInteger$1,
+  identify: (object6) => Number.isInteger(object6) && !Object.is(object6, -0) && object6.toString(10).indexOf("e") < 0,
+  represent: (object6) => object6.toString(10)
+});
+var YAML_INTEGER_PATTERN = /* @__PURE__ */ new RegExp("^(?:[-+]?0b[0-1_]+|[-+]?0[0-7_]+|[-+]?0x[0-9a-fA-F_]+|[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+|[-+]?(?:0|[1-9][0-9_]*))$");
+function parseYamlInteger(source2) {
+  let value = source2.replace(/_/g, "");
+  let sign = 1;
+  if (value[0] === "-" || value[0] === "+") {
+    if (value[0] === "-") sign = -1;
+    value = value.slice(1);
+  }
+  if (value.startsWith("0b")) return sign * parseInt(value.slice(2), 2);
+  if (value.startsWith("0x")) return sign * parseInt(value.slice(2), 16);
+  if (value.includes(":")) {
+    let result = 0;
+    for (const part of value.split(":")) result = result * 60 + Number(part);
+    return sign * result;
+  }
+  if (value !== "0" && value[0] === "0") return sign * parseInt(value, 8);
+  return sign * parseInt(value, 10);
+}
+function resolveYamlInteger(source2) {
+  if (!YAML_INTEGER_PATTERN.test(source2)) return NOT_RESOLVED;
+  const result = parseYamlInteger(source2);
+  return Number.isFinite(result) ? result : NOT_RESOLVED;
+}
+var intYaml11Tag = defineScalarTag("tag:yaml.org,2002:int", {
+  implicit: true,
+  implicitFirstChars: [
+    "-",
+    "+",
+    ..."0123456789"
+  ],
+  resolve: resolveYamlInteger,
+  identify: (object6) => Number.isInteger(object6) && !Object.is(object6, -0) && object6.toString(10).indexOf("e") < 0,
+  represent: (object6) => object6.toString(10)
+});
+var YAML_FLOAT_PATTERN$1 = /* @__PURE__ */ new RegExp("^(?:[-+]?[0-9]+(?:\\.[0-9]*)?(?:[eE][-+]?[0-9]+)?|[-+]?\\.[0-9]+(?:[eE][-+]?[0-9]+)?|[-+]?\\.(?:inf|Inf|INF)|\\.(?:nan|NaN|NAN))$");
+var YAML_FLOAT_SPECIAL_PATTERN$1 = /* @__PURE__ */ new RegExp("^(?:[-+]?\\.(?:inf|Inf|INF)|\\.(?:nan|NaN|NAN))$");
+function resolveYamlFloat$2(source2) {
+  if (!YAML_FLOAT_PATTERN$1.test(source2)) return NOT_RESOLVED;
+  let value = source2.toLowerCase();
+  const sign = value[0] === "-" ? -1 : 1;
+  if ("+-".includes(value[0])) value = value.slice(1);
+  if (value === ".inf") return sign === 1 ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+  if (value === ".nan") return NaN;
+  const result = sign * parseFloat(value);
+  if (Number.isFinite(result) || YAML_FLOAT_SPECIAL_PATTERN$1.test(source2)) return result;
+  return NOT_RESOLVED;
+}
+function representYamlFloat$2(object6) {
+  if (isNaN(object6)) return ".nan";
+  if (object6 === Number.POSITIVE_INFINITY) return ".inf";
+  if (object6 === Number.NEGATIVE_INFINITY) return "-.inf";
+  if (Object.is(object6, -0)) return "-0.0";
+  const result = object6.toString(10);
+  return /^[-+]?[0-9]+e/.test(result) ? result.replace("e", ".e") : result;
+}
+var floatCoreTag = defineScalarTag("tag:yaml.org,2002:float", {
+  implicit: true,
+  implicitFirstChars: [
+    "-",
+    "+",
+    ".",
+    ..."0123456789"
+  ],
+  resolve: resolveYamlFloat$2,
+  identify: (object6) => typeof object6 === "number" && (!Number.isInteger(object6) || Object.is(object6, -0) || object6.toString(10).indexOf("e") >= 0),
+  represent: representYamlFloat$2
+});
+var YAML_FLOAT_IMPLICIT_PATTERN = /* @__PURE__ */ new RegExp("^-?(?:0|[1-9][0-9]*)(?:\\.[0-9]*)?(?:[eE][-+]?[0-9]+)?$");
+var YAML_FLOAT_EXPLICIT_PATTERN = /* @__PURE__ */ new RegExp("^(?:[-+]?[0-9]+(?:\\.[0-9]*)?(?:[eE][-+]?[0-9]+)?|[-+]?\\.[0-9]+(?:[eE][-+]?[0-9]+)?|[-+]?\\.(?:inf|Inf|INF)|\\.(?:nan|NaN|NAN))$");
+function resolveYamlFloat$1(source2, isExplicit) {
+  if (isExplicit) {
+    if (!YAML_FLOAT_EXPLICIT_PATTERN.test(source2)) return NOT_RESOLVED;
+    let value = source2.toLowerCase();
+    const sign = value[0] === "-" ? -1 : 1;
+    if ("+-".includes(value[0])) value = value.slice(1);
+    if (value === ".inf") return sign === 1 ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+    if (value === ".nan") return NaN;
+    const result2 = sign * parseFloat(value);
+    return Number.isFinite(result2) ? result2 : NOT_RESOLVED;
+  }
+  if (!YAML_FLOAT_IMPLICIT_PATTERN.test(source2)) return NOT_RESOLVED;
+  const result = Number(source2);
+  if (Number.isFinite(result)) return result;
+  return NOT_RESOLVED;
+}
+function representYamlFloat$1(object6) {
+  if (isNaN(object6)) return ".nan";
+  if (object6 === Number.POSITIVE_INFINITY) return ".inf";
+  if (object6 === Number.NEGATIVE_INFINITY) return "-.inf";
+  if (Object.is(object6, -0)) return "-0.0";
+  const result = object6.toString(10);
+  return /^[-+]?[0-9]+e/.test(result) ? result.replace("e", ".e") : result;
+}
+var floatJsonTag = defineScalarTag("tag:yaml.org,2002:float", {
+  implicit: true,
+  implicitFirstChars: ["-", ..."0123456789"],
+  resolve: resolveYamlFloat$1,
+  identify: (object6) => typeof object6 === "number" && (!Number.isInteger(object6) || Object.is(object6, -0) || object6.toString(10).indexOf("e") >= 0),
+  represent: representYamlFloat$1
+});
+var YAML_FLOAT_PATTERN = /* @__PURE__ */ new RegExp("^(?:[-+]?(?:(?:[0-9][0-9_]*)?\\.[0-9_]*)(?:[eE][-+][0-9]+)?|[-+]?[0-9][0-9_]*(?::[0-5]?[0-9])+\\.[0-9_]*|[-+]?\\.(?:inf|Inf|INF)|\\.(?:nan|NaN|NAN))$");
+var YAML_FLOAT_SPECIAL_PATTERN = /* @__PURE__ */ new RegExp("^(?:[-+]?\\.(?:inf|Inf|INF)|\\.(?:nan|NaN|NAN))$");
+function resolveYamlFloat(source2) {
+  if (!YAML_FLOAT_PATTERN.test(source2)) return NOT_RESOLVED;
+  let value = source2.toLowerCase().replace(/_/g, "");
+  const sign = value[0] === "-" ? -1 : 1;
+  if ("+-".includes(value[0])) value = value.slice(1);
+  if (value === ".inf") return sign === 1 ? Number.POSITIVE_INFINITY : Number.NEGATIVE_INFINITY;
+  if (value === ".nan") return NaN;
+  let result = 0;
+  if (value.includes(":")) {
+    for (const part of value.split(":")) result = result * 60 + Number(part);
+    result *= sign;
+  } else result = sign * parseFloat(value);
+  if (Number.isFinite(result) || YAML_FLOAT_SPECIAL_PATTERN.test(source2)) return result;
+  return NOT_RESOLVED;
+}
+function representYamlFloat(object6) {
+  if (isNaN(object6)) return ".nan";
+  if (object6 === Number.POSITIVE_INFINITY) return ".inf";
+  if (object6 === Number.NEGATIVE_INFINITY) return "-.inf";
+  if (Object.is(object6, -0)) return "-0.0";
+  const result = object6.toString(10);
+  return /^[-+]?[0-9]+e/.test(result) ? result.replace("e", ".e") : result;
+}
+var floatYaml11Tag = defineScalarTag("tag:yaml.org,2002:float", {
+  implicit: true,
+  implicitFirstChars: [
+    "-",
+    "+",
+    ".",
+    ..."0123456789"
+  ],
+  resolve: resolveYamlFloat,
+  identify: (object6) => typeof object6 === "number" && (!Number.isInteger(object6) || Object.is(object6, -0) || object6.toString(10).indexOf("e") >= 0),
+  represent: representYamlFloat
+});
+var mergeTag = defineScalarTag("tag:yaml.org,2002:merge", {
+  implicit: true,
+  implicitFirstChars: ["<"],
+  resolve: (source2, isExplicit) => {
+    if (source2 === "<<" || isExplicit && source2 === "") return "<<";
+    return NOT_RESOLVED;
+  },
+  identify: () => false
+});
+var BASE64_PATTERN = /^[A-Za-z0-9+/]*={0,2}$/;
+function resolveYamlBinary(source2) {
+  const input2 = source2.replace(/\s/g, "");
+  if (input2.length % 4 !== 0 || !BASE64_PATTERN.test(input2)) return NOT_RESOLVED;
+  const binary = atob(input2);
+  const result = new Uint8Array(binary.length);
+  for (let index = 0; index < binary.length; index++) result[index] = binary.charCodeAt(index);
+  return result;
+}
+function representYamlBinary(object6) {
+  let binary = "";
+  for (let index = 0; index < object6.length; index++) binary += String.fromCharCode(object6[index]);
+  return btoa(binary);
+}
+var binaryTag = defineScalarTag("tag:yaml.org,2002:binary", {
+  resolve: resolveYamlBinary,
+  identify: (object6) => Object.prototype.toString.call(object6) === "[object Uint8Array]",
+  represent: representYamlBinary
+});
+var YAML_DATE_REGEXP = /* @__PURE__ */ new RegExp("^([0-9][0-9][0-9][0-9])-([0-9][0-9])-([0-9][0-9])$");
+var YAML_TIMESTAMP_REGEXP = /* @__PURE__ */ new RegExp("^([0-9][0-9][0-9][0-9])-([0-9][0-9]?)-([0-9][0-9]?)(?:[Tt]|[ \\t]+)([0-9][0-9]?):([0-9][0-9]):([0-9][0-9])(?:\\.([0-9]*))?(?:[ \\t]*(Z|([-+])([0-9][0-9]?)(?::([0-9][0-9]))?))?$");
+function makeUtcDate(year, month, day, hour = 0, minute = 0, second = 0, fraction = 0) {
+  const date5 = new Date(Date.UTC(year, month, day, hour, minute, second, fraction));
+  date5.setUTCFullYear(year, month, day);
+  return date5;
+}
+function resolveYamlTimestamp(source2) {
+  let match = YAML_DATE_REGEXP.exec(source2);
+  if (match === null) match = YAML_TIMESTAMP_REGEXP.exec(source2);
+  if (match === null) return NOT_RESOLVED;
+  const year = +match[1];
+  const month = +match[2] - 1;
+  const day = +match[3];
+  if (!match[4]) {
+    const date6 = makeUtcDate(year, month, day);
+    if (date6.getUTCFullYear() !== year || date6.getUTCMonth() !== month || date6.getUTCDate() !== day) return NOT_RESOLVED;
+    return date6;
+  }
+  const hour = +match[4];
+  const minute = +match[5];
+  const second = +match[6];
+  let fraction = 0;
+  if (hour > 23 || minute > 59 || second > 59) return NOT_RESOLVED;
+  if (match[7]) {
+    let value = match[7].slice(0, 3);
+    while (value.length < 3) value += "0";
+    fraction = +value;
+  }
+  const date5 = makeUtcDate(year, month, day, hour, minute, second, fraction);
+  if (date5.getUTCFullYear() !== year || date5.getUTCMonth() !== month || date5.getUTCDate() !== day) return NOT_RESOLVED;
+  if (match[9]) {
+    const offsetHour = +match[10];
+    const offsetMinute = +(match[11] || 0);
+    if (offsetHour > 23 || offsetMinute > 59) return NOT_RESOLVED;
+    const offset = (offsetHour * 60 + offsetMinute) * 6e4;
+    date5.setTime(date5.getTime() - (match[9] === "-" ? -offset : offset));
+  }
+  return date5;
+}
+var timestampTag = defineScalarTag("tag:yaml.org,2002:timestamp", {
+  implicit: true,
+  implicitFirstChars: [..."0123456789"],
+  resolve: resolveYamlTimestamp,
+  identify: (object6) => object6 instanceof Date,
+  represent: (object6) => object6.toISOString()
+});
+var seqTag = defineSequenceTag("tag:yaml.org,2002:seq", {
+  create: () => [],
+  addItem: (container, item) => {
+    container.push(item);
+  },
+  identify: Array.isArray
+});
+function isPlainObject2(data) {
+  if (data === null || typeof data !== "object" || Array.isArray(data)) return false;
+  const prototype = Object.getPrototypeOf(data);
+  return prototype === null || prototype === Object.prototype;
+}
+function pick(object6, keys) {
+  const result = {};
+  for (const key of keys) if (object6[key] !== void 0) result[key] = object6[key];
+  return result;
+}
+var omapTag = defineSequenceTag("tag:yaml.org,2002:omap", {
+  create: () => ({
+    list: [],
+    seen: /* @__PURE__ */ new Set()
+  }),
+  addItem: (carrier, item) => {
+    let key;
+    if (item instanceof Map) {
+      if (item.size !== 1) return "cannot resolve an ordered map item";
+      key = item.keys().next().value;
+    } else if (isPlainObject2(item)) {
+      const itemKeys = Object.keys(item);
+      if (itemKeys.length !== 1) return "cannot resolve an ordered map item";
+      key = itemKeys[0];
+    } else return "cannot resolve an ordered map item";
+    if (carrier.seen.has(key)) return "duplicate key in ordered map";
+    carrier.seen.add(key);
+    carrier.list.push(item);
+    return "";
+  },
+  finalize: (carrier) => carrier.list,
+  identify: () => false
+});
+var pairsTag = defineSequenceTag("tag:yaml.org,2002:pairs", {
+  create: () => [],
+  addItem: (container, item) => {
+    if (item instanceof Map) {
+      if (item.size !== 1) return "cannot resolve a pairs item";
+      container.push(item.entries().next().value);
+      return "";
+    }
+    if (Object.prototype.toString.call(item) !== "[object Object]") return "cannot resolve a pairs item";
+    const object6 = item;
+    const keys = Object.keys(object6);
+    if (keys.length !== 1) return "cannot resolve a pairs item";
+    container.push([keys[0], object6[keys[0]]]);
+    return "";
+  },
+  identify: () => false
+});
+var mapTag = defineMappingTag("tag:yaml.org,2002:map", {
+  create: () => ({}),
+  identify: isPlainObject2,
+  represent: (o) => {
+    const map4 = /* @__PURE__ */ new Map();
+    for (const key of Object.keys(o)) map4.set(key, o[key]);
+    return map4;
+  },
+  addPair: (container, key, value) => {
+    if (key !== null && typeof key === "object") return "object-based map does not support complex keys";
+    const normalizedKey = String(key);
+    if (normalizedKey === "__proto__") Object.defineProperty(container, normalizedKey, {
+      value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    else container[normalizedKey] = value;
+    return "";
+  },
+  has: (container, key) => {
+    if (key !== null && typeof key === "object") return false;
+    return Object.prototype.hasOwnProperty.call(container, String(key));
+  },
+  keys: (container) => Object.keys(container),
+  get: (container, key) => {
+    const normalizedKey = String(key);
+    if (!Object.prototype.hasOwnProperty.call(container, normalizedKey)) return null;
+    return container[normalizedKey];
+  }
+});
+var setTag = defineMappingTag("tag:yaml.org,2002:set", {
+  create: () => /* @__PURE__ */ new Set(),
+  identify: (data) => data instanceof Set,
+  represent: (data) => {
+    const map4 = /* @__PURE__ */ new Map();
+    for (const key of data) map4.set(key, null);
+    return map4;
+  },
+  addPair: (container, key, value) => {
+    if (value !== null) return "cannot resolve a set item";
+    container.add(key);
+    return "";
+  },
+  has: (container, key) => container.has(key),
+  keys: (container) => container.keys(),
+  get: () => null
+});
+function createTagDefinitionMap() {
+  return {
+    scalar: /* @__PURE__ */ Object.create(null),
+    sequence: /* @__PURE__ */ Object.create(null),
+    mapping: /* @__PURE__ */ Object.create(null)
+  };
+}
+function createTagDefinitionListMap() {
+  return {
+    scalar: [],
+    sequence: [],
+    mapping: []
+  };
+}
+function compileTags(tags) {
+  const result = [];
+  for (const tag of tags) {
+    let index = result.length;
+    for (let previousIndex = 0; previousIndex < result.length; previousIndex++) {
+      const previous = result[previousIndex];
+      if (previous.nodeKind === tag.nodeKind && previous.tagName === tag.tagName && previous.matchByTagPrefix === tag.matchByTagPrefix) {
+        index = previousIndex;
+        break;
+      }
+    }
+    result[index] = tag;
+  }
+  return result;
+}
+var Schema = class Schema2 {
+  tags;
+  /** @internal */
+  implicitScalarTags;
+  /**
+  * Dispatch implicit scalar resolvers by `source.charAt(0)`. Each bucket holds
+  * the resolvers that may match that key, in schema order; a key absent from
+  * the map uses
+  * {@link Schema.implicitScalarAnyFirstChar}
+  * (resolvers that declared no first-char constraint, so they apply to any
+  * first character).
+  */
+  implicitScalarByFirstChar;
+  implicitScalarAnyFirstChar;
+  /**
+  * The default scalar tag (`!!str`), resolved once so the composer's fallback
+  * for unresolved plain scalars avoids a keyed lookup per scalar.
+  *
+  * @internal
+  */
+  defaultScalarTag;
+  /**
+  * The default container tags (`!!seq` / `!!map`), used by the dumper: when a
+  * value is identified by its default tag, the tag is implicit and not
+  * printed. Undefined if the schema does not define them (then such values
+  * can't be dumped).
+  *
+  * @internal
+  */
+  defaultSequenceTag;
+  /** @internal */
+  defaultMappingTag;
+  exact;
+  prefix;
+  constructor(tags) {
+    const compiledTags = compileTags(tags);
+    const implicitScalarTags = [];
+    const exact = createTagDefinitionMap();
+    const prefix = createTagDefinitionListMap();
+    for (const tag of compiledTags) {
+      if (tag.nodeKind === "scalar" && tag.implicit) {
+        if (tag.matchByTagPrefix) throw new Error("Implicit scalar tags cannot match by tag prefix");
+        implicitScalarTags.push(tag);
+      }
+      switch (tag.nodeKind) {
+        case "scalar":
+          if (tag.matchByTagPrefix) prefix.scalar.push(tag);
+          else exact.scalar[tag.tagName] = tag;
+          break;
+        case "sequence":
+          if (tag.matchByTagPrefix) prefix.sequence.push(tag);
+          else exact.sequence[tag.tagName] = tag;
+          break;
+        case "mapping":
+          if (tag.matchByTagPrefix) prefix.mapping.push(tag);
+          else exact.mapping[tag.tagName] = tag;
+          break;
+      }
+    }
+    const implicitScalarAnyFirstChar = implicitScalarTags.filter((tag) => tag.implicitFirstChars === null);
+    const keys = /* @__PURE__ */ new Set();
+    for (const tag of implicitScalarTags) if (tag.implicitFirstChars !== null) for (const key of tag.implicitFirstChars) keys.add(key);
+    const implicitScalarByFirstChar = /* @__PURE__ */ new Map();
+    for (const key of keys) implicitScalarByFirstChar.set(key, implicitScalarTags.filter((tag) => tag.implicitFirstChars === null || tag.implicitFirstChars.indexOf(key) !== -1));
+    const defaultScalarTag = exact.scalar["tag:yaml.org,2002:str"];
+    if (!defaultScalarTag) throw new Error("schema does not define the default scalar tag (tag:yaml.org,2002:str)");
+    this.tags = compiledTags;
+    this.implicitScalarTags = implicitScalarTags;
+    this.implicitScalarByFirstChar = implicitScalarByFirstChar;
+    this.implicitScalarAnyFirstChar = implicitScalarAnyFirstChar;
+    this.defaultScalarTag = defaultScalarTag;
+    this.defaultSequenceTag = exact.sequence["tag:yaml.org,2002:seq"];
+    this.defaultMappingTag = exact.mapping["tag:yaml.org,2002:map"];
+    this.exact = exact;
+    this.prefix = prefix;
+  }
+  /** @internal */
+  lookupScalarTag(tagName) {
+    const exactTag = this.exact.scalar[tagName];
+    if (exactTag) return exactTag;
+    for (const tag of this.prefix.scalar) if (tagName.startsWith(tag.tagName)) return tag;
+  }
+  /** @internal */
+  lookupSequenceTag(tagName) {
+    const exactTag = this.exact.sequence[tagName];
+    if (exactTag) return exactTag;
+    for (const tag of this.prefix.sequence) if (tagName.startsWith(tag.tagName)) return tag;
+  }
+  /** @internal */
+  lookupMappingTag(tagName) {
+    const exactTag = this.exact.mapping[tagName];
+    if (exactTag) return exactTag;
+    for (const tag of this.prefix.mapping) if (tagName.startsWith(tag.tagName)) return tag;
+  }
+  /** @internal */
+  resolveImplicitScalarTag(source2) {
+    const candidates = this.implicitScalarByFirstChar.get(source2.charAt(0)) ?? this.implicitScalarAnyFirstChar;
+    for (const tag2 of candidates) {
+      const value = tag2.resolve(source2, false, tag2.tagName);
+      if (value !== NOT_RESOLVED) return {
+        value,
+        tag: tag2
+      };
+    }
+    const tag = this.defaultScalarTag;
+    return {
+      value: tag.resolve(source2, false, tag.tagName),
+      tag
+    };
+  }
+  /**
+  * Creates a new schema with the specified tags added. If a tag already
+  * exists, it is replaced by the specified tag.
+  *
+  * @example
+  *
+  * ```javascript
+  * import { CORE_SCHEMA, mergeTag, realMapTag } from 'js-yaml'
+  *
+  * const schema = CORE_SCHEMA.withTags(mergeTag, realMapTag)
+  * ```
+  */
+  withTags(...tags) {
+    let flatTags = [];
+    for (const tag of tags) flatTags = flatTags.concat(tag);
+    return new Schema2([...this.tags, ...flatTags]);
+  }
+};
+var FAILSAFE_SCHEMA = new Schema([
+  strTag,
+  seqTag,
+  mapTag
+]);
+var JSON_SCHEMA = new Schema([
+  ...FAILSAFE_SCHEMA.tags,
+  nullJsonTag,
+  boolJsonTag,
+  intJsonTag,
+  floatJsonTag
+]);
+var CORE_SCHEMA = new Schema([
+  ...FAILSAFE_SCHEMA.tags,
+  nullCoreTag,
+  boolCoreTag,
+  intCoreTag,
+  floatCoreTag
+]);
+var YAML11_SCHEMA = new Schema([
+  ...FAILSAFE_SCHEMA.tags,
+  nullYaml11Tag,
+  boolYaml11Tag,
+  intYaml11Tag,
+  floatYaml11Tag,
+  timestampTag,
+  mergeTag,
+  binaryTag,
+  omapTag,
+  pairsTag,
+  setTag
+]);
+var DUMP_SCHEMA = YAML11_SCHEMA.withTags({
+  ...intYaml11Tag,
+  resolve: (source2, isExplicit, tagName) => {
+    const result = intYaml11Tag.resolve(source2, isExplicit, tagName);
+    return result === NOT_RESOLVED ? intCoreTag.resolve(source2, isExplicit, tagName) : result;
+  }
+}, {
+  ...floatYaml11Tag,
+  resolve: (source2, isExplicit, tagName) => {
+    const result = floatYaml11Tag.resolve(source2, isExplicit, tagName);
+    return result === NOT_RESOLVED ? floatCoreTag.resolve(source2, isExplicit, tagName) : result;
+  }
+});
+var realMapTag = defineMappingTag("tag:yaml.org,2002:map", {
+  create: () => /* @__PURE__ */ new Map(),
+  addPair: (container, key, value) => {
+    container.set(key, value);
+    return "";
+  },
+  has: (container, key) => container.has(key),
+  keys: (container) => container.keys(),
+  get: (container, key) => container.get(key),
+  identify: (data) => data instanceof Map || isPlainObject2(data),
+  represent: (data) => {
+    if (data instanceof Map) return data;
+    const map4 = /* @__PURE__ */ new Map();
+    const obj = data;
+    for (const key of Object.keys(obj)) map4.set(key, obj[key]);
+    return map4;
+  }
+});
+function normalizeKey(key) {
+  if (Array.isArray(key)) {
+    const array5 = Array.prototype.slice.call(key);
+    for (let index = 0; index < array5.length; index++) {
+      if (Array.isArray(array5[index])) return null;
+      if (typeof array5[index] === "object" && Object.prototype.toString.call(array5[index]) === "[object Object]") array5[index] = "[object Object]";
+    }
+    return String(array5);
+  }
+  if (typeof key === "object" && Object.prototype.toString.call(key) === "[object Object]") return "[object Object]";
+  return String(key);
+}
+var legacyMapTag = defineMappingTag("tag:yaml.org,2002:map", {
+  create: () => ({}),
+  identify: isPlainObject2,
+  represent: (o) => {
+    const map4 = /* @__PURE__ */ new Map();
+    for (const key of Object.keys(o)) map4.set(key, o[key]);
+    return map4;
+  },
+  addPair: (container, key, value) => {
+    const normalizedKey = normalizeKey(key);
+    if (normalizedKey === null) return "nested arrays are not supported inside keys";
+    if (normalizedKey === "__proto__") Object.defineProperty(container, normalizedKey, {
+      value,
+      enumerable: true,
+      configurable: true,
+      writable: true
+    });
+    else container[normalizedKey] = value;
+    return "";
+  },
+  has: (container, key) => {
+    const normalizedKey = normalizeKey(key);
+    return normalizedKey !== null && Object.prototype.hasOwnProperty.call(container, normalizedKey);
+  },
+  keys: (container) => Object.keys(container),
+  get: (container, key) => {
+    const normalizedKey = String(key);
+    if (!Object.prototype.hasOwnProperty.call(container, normalizedKey)) return null;
+    return container[normalizedKey];
+  }
+});
+var DEFAULT_SNIPPET_OPTIONS = {
+  maxLength: 79,
+  indent: 1,
+  linesBefore: 3,
+  linesAfter: 2
+};
+function getLine(buffer, lineStart, lineEnd, position, maxLineLength) {
+  let head = "";
+  let tail = "";
+  const maxHalfLength = Math.floor(maxLineLength / 2) - 1;
+  if (position - lineStart > maxHalfLength) {
+    head = " ... ";
+    lineStart = position - maxHalfLength + head.length;
+  }
+  if (lineEnd - position > maxHalfLength) {
+    tail = " ...";
+    lineEnd = position + maxHalfLength - tail.length;
+  }
+  return {
+    str: head + buffer.slice(lineStart, lineEnd).replace(/\t/g, "\u2192") + tail,
+    pos: position - lineStart + head.length
+  };
+}
+function padStart(string4, max) {
+  return " ".repeat(Math.max(max - string4.length, 0)) + string4;
+}
+function makeSnippet(mark, options) {
+  if (!mark.buffer) return null;
+  const opts = {
+    ...DEFAULT_SNIPPET_OPTIONS,
+    ...options
+  };
+  const re = /\r?\n|\r|\0/g;
+  const lineStarts = [0];
+  const lineEnds = [];
+  let match;
+  let foundLineNo = -1;
+  while (match = re.exec(mark.buffer)) {
+    lineEnds.push(match.index);
+    lineStarts.push(match.index + match[0].length);
+    if (mark.position <= match.index && foundLineNo < 0) foundLineNo = lineStarts.length - 2;
+  }
+  if (foundLineNo < 0) foundLineNo = lineStarts.length - 1;
+  let result = "";
+  const lineNoLength = Math.min(mark.line + opts.linesAfter, lineEnds.length).toString().length;
+  const maxLineLength = opts.maxLength - (opts.indent + lineNoLength + 3);
+  for (let i = 1; i <= opts.linesBefore; i++) {
+    if (foundLineNo - i < 0) break;
+    const line2 = getLine(mark.buffer, lineStarts[foundLineNo - i], lineEnds[foundLineNo - i], mark.position - (lineStarts[foundLineNo] - lineStarts[foundLineNo - i]), maxLineLength);
+    result = `${" ".repeat(opts.indent)}${padStart((mark.line - i + 1).toString(), lineNoLength)} | ${line2.str}
+${result}`;
+  }
+  const line = getLine(mark.buffer, lineStarts[foundLineNo], lineEnds[foundLineNo], mark.position, maxLineLength);
+  result += `${" ".repeat(opts.indent)}${padStart((mark.line + 1).toString(), lineNoLength)} | ${line.str}
+`;
+  result += `${"-".repeat(opts.indent + lineNoLength + 3 + line.pos)}^
+`;
+  for (let i = 1; i <= opts.linesAfter; i++) {
+    if (foundLineNo + i >= lineEnds.length) break;
+    const line2 = getLine(mark.buffer, lineStarts[foundLineNo + i], lineEnds[foundLineNo + i], mark.position - (lineStarts[foundLineNo] - lineStarts[foundLineNo + i]), maxLineLength);
+    result += `${" ".repeat(opts.indent)}${padStart((mark.line + i + 1).toString(), lineNoLength)} | ${line2.str}
+`;
+  }
+  return result.replace(/\n$/, "");
+}
+function formatError(exception, compact) {
+  let where = "";
+  if (!exception.mark) return exception.reason;
+  if (exception.mark.name) where += `in "${exception.mark.name}" `;
+  where += `(${exception.mark.line + 1}:${exception.mark.column + 1})`;
+  if (!compact && exception.mark.snippet) where += `
+
+${exception.mark.snippet}`;
+  return `${exception.reason} ${where}`;
+}
+var YAMLException = class YAMLException2 extends Error {
+  reason;
+  mark;
+  /**
+  * Optional `mark` contains source snippet data. Usually, use
+  * {@link YAMLException.throwAt} instead of passing it directly.
+  */
+  constructor(reason, mark) {
+    super();
+    this.name = "YAMLException";
+    this.reason = reason;
+    this.mark = mark;
+    this.message = formatError(this, false);
+    if (Error.captureStackTrace) Error.captureStackTrace(this, this.constructor);
+  }
+  /**
+  * Returns the formatted error, omitting the source snippet in compact mode.
+  */
+  toString(compact) {
+    return `${this.name}: ${formatError(this, compact)}`;
+  }
+  /**
+  * Builds a YAMLException with a source snippet and throws it. `source` is
+  * the raw input text; `position` is an offset into it.
+  */
+  static throwAt(source2, position, message, filename = "") {
+    let line = 0;
+    let lineStart = 0;
+    for (let index = 0; index < position; index++) {
+      const ch = source2.charCodeAt(index);
+      if (ch === 10) {
+        line++;
+        lineStart = index + 1;
+      } else if (ch === 13) {
+        line++;
+        if (source2.charCodeAt(index + 1) === 10) index++;
+        lineStart = index + 1;
+      }
+    }
+    const mark = {
+      name: filename,
+      buffer: source2,
+      position,
+      line,
+      column: position - lineStart
+    };
+    mark.snippet = makeSnippet(mark);
+    throw new YAMLException2(message, mark);
+  }
+};
+var EVENT_ID = {
+  DOCUMENT: 1,
+  SEQUENCE: 2,
+  MAPPING: 3,
+  SCALAR: 4,
+  ALIAS: 5,
+  POP: 6
+};
+var SCALAR_STYLE = {
+  PLAIN: 1,
+  SINGLE_QUOTED: 2,
+  DOUBLE_QUOTED: 3,
+  LITERAL_BLOCK: 4,
+  FOLDED_BLOCK: 5
+};
+var COLLECTION_STYLE = {
+  BLOCK: 1,
+  FLOW: 2
+};
+var CHOMPING_MODE = {
+  CLIP: 1,
+  STRIP: 2,
+  KEEP: 3
+};
+var NO_RANGE$3 = -1;
+function simpleEscapeSequence(c) {
+  switch (c) {
+    case 48:
+      return "\0";
+    case 97:
+      return "\x07";
+    case 98:
+      return "\b";
+    case 116:
+      return "	";
+    case 9:
+      return "	";
+    case 110:
+      return "\n";
+    case 118:
+      return "\v";
+    case 102:
+      return "\f";
+    case 114:
+      return "\r";
+    case 101:
+      return "\x1B";
+    case 32:
+      return " ";
+    case 34:
+      return '"';
+    case 47:
+      return "/";
+    case 92:
+      return "\\";
+    case 78:
+      return "\x85";
+    case 95:
+      return "\xA0";
+    case 76:
+      return "\u2028";
+    case 80:
+      return "\u2029";
+    default:
+      return "";
+  }
+}
+var simpleEscapeCheck = new Array(256);
+var simpleEscapeMap = new Array(256);
+for (let i = 0; i < 256; i++) {
+  simpleEscapeCheck[i] = simpleEscapeSequence(i) ? 1 : 0;
+  simpleEscapeMap[i] = simpleEscapeSequence(i);
+}
+function charFromCodepoint(c) {
+  if (c <= 65535) return String.fromCharCode(c);
+  return String.fromCharCode((c - 65536 >> 10) + 55296, (c - 65536 & 1023) + 56320);
+}
+function fromHexCode$1(c) {
+  if (c >= 48 && c <= 57) return c - 48;
+  return (c | 32) - 97 + 10;
+}
+function escapedHexLen$1(c) {
+  if (c === 120) return 2;
+  if (c === 117) return 4;
+  return 8;
+}
+function skipFoldedBreaks(input2, position, end) {
+  let breaks = 0;
+  while (position < end) {
+    const ch = input2.charCodeAt(position);
+    if (ch === 10) {
+      breaks++;
+      position++;
+    } else if (ch === 13) {
+      breaks++;
+      position++;
+      if (input2.charCodeAt(position) === 10) position++;
+    } else if (ch === 32 || ch === 9) position++;
+    else break;
+  }
+  return {
+    position,
+    breaks
+  };
+}
+function foldedBreaks(count3) {
+  if (count3 === 1) return " ";
+  return "\n".repeat(count3 - 1);
+}
+function getPlainValue(input2, start, end) {
+  let result = "";
+  let position = start;
+  let captureStart = start;
+  let captureEnd = start;
+  while (position < end) {
+    const ch = input2.charCodeAt(position);
+    if (ch === 10 || ch === 13) {
+      result += input2.slice(captureStart, captureEnd);
+      const fold = skipFoldedBreaks(input2, position, end);
+      result += foldedBreaks(fold.breaks);
+      position = captureStart = captureEnd = fold.position;
+    } else {
+      position++;
+      if (ch !== 32 && ch !== 9) captureEnd = position;
+    }
+  }
+  return result + input2.slice(captureStart, captureEnd);
+}
+function getSingleQuotedValue(input2, start, end) {
+  let result = "";
+  let position = start;
+  let captureStart = start;
+  let captureEnd = start;
+  while (position < end) {
+    const ch = input2.charCodeAt(position);
+    if (ch === 39) {
+      result += input2.slice(captureStart, position) + "'";
+      position += 2;
+      captureStart = captureEnd = position;
+    } else if (ch === 10 || ch === 13) {
+      result += input2.slice(captureStart, captureEnd);
+      const fold = skipFoldedBreaks(input2, position, end);
+      result += foldedBreaks(fold.breaks);
+      position = captureStart = captureEnd = fold.position;
+    } else {
+      position++;
+      if (ch !== 32 && ch !== 9) captureEnd = position;
+    }
+  }
+  return result + input2.slice(captureStart, end);
+}
+function getDoubleQuotedValue(input2, start, end) {
+  let result = "";
+  let position = start;
+  let captureStart = start;
+  let captureEnd = start;
+  while (position < end) {
+    const ch = input2.charCodeAt(position);
+    if (ch === 92) {
+      result += input2.slice(captureStart, position);
+      position++;
+      const escaped = input2.charCodeAt(position);
+      if (escaped === 10 || escaped === 13) position = skipFoldedBreaks(input2, position, end).position;
+      else if (escaped < 256 && simpleEscapeCheck[escaped]) {
+        result += simpleEscapeMap[escaped];
+        position++;
+      } else {
+        let hexLength = escapedHexLen$1(escaped);
+        let hexResult = 0;
+        for (; hexLength > 0; hexLength--) {
+          position++;
+          const digit = fromHexCode$1(input2.charCodeAt(position));
+          hexResult = (hexResult << 4) + digit;
+        }
+        result += charFromCodepoint(hexResult);
+        position++;
+      }
+      captureStart = captureEnd = position;
+    } else if (ch === 10 || ch === 13) {
+      result += input2.slice(captureStart, captureEnd);
+      const fold = skipFoldedBreaks(input2, position, end);
+      result += foldedBreaks(fold.breaks);
+      position = captureStart = captureEnd = fold.position;
+    } else {
+      position++;
+      if (ch !== 32 && ch !== 9) captureEnd = position;
+    }
+  }
+  return result + input2.slice(captureStart, end);
+}
+function getBlockValue(input2, start, end, indent, chomping, folded) {
+  const textIndent = indent < 0 ? 0 : indent;
+  const region = input2.slice(start, end).replace(/\r\n?/g, "\n");
+  const lines = region === "" ? [] : (region.endsWith("\n") ? region.slice(0, -1) : region).split("\n");
+  let result = "";
+  let didReadContent = false;
+  let emptyLines = 0;
+  let atMoreIndented = false;
+  for (const line of lines) {
+    let column = 0;
+    while (column < textIndent && line.charCodeAt(column) === 32) column++;
+    if (indent < 0 || column >= line.length) {
+      emptyLines++;
+      continue;
+    }
+    const content = line.slice(textIndent);
+    const first = content.charCodeAt(0);
+    if (folded) if (first === 32 || first === 9) {
+      atMoreIndented = true;
+      result += "\n".repeat(didReadContent ? 1 + emptyLines : emptyLines);
+    } else if (atMoreIndented) {
+      atMoreIndented = false;
+      result += "\n".repeat(emptyLines + 1);
+    } else if (emptyLines === 0) {
+      if (didReadContent) result += " ";
+    } else result += "\n".repeat(emptyLines);
+    else result += "\n".repeat(didReadContent ? 1 + emptyLines : emptyLines);
+    result += content;
+    didReadContent = true;
+    emptyLines = 0;
+  }
+  if (chomping === CHOMPING_MODE.KEEP) result += "\n".repeat(didReadContent ? 1 + emptyLines : emptyLines);
+  else if (chomping !== CHOMPING_MODE.STRIP) {
+    if (didReadContent) result += "\n";
+  }
+  return result;
+}
+function getScalarValue(input2, scalar) {
+  if (scalar.valueStart === NO_RANGE$3) return "";
+  const { valueStart, valueEnd } = scalar;
+  if (scalar.fast) return input2.slice(valueStart, valueEnd);
+  switch (scalar.style) {
+    case SCALAR_STYLE.SINGLE_QUOTED:
+      return getSingleQuotedValue(input2, valueStart, valueEnd);
+    case SCALAR_STYLE.DOUBLE_QUOTED:
+      return getDoubleQuotedValue(input2, valueStart, valueEnd);
+    case SCALAR_STYLE.LITERAL_BLOCK:
+      return getBlockValue(input2, valueStart, valueEnd, scalar.indent, scalar.chomping, false);
+    case SCALAR_STYLE.FOLDED_BLOCK:
+      return getBlockValue(input2, valueStart, valueEnd, scalar.indent, scalar.chomping, true);
+    default:
+      return getPlainValue(input2, valueStart, valueEnd);
+  }
+}
+var DEFAULT_TAG_HANDLERS = Object.assign(/* @__PURE__ */ Object.create(null), {
+  "!": "!",
+  "!!": "tag:yaml.org,2002:"
+});
+function tagNameFull(rawTag, tagHandlers) {
+  if (rawTag.startsWith("!<") && rawTag.endsWith(">")) return decodeURIComponent(rawTag.slice(2, -1));
+  const handleEnd = rawTag.indexOf("!", 1);
+  const handle = handleEnd === -1 ? "!" : rawTag.slice(0, handleEnd + 1);
+  const prefix = tagHandlers?.[handle] ?? DEFAULT_TAG_HANDLERS[handle] ?? handle;
+  return decodeURIComponent(prefix) + decodeURIComponent(rawTag.slice(handle.length));
+}
+var NO_RANGE$2 = -1;
+var MERGE_TAG_NAME = "tag:yaml.org,2002:merge";
+var DEFAULT_CONSTRUCTOR_OPTIONS = {
+  filename: "",
+  schema: CORE_SCHEMA,
+  json: false,
+  maxTotalMergeKeys: 1e4,
+  maxAliases: -1
+};
+function eventPosition$1(event) {
+  if ("tagStart" in event && event.tagStart !== NO_RANGE$2) return event.tagStart;
+  if ("anchorStart" in event && event.anchorStart !== NO_RANGE$2) return event.anchorStart;
+  if ("valueStart" in event && event.valueStart !== NO_RANGE$2) return event.valueStart;
+  if ("start" in event) return event.start;
+  return 0;
+}
+function throwError$1(state, message) {
+  YAMLException.throwAt(state.source, state.position, message, state.filename);
+}
+function finalizeCollection(state, position, tag, carrier) {
+  try {
+    return tag.finalize(carrier);
+  } catch (error62) {
+    if (error62 instanceof YAMLException) throw error62;
+    YAMLException.throwAt(state.source, position, error62 instanceof Error ? error62.message : String(error62), state.filename);
+  }
+}
+function constructScalar(state, event) {
+  const source2 = getScalarValue(state.source, event);
+  const rawTag = event.tagStart === NO_RANGE$2 ? "" : state.source.slice(event.tagStart, event.tagEnd);
+  const strTag2 = state.schema.defaultScalarTag;
+  if (rawTag !== "") {
+    if (rawTag === "!") return {
+      value: source2,
+      tag: strTag2
+    };
+    const tagName = tagNameFull(rawTag, state.tagHandlers);
+    const scalarTag = state.schema.lookupScalarTag(tagName);
+    if (scalarTag) {
+      const result = scalarTag.resolve(source2, true, tagName);
+      if (result === NOT_RESOLVED) throwError$1(state, `cannot resolve a node with !<${tagName}> explicit tag`);
+      return {
+        value: result,
+        tag: scalarTag
+      };
+    }
+    const collectionTagDef = state.schema.lookupMappingTag(tagName) ?? state.schema.lookupSequenceTag(tagName);
+    if (collectionTagDef) {
+      if (source2 !== "") throwError$1(state, `cannot resolve a node with !<${tagName}> explicit tag`);
+      const carrier = collectionTagDef.create(tagName);
+      return {
+        value: collectionTagDef.carrierIsResult ? carrier : finalizeCollection(state, state.position, collectionTagDef, carrier),
+        tag: collectionTagDef
+      };
+    }
+    throwError$1(state, `unknown scalar tag !<${tagName}>`);
+  }
+  if (event.style === SCALAR_STYLE.PLAIN) return state.schema.resolveImplicitScalarTag(source2);
+  return {
+    value: strTag2.resolve(source2, false, strTag2.tagName),
+    tag: strTag2
+  };
+}
+function collectionTagName(state, event, defaultTagName) {
+  const rawTag = event.tagStart === NO_RANGE$2 ? "" : state.source.slice(event.tagStart, event.tagEnd);
+  return rawTag === "" || rawTag === "!" ? defaultTagName : tagNameFull(rawTag, state.tagHandlers);
+}
+function isMappingTag(tag) {
+  return tag.nodeKind === "mapping";
+}
+function chargeMergeWork(state) {
+  state.totalMergeKeys++;
+  if (state.maxTotalMergeKeys !== -1 && state.totalMergeKeys > state.maxTotalMergeKeys) throwError$1(state, `merge keys exceeded maxTotalMergeKeys (${state.maxTotalMergeKeys})`);
+}
+function mergeKeys(state, frame, source2, sourceTag) {
+  chargeMergeWork(state);
+  for (const sourceKey of sourceTag.keys(source2)) {
+    chargeMergeWork(state);
+    if (frame.tag.has(frame.value, sourceKey)) continue;
+    const err = frame.tag.addPair(frame.value, sourceKey, sourceTag.get(source2, sourceKey));
+    if (err) throwError$1(state, err);
+    frame.overridable ??= /* @__PURE__ */ new Set();
+    frame.overridable.add(sourceKey);
+  }
+}
+function mergeSource(state, frame, source2, sourceTag) {
+  state.position = frame.keyPosition;
+  if (isMappingTag(sourceTag)) mergeKeys(state, frame, source2, sourceTag);
+  else if (sourceTag.nodeKind === "sequence" && Array.isArray(source2)) {
+    if (source2.length > 100) throwError$1(state, "abnormal merge sequence size");
+    for (const element of source2) {
+      const elementTag = state.nodeTags.get(element);
+      if (!elementTag) throwError$1(state, "cannot merge mappings; the provided source object is unacceptable");
+      mergeKeys(state, frame, element, elementTag);
+    }
+  } else throwError$1(state, "cannot merge mappings; the provided source object is unacceptable");
+}
+function addMappingValue(state, frame, key, value, tag) {
+  state.position = frame.keyPosition;
+  if (frame.keyIsMerge) {
+    mergeSource(state, frame, value, tag);
+    return;
+  }
+  if (!state.json && frame.tag.has(frame.value, key) && !frame.overridable?.has(key)) throwError$1(state, "duplicated mapping key");
+  const err = frame.tag.addPair(frame.value, key, value);
+  if (err) throwError$1(state, err);
+  frame.overridable?.delete(key);
+}
+function addValue(state, value, tag) {
+  const frame = state.frames[state.frames.length - 1];
+  if (frame.kind === "document") {
+    frame.value = value;
+    frame.hasValue = true;
+  } else if (frame.kind === "sequence") {
+    if (isMappingTag(tag)) state.nodeTags.set(value, tag);
+    const err = frame.tag.addItem(frame.value, value, frame.index++);
+    if (err) throwError$1(state, err);
+  } else if (frame.hasKey) {
+    const key = frame.key;
+    frame.key = void 0;
+    frame.hasKey = false;
+    addMappingValue(state, frame, key, value, tag);
+  } else {
+    frame.key = value;
+    frame.keyPosition = state.position;
+    frame.hasKey = true;
+    frame.keyIsMerge = tag.tagName === MERGE_TAG_NAME;
+  }
+}
+function storeAnchor(state, event, value, tag, isValueFinal) {
+  if (event.anchorStart !== NO_RANGE$2) {
+    const anchor2 = {
+      value,
+      tag,
+      isValueFinal
+    };
+    state.anchors.set(state.source.slice(event.anchorStart, event.anchorEnd), anchor2);
+    return anchor2;
+  }
+  return null;
+}
+function constructFromEvents(events, options) {
+  const state = {
+    ...DEFAULT_CONSTRUCTOR_OPTIONS,
+    ...options,
+    events,
+    documents: [],
+    eventIndex: 0,
+    position: 0,
+    frames: [],
+    anchors: /* @__PURE__ */ new Map(),
+    nodeTags: /* @__PURE__ */ new Map(),
+    tagHandlers: /* @__PURE__ */ Object.create(null),
+    totalMergeKeys: 0,
+    aliasCount: 0
+  };
+  while (state.eventIndex < state.events.length) {
+    const event = state.events[state.eventIndex++];
+    state.position = eventPosition$1(event);
+    switch (event.type) {
+      case EVENT_ID.DOCUMENT:
+        state.anchors = /* @__PURE__ */ new Map();
+        state.nodeTags = /* @__PURE__ */ new Map();
+        state.aliasCount = 0;
+        state.tagHandlers = /* @__PURE__ */ Object.create(null);
+        for (const directive of event.directives) if (directive.kind === "tag") state.tagHandlers[directive.handle] = directive.prefix;
+        state.frames.push({
+          kind: "document",
+          position: state.position,
+          value: void 0,
+          hasValue: false
+        });
+        break;
+      case EVENT_ID.SCALAR: {
+        const { value, tag } = constructScalar(state, event);
+        storeAnchor(state, event, value, tag, true);
+        addValue(state, value, tag);
+        break;
+      }
+      case EVENT_ID.SEQUENCE: {
+        const tagName = collectionTagName(state, event, "tag:yaml.org,2002:seq");
+        const tag = state.schema.lookupSequenceTag(tagName);
+        if (!tag) throwError$1(state, `unknown sequence tag !<${tagName}>`);
+        const value = tag.create(tagName);
+        const anchor2 = storeAnchor(state, event, value, tag, tag.carrierIsResult);
+        state.frames.push({
+          kind: "sequence",
+          position: state.position,
+          value,
+          tag,
+          anchor: anchor2,
+          index: 0
+        });
+        break;
+      }
+      case EVENT_ID.MAPPING: {
+        const tagName = collectionTagName(state, event, "tag:yaml.org,2002:map");
+        const tag = state.schema.lookupMappingTag(tagName);
+        if (!tag) throwError$1(state, `unknown mapping tag !<${tagName}>`);
+        const value = tag.create(tagName);
+        const anchor2 = storeAnchor(state, event, value, tag, tag.carrierIsResult);
+        state.frames.push({
+          kind: "mapping",
+          position: state.position,
+          value,
+          tag,
+          anchor: anchor2,
+          key: void 0,
+          keyPosition: state.position,
+          hasKey: false,
+          keyIsMerge: false,
+          overridable: null
+        });
+        break;
+      }
+      case EVENT_ID.ALIAS: {
+        if (state.maxAliases !== -1 && ++state.aliasCount > state.maxAliases) throwError$1(state, `aliases exceeded maxAliases (${state.maxAliases})`);
+        const name = state.source.slice(event.anchorStart, event.anchorEnd);
+        const anchor2 = state.anchors.get(name);
+        if (!anchor2) throwError$1(state, `unidentified alias "${name}"`);
+        if (!anchor2.isValueFinal) throwError$1(state, `recursive alias "${name}" is not supported for tag ${anchor2.tag.tagName} because it uses finalize()`);
+        addValue(state, anchor2.value, anchor2.tag);
+        break;
+      }
+      case EVENT_ID.POP: {
+        const frame = state.frames.pop();
+        if (frame.kind === "mapping" && frame.hasKey) {
+          state.position = frame.keyPosition;
+          throwError$1(state, "incomplete mapping pair in event stream");
+        }
+        if (frame.kind === "document") state.documents.push(frame.value);
+        else {
+          const value = frame.tag.carrierIsResult ? frame.value : finalizeCollection(state, frame.position, frame.tag, frame.value);
+          if (frame.anchor) {
+            frame.anchor.value = value;
+            frame.anchor.isValueFinal = true;
+          }
+          addValue(state, value, frame.tag);
+        }
+        break;
+      }
+    }
+  }
+  return state.documents;
+}
+var NO_RANGE$1 = -1;
+var HAS_OWN = Object.prototype.hasOwnProperty;
+var CONTEXT_FLOW_IN = 1;
+var CONTEXT_FLOW_OUT = 2;
+var CONTEXT_BLOCK_IN = 3;
+var CONTEXT_BLOCK_OUT = 4;
+var PATTERN_NON_PRINTABLE = /[\x00-\x08\x0B\x0C\x0E-\x1F\x7F-\x84\x86-\x9F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?:[^\uD800-\uDBFF]|^)[\uDC00-\uDFFF]/;
+var PATTERN_FLOW_INDICATORS = /[,\[\]{}]/;
+var PATTERN_TAG_HANDLE = /^(?:!|!!|![0-9A-Za-z-]+!)$/;
+var NS_URI_CHAR = String.raw`(?:%[0-9A-Fa-f]{2}|[0-9A-Za-z\-#;/?:@&=+$,_.!~*'()\[\]])`;
+var NS_TAG_CHAR = String.raw`(?:%[0-9A-Fa-f]{2}|[0-9A-Za-z\-#;/?:@&=+$.~*'()_])`;
+var PATTERN_TAG_URI = new RegExp(`^(?:${NS_URI_CHAR})*$`);
+var PATTERN_TAG_SUFFIX = new RegExp(`^(?:${NS_TAG_CHAR})+$`);
+var PATTERN_TAG_PREFIX = new RegExp(`^(?:!(?:${NS_URI_CHAR})*|${NS_TAG_CHAR}(?:${NS_URI_CHAR})*)$`);
+var DEFAULT_PARSER_OPTIONS = {
+  filename: "",
+  maxDepth: 100
+};
+function addDocumentEvent(state, explicitStart, explicitEnd) {
+  state.events.push({
+    type: EVENT_ID.DOCUMENT,
+    explicitStart,
+    explicitEnd,
+    directives: state.directives
+  });
+}
+function addSequenceEvent(state, start, anchorStart, anchorEnd, tagStart, tagEnd, style) {
+  state.events.push({
+    type: EVENT_ID.SEQUENCE,
+    start,
+    anchorStart,
+    anchorEnd,
+    tagStart,
+    tagEnd,
+    style
+  });
+}
+function addMappingEvent(state, start, anchorStart, anchorEnd, tagStart, tagEnd, style) {
+  state.events.push({
+    type: EVENT_ID.MAPPING,
+    start,
+    anchorStart,
+    anchorEnd,
+    tagStart,
+    tagEnd,
+    style
+  });
+}
+function insertFlowPairMappingEvent(state, snapshot) {
+  state.events.splice(snapshot.eventsLength, 0, {
+    type: EVENT_ID.MAPPING,
+    start: snapshot.position,
+    anchorStart: NO_RANGE$1,
+    anchorEnd: NO_RANGE$1,
+    tagStart: NO_RANGE$1,
+    tagEnd: NO_RANGE$1,
+    style: COLLECTION_STYLE.FLOW
+  });
+}
+function addScalarEvent(state, valueStart, valueEnd, anchorStart, anchorEnd, tagStart, tagEnd, style, chomping = CHOMPING_MODE.CLIP, indent = -1, fast = false) {
+  state.events.push({
+    type: EVENT_ID.SCALAR,
+    valueStart,
+    valueEnd,
+    anchorStart,
+    anchorEnd,
+    tagStart,
+    tagEnd,
+    style,
+    chomping,
+    indent,
+    fast
+  });
+}
+function addAliasEvent(state, anchorStart, anchorEnd) {
+  state.events.push({
+    type: EVENT_ID.ALIAS,
+    anchorStart,
+    anchorEnd
+  });
+}
+function addPopEvent(state) {
+  state.events.push({ type: EVENT_ID.POP });
+}
+function addEmptyScalarEvent(state) {
+  addScalarEvent(state, NO_RANGE$1, NO_RANGE$1, NO_RANGE$1, NO_RANGE$1, NO_RANGE$1, NO_RANGE$1, SCALAR_STYLE.PLAIN);
+}
+function emptyProperties() {
+  return {
+    anchorStart: NO_RANGE$1,
+    anchorEnd: NO_RANGE$1,
+    tagStart: NO_RANGE$1,
+    tagEnd: NO_RANGE$1
+  };
+}
+function snapshotState(state) {
+  return {
+    position: state.position,
+    line: state.line,
+    lineStart: state.lineStart,
+    lineIndent: state.lineIndent,
+    firstTabInLine: state.firstTabInLine,
+    eventsLength: state.events.length
+  };
+}
+function restoreState(state, snapshot) {
+  state.position = snapshot.position;
+  state.line = snapshot.line;
+  state.lineStart = snapshot.lineStart;
+  state.lineIndent = snapshot.lineIndent;
+  state.firstTabInLine = snapshot.firstTabInLine;
+  state.events.length = snapshot.eventsLength;
+}
+function throwError(state, message) {
+  YAMLException.throwAt(state.input.slice(0, state.length), state.position, message, state.filename);
+}
+function isEol(c) {
+  return c === 10 || c === 13;
+}
+function isWhiteSpace(c) {
+  return c === 9 || c === 32;
+}
+function isWsOrEol(c) {
+  return isWhiteSpace(c) || isEol(c);
+}
+function isWsOrEolOrEnd(c) {
+  return c === 0 || isWsOrEol(c);
+}
+function isFlowIndicator(c) {
+  return c === 44 || c === 91 || c === 93 || c === 123 || c === 125;
+}
+function fromDecimalCode(c) {
+  return c >= 48 && c <= 57 ? c - 48 : -1;
+}
+function fromHexCode(c) {
+  if (c >= 48 && c <= 57) return c - 48;
+  const lc = c | 32;
+  if (lc >= 97 && lc <= 102) return lc - 97 + 10;
+  return -1;
+}
+function escapedHexLen(c) {
+  if (c === 120) return 2;
+  if (c === 117) return 4;
+  if (c === 85) return 8;
+  return 0;
+}
+function isSimpleEscape(c) {
+  return c === 48 || c === 97 || c === 98 || c === 116 || c === 9 || c === 110 || c === 118 || c === 102 || c === 114 || c === 101 || c === 32 || c === 34 || c === 47 || c === 92 || c === 78 || c === 95 || c === 76 || c === 80;
+}
+function consumeLineBreak(state) {
+  if (state.input.charCodeAt(state.position) === 10) state.position++;
+  else {
+    state.position++;
+    if (state.input.charCodeAt(state.position) === 10) state.position++;
+  }
+  state.line++;
+  state.lineStart = state.position;
+  state.lineIndent = 0;
+  state.firstTabInLine = -1;
+}
+function skipSeparationSpace(state, allowComments) {
+  let lineBreaks = 0;
+  let ch = state.input.charCodeAt(state.position);
+  let hasSeparation = state.position === state.lineStart || isWsOrEol(state.input.charCodeAt(state.position - 1));
+  while (ch !== 0) {
+    while (isWhiteSpace(ch)) {
+      hasSeparation = true;
+      if (ch === 9 && state.firstTabInLine === -1) state.firstTabInLine = state.position;
+      ch = state.input.charCodeAt(++state.position);
+    }
+    if (allowComments && hasSeparation && ch === 35) do
+      ch = state.input.charCodeAt(++state.position);
+    while (!isEol(ch) && ch !== 0);
+    if (!isEol(ch)) break;
+    consumeLineBreak(state);
+    lineBreaks++;
+    hasSeparation = true;
+    ch = state.input.charCodeAt(state.position);
+    while (ch === 32) {
+      state.lineIndent++;
+      ch = state.input.charCodeAt(++state.position);
+    }
+  }
+  return lineBreaks;
+}
+function testDocumentSeparator(state, position = state.position) {
+  const ch = state.input.charCodeAt(position);
+  if ((ch === 45 || ch === 46) && ch === state.input.charCodeAt(position + 1) && ch === state.input.charCodeAt(position + 2)) {
+    const following = state.input.charCodeAt(position + 3);
+    return following === 0 || isWsOrEol(following);
+  }
+  return false;
+}
+function skipByteOrderMark(state) {
+  if (state.position === state.lineStart && state.input.charCodeAt(state.position) === 65279) {
+    state.position++;
+    state.lineStart = state.position;
+  }
+}
+function testDocumentBoundary(state) {
+  if (state.position !== state.lineStart) return false;
+  if (testDocumentSeparator(state)) return true;
+  if (state.input.charCodeAt(state.position) !== 65279) return false;
+  const snapshot = snapshotState(state);
+  skipByteOrderMark(state);
+  skipSeparationSpace(state, true);
+  const ch = state.input.charCodeAt(state.position);
+  const result = state.position === state.lineStart && (ch === 37 || ch === 45 && testDocumentSeparator(state));
+  restoreState(state, snapshot);
+  return result;
+}
+function skipUntilLineEnd(state) {
+  let ch = state.input.charCodeAt(state.position);
+  while (ch !== 0 && !isEol(ch)) ch = state.input.charCodeAt(++state.position);
+}
+function checkPrintable(state, start, end) {
+  if (PATTERN_NON_PRINTABLE.test(state.input.slice(start, end))) throwError(state, "the stream contains non-printable characters");
+}
+function readTagProperty(state, props, inFlow) {
+  if (state.input.charCodeAt(state.position) !== 33) return false;
+  if (props.tagStart !== NO_RANGE$1) throwError(state, "duplication of a tag property");
+  const start = state.position;
+  let isVerbatim = false;
+  let isNamed = false;
+  let tagHandle = "!";
+  let ch = state.input.charCodeAt(++state.position);
+  if (ch === 60) {
+    isVerbatim = true;
+    ch = state.input.charCodeAt(++state.position);
+  } else if (ch === 33) {
+    isNamed = true;
+    tagHandle = "!!";
+    ch = state.input.charCodeAt(++state.position);
+  }
+  let suffixStart = state.position;
+  let tagName;
+  if (isVerbatim) {
+    while (ch !== 0 && ch !== 62) ch = state.input.charCodeAt(++state.position);
+    if (ch !== 62) throwError(state, "unexpected end of the stream within a verbatim tag");
+    tagName = state.input.slice(suffixStart, state.position);
+    state.position++;
+  } else {
+    while (ch !== 0 && !isWsOrEol(ch) && !(inFlow && isFlowIndicator(ch))) {
+      if (ch === 33) if (!isNamed) {
+        tagHandle = state.input.slice(suffixStart - 1, state.position + 1);
+        if (!PATTERN_TAG_HANDLE.test(tagHandle)) throwError(state, "named tag handle cannot contain such characters");
+        isNamed = true;
+        suffixStart = state.position + 1;
+      } else throwError(state, "tag suffix cannot contain exclamation marks");
+      ch = state.input.charCodeAt(++state.position);
+    }
+    tagName = state.input.slice(suffixStart, state.position);
+    if (PATTERN_FLOW_INDICATORS.test(tagName)) throwError(state, "tag suffix cannot contain flow indicator characters");
+  }
+  if (tagName && !(isVerbatim ? PATTERN_TAG_URI.test(tagName) : PATTERN_TAG_SUFFIX.test(tagName))) throwError(state, `tag name cannot contain such characters: ${tagName}`);
+  if (!isVerbatim && tagHandle !== "!" && tagHandle !== "!!" && !HAS_OWN.call(state.tagHandlers, tagHandle)) throwError(state, `undeclared tag handle "${tagHandle}"`);
+  props.tagStart = start;
+  props.tagEnd = state.position;
+  return true;
+}
+function readAnchorProperty(state, props) {
+  if (state.input.charCodeAt(state.position) !== 38) return false;
+  if (props.anchorStart !== NO_RANGE$1) throwError(state, "duplication of an anchor property");
+  state.position++;
+  const start = state.position;
+  while (state.input.charCodeAt(state.position) !== 0 && !isWsOrEol(state.input.charCodeAt(state.position)) && !isFlowIndicator(state.input.charCodeAt(state.position))) state.position++;
+  if (state.position === start) throwError(state, "name of an anchor node must contain at least one character");
+  props.anchorStart = start;
+  props.anchorEnd = state.position;
+  return true;
+}
+function readAlias(state, props) {
+  if (state.input.charCodeAt(state.position) !== 42) return false;
+  if (props.anchorStart !== NO_RANGE$1 || props.tagStart !== NO_RANGE$1) throwError(state, "alias node should not have any properties");
+  state.position++;
+  const start = state.position;
+  while (state.input.charCodeAt(state.position) !== 0 && !isWsOrEol(state.input.charCodeAt(state.position)) && !isFlowIndicator(state.input.charCodeAt(state.position))) state.position++;
+  if (state.position === start) throwError(state, "name of an alias node must contain at least one character");
+  addAliasEvent(state, start, state.position);
+  return true;
+}
+function readFlowScalarBreak(state, nodeIndent) {
+  skipSeparationSpace(state, false);
+  if (state.lineIndent < nodeIndent) throwError(state, "deficient indentation");
+}
+function readSingleQuotedScalar(state, nodeIndent, props) {
+  if (state.input.charCodeAt(state.position) !== 39) return false;
+  state.position++;
+  const start = state.position;
+  let simple = true;
+  while (state.input.charCodeAt(state.position) !== 0) {
+    const ch = state.input.charCodeAt(state.position);
+    if (ch === 39) {
+      if (state.input.charCodeAt(state.position + 1) === 39) {
+        simple = false;
+        state.position += 2;
+        continue;
+      }
+      const end = state.position;
+      state.position++;
+      addScalarEvent(state, start, end, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, SCALAR_STYLE.SINGLE_QUOTED, CHOMPING_MODE.CLIP, -1, simple);
+      return true;
+    }
+    if (isEol(ch)) {
+      simple = false;
+      readFlowScalarBreak(state, nodeIndent);
+    } else if (state.position === state.lineStart && testDocumentSeparator(state)) throwError(state, "unexpected end of the document within a single quoted scalar");
+    else if (ch !== 9 && ch < 32) throwError(state, "expected valid JSON character");
+    else state.position++;
+  }
+  throwError(state, "unexpected end of the stream within a single quoted scalar");
+}
+function readDoubleQuotedScalar(state, nodeIndent, props) {
+  if (state.input.charCodeAt(state.position) !== 34) return false;
+  state.position++;
+  const start = state.position;
+  let simple = true;
+  while (state.input.charCodeAt(state.position) !== 0) {
+    const ch = state.input.charCodeAt(state.position);
+    if (ch === 34) {
+      const end = state.position;
+      state.position++;
+      addScalarEvent(state, start, end, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, SCALAR_STYLE.DOUBLE_QUOTED, CHOMPING_MODE.CLIP, -1, simple);
+      return true;
+    }
+    if (ch === 92) {
+      simple = false;
+      const escaped = state.input.charCodeAt(++state.position);
+      if (isEol(escaped)) readFlowScalarBreak(state, nodeIndent);
+      else if (isSimpleEscape(escaped)) state.position++;
+      else {
+        let hexLength = escapedHexLen(escaped);
+        if (hexLength === 0) throwError(state, "unknown escape sequence");
+        while (hexLength-- > 0) {
+          state.position++;
+          if (fromHexCode(state.input.charCodeAt(state.position)) < 0) throwError(state, "expected hexadecimal character");
+        }
+        state.position++;
+      }
+    } else if (isEol(ch)) {
+      simple = false;
+      readFlowScalarBreak(state, nodeIndent);
+    } else if (state.position === state.lineStart && testDocumentSeparator(state)) throwError(state, "unexpected end of the document within a double quoted scalar");
+    else if (ch !== 9 && ch < 32) throwError(state, "expected valid JSON character");
+    else state.position++;
+  }
+  throwError(state, "unexpected end of the stream within a double quoted scalar");
+}
+function readBlockScalar(state, parentIndent, props) {
+  const ch = state.input.charCodeAt(state.position);
+  let chomping = CHOMPING_MODE.CLIP;
+  let indent = -1;
+  let detectedIndent = false;
+  if (ch !== 124 && ch !== 62) return false;
+  const style = ch === 124 ? SCALAR_STYLE.LITERAL_BLOCK : SCALAR_STYLE.FOLDED_BLOCK;
+  state.position++;
+  while (state.input.charCodeAt(state.position) !== 0) {
+    const current = state.input.charCodeAt(state.position);
+    const digit = fromDecimalCode(current);
+    if (current === 43 || current === 45) {
+      if (chomping !== CHOMPING_MODE.CLIP) throwError(state, "repeat of a chomping mode identifier");
+      chomping = current === 43 ? CHOMPING_MODE.KEEP : CHOMPING_MODE.STRIP;
+      state.position++;
+    } else if (digit >= 0) {
+      if (digit === 0) throwError(state, "bad explicit indentation width of a block scalar; it cannot be less than one");
+      if (detectedIndent) throwError(state, "repeat of an indentation width identifier");
+      indent = parentIndent + digit - 1;
+      detectedIndent = true;
+      state.position++;
+    } else break;
+  }
+  let hadWhitespace = false;
+  while (isWhiteSpace(state.input.charCodeAt(state.position))) {
+    hadWhitespace = true;
+    state.position++;
+  }
+  if (hadWhitespace && state.input.charCodeAt(state.position) === 35) skipUntilLineEnd(state);
+  if (isEol(state.input.charCodeAt(state.position))) consumeLineBreak(state);
+  else if (state.input.charCodeAt(state.position) !== 0) throwError(state, "a line break is expected");
+  let contentIndent = detectedIndent ? indent : -1;
+  let maxLeadingIndent = 0;
+  const valueStart = state.position;
+  let valueEnd = state.position;
+  while (state.input.charCodeAt(state.position) !== 0) {
+    const linePosition = state.position;
+    let column = 0;
+    while (state.input.charCodeAt(linePosition + column) === 32) column++;
+    const first = state.input.charCodeAt(linePosition + column);
+    if (first === 0) {
+      if (contentIndent >= 0) {
+        if (column > contentIndent) valueEnd = linePosition + column;
+      } else if (column > 0) valueEnd = linePosition + column;
+      break;
+    }
+    if (testDocumentBoundary(state)) break;
+    if (!detectedIndent && contentIndent === -1 && isEol(first)) maxLeadingIndent = Math.max(maxLeadingIndent, column);
+    if (!detectedIndent && contentIndent === -1 && !isEol(first)) {
+      if (first === 9 && column < parentIndent) {
+        state.position = linePosition + column;
+        throwError(state, "tab characters must not be used in indentation");
+      }
+      if (column >= parentIndent && column < maxLeadingIndent) {
+        state.position = linePosition + column;
+        throwError(state, "bad indentation of a mapping entry");
+      }
+    }
+    if (contentIndent === -1 && first !== 0 && !isEol(first) && column < parentIndent) {
+      state.lineIndent = column;
+      state.position = linePosition + column;
+      break;
+    }
+    if (!detectedIndent && first !== 0 && !isEol(first) && contentIndent === -1) contentIndent = column;
+    const requiredIndent = contentIndent === -1 ? parentIndent + 1 : contentIndent;
+    if (first !== 0 && !isEol(first) && column < requiredIndent) {
+      state.lineIndent = column;
+      state.position = linePosition + column;
+      break;
+    }
+    skipUntilLineEnd(state);
+    valueEnd = state.position;
+    if (isEol(state.input.charCodeAt(state.position))) {
+      consumeLineBreak(state);
+      valueEnd = state.position;
+    }
+  }
+  checkPrintable(state, valueStart, valueEnd);
+  addScalarEvent(state, valueStart, valueEnd, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, style, chomping, contentIndent);
+  return true;
+}
+function canStartPlainScalar(state, nodeContext) {
+  const ch = state.input.charCodeAt(state.position);
+  const inFlow = nodeContext === CONTEXT_FLOW_IN;
+  if (ch === 0 || isWsOrEol(ch) || ch === 35 || ch === 38 || ch === 42 || ch === 33 || ch === 124 || ch === 62 || ch === 39 || ch === 34 || ch === 37 || ch === 64 || ch === 96 || inFlow && isFlowIndicator(ch)) return false;
+  if (ch === 63 || ch === 45) {
+    const following = state.input.charCodeAt(state.position + 1);
+    if (isWsOrEolOrEnd(following) || inFlow && isFlowIndicator(following)) return false;
+  }
+  return true;
+}
+function readPlainScalar(state, nodeIndent, nodeContext, props) {
+  if (!canStartPlainScalar(state, nodeContext)) return false;
+  const start = state.position;
+  let end = state.position;
+  let ch = state.input.charCodeAt(state.position);
+  const inFlow = nodeContext === CONTEXT_FLOW_IN;
+  let multiline = false;
+  while (ch !== 0) {
+    if (testDocumentBoundary(state)) break;
+    if (ch === 58) {
+      const following = state.input.charCodeAt(state.position + 1);
+      if (isWsOrEolOrEnd(following) || inFlow && isFlowIndicator(following)) break;
+    } else if (ch === 35) {
+      if (isWsOrEol(state.input.charCodeAt(state.position - 1))) break;
+    } else if (inFlow && isFlowIndicator(ch)) break;
+    else if (isEol(ch)) {
+      const savedPosition = state.position;
+      const savedLine = state.line;
+      const savedLineStart = state.lineStart;
+      const savedLineIndent = state.lineIndent;
+      skipSeparationSpace(state, false);
+      if (state.lineIndent >= nodeIndent) {
+        multiline = true;
+        ch = state.input.charCodeAt(state.position);
+        continue;
+      }
+      state.position = savedPosition;
+      state.line = savedLine;
+      state.lineStart = savedLineStart;
+      state.lineIndent = savedLineIndent;
+      break;
+    }
+    if (!isWhiteSpace(ch)) end = state.position + 1;
+    ch = state.input.charCodeAt(++state.position);
+  }
+  if (end === start) return false;
+  checkPrintable(state, start, end);
+  addScalarEvent(state, start, end, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, SCALAR_STYLE.PLAIN, CHOMPING_MODE.CLIP, -1, !multiline);
+  return true;
+}
+function skipFlowSeparationSpace(state, nodeIndent) {
+  const startLine = state.line;
+  skipSeparationSpace(state, true);
+  if (state.line > startLine && state.lineIndent < nodeIndent || state.firstTabInLine !== -1 && state.lineIndent < nodeIndent) throwError(state, "deficient indentation");
+}
+function readFlowCollection(state, nodeIndent, props) {
+  const ch = state.input.charCodeAt(state.position);
+  const isMapping = ch === 123;
+  const start = state.position;
+  let readNext = true;
+  if (ch !== 91 && ch !== 123) return false;
+  const terminator = isMapping ? 125 : 93;
+  if (isMapping) addMappingEvent(state, start, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, COLLECTION_STYLE.FLOW);
+  else addSequenceEvent(state, start, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, COLLECTION_STYLE.FLOW);
+  state.position++;
+  while (state.input.charCodeAt(state.position) !== 0) {
+    skipFlowSeparationSpace(state, nodeIndent);
+    let ch2 = state.input.charCodeAt(state.position);
+    if (ch2 === terminator) {
+      state.position++;
+      addPopEvent(state);
+      return true;
+    } else if (!readNext) throwError(state, "missed comma between flow collection entries");
+    else if (ch2 === 44) throwError(state, "expected the node content, but found ','");
+    let isPair = false;
+    let isExplicitPair = false;
+    if (ch2 === 63 && isWsOrEol(state.input.charCodeAt(state.position + 1))) {
+      isPair = isExplicitPair = true;
+      state.position += 1;
+      skipFlowSeparationSpace(state, nodeIndent);
+    }
+    const entryLine = state.line;
+    const entryStart = snapshotState(state);
+    const keyWasRead = parseNode2(state, nodeIndent, CONTEXT_FLOW_IN, false, true);
+    skipFlowSeparationSpace(state, nodeIndent);
+    ch2 = state.input.charCodeAt(state.position);
+    if ((isMapping || isExplicitPair || state.line === entryLine) && ch2 === 58) {
+      isPair = true;
+      state.position++;
+      skipFlowSeparationSpace(state, nodeIndent);
+      if (!isMapping) {
+        insertFlowPairMappingEvent(state, entryStart);
+        if (!keyWasRead) addEmptyScalarEvent(state);
+      } else if (!keyWasRead) addEmptyScalarEvent(state);
+      if (!parseNode2(state, nodeIndent, CONTEXT_FLOW_IN, false, true)) addEmptyScalarEvent(state);
+      skipFlowSeparationSpace(state, nodeIndent);
+      if (!isMapping) addPopEvent(state);
+    } else if (isMapping && isPair) {
+      if (!keyWasRead) addEmptyScalarEvent(state);
+      addEmptyScalarEvent(state);
+    } else if (isMapping) addEmptyScalarEvent(state);
+    else if (isPair) {
+      insertFlowPairMappingEvent(state, entryStart);
+      if (!keyWasRead) addEmptyScalarEvent(state);
+      addEmptyScalarEvent(state);
+      addPopEvent(state);
+    }
+    ch2 = state.input.charCodeAt(state.position);
+    if (ch2 === 44) {
+      readNext = true;
+      state.position++;
+    } else readNext = false;
+  }
+  throwError(state, "unexpected end of the stream within a flow collection");
+}
+function readBlockSequence(state, nodeIndent, props) {
+  if (state.firstTabInLine !== -1 || state.input.charCodeAt(state.position) !== 45 || !isWsOrEolOrEnd(state.input.charCodeAt(state.position + 1))) return false;
+  addSequenceEvent(state, state.position, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, COLLECTION_STYLE.BLOCK);
+  while (state.input.charCodeAt(state.position) === 45 && isWsOrEolOrEnd(state.input.charCodeAt(state.position + 1))) {
+    if (state.firstTabInLine !== -1) {
+      state.position = state.firstTabInLine;
+      throwError(state, "tab characters must not be used in indentation");
+    }
+    const entryLine = state.line;
+    state.position++;
+    const hadBreak = skipSeparationSpace(state, true) > 0;
+    if (state.firstTabInLine !== -1 && state.input.charCodeAt(state.position) === 45 && isWsOrEolOrEnd(state.input.charCodeAt(state.position + 1))) throwError(state, "bad indentation of a sequence entry");
+    if (hadBreak && state.lineIndent <= nodeIndent) addEmptyScalarEvent(state);
+    else parseNode2(state, nodeIndent, CONTEXT_BLOCK_IN, false, true);
+    skipSeparationSpace(state, true);
+    if (state.lineIndent < nodeIndent || state.position >= state.length) break;
+    if (state.lineIndent > nodeIndent) throwError(state, "bad indentation of a sequence entry");
+    if (state.line === entryLine && state.input.charCodeAt(state.position) === 45 && isWsOrEolOrEnd(state.input.charCodeAt(state.position + 1))) throwError(state, "bad indentation of a sequence entry");
+  }
+  addPopEvent(state);
+  return true;
+}
+function readBlockMapping(state, nodeIndent, flowIndent, props) {
+  let atExplicitKey = false;
+  let detected = false;
+  let mappingOpened = false;
+  let pendingExplicitKey = false;
+  if (state.firstTabInLine !== -1) return false;
+  let ch = state.input.charCodeAt(state.position);
+  while (ch !== 0) {
+    if (!atExplicitKey && state.firstTabInLine !== -1) {
+      state.position = state.firstTabInLine;
+      throwError(state, "tab characters must not be used in indentation");
+    }
+    const following = state.input.charCodeAt(state.position + 1);
+    const entryLine = state.line;
+    if ((ch === 63 || ch === 58) && isWsOrEolOrEnd(following)) {
+      if (!mappingOpened) {
+        addMappingEvent(state, state.position, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, COLLECTION_STYLE.BLOCK);
+        mappingOpened = true;
+      }
+      if (ch === 63) {
+        if (atExplicitKey) addEmptyScalarEvent(state);
+        detected = true;
+        atExplicitKey = true;
+      } else if (atExplicitKey) atExplicitKey = false;
+      else {
+        addEmptyScalarEvent(state);
+        detected = true;
+        atExplicitKey = false;
+      }
+      state.position += 1;
+      pendingExplicitKey = true;
+    } else {
+      if (atExplicitKey) {
+        addEmptyScalarEvent(state);
+        atExplicitKey = false;
+      }
+      const beforeKey = snapshotState(state);
+      if (!parseNode2(state, flowIndent, CONTEXT_FLOW_OUT, false, true)) break;
+      if (state.line === entryLine) {
+        ch = state.input.charCodeAt(state.position);
+        while (isWhiteSpace(ch)) ch = state.input.charCodeAt(++state.position);
+        if (ch === 58) {
+          ch = state.input.charCodeAt(++state.position);
+          if (!isWsOrEolOrEnd(ch)) throwError(state, "a whitespace character is expected after the key-value separator within a block mapping");
+          if (!mappingOpened) {
+            state.events.splice(beforeKey.eventsLength, 0, {
+              type: EVENT_ID.MAPPING,
+              start: beforeKey.position,
+              anchorStart: props.anchorStart,
+              anchorEnd: props.anchorEnd,
+              tagStart: props.tagStart,
+              tagEnd: props.tagEnd,
+              style: COLLECTION_STYLE.BLOCK
+            });
+            mappingOpened = true;
+          }
+          detected = true;
+          atExplicitKey = false;
+          pendingExplicitKey = false;
+        } else if (detected) throwError(state, "expected ':' after a mapping key");
+        else {
+          if (props.anchorStart !== NO_RANGE$1 || props.tagStart !== NO_RANGE$1) {
+            restoreState(state, beforeKey);
+            return false;
+          }
+          return true;
+        }
+      } else if (detected) throwError(state, "can not read a block mapping entry; a multiline key may not be an implicit key");
+      else {
+        if (props.anchorStart !== NO_RANGE$1 || props.tagStart !== NO_RANGE$1) {
+          restoreState(state, beforeKey);
+          return false;
+        }
+        return true;
+      }
+    }
+    if (parseNode2(state, nodeIndent, CONTEXT_BLOCK_OUT, true, pendingExplicitKey)) pendingExplicitKey = false;
+    if (!atExplicitKey) {
+      if (pendingExplicitKey) {
+        addEmptyScalarEvent(state);
+        pendingExplicitKey = false;
+      }
+    }
+    skipSeparationSpace(state, true);
+    ch = state.input.charCodeAt(state.position);
+    if ((state.line === entryLine || state.lineIndent > nodeIndent) && ch !== 0) throwError(state, "bad indentation of a mapping entry");
+    else if (state.lineIndent < nodeIndent) break;
+  }
+  if (!detected) return false;
+  if (atExplicitKey) addEmptyScalarEvent(state);
+  if (mappingOpened) addPopEvent(state);
+  return true;
+}
+function parseNode2(state, parentIndent, nodeContext, allowToSeek, allowCompact, allowPropertyMapping = true) {
+  if (state.depth >= state.maxDepth) throwError(state, `nesting exceeded maxDepth (${state.maxDepth})`);
+  state.depth++;
+  let indentStatus = 1;
+  let atNewLine = false;
+  let hasContent = false;
+  let propertyStart = null;
+  const props = emptyProperties();
+  let allowBlockScalars = nodeContext === CONTEXT_BLOCK_OUT || nodeContext === CONTEXT_BLOCK_IN;
+  let allowBlockCollections = allowBlockScalars;
+  const allowBlockStyles = allowBlockScalars;
+  if (allowToSeek && skipSeparationSpace(state, true)) {
+    atNewLine = true;
+    if (state.lineIndent > parentIndent) indentStatus = 1;
+    else if (state.lineIndent === parentIndent) indentStatus = 0;
+    else indentStatus = -1;
+  }
+  if (indentStatus === 1) while (true) {
+    const ch = state.input.charCodeAt(state.position);
+    const propertyState = snapshotState(state);
+    if (atNewLine && indentStatus !== 1 && (ch === 33 || ch === 38)) break;
+    if (atNewLine && allowBlockStyles && (props.tagStart !== NO_RANGE$1 || props.anchorStart !== NO_RANGE$1) && (ch === 33 || ch === 38)) {
+      const fallbackState = snapshotState(state);
+      const flowIndent = parentIndent + 1;
+      if (readBlockMapping(state, state.position - state.lineStart, flowIndent, props) && state.events[fallbackState.eventsLength]?.type === EVENT_ID.MAPPING) {
+        state.depth--;
+        return true;
+      }
+      restoreState(state, fallbackState);
+    }
+    if (atNewLine && (ch === 33 && props.tagStart !== NO_RANGE$1 || ch === 38 && props.anchorStart !== NO_RANGE$1)) break;
+    if (!readTagProperty(state, props, nodeContext === CONTEXT_FLOW_IN) && !readAnchorProperty(state, props)) break;
+    if (propertyStart === null) propertyStart = propertyState;
+    if (skipSeparationSpace(state, true)) {
+      atNewLine = true;
+      allowBlockCollections = allowBlockStyles;
+      if (state.lineIndent > parentIndent) indentStatus = 1;
+      else if (state.lineIndent === parentIndent) indentStatus = 0;
+      else indentStatus = -1;
+    } else allowBlockCollections = false;
+  }
+  if (allowBlockCollections) allowBlockCollections = atNewLine || allowCompact;
+  if (indentStatus === 1 || nodeContext === CONTEXT_BLOCK_OUT) {
+    const flowIndent = nodeContext === CONTEXT_FLOW_IN || nodeContext === CONTEXT_FLOW_OUT ? parentIndent : parentIndent + 1;
+    const blockIndent = state.position - state.lineStart;
+    if (indentStatus === 1) if (allowBlockCollections && (readBlockSequence(state, blockIndent, props) || readBlockMapping(state, blockIndent, flowIndent, props)) || readFlowCollection(state, flowIndent, props)) hasContent = true;
+    else {
+      const ch = state.input.charCodeAt(state.position);
+      if (propertyStart !== null && allowPropertyMapping && allowBlockStyles && !allowBlockCollections && ch !== 124 && ch !== 62) {
+        const fallbackState = snapshotState(state);
+        const propertyIndent = propertyStart.position - propertyStart.lineStart;
+        restoreState(state, propertyStart);
+        if (readBlockMapping(state, propertyIndent, flowIndent, emptyProperties()) && state.events[fallbackState.eventsLength]?.type === EVENT_ID.MAPPING) hasContent = true;
+        else restoreState(state, fallbackState);
+      }
+      if (!hasContent && (allowBlockScalars && readBlockScalar(state, flowIndent, props) || readSingleQuotedScalar(state, flowIndent, props) || readDoubleQuotedScalar(state, flowIndent, props) || readAlias(state, props) || readPlainScalar(state, flowIndent, nodeContext, props))) hasContent = true;
+    }
+    else if (indentStatus === 0) hasContent = allowBlockCollections && readBlockSequence(state, blockIndent, props);
+  }
+  allowBlockScalars = allowBlockScalars && !hasContent;
+  if (!hasContent && (props.anchorStart !== NO_RANGE$1 || props.tagStart !== NO_RANGE$1 || allowBlockScalars)) {
+    addScalarEvent(state, NO_RANGE$1, NO_RANGE$1, props.anchorStart, props.anchorEnd, props.tagStart, props.tagEnd, SCALAR_STYLE.PLAIN);
+    hasContent = true;
+  }
+  state.depth--;
+  return hasContent || props.anchorStart !== NO_RANGE$1 || props.tagStart !== NO_RANGE$1;
+}
+function readDirective(state) {
+  if (state.lineIndent > 0 || state.input.charCodeAt(state.position) !== 37) return false;
+  state.position++;
+  const nameStart = state.position;
+  while (state.input.charCodeAt(state.position) !== 0 && !isWsOrEol(state.input.charCodeAt(state.position))) state.position++;
+  const name = state.input.slice(nameStart, state.position);
+  const args = [];
+  if (name.length === 0) throwError(state, "directive name must not be less than one character in length");
+  while (state.input.charCodeAt(state.position) !== 0 && !isEol(state.input.charCodeAt(state.position))) {
+    while (isWhiteSpace(state.input.charCodeAt(state.position))) state.position++;
+    if (state.input.charCodeAt(state.position) === 35 || isEol(state.input.charCodeAt(state.position)) || state.input.charCodeAt(state.position) === 0) break;
+    const start = state.position;
+    while (state.input.charCodeAt(state.position) !== 0 && !isWsOrEol(state.input.charCodeAt(state.position))) state.position++;
+    args.push(state.input.slice(start, state.position));
+  }
+  if (isEol(state.input.charCodeAt(state.position))) consumeLineBreak(state);
+  if (name === "YAML") {
+    if (state.directives.some((directive) => directive.kind === "yaml")) throwError(state, "duplication of %YAML directive");
+    if (args.length !== 1) throwError(state, "YAML directive accepts exactly one argument");
+    const match = /^([0-9]+)\.([0-9]+)$/.exec(args[0]);
+    if (match === null) throwError(state, "ill-formed argument of the YAML directive");
+    if (parseInt(match[1], 10) !== 1) throwError(state, "unacceptable YAML version of the document");
+    state.directives.push({
+      kind: "yaml",
+      version: args[0]
+    });
+  } else if (name === "TAG") {
+    if (args.length !== 2) throwError(state, "TAG directive accepts exactly two arguments");
+    const [handle, prefix] = args;
+    if (!PATTERN_TAG_HANDLE.test(handle)) throwError(state, "ill-formed tag handle (first argument) of the TAG directive");
+    if (HAS_OWN.call(state.tagHandlers, handle)) throwError(state, `there is a previously declared suffix for "${handle}" tag handle`);
+    if (!PATTERN_TAG_PREFIX.test(prefix)) throwError(state, "ill-formed tag prefix (second argument) of the TAG directive");
+    state.tagHandlers[handle] = prefix;
+    state.directives.push({
+      kind: "tag",
+      handle,
+      prefix
+    });
+  }
+  return true;
+}
+function readDocument(state) {
+  state.directives = [];
+  state.tagHandlers = /* @__PURE__ */ Object.create(null);
+  let hasDirectives = false;
+  skipSeparationSpace(state, true);
+  while (readDirective(state)) {
+    hasDirectives = true;
+    skipSeparationSpace(state, true);
+  }
+  let explicitStart = false;
+  let explicitEnd = false;
+  let allowCompact = true;
+  if (state.lineIndent === 0 && state.input.charCodeAt(state.position) === 45 && state.input.charCodeAt(state.position + 1) === 45 && state.input.charCodeAt(state.position + 2) === 45 && isWsOrEolOrEnd(state.input.charCodeAt(state.position + 3))) {
+    explicitStart = true;
+    const markerLine = state.line;
+    state.position += 3;
+    skipSeparationSpace(state, true);
+    allowCompact = state.line > markerLine;
+  } else if (hasDirectives) throwError(state, "directives end mark is expected");
+  const documentEventIndex = state.events.length;
+  if (!explicitStart && state.position === state.lineStart && state.input.charCodeAt(state.position) === 46 && testDocumentSeparator(state)) {
+    state.position += 3;
+    skipSeparationSpace(state, true);
+    return;
+  }
+  addDocumentEvent(state, explicitStart, false);
+  if (!parseNode2(state, state.lineIndent - 1, CONTEXT_BLOCK_OUT, false, allowCompact, allowCompact)) addEmptyScalarEvent(state);
+  skipSeparationSpace(state, true);
+  if (state.position === state.lineStart && testDocumentSeparator(state)) {
+    explicitEnd = state.input.charCodeAt(state.position) === 46;
+    if (explicitEnd) {
+      const markerLine = state.line;
+      state.position += 3;
+      skipSeparationSpace(state, true);
+      if (state.line === markerLine && state.position < state.length) throwError(state, "end of the stream or a document separator is expected");
+    }
+  }
+  const documentEvent = state.events[documentEventIndex];
+  if (documentEvent?.type === EVENT_ID.DOCUMENT) documentEvent.explicitEnd = explicitEnd;
+  addPopEvent(state);
+  if (!explicitEnd && state.position < state.length && !testDocumentBoundary(state)) throwError(state, "end of the stream or a document separator is expected");
+}
+function parseEvents(input2, options) {
+  const length = input2.length;
+  const state = {
+    ...DEFAULT_PARSER_OPTIONS,
+    ...options,
+    input: `${input2}\0`,
+    length,
+    position: 0,
+    line: 0,
+    lineStart: 0,
+    lineIndent: 0,
+    firstTabInLine: -1,
+    depth: 0,
+    directives: [],
+    tagHandlers: /* @__PURE__ */ Object.create(null),
+    events: []
+  };
+  const nullpos = input2.indexOf("\0");
+  if (nullpos !== -1) YAMLException.throwAt(input2, nullpos, "null byte is not allowed in input", state.filename);
+  while (state.position < state.length) {
+    skipByteOrderMark(state);
+    skipSeparationSpace(state, true);
+    if (state.position >= state.length) break;
+    const documentStart = state.position;
+    readDocument(state);
+    if (state.position === documentStart)
+      throwError(state, "can not read a document");
+  }
+  return state.events;
+}
+var DEFAULT_LOAD_OPTIONS = {
+  ...DEFAULT_PARSER_OPTIONS,
+  ...DEFAULT_CONSTRUCTOR_OPTIONS
+};
+function loadDocuments(input2, options = {}) {
+  const opts = {
+    ...DEFAULT_LOAD_OPTIONS,
+    ...options
+  };
+  const source2 = String(input2);
+  const PARSER_OPT_KEYS = Object.keys(DEFAULT_PARSER_OPTIONS);
+  const CONSTRUCTOR_OPT_KEYS = Object.keys(DEFAULT_CONSTRUCTOR_OPTIONS);
+  return constructFromEvents(parseEvents(source2, pick(opts, PARSER_OPT_KEYS)), {
+    ...pick(opts, CONSTRUCTOR_OPT_KEYS),
+    source: source2
+  });
+}
+function load(input2, options) {
+  const documents = loadDocuments(input2, options);
+  if (documents.length === 0) throw new YAMLException("expected a document, but the input is empty");
+  if (documents.length === 1) return documents[0];
+  throw new YAMLException("expected a single document in the stream, but found more");
+}
+function hasBit(mask, bit) {
+  return (mask & 1 << bit) !== 0;
+}
+var DEFAULT_SCALAR_STYLE_RULES = {
+  applyQuoteFlowKeysOption,
+  doubleQuoteForInvisibles,
+  doubleQuoteWhitespaceOnly,
+  applyForceQuotesOption,
+  tryLongOrMultilineAsBlock,
+  quoteInvalidPlain,
+  fallbackToDoubleQuoted
+};
+function _preferredQuotedStyle(layout) {
+  if (layout.presenterOptions.quoteStyle === "single" && hasBit(layout.allowedStylesMask, SCALAR_STYLE.SINGLE_QUOTED)) return SCALAR_STYLE.SINGLE_QUOTED;
+  return SCALAR_STYLE.DOUBLE_QUOTED;
+}
+function applyQuoteFlowKeysOption(layout) {
+  if (!layout.presenterOptions.quoteFlowKeys) return;
+  if (!layout.isKey || !layout.flowOnly || layout.style !== SCALAR_STYLE.PLAIN) return;
+  layout.style = SCALAR_STYLE.DOUBLE_QUOTED;
+}
+function doubleQuoteForInvisibles(layout) {
+  if (layout.style === SCALAR_STYLE.PLAIN && /[\t\x7F-\xA0\u2028\u2029\uFEFF\uFFFE\uFFFF]/.test(layout.node.value)) layout.style = SCALAR_STYLE.DOUBLE_QUOTED;
+}
+function doubleQuoteWhitespaceOnly(layout) {
+  if (layout.style === SCALAR_STYLE.PLAIN && /^\s+$/.test(layout.node.value)) layout.style = SCALAR_STYLE.DOUBLE_QUOTED;
+}
+function applyForceQuotesOption(layout) {
+  if (!layout.presenterOptions.forceQuotes) return;
+  if (layout.isKey || layout.style !== SCALAR_STYLE.PLAIN) return;
+  if (layout.node.tag !== layout.presenterOptions.schema.defaultScalarTag.tagName) return;
+  layout.style = layout.node.value.includes("\n") ? SCALAR_STYLE.DOUBLE_QUOTED : _preferredQuotedStyle(layout);
+}
+function tryLongOrMultilineAsBlock(layout) {
+  if (layout.style !== SCALAR_STYLE.PLAIN || layout.isKey) return;
+  const value = layout.node.value;
+  const multiline = value.indexOf("\n") !== -1;
+  if (!hasBit(layout.allowedStylesMask, SCALAR_STYLE.LITERAL_BLOCK)) {
+    if (multiline) layout.style = SCALAR_STYLE.DOUBLE_QUOTED;
+    return;
+  }
+  const w = layout.presenterOptions.lineWidth;
+  if (w === -1) {
+    if (multiline) layout.style = SCALAR_STYLE.LITERAL_BLOCK;
+    return;
+  }
+  const availableWidth = Math.max(Math.min(w, 40), w - layout.shiftOfContent);
+  let position = 0;
+  let shouldFold = false;
+  while (position <= value.length) {
+    let lineEnd = value.length;
+    const nextLineBreak = value.indexOf("\n", position);
+    if (nextLineBreak !== -1) lineEnd = nextLineBreak;
+    const line = value.slice(position, lineEnd);
+    if (line.length > availableWidth && line[0] !== " " && / [^ \t]/.test(line)) shouldFold = true;
+    if (nextLineBreak === -1) break;
+    position = nextLineBreak + 1;
+  }
+  if (shouldFold) layout.style = SCALAR_STYLE.FOLDED_BLOCK;
+  else if (multiline) layout.style = SCALAR_STYLE.LITERAL_BLOCK;
+}
+function quoteInvalidPlain(layout) {
+  if (layout.style === SCALAR_STYLE.PLAIN && !hasBit(layout.allowedStylesMask, SCALAR_STYLE.PLAIN)) layout.style = _preferredQuotedStyle(layout);
+}
+function fallbackToDoubleQuoted(layout) {
+  if (!hasBit(layout.allowedStylesMask, layout.style)) layout.style = SCALAR_STYLE.DOUBLE_QUOTED;
+}
+var SRC_C_PRINTABLE = "[\\x09\\x0A\\x0D\\x20-\\x7E\\x85\\xA0-\\uD7FF\\uE000-\\uFFFD\\u{10000}-\\u{10FFFF}]";
+var SRC_B_CHAR = "[\\n\\r]";
+var SRC_C_BYTE_ORDER_MARK = "\\uFEFF";
+var SRC_S_WHITE = "[ \\t]";
+var SRC_NB_CHAR = `(?:(?!(?:${SRC_B_CHAR}|${SRC_C_BYTE_ORDER_MARK}))${SRC_C_PRINTABLE})`;
+var SRC_NS_CHAR = `(?:(?!${SRC_S_WHITE})${SRC_NB_CHAR})`;
+var SRC_NB_JSON = "[\\x09\\x20-\\uD7FF\\uE000-\\uFFFF\\u{10000}-\\u{10FFFF}]";
+var SRC_C_INDICATOR = "[-?:,\\[\\]{}#&*!|>'\"%@`]";
+var SRC_C_FLOW_INDICATOR = "[,\\[\\]{}]";
+var SRC_NS_PLAIN_SAFE_FLOW_OUT = SRC_NS_CHAR;
+var SRC_NS_PLAIN_SAFE_FLOW_IN = `(?:(?!${SRC_C_FLOW_INDICATOR})${SRC_NS_CHAR})`;
+var SRC_NS_PLAIN_FIRST_FLOW_OUT = `(?:(?:(?!${SRC_C_INDICATOR})${SRC_NS_CHAR})|[?:-](?=${SRC_NS_PLAIN_SAFE_FLOW_OUT}))`;
+var SRC_NS_PLAIN_FIRST_FLOW_IN = `(?:(?:(?!${SRC_C_INDICATOR})${SRC_NS_CHAR})|[?:-](?=${SRC_NS_PLAIN_SAFE_FLOW_IN}))`;
+var SRC_NS_PLAIN_CHAR_FLOW_OUT = `(?:(?:(?![:#])${SRC_NS_PLAIN_SAFE_FLOW_OUT})|:(?=${SRC_NS_PLAIN_SAFE_FLOW_OUT}))#*`;
+var SRC_NS_PLAIN_CHAR_FLOW_IN = `(?:(?:(?![:#])${SRC_NS_PLAIN_SAFE_FLOW_IN})|:(?=${SRC_NS_PLAIN_SAFE_FLOW_IN}))#*`;
+var SRC_NB_NS_PLAIN_IN_LINE_FLOW_OUT = `(?:${SRC_S_WHITE}*${SRC_NS_PLAIN_CHAR_FLOW_OUT})*`;
+var SRC_NB_NS_PLAIN_IN_LINE_FLOW_IN = `(?:${SRC_S_WHITE}*${SRC_NS_PLAIN_CHAR_FLOW_IN})*`;
+var SRC_NS_PLAIN_ONE_LINE_FLOW_OUT = `${SRC_NS_PLAIN_FIRST_FLOW_OUT}#*${SRC_NB_NS_PLAIN_IN_LINE_FLOW_OUT}`;
+var SRC_NS_PLAIN_ONE_LINE_FLOW_IN = `${SRC_NS_PLAIN_FIRST_FLOW_IN}#*${SRC_NB_NS_PLAIN_IN_LINE_FLOW_IN}`;
+var SRC_NS_PLAIN_ONE_LINE_BLOCK_KEY = SRC_NS_PLAIN_ONE_LINE_FLOW_OUT;
+var SRC_NS_PLAIN_ONE_LINE_FLOW_KEY = SRC_NS_PLAIN_ONE_LINE_FLOW_IN;
+var SRC_S_NS_PLAIN_NEXT_LINE_FLOW_OUT = `\\n+${SRC_NS_PLAIN_CHAR_FLOW_OUT}${SRC_NB_NS_PLAIN_IN_LINE_FLOW_OUT}`;
+var SRC_S_NS_PLAIN_NEXT_LINE_FLOW_IN = `\\n+${SRC_NS_PLAIN_CHAR_FLOW_IN}${SRC_NB_NS_PLAIN_IN_LINE_FLOW_IN}`;
+var SRC_NS_PLAIN_MULTI_LINE_FLOW_OUT = `${SRC_NS_PLAIN_ONE_LINE_FLOW_OUT}(?:${SRC_S_NS_PLAIN_NEXT_LINE_FLOW_OUT})*`;
+var SRC_NS_PLAIN_MULTI_LINE_FLOW_IN = `${SRC_NS_PLAIN_ONE_LINE_FLOW_IN}(?:${SRC_S_NS_PLAIN_NEXT_LINE_FLOW_IN})*`;
+var NS_PLAIN_FLOW_OUT = new RegExp(`^(?:${SRC_NS_PLAIN_MULTI_LINE_FLOW_OUT})$`, "u");
+var NS_PLAIN_FLOW_IN = new RegExp(`^(?:${SRC_NS_PLAIN_MULTI_LINE_FLOW_IN})$`, "u");
+var NS_PLAIN_BLOCK_KEY = new RegExp(`^(?:${SRC_NS_PLAIN_ONE_LINE_BLOCK_KEY})$`, "u");
+var NS_PLAIN_FLOW_KEY = new RegExp(`^(?:${SRC_NS_PLAIN_ONE_LINE_FLOW_KEY})$`, "u");
+var NB_SINGLE_ONE_LINE = new RegExp(`^(?:${SRC_NB_JSON})*$`, "u");
+var NB_SINGLE_MULTI_LINE = new RegExp(`^(?:${SRC_NB_JSON}|\\n)*$`, "u");
+var BLOCK_SCALAR_CONTENT = new RegExp(`^(?:${SRC_NB_CHAR}|\\n)*$`, "u");
+var DEFAULT_PRESENTER_OPTIONS = {
+  indent: 2,
+  seqNoIndent: false,
+  seqInlineFirst: true,
+  lineWidth: 80,
+  flowBracketPadding: false,
+  flowSkipCommaSpace: false,
+  flowSkipColonSpace: false,
+  quoteFlowKeys: false,
+  quoteStyle: "single",
+  forceQuotes: false,
+  scalarStyleRules: Object.keys(DEFAULT_SCALAR_STYLE_RULES).map((name) => Reflect.get(DEFAULT_SCALAR_STYLE_RULES, name)),
+  tagBeforeAnchor: false
+};
+var DEFAULT_DUMP_OPTIONS = {
+  ...DEFAULT_PRESENTER_OPTIONS,
+  schema: DUMP_SCHEMA,
+  skipInvalid: false,
+  noRefs: false,
+  flowLevel: -1,
+  sortKeys: false,
+  transform: () => {
+  }
+};
+var EVENT_DOCUMENT = EVENT_ID.DOCUMENT;
+var EVENT_SEQUENCE = EVENT_ID.SEQUENCE;
+var EVENT_MAPPING = EVENT_ID.MAPPING;
+var EVENT_SCALAR = EVENT_ID.SCALAR;
+var EVENT_ALIAS = EVENT_ID.ALIAS;
+var EVENT_POP = EVENT_ID.POP;
+var SCALAR_STYLE_PLAIN = SCALAR_STYLE.PLAIN;
+var SCALAR_STYLE_SINGLE_QUOTED = SCALAR_STYLE.SINGLE_QUOTED;
+var SCALAR_STYLE_DOUBLE_QUOTED = SCALAR_STYLE.DOUBLE_QUOTED;
+var SCALAR_STYLE_LITERAL_BLOCK = SCALAR_STYLE.LITERAL_BLOCK;
+var SCALAR_STYLE_FOLDED_BLOCK = SCALAR_STYLE.FOLDED_BLOCK;
+var COLLECTION_STYLE_BLOCK = COLLECTION_STYLE.BLOCK;
+var COLLECTION_STYLE_FLOW = COLLECTION_STYLE.FLOW;
+var CHOMPING_CLIP = CHOMPING_MODE.CLIP;
+var CHOMPING_STRIP = CHOMPING_MODE.STRIP;
+var CHOMPING_KEEP = CHOMPING_MODE.KEEP;
+
+// packages/capabilities/dist/azd-project-files.js
 import { createHash as createHash5 } from "node:crypto";
-function sha256(bytes) {
+import { constants as constants11 } from "node:fs";
+import { lstat as lstat11, open as open11, opendir, realpath as realpath5 } from "node:fs/promises";
+import { isAbsolute as isAbsolute5, join as join15, relative as relative5, resolve as resolve14, sep as sep3 } from "node:path";
+var AzdBindingError = class extends Error {
+  code;
+  constructor(code, message) {
+    super(message);
+    this.code = code;
+    this.name = "AzdBindingError";
+  }
+};
+var AZD_FILE_LIMITS = Object.freeze({
+  /** `azure.yaml`, hook scripts, parameter files and environment files. */
+  fileBytes: 256 * 1024,
+  treeBytes: 16 * 1024 * 1024,
+  treeEntries: 2048,
+  treeDepth: 16
+});
+function sha256Hex(bytes) {
   return createHash5("sha256").update(bytes).digest("hex");
+}
+function pathEscapes(parent, child) {
+  const relation = relative5(parent, child);
+  return relation === "" || relation === ".." || relation.startsWith(`..${sep3}`) || isAbsolute5(relation);
+}
+var AzdProjectFiles = class _AzdProjectFiles {
+  rootPath;
+  rootRealPath;
+  constructor(rootPath, rootRealPath) {
+    this.rootPath = rootPath;
+    this.rootRealPath = rootRealPath;
+  }
+  static async open(projectRoot) {
+    if (typeof projectRoot !== "string" || !isAbsolute5(projectRoot))
+      throw new AzdBindingError("AZD_BINDING_INPUT_INVALID", "The azd project root must be an absolute path");
+    const rootPath = resolve14(projectRoot);
+    try {
+      const metadata2 = await lstat11(rootPath);
+      if (!metadata2.isDirectory() || metadata2.isSymbolicLink())
+        throw new Error("not a real directory");
+      return new _AzdProjectFiles(rootPath, await realpath5(rootPath));
+    } catch {
+      throw new AzdBindingError("AZD_PROJECT_MISSING", "The azd project root is not a readable directory");
+    }
+  }
+  /** Metadata for `path`, or undefined when absent. Any symbolic link on the way fails closed. */
+  async stat(path2) {
+    const segments = path2.split("/");
+    let current = this.rootPath;
+    let metadata2;
+    for (const [index, segment] of segments.entries()) {
+      current = join15(current, segment);
+      if (pathEscapes(this.rootPath, current))
+        throw this.unsafe();
+      try {
+        metadata2 = await lstat11(current);
+      } catch (error62) {
+        if (error62.code === "ENOENT" || error62.code === "ENOTDIR")
+          return void 0;
+        throw this.unsafe();
+      }
+      if (metadata2.isSymbolicLink())
+        throw this.unsafe();
+      if (index < segments.length - 1 && !metadata2.isDirectory())
+        throw this.unsafe();
+    }
+    return metadata2;
+  }
+  async read(path2, maxBytes, missing2) {
+    const metadata2 = await this.stat(path2);
+    if (metadata2 === void 0)
+      throw new AzdBindingError(missing2, `Required azd project file is missing: ${path2}`);
+    return await this.readFile(path2, metadata2, maxBytes);
+  }
+  async readFile(path2, metadata2, maxBytes) {
+    if (!metadata2.isFile() || metadata2.nlink !== 1)
+      throw this.unsafe();
+    if (metadata2.size > maxBytes)
+      throw new AzdBindingError("AZD_FILE_LIMIT_EXCEEDED", `An azd project file exceeds ${maxBytes} bytes: ${path2}`);
+    const absolute = join15(this.rootPath, ...path2.split("/"));
+    try {
+      if (pathEscapes(this.rootRealPath, await realpath5(absolute)))
+        throw this.unsafe();
+      const input2 = await open11(absolute, constants11.O_RDONLY | constants11.O_NOFOLLOW | constants11.O_NONBLOCK);
+      try {
+        const opened = await input2.stat();
+        if (!opened.isFile() || opened.nlink !== 1)
+          throw this.unsafe();
+        const chunks = [];
+        let bytes = 0;
+        for (; ; ) {
+          const chunk = Buffer.alloc(Math.min(64 * 1024, maxBytes - bytes + 1));
+          const { bytesRead } = await input2.read(chunk);
+          if (bytesRead === 0)
+            break;
+          bytes += bytesRead;
+          if (bytes > maxBytes)
+            throw new AzdBindingError("AZD_FILE_LIMIT_EXCEEDED", `An azd project file exceeds ${maxBytes} bytes: ${path2}`);
+          chunks.push(chunk.subarray(0, bytesRead));
+        }
+        return Buffer.concat(chunks);
+      } finally {
+        await input2.close();
+      }
+    } catch (error62) {
+      if (error62 instanceof AzdBindingError)
+        throw error62;
+      throw this.unsafe();
+    }
+  }
+  /** Digest of every file under a directory, so any added, removed, renamed or edited file changes it. */
+  async hashTree(path2, visitFile) {
+    const files2 = [];
+    let entries = 0;
+    let bytes = 0;
+    const visit2 = async (directory, depth) => {
+      if (depth > AZD_FILE_LIMITS.treeDepth)
+        throw new AzdBindingError("AZD_FILE_LIMIT_EXCEEDED", `The azd infrastructure tree is too deep: ${path2}`);
+      const names = [];
+      for await (const entry of await opendir(join15(this.rootPath, ...directory.split("/")))) {
+        names.push(entry.name);
+        if (names.length > AZD_FILE_LIMITS.treeEntries)
+          throw new AzdBindingError("AZD_FILE_LIMIT_EXCEEDED", `The azd infrastructure tree has too many entries: ${path2}`);
+      }
+      for (const name of names.sort()) {
+        if (++entries > AZD_FILE_LIMITS.treeEntries)
+          throw new AzdBindingError("AZD_FILE_LIMIT_EXCEEDED", `The azd infrastructure tree has too many entries: ${path2}`);
+        const child = `${directory}/${name}`;
+        const metadata2 = await this.stat(child);
+        if (metadata2 === void 0)
+          throw this.unsafe();
+        if (metadata2.isDirectory()) {
+          await visit2(child, depth + 1);
+          continue;
+        }
+        const content = await this.readFile(child, metadata2, AZD_FILE_LIMITS.treeBytes - bytes);
+        bytes += content.length;
+        files2.push({ path: child.slice(path2.length + 1), hash: sha256Hex(content) });
+        visitFile?.(child.slice(path2.length + 1), content);
+      }
+    };
+    const root = await this.stat(path2);
+    if (root === void 0 || !root.isDirectory())
+      throw this.unsafe();
+    try {
+      await visit2(path2, 0);
+    } catch (error62) {
+      if (error62 instanceof AzdBindingError)
+        throw error62;
+      throw this.unsafe();
+    }
+    files2.sort((left, right) => left.path < right.path ? -1 : left.path > right.path ? 1 : 0);
+    return calculatePolicyValidationDigest(files2);
+  }
+  unsafe() {
+    return new AzdBindingError("AZD_PATH_UNSAFE", "An azd project path is unsafe: links and escapes are refused");
+  }
+};
+
+// packages/capabilities/dist/azd-bicep-references.js
+var EXACT_TAG = new RegExp(AZD_EXACT_TAG_PATTERN, "u");
+var REFERENCE = /\b(?:module\s+[A-Za-z_]\w*\s+|extension\s+|import\s+|from\s+|using\s+|(?:loadTextContent|loadFileAsBase64|loadJsonContent|loadYamlContent)\(\s*)(['"])([^'"\r\n]*)\1/gu;
+var REGISTRY = /^[a-z0-9](?:[a-z0-9.-]*[a-z0-9])?(?::\d{1,5})?$/u;
+var REPOSITORY = /^[a-z0-9]+(?:[._-][a-z0-9]+)*(?:\/[a-z0-9]+(?:[._-][a-z0-9]+)*)*$/u;
+var SPEC_NAME = /^[A-Za-z0-9][A-Za-z0-9._()-]{0,89}$/u;
+var SPEC_VERSION = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/u;
+var GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/u;
+function unpinned(message) {
+  throw new AzdBindingError("AZD_MODULE_UNPINNED", message);
+}
+function record(value, context) {
+  if (value === null || typeof value !== "object" || Array.isArray(value))
+    throw new AzdBindingError("AZD_PROJECT_UNSUPPORTED", `${context} must be an object`);
+  return value;
+}
+function parseAliases(config2, file2) {
+  let document2;
+  try {
+    document2 = JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(config2));
+  } catch {
+    throw new AzdBindingError("AZD_PROJECT_UNSUPPORTED", `${file2} must be plain JSON so module aliases can be bound`);
+  }
+  const aliases = record(document2, file2).moduleAliases;
+  const br = /* @__PURE__ */ new Map();
+  const ts = /* @__PURE__ */ new Map();
+  if (aliases === void 0)
+    return { br, ts };
+  const declared = record(aliases, `${file2} moduleAliases`);
+  for (const [name, entry] of Object.entries(record(declared.br ?? {}, `${file2} moduleAliases.br`))) {
+    if (name === "public")
+      unpinned(`${file2} redefines the built-in br/public alias; remove it so public modules stay on mcr.microsoft.com`);
+    const alias = record(entry, `${file2} br alias ${name}`);
+    const registry2 = typeof alias.registry === "string" ? alias.registry.toLowerCase() : "";
+    const modulePath = typeof alias.modulePath === "string" ? alias.modulePath : "";
+    if (!REGISTRY.test(registry2) || modulePath.length > 0 && !REPOSITORY.test(modulePath))
+      unpinned(`${file2} br alias ${name} must name a registry and a lowercase module path`);
+    br.set(name, { registry: registry2, modulePath });
+  }
+  for (const [name, entry] of Object.entries(record(declared.ts ?? {}, `${file2} moduleAliases.ts`))) {
+    const alias = record(entry, `${file2} ts alias ${name}`);
+    const subscription2 = typeof alias.subscription === "string" ? alias.subscription.toLowerCase() : "";
+    const resourceGroup = typeof alias.resourceGroup === "string" ? alias.resourceGroup : "";
+    if (!GUID.test(subscription2) || resourceGroup.length === 0)
+      unpinned(`${file2} ts alias ${name} must name a subscription and resource group`);
+    ts.set(name, { subscription: subscription2, resourceGroup });
+  }
+  return { br, ts };
+}
+function parseRegistryReference(reference, aliases) {
+  const aliasMatch = /^br\/([A-Za-z0-9_-]+):(.*)$/u.exec(reference);
+  const plainMatch = /^br:(.*)$/u.exec(reference);
+  let registry2;
+  let remainder;
+  if (aliasMatch !== null) {
+    const name = aliasMatch[1];
+    const resolved = name === "public" ? { registry: AZD_PUBLIC_BICEP_REGISTRY, modulePath: "bicep" } : aliases.br.get(name) ?? unpinned(`Module reference ${reference} uses the undefined alias br/${name}`);
+    registry2 = resolved.registry;
+    remainder = resolved.modulePath.length === 0 ? aliasMatch[2] : `${resolved.modulePath}/${aliasMatch[2]}`;
+  } else if (plainMatch !== null) {
+    const slash = plainMatch[1].indexOf("/");
+    if (slash <= 0)
+      unpinned(`Module reference ${reference} must name a registry and a repository`);
+    registry2 = plainMatch[1].slice(0, slash).toLowerCase();
+    remainder = plainMatch[1].slice(slash + 1);
+  } else
+    return unpinned(`Module reference ${reference} is not a supported br reference`);
+  let path2;
+  let pin;
+  const digestAt = remainder.indexOf("@");
+  if (digestAt >= 0) {
+    const digest2 = /^@sha256:([0-9a-f]{64})$/u.exec(remainder.slice(digestAt));
+    if (digest2 === null)
+      return unpinned(`Module reference ${reference} has a malformed digest; use @sha256:<64 hex>`);
+    path2 = remainder.slice(0, digestAt);
+    pin = { type: "digest", value: digest2[1] };
+  } else {
+    const colon = remainder.lastIndexOf(":");
+    if (colon <= 0 || colon === remainder.length - 1)
+      return unpinned(`Module reference ${reference} has no tag; pin an exact x.y.z tag or an @sha256 digest`);
+    path2 = remainder.slice(0, colon);
+    const tag = remainder.slice(colon + 1);
+    if (!EXACT_TAG.test(tag))
+      return unpinned(`Module reference ${reference} uses the floating tag '${tag.slice(0, 32)}'; pin an exact x.y.z tag or an @sha256 digest`);
+    if (registry2 !== AZD_PUBLIC_BICEP_REGISTRY || !path2.startsWith("bicep/"))
+      return unpinned(`Module reference ${reference} is outside the Microsoft public registry, where tags are not immutable; pin an @sha256 digest`);
+    pin = { type: "tag", value: tag };
+  }
+  if (!REGISTRY.test(registry2) || !REPOSITORY.test(path2))
+    return unpinned(`Module reference ${reference} has an invalid registry or repository name`);
+  return { kind: "br", registry: registry2, path: path2, pin };
+}
+function parseTemplateSpec(reference, aliases) {
+  const aliasMatch = /^ts\/([A-Za-z0-9_-]+):([^:]+):([^:]+)$/u.exec(reference);
+  const plainMatch = /^ts:([0-9A-Fa-f-]{36})\/([^/:]+)\/([^/:]+):([^:]+)$/u.exec(reference);
+  let subscription2;
+  let resourceGroup;
+  let name;
+  let version2;
+  if (aliasMatch !== null) {
+    const alias = aliases.ts.get(aliasMatch[1]) ?? unpinned(`Module reference ${reference} uses the undefined alias ts/${aliasMatch[1]}`);
+    ({ subscription: subscription2, resourceGroup } = alias);
+    name = aliasMatch[2];
+    version2 = aliasMatch[3];
+  } else if (plainMatch !== null) {
+    subscription2 = plainMatch[1].toLowerCase();
+    [resourceGroup, name, version2] = [plainMatch[2], plainMatch[3], plainMatch[4]];
+  } else
+    return unpinned(`Template spec reference ${reference} must name a subscription, resource group, spec and version`);
+  if (!GUID.test(subscription2) || !SPEC_NAME.test(name) || !SPEC_VERSION.test(version2))
+    return unpinned(`Template spec reference ${reference} has an invalid subscription, name or version`);
+  return {
+    kind: "ts",
+    registry: `${subscription2}/${resourceGroup}`,
+    path: name,
+    pin: { type: "version", value: version2 }
+  };
+}
+function assertLocal(root, file2, reference) {
+  if (/^(?:[\\/]|[A-Za-z]:)/u.test(reference) || reference.split(/[\\/]/u).includes(".."))
+    throw new AzdBindingError("AZD_PATH_UNSAFE", `Infra ${root} file ${file2} references a file outside its bound tree`);
+}
+function inventoryBicepReferences(root, files2) {
+  const configs = /* @__PURE__ */ new Map();
+  const aliasesFor = (file2) => {
+    const segments = file2.split("/").slice(0, -1);
+    for (let depth = segments.length; depth >= 0; depth--) {
+      const candidate = [...segments.slice(0, depth), "bicepconfig.json"].join("/");
+      const content = files2.get(candidate);
+      if (content === void 0)
+        continue;
+      let aliases = configs.get(candidate);
+      if (aliases === void 0) {
+        aliases = parseAliases(content, `${root.path}/${candidate}`);
+        configs.set(candidate, aliases);
+      }
+      return aliases;
+    }
+    throw new AzdBindingError("AZD_INFRA_MISSING", `Infra ${root.name} needs ${root.path}/bicepconfig.json`);
+  };
+  for (const path2 of files2.keys())
+    if (path2.endsWith("bicepconfig.json"))
+      aliasesFor(path2.replace(/bicepconfig\.json$/u, "x"));
+  const modules = [];
+  for (const [path2, content] of [...files2].sort(([left], [right]) => left < right ? -1 : left > right ? 1 : 0)) {
+    if (!path2.endsWith(".bicep"))
+      continue;
+    let source2;
+    try {
+      source2 = new TextDecoder("utf-8", { fatal: true }).decode(content);
+    } catch {
+      throw new AzdBindingError("AZD_INFRA_MISSING", `Infra ${root.name} file ${path2} is not valid UTF-8`);
+    }
+    const file2 = `${root.path}/${path2}`;
+    const seen = /* @__PURE__ */ new Set();
+    for (const match of source2.matchAll(REFERENCE)) {
+      const reference = match[2];
+      if (seen.has(reference))
+        continue;
+      seen.add(reference);
+      if (/^(?:br|ts)[:/]/u.test(reference)) {
+        const parsed = reference.startsWith("br") ? parseRegistryReference(reference, aliasesFor(path2)) : parseTemplateSpec(reference, aliasesFor(path2));
+        modules.push({ root: root.name, file: file2, reference, ...parsed });
+      } else if (/^[a-z][a-z0-9+.-]+:/iu.test(reference) && !/^(?:az|microsoftgraph|kubernetes)[@:]/iu.test(reference)) {
+        unpinned(`Infra ${root.name} file ${file2} references ${reference.slice(0, 48)}, which cannot be pinned; use a br: reference with an exact tag or digest`);
+      } else
+        assertLocal(root.name, file2, reference);
+    }
+  }
+  return modules;
+}
+
+// packages/capabilities/dist/azd-execution-envelope.js
+import { isAbsolute as isAbsolute6 } from "node:path";
+function buildAzdExecutionEnvelope(request) {
+  return {
+    workingDirectory: "project-root",
+    environmentName: request.environmentName,
+    prompts: "disabled",
+    identityPreflight: {
+      cloud: request.cloud ?? "AzureCloud",
+      tenantId: request.target.tenantId,
+      subscriptionId: request.target.subscriptionId,
+      onMismatch: "stop"
+    }
+  };
+}
+function buildAzdArguments(envelope, operation, projectRoot) {
+  if (operation !== "provision-preview" && operation !== "provision" && operation !== "down")
+    throw new AzdBindingError("AZD_BINDING_INPUT_INVALID", "Only azd provision and azd down can be run for a bound project");
+  if (!isAbsolute6(projectRoot) || projectRoot.startsWith("-"))
+    throw new AzdBindingError("AZD_BINDING_INPUT_INVALID", "The azd project root must be an absolute path");
+  const command = operation === "provision-preview" ? ["provision", "--preview", "--no-state"] : operation === "provision" ? ["provision", "--no-state"] : ["down", "--force"];
+  return [
+    ...command,
+    "--environment",
+    envelope.environmentName,
+    "--cwd",
+    projectRoot,
+    "--no-prompt",
+    ...operation === "provision-preview" ? ["--output", "json"] : []
+  ];
+}
+function assertAzdIdentityMatchesBinding(observed, binding) {
+  const expected = binding.executionEnvelope.identityPreflight;
+  const fail3 = (message) => {
+    throw new AzdBindingError("AZD_IDENTITY_MISMATCH", message);
+  };
+  const check2 = (name, actual, wanted, fold) => {
+    if (typeof actual !== "string" || actual.length === 0)
+      fail3(`The active Azure ${name} was not reported; sign in to the approved target and run the preflight again`);
+    else if ((fold ? actual.toLowerCase() : actual) !== wanted)
+      fail3(`The active Azure ${name} does not match the approved target; sign in to the approved target`);
+  };
+  check2("cloud", observed.cloud, expected.cloud, false);
+  check2("tenant", observed.tenantId, expected.tenantId, true);
+  check2("CLI subscription", observed.azureCliDefaultSubscriptionId, expected.subscriptionId, true);
+}
+
+// packages/capabilities/dist/azd-prerequisites.js
+var INSTALL_DOCS = "https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd";
+function releaseUrl(version2) {
+  return `https://github.com/Azure/azure-dev/releases/tag/azure-dev-cli_${version2}`;
+}
+function compareVersions(left, right) {
+  const a = left.split(".").map(Number);
+  const b = right.split(".").map(Number);
+  for (let index = 0; index < 3; index++) {
+    const difference = (a[index] ?? 0) - (b[index] ?? 0);
+    if (difference !== 0)
+      return difference;
+  }
+  return 0;
+}
+var COMPARATOR = /^(>=|<=|!=|>|<|=)?\s*v?(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z][0-9A-Za-z.-]*))?/u;
+function satisfiesAzdVersionConstraint(version2, constraint) {
+  const release2 = /^(\d+)\.(\d+)\.(\d+)$/u.exec(version2);
+  if (release2 === null)
+    return void 0;
+  const actual = [Number(release2[1]), Number(release2[2]), Number(release2[3])];
+  let satisfied = false;
+  for (const group of constraint.split("||")) {
+    let rest = group.trim();
+    if (rest.length === 0)
+      return void 0;
+    let groupSatisfied = true;
+    while (rest.length > 0) {
+      const match = COMPARATOR.exec(rest);
+      if (match === null)
+        return void 0;
+      const wanted = [Number(match[2]), Number(match[3]), Number(match[4])];
+      let order = compareVersions(actual.join("."), wanted.join("."));
+      if (order === 0 && match[5] !== void 0)
+        order = 1;
+      const operator = match[1] ?? "=";
+      const holds = operator === ">=" ? order >= 0 : operator === ">" ? order > 0 : operator === "<=" ? order <= 0 : operator === "<" ? order < 0 : operator === "!=" ? order !== 0 : order === 0;
+      groupSatisfied &&= holds;
+      rest = rest.slice(match[0].length).replace(/^[\s,]+/u, "");
+    }
+    satisfied ||= groupSatisfied;
+  }
+  return satisfied;
+}
+function evaluateAzdPrerequisite(input2) {
+  const { pinnedVersion, found, installedVersion } = input2;
+  if (pinnedVersion === void 0)
+    return {
+      ok: false,
+      code: "AZD_PIN_UNAVAILABLE",
+      value: "bundled azd version unavailable",
+      remedy: "Reinstall the apex CLI package"
+    };
+  const install = `Install azd ${pinnedVersion} (${releaseUrl(pinnedVersion)}; install guide ${INSTALL_DOCS}), add it to PATH, then rerun doctor`;
+  if (!found)
+    return { ok: false, code: "AZD_NOT_FOUND", value: "not found on PATH; Bicep runs require azd", remedy: install };
+  if (installedVersion === void 0)
+    return {
+      ok: false,
+      code: "AZD_VERSION_UNAVAILABLE",
+      value: "version unavailable from azd version",
+      remedy: `Run azd version to confirm it reports a stable release; ${install}`
+    };
+  if (installedVersion === pinnedVersion)
+    return { ok: true, value: installedVersion };
+  const direction = compareVersions(installedVersion, pinnedVersion) < 0 ? "older" : "newer";
+  return {
+    ok: false,
+    code: "AZD_VERSION_MISMATCH",
+    value: `${installedVersion} is ${direction} than the pinned ${pinnedVersion}`,
+    remedy: `Bicep runs bind the exact azd version; ${install}`
+  };
+}
+
+// packages/capabilities/dist/azd-binding.js
+var PROJECT_HOOK_EVENTS = /* @__PURE__ */ new Set([
+  "preprovision",
+  "postprovision",
+  "preinfracreate",
+  "postinfracreate",
+  "preinfradelete",
+  "postinfradelete",
+  "predown",
+  "postdown",
+  "preup",
+  "postup",
+  "prepackage",
+  "postpackage",
+  "prepublish",
+  "postpublish",
+  "predeploy",
+  "postdeploy",
+  "prerestore",
+  "postrestore"
+]);
+var SERVICE_HOOK_EVENTS = /* @__PURE__ */ new Set([
+  "predeploy",
+  "postdeploy",
+  "prerestore",
+  "postrestore",
+  "prebuild",
+  "postbuild",
+  "prepackage",
+  "postpackage",
+  "prepublish",
+  "postpublish"
+]);
+var LAYER_HOOK_EVENTS = /* @__PURE__ */ new Set(["preprovision", "postprovision"]);
+var TOP_LEVEL_KEYS = [
+  "name",
+  "metadata",
+  "infra",
+  "services",
+  "hooks",
+  "requiredVersions",
+  "pipeline",
+  "workflows",
+  "resourceGroup"
+];
+var NAME = /^[A-Za-z0-9][A-Za-z0-9._-]{0,63}$/u;
+var RELATIVE_SEGMENT = /^[A-Za-z0-9._-]+$/u;
+var RESERVED_SEGMENTS = /* @__PURE__ */ new Set([".", "..", ".azure", ".git"]);
+var PARAMETER_NAME = /^[A-Za-z_][A-Za-z0-9_]{0,127}$/u;
+var CONTROL = /[\u0000-\u001f\u007f]/u;
+var SCRIPT_CONTROL = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/u;
+var MAX_ENV_ENTRIES = 256;
+var MAX_ENV_VALUE = 4096;
+var MAX_HOOKS_PER_EVENT = 32;
+function fail(code, message) {
+  throw new AzdBindingError(code, message);
+}
+function plain(value, context, code) {
+  if (value === null || typeof value !== "object" || Array.isArray(value))
+    fail(code, `${context} must be a mapping`);
+  const result = value;
+  if (Object.keys(result).includes("__proto__"))
+    fail(code, `${context} contains a reserved key`);
+  return result;
+}
+function onlyKeys(value, allowed, context, code) {
+  for (const key of Object.keys(value))
+    if (!allowed.includes(key))
+      fail(code, `${context} declares unsupported setting '${safeKey(key)}'`);
+}
+function safeKey(key) {
+  return /^[A-Za-z0-9._-]{1,48}$/u.test(key) ? key : "(unprintable)";
+}
+function text(value, context, code, max = 256) {
+  if (typeof value !== "string" || value.length === 0 || value.length > max || CONTROL.test(value))
+    fail(code, `${context} must be a non-empty single-line string of at most ${max} characters`);
+  return value;
+}
+function moduleName(value, context, code) {
+  const name = text(value, context, code, 64);
+  if (!NAME.test(name))
+    fail(code, `${context} must be a bare module name without path separators`);
+  return name;
+}
+function bool(value, fallback, context, code) {
+  if (value === void 0)
+    return fallback;
+  if (typeof value !== "boolean")
+    fail(code, `${context} must be true or false`);
+  return value;
+}
+function compare(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+function relativePath(value) {
+  const trimmed = value.startsWith("./") ? value.slice(2) : value;
+  if (trimmed.length === 0 || trimmed.length > 512)
+    return void 0;
+  const segments = trimmed.split("/");
+  const valid = segments.every((segment) => RELATIVE_SEGMENT.test(segment) && !RESERVED_SEGMENTS.has(segment.toLowerCase()));
+  return valid ? segments.join("/") : void 0;
+}
+function projectPath(value, context, code = "AZD_PATH_UNSAFE") {
+  const path2 = relativePath(text(value, context, code, 512));
+  if (path2 === void 0)
+    fail(code, `${context} must be a project-relative path without links, '..' or protected folders`);
+  return path2;
+}
+function parseYaml(bytes) {
+  let source2;
+  try {
+    source2 = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return fail("AZD_YAML_INVALID", "azure.yaml is not valid UTF-8");
+  }
+  let document2;
+  try {
+    document2 = load(source2, { maxAliases: 0, maxDepth: 24 });
+  } catch {
+    return fail("AZD_YAML_INVALID", "azure.yaml is not a single plain YAML document (aliases are not supported)");
+  }
+  return plain(assertPlainYaml(document2), "azure.yaml", "AZD_YAML_INVALID");
+}
+function assertPlainYaml(document2) {
+  let nodes = 0;
+  const visit2 = (value, depth) => {
+    if (++nodes > 1e4 || depth > 24)
+      fail("AZD_YAML_INVALID", "azure.yaml is too large or deeply nested");
+    if (Array.isArray(value))
+      for (const item of value)
+        visit2(item, depth + 1);
+    else if (value !== null && typeof value === "object")
+      for (const [key, child] of Object.entries(value)) {
+        if (key === "<<" || key === "__proto__")
+          fail("AZD_YAML_INVALID", "azure.yaml uses a merge or reserved key");
+        visit2(child, depth + 1);
+      }
+  };
+  visit2(document2, 0);
+  return document2;
+}
+function parseDotenv(source2) {
+  const lines = source2.split(/\r?\n/u);
+  if (lines.length > MAX_ENV_ENTRIES * 4)
+    fail("AZD_ENV_INVALID", "The azd environment file has too many lines");
+  const values = /* @__PURE__ */ new Map();
+  for (const [index, raw] of lines.entries()) {
+    const label = `line ${index + 1}`;
+    if (raw.trim().length === 0 || raw.trim().startsWith("#"))
+      continue;
+    const match = /^([A-Za-z_][A-Za-z0-9_]{0,127})=(.*)$/u.exec(raw);
+    if (match === null)
+      fail("AZD_ENV_INVALID", `The azd environment file has an unsupported ${label}`);
+    const key = match[1];
+    const rest = match[2];
+    let value;
+    if (rest.startsWith('"')) {
+      let parsed = "";
+      let position = 1;
+      let closed = false;
+      while (position < rest.length) {
+        const char = rest[position];
+        if (char === '"') {
+          closed = true;
+          position += 1;
+          break;
+        }
+        if (char === "\\") {
+          const next = rest[position + 1];
+          if (next !== '"' && next !== "\\")
+            fail("AZD_ENV_INVALID", `The azd environment file has an unsupported escape on ${label}`);
+          parsed += next;
+          position += 2;
+          continue;
+        }
+        parsed += char;
+        position += 1;
+      }
+      if (!closed || rest.slice(position).trim().length > 0)
+        fail("AZD_ENV_INVALID", `The azd environment file has an unterminated or trailing value on ${label}`);
+      value = parsed;
+    } else if (rest.startsWith("'")) {
+      const end = rest.indexOf("'", 1);
+      if (end === -1 || rest.slice(end + 1).trim().length > 0)
+        fail("AZD_ENV_INVALID", `The azd environment file has an unterminated or trailing value on ${label}`);
+      value = rest.slice(1, end);
+    } else {
+      if (!/^[^\s"'#$`\\]*$/u.test(rest))
+        fail("AZD_ENV_INVALID", `The azd environment file has an ambiguous unquoted value on ${label}`);
+      value = rest;
+    }
+    if (value.includes("$") || CONTROL.test(value) || value.length > MAX_ENV_VALUE)
+      fail("AZD_ENV_INVALID", `The azd environment value on ${label} uses expansion, control characters or exceeds its limit`);
+    if (values.has(key))
+      fail("AZD_ENV_INVALID", `The azd environment file repeats ${key}`);
+    values.set(key, value);
+    if (values.size > MAX_ENV_ENTRIES)
+      fail("AZD_ENV_INVALID", "The azd environment file has too many entries");
+  }
+  return { values };
+}
+function assertApprovedEnvironment(values) {
+  for (const [key, value] of values) {
+    if (!AZD_ENVIRONMENT_KEYS.includes(key))
+      fail("AZD_ENV_UNAPPROVED_KEY", `The azd environment holds ${key}, which is not an azd-managed key; move custom values into the reviewed main.parameters.json or the typed environment inputs, and keep secrets in Key Vault references`);
+    if (SECRET_VALUE_PATTERN.test(value))
+      fail("AZD_ENV_SECRET", `The azd environment value of ${key} looks like a secret`);
+  }
+}
+async function inventoryAzdConfigFiles(files2, directory) {
+  const result = {};
+  const parse4 = (bytes, context) => {
+    try {
+      return plain(JSON.parse(new TextDecoder("utf-8", { fatal: true }).decode(bytes)), context, "AZD_ENV_INVALID");
+    } catch (error62) {
+      if (error62 instanceof AzdBindingError)
+        throw error62;
+      return fail("AZD_ENV_INVALID", `${context} is not valid JSON`);
+    }
+  };
+  if (await files2.stat(`${directory}/config.json`) !== void 0) {
+    const bytes = await files2.read(`${directory}/config.json`, AZD_FILE_LIMITS.fileBytes, "AZD_ENV_MISSING");
+    if (Object.keys(parse4(bytes, "The azd environment config")).length > 0)
+      fail("AZD_ENV_UNAPPROVED_KEY", "The azd environment config must be empty; stored parameter values belong in the reviewed main.parameters.json");
+    result.configHash = sha256Hex(bytes);
+  }
+  if (await files2.stat(".azure/config.json") !== void 0) {
+    const bytes = await files2.read(".azure/config.json", AZD_FILE_LIMITS.fileBytes, "AZD_ENV_MISSING");
+    const project = parse4(bytes, ".azure/config.json");
+    onlyKeys(project, ["version", "defaultEnvironment"], ".azure/config.json", "AZD_ENV_INVALID");
+    if (project.version !== void 0 && !Number.isInteger(project.version) || project.defaultEnvironment !== void 0 && typeof project.defaultEnvironment !== "string")
+      fail("AZD_ENV_INVALID", ".azure/config.json has unexpected value types");
+    result.projectConfigHash = sha256Hex(bytes);
+  }
+  return result;
+}
+function sameText(left, right) {
+  return left !== void 0 && right !== void 0 && left.toLowerCase() === right.toLowerCase();
+}
+function assertTarget(values, request) {
+  const redirect = (name) => fail("AZD_ENV_TARGET_MISMATCH", `The azd environment ${name} does not match the approved target`);
+  if (values.get("AZURE_ENV_NAME") !== request.environmentName)
+    redirect("AZURE_ENV_NAME");
+  if (!sameText(values.get("AZURE_SUBSCRIPTION_ID"), request.target.subscriptionId))
+    redirect("AZURE_SUBSCRIPTION_ID");
+  if (!sameText(values.get("AZURE_LOCATION"), request.target.location))
+    redirect("AZURE_LOCATION");
+  const tenant = values.get("AZURE_TENANT_ID");
+  if (tenant !== void 0 && !sameText(tenant, request.target.tenantId))
+    redirect("AZURE_TENANT_ID");
+  const group = values.get("AZURE_RESOURCE_GROUP");
+  if (request.target.resourceGroup !== void 0 && !sameText(group, request.target.resourceGroup))
+    redirect("AZURE_RESOURCE_GROUP");
+}
+function assertDeclaredGroup(value, request, context) {
+  if (value === void 0)
+    return;
+  const group = text(value, context, "AZD_PROJECT_UNSUPPORTED");
+  if (!sameText(group, request.target.resourceGroup))
+    fail("AZD_ENV_TARGET_MISMATCH", `${context} redirects the deployment away from the approved resource group`);
+}
+async function inventoryEnvironment(files2, request) {
+  const directory = `.azure/${request.environmentName}`;
+  const bytes = await files2.read(`${directory}/.env`, AZD_FILE_LIMITS.fileBytes, "AZD_ENV_MISSING");
+  let source2;
+  try {
+    source2 = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return fail("AZD_ENV_INVALID", "The azd environment file is not valid UTF-8");
+  }
+  const { values } = parseDotenv(source2);
+  assertApprovedEnvironment(values);
+  assertTarget(values, request);
+  const { configHash, projectConfigHash } = await inventoryAzdConfigFiles(files2, directory);
+  const entries = [...values.entries()].sort(([left], [right]) => compare(left, right));
+  return {
+    values,
+    environment: {
+      name: request.environmentName,
+      target: {
+        subscriptionId: request.target.subscriptionId,
+        location: request.target.location,
+        tenantId: request.target.tenantId,
+        ...request.target.resourceGroup === void 0 ? {} : { resourceGroup: request.target.resourceGroup }
+      },
+      keys: entries.map(([key]) => key),
+      valuesHash: calculatePolicyValidationDigest(entries),
+      ...configHash === void 0 ? {} : { configHash },
+      ...projectConfigHash === void 0 ? {} : { projectConfigHash }
+    }
+  };
+}
+function resolveParameters(bytes, values) {
+  let source2;
+  try {
+    source2 = new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return fail("AZD_PARAMETERS_UNSUPPORTED", "The Bicep parameter file is not valid UTF-8");
+  }
+  const stripped = source2.replace(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/gu, "").replaceAll('"$schema"', "");
+  if (stripped.includes("$"))
+    fail("AZD_PARAMETERS_UNSUPPORTED", "The Bicep parameter file uses substitution other than ${NAME}");
+  const resolved = source2.replace(/\$\{([A-Za-z_][A-Za-z0-9_]*)\}/gu, (_match, name) => {
+    const value = values.get(name);
+    if (value === void 0)
+      fail("AZD_PARAMETERS_UNRESOLVED", `Bicep parameter substitution ${name} is not an approved azd-managed value; put reviewed values directly in the parameter file or the typed environment inputs`);
+    if (/["\\]/u.test(value))
+      fail("AZD_PARAMETERS_UNSUPPORTED", `Bicep parameter substitution ${name} holds characters that alter JSON structure`);
+    return value;
+  });
+  let document2;
+  try {
+    document2 = JSON.parse(resolved);
+  } catch {
+    return fail("AZD_PARAMETERS_UNSUPPORTED", "The Bicep parameter file is not valid JSON after substitution");
+  }
+  const root = plain(document2, "The Bicep parameter file", "AZD_PARAMETERS_UNSUPPORTED");
+  onlyKeys(root, ["$schema", "contentVersion", "parameters"], "The Bicep parameter file", "AZD_PARAMETERS_UNSUPPORTED");
+  const parameters = plain(root.parameters ?? {}, "The Bicep parameters", "AZD_PARAMETERS_UNSUPPORTED");
+  const entries = [];
+  for (const [name, definition] of Object.entries(parameters)) {
+    if (!PARAMETER_NAME.test(name))
+      fail("AZD_PARAMETERS_UNSUPPORTED", `Bicep parameter name ${safeKey(name)} is not supported`);
+    const parameter = plain(definition, `Bicep parameter ${name}`, "AZD_PARAMETERS_UNSUPPORTED");
+    onlyKeys(parameter, ["value", "reference"], `Bicep parameter ${name}`, "AZD_PARAMETERS_UNSUPPORTED");
+    if (parameter.value === void 0 === (parameter.reference === void 0))
+      fail("AZD_PARAMETERS_UNSUPPORTED", `Bicep parameter ${name} must declare exactly one of value or reference`);
+    if (parameter.value !== void 0 && SECRET_FIELD_PATTERN.test(name))
+      fail("AZD_PARAMETERS_SECRET", `Bicep parameter ${name} carries a secret-named literal; use a Key Vault reference`);
+    if (SECRET_VALUE_PATTERN.test(JSON.stringify(parameter)))
+      fail("AZD_PARAMETERS_SECRET", `Bicep parameter ${name} holds a secret-like value; use a Key Vault reference`);
+    entries.push([name, parameter]);
+  }
+  entries.sort(([left], [right]) => compare(left, right));
+  return { fileHash: sha256Hex(bytes), resolvedHash: calculatePolicyValidationDigest(entries) };
+}
+function declareRoots(infra) {
+  onlyKeys(infra, ["provider", "path", "module", "layers"], "infra", "AZD_PROJECT_UNSUPPORTED");
+  if (infra.provider !== void 0 && infra.provider !== "bicep")
+    fail("AZD_PROVIDER_UNSUPPORTED", "Only the built-in bicep infra provider is supported; Terraform and extension providers are not");
+  if (infra.layers === void 0)
+    return {
+      layered: false,
+      roots: [
+        {
+          name: "default",
+          path: projectPath(infra.path ?? "infra", "infra.path"),
+          module: moduleName(infra.module ?? "main", "infra.module", "AZD_PROJECT_UNSUPPORTED"),
+          dependsOn: [],
+          hooks: void 0
+        }
+      ]
+    };
+  if (infra.path !== void 0 || infra.module !== void 0)
+    fail("AZD_LAYER_UNSUPPORTED", "infra.layers cannot be combined with infra.path or infra.module");
+  if (!Array.isArray(infra.layers) || infra.layers.length === 0 || infra.layers.length > 16)
+    fail("AZD_LAYER_UNSUPPORTED", "infra.layers must list between 1 and 16 layers");
+  const roots = [];
+  const seen = /* @__PURE__ */ new Set();
+  const paths = /* @__PURE__ */ new Set();
+  for (const candidate of infra.layers) {
+    const layer = plain(candidate, "An infra layer", "AZD_LAYER_UNSUPPORTED");
+    onlyKeys(layer, ["name", "path", "module", "provider", "config", "dependsOn", "hooks"], "An infra layer", "AZD_LAYER_UNSUPPORTED");
+    const name = text(layer.name, "An infra layer name", "AZD_LAYER_UNSUPPORTED", 64);
+    if (!NAME.test(name) || name.toLowerCase() === "default" || seen.has(name.toLowerCase()))
+      fail("AZD_LAYER_UNSUPPORTED", `Infra layer name ${safeKey(name)} is invalid, reserved or repeated`);
+    seen.add(name.toLowerCase());
+    if (layer.provider !== void 0 && layer.provider !== "bicep")
+      fail("AZD_PROVIDER_UNSUPPORTED", `Infra layer ${name} must use the built-in bicep provider`);
+    if (layer.config !== void 0 && Object.keys(plain(layer.config, `Infra layer ${name} config`, "AZD_LAYER_UNSUPPORTED")).length > 0)
+      fail("AZD_LAYER_UNSUPPORTED", `Infra layer ${name} provider configuration is not supported`);
+    const path2 = projectPath(layer.path, `Infra layer ${name} path`);
+    if (paths.has(path2.toLowerCase()))
+      fail("AZD_LAYER_UNSUPPORTED", `Infra layer ${name} repeats another layer path`);
+    paths.add(path2.toLowerCase());
+    const dependsOn = layer.dependsOn === void 0 ? [] : Array.isArray(layer.dependsOn) ? layer.dependsOn.map((item) => text(item, `Infra layer ${name} dependency`, "AZD_LAYER_UNSUPPORTED", 64)) : fail("AZD_LAYER_UNSUPPORTED", `Infra layer ${name} dependsOn must be a list`);
+    roots.push({
+      name,
+      path: path2,
+      module: moduleName(layer.module ?? "main", `Infra layer ${name} module`, "AZD_LAYER_UNSUPPORTED"),
+      dependsOn,
+      hooks: layer.hooks
+    });
+  }
+  const names = roots.map(({ name }) => name);
+  const graph = new Map(roots.map((root) => [root.name, root.dependsOn]));
+  for (const root of roots) {
+    const invalid = root.dependsOn.some((dependency) => !names.includes(dependency) || dependency === root.name);
+    if (invalid || new Set(root.dependsOn).size !== root.dependsOn.length)
+      fail("AZD_LAYER_UNSUPPORTED", `Infra layer ${root.name} has an unknown, repeated or self dependency`);
+  }
+  const state = /* @__PURE__ */ new Map();
+  const visit2 = (name) => {
+    if (state.get(name) === "done")
+      return;
+    if (state.get(name) === "visiting")
+      fail("AZD_LAYER_UNSUPPORTED", "Infra layer dependencies are cyclic");
+    state.set(name, "visiting");
+    for (const dependency of graph.get(name) ?? [])
+      visit2(dependency);
+    state.set(name, "done");
+  };
+  for (const name of names)
+    visit2(name);
+  return { layered: true, roots };
+}
+async function inventoryRoot(files2, root, values) {
+  const template = await files2.stat(`${root.path}/${root.module}.bicep`);
+  if (template === void 0 || !template.isFile())
+    fail("AZD_INFRA_MISSING", `Infra ${root.name} has no ${root.module}.bicep under ${root.path}`);
+  if (await files2.stat(`${root.path}/${root.module}.bicepparam`) !== void 0)
+    fail("AZD_PARAMETERS_UNSUPPORTED", `Infra ${root.name} uses .bicepparam, which cannot be resolved deterministically`);
+  if (await files2.stat(`${root.path}/bicepconfig.json`) === void 0)
+    fail("AZD_INFRA_MISSING", `Infra ${root.name} needs ${root.path}/bicepconfig.json so Bicep configuration is never inherited from outside the bound tree`);
+  const parametersPath = `${root.path}/${root.module}.parameters.json`;
+  const parameters = await files2.stat(parametersPath) === void 0 ? void 0 : resolveParameters(await files2.read(parametersPath, AZD_FILE_LIMITS.fileBytes, "AZD_INFRA_MISSING"), values);
+  const sources = /* @__PURE__ */ new Map();
+  const treeHash = await files2.hashTree(root.path, (path2, content) => {
+    if (path2.endsWith(".bicep") || path2.endsWith("bicepconfig.json"))
+      sources.set(path2, content);
+  });
+  return {
+    root: {
+      name: root.name,
+      path: root.path,
+      module: root.module,
+      provider: "bicep",
+      dependsOn: [...root.dependsOn],
+      treeHash,
+      ...parameters === void 0 ? {} : { parametersPath, parametersFileHash: parameters.fileHash },
+      resolvedParametersHash: parameters?.resolvedHash ?? calculatePolicyValidationDigest([])
+    },
+    remoteModules: inventoryBicepReferences({ name: root.name, path: root.path }, sources)
+  };
+}
+var SCRIPT_TOKEN = /^[A-Za-z0-9._/\\-]+$/u;
+async function inventoryHooks(files2, site) {
+  const result = [];
+  const hooks = plain(site.declaration, `${site.scope} hooks`, "AZD_PROJECT_UNSUPPORTED");
+  for (const [event, declared] of Object.entries(hooks)) {
+    if (!site.events.has(event))
+      fail("AZD_PROJECT_UNSUPPORTED", `${site.scope} declares unsupported hook event ${safeKey(event)}`);
+    const list = Array.isArray(declared) ? declared : [declared];
+    if (list.length > MAX_HOOKS_PER_EVENT)
+      fail("AZD_PROJECT_UNSUPPORTED", `${site.scope} ${event} declares too many hooks`);
+    for (const [order, candidate] of list.entries()) {
+      const entry = plain(candidate, `${site.scope} ${event} hook`, "AZD_PROJECT_UNSUPPORTED");
+      const variants = [];
+      if (entry.run !== void 0)
+        variants.push(["all", entry]);
+      for (const platform of ["windows", "posix"])
+        if (entry[platform] !== void 0)
+          variants.push([
+            platform,
+            plain(entry[platform], `${site.scope} ${event} ${platform} hook`, "AZD_PROJECT_UNSUPPORTED")
+          ]);
+      if (variants.length === 0)
+        fail("AZD_PROJECT_UNSUPPORTED", `${site.scope} ${event} hook has no run command`);
+      for (const [platform, definition] of variants)
+        result.push(await inventoryHook(files2, site, event, order, platform, definition));
+    }
+  }
+  return result;
+}
+async function inventoryHook(files2, site, event, order, platform, definition) {
+  const context = `${site.scope} ${event} hook`;
+  const run = definition.run;
+  if (typeof run !== "string" || run.trim().length === 0 || run.length > AZD_BINDING_LIMITS.hookRunLength || SCRIPT_CONTROL.test(run))
+    fail("AZD_PROJECT_UNSUPPORTED", `${context} run must be a non-empty command or script path`);
+  const declared = definition.shell ?? definition.kind;
+  if (declared !== void 0 && declared !== "sh" && declared !== "pwsh")
+    fail("AZD_PROJECT_UNSUPPORTED", `${context} uses a runner azd does not support; only sh and pwsh exist`);
+  const workingDirectory = definition.dir === void 0 || definition.dir === "." ? void 0 : projectPath(definition.dir, `${context} dir`, "AZD_HOOK_SCRIPT_INVALID");
+  let path2;
+  let contentHash;
+  const token = run.trim();
+  if (SCRIPT_TOKEN.test(token) && (/[\\/]/u.test(token) || /\.(?:sh|ps1)$/iu.test(token))) {
+    const candidate = relativePath(token.replaceAll("\\", "/"));
+    if (candidate === void 0)
+      fail("AZD_HOOK_SCRIPT_INVALID", `${context} script path is absolute, uses links or leaves the project`);
+    const found = [];
+    for (const base of site.bases) {
+      const full = base.length === 0 ? candidate : `${base}/${candidate}`;
+      if (await files2.stat(full) !== void 0)
+        found.push(full);
+    }
+    if (found.length !== 1)
+      fail("AZD_HOOK_SCRIPT_INVALID", `${context} script ${safeKey(token)} ${found.length === 0 ? "does not exist in the project" : "is ambiguous between project and service folders"}`);
+    const metadata2 = await files2.stat(found[0]);
+    if (metadata2 === void 0 || !metadata2.isFile())
+      fail("AZD_HOOK_SCRIPT_INVALID", `${context} script is not a regular file`);
+    path2 = found[0];
+    contentHash = sha256Hex(await files2.readFile(path2, metadata2, AZD_FILE_LIMITS.fileBytes));
+  }
+  return {
+    scope: site.scope,
+    event,
+    order,
+    platform,
+    ...declared === void 0 ? {} : { shell: declared },
+    run,
+    ...workingDirectory === void 0 ? {} : { workingDirectory },
+    ...path2 === void 0 || contentHash === void 0 ? {} : { path: path2, contentHash },
+    continueOnError: bool(definition.continueOnError, false, `${context} continueOnError`, "AZD_PROJECT_UNSUPPORTED"),
+    interactive: bool(definition.interactive, false, `${context} interactive`, "AZD_PROJECT_UNSUPPORTED")
+  };
+}
+function declaredExtensions(required3, azdVersion) {
+  const declaration = plain(required3, "requiredVersions", "AZD_PROJECT_UNSUPPORTED");
+  onlyKeys(declaration, ["azd", "extensions"], "requiredVersions", "AZD_PROJECT_UNSUPPORTED");
+  if (declaration.azd !== void 0) {
+    const constraint = text(declaration.azd, "requiredVersions.azd", "AZD_PROJECT_UNSUPPORTED", 64);
+    const satisfied = satisfiesAzdVersionConstraint(azdVersion, constraint);
+    if (satisfied === void 0)
+      fail("AZD_PROJECT_UNSUPPORTED", "requiredVersions.azd must use simple comparators such as '>= 1.35.0'");
+    if (!satisfied)
+      fail("AZD_VERSION_CONSTRAINT", `azure.yaml requires azd ${constraint}, which the bound azd ${azdVersion} does not meet`);
+  }
+  if (declaration.extensions === void 0)
+    return [];
+  const extensions = plain(declaration.extensions, "requiredVersions.extensions", "AZD_PROJECT_UNSUPPORTED");
+  const result = [];
+  for (const [id, constraint] of Object.entries(extensions)) {
+    if (!/^[a-z0-9][a-z0-9._-]{0,127}$/u.test(id))
+      fail("AZD_PROJECT_UNSUPPORTED", `azd extension id ${safeKey(id)} is not supported`);
+    result.push({
+      id,
+      version: text(constraint, `extension ${safeKey(id)} version`, "AZD_PROJECT_UNSUPPORTED", 64),
+      source: "azd"
+    });
+  }
+  return result.sort((left, right) => compare(left.id, right.id));
+}
+function assertSupportedProject(project, request) {
+  for (const unsupported of ["resources", "platform", "state", "cloud"])
+    if (project[unsupported] !== void 0)
+      fail("AZD_PROJECT_UNSUPPORTED", `azure.yaml '${unsupported}' is not supported: it generates infrastructure or redirects state, platform or cloud`);
+  onlyKeys(project, TOP_LEVEL_KEYS, "azure.yaml", "AZD_PROJECT_UNSUPPORTED");
+  assertDeclaredGroup(project.resourceGroup, request, "azure.yaml resourceGroup");
+}
+async function inspectAzdBicepProject(input2) {
+  const request = {
+    ...input2,
+    target: {
+      ...input2.target,
+      subscriptionId: input2.target.subscriptionId.toLowerCase(),
+      location: input2.target.location.toLowerCase(),
+      tenantId: String(input2.target.tenantId).toLowerCase()
+    }
+  };
+  if (!value_exports2.Check(EnvironmentSchema, request.environmentName))
+    fail("AZD_BINDING_INPUT_INVALID", "The azd environment name is invalid");
+  if (!value_exports2.Check(AzdEnvironmentV1Schema.properties.target, request.target))
+    fail("AZD_BINDING_INPUT_INVALID", "The approved azd target is invalid");
+  if (!value_exports2.Check(AzdVersionSchema, request.azdVersion))
+    fail("AZD_BINDING_INPUT_INVALID", "The azd version must be an exact x.y.z release");
+  const files2 = await AzdProjectFiles.open(request.projectRoot);
+  const manifest2 = await files2.read("azure.yaml", AZD_FILE_LIMITS.fileBytes, "AZD_PROJECT_MISSING");
+  const project = parseYaml(manifest2);
+  assertSupportedProject(project, request);
+  const projectName = text(project.name, "azure.yaml name", "AZD_PROJECT_UNSUPPORTED", 128);
+  const { environment, values } = await inventoryEnvironment(files2, request);
+  const { layered, roots: declarations } = declareRoots(project.infra === void 0 ? {} : plain(project.infra, "infra", "AZD_PROJECT_UNSUPPORTED"));
+  const roots = [];
+  const remoteModules = [];
+  for (const declaration of declarations) {
+    const inventoried = await inventoryRoot(files2, declaration, values);
+    roots.push(inventoried.root);
+    remoteModules.push(...inventoried.remoteModules);
+  }
+  const sites = [];
+  if (project.hooks !== void 0)
+    sites.push({ scope: "project", events: PROJECT_HOOK_EVENTS, declaration: project.hooks, bases: [""] });
+  for (const declaration of declarations)
+    if (declaration.hooks !== void 0)
+      sites.push({
+        scope: `layer:${declaration.name}`,
+        events: LAYER_HOOK_EVENTS,
+        declaration: declaration.hooks,
+        bases: [""]
+      });
+  if (project.services !== void 0) {
+    const services = plain(project.services, "services", "AZD_PROJECT_UNSUPPORTED");
+    if (Object.keys(services).length > 64)
+      fail("AZD_PROJECT_UNSUPPORTED", "azure.yaml declares too many services");
+    for (const [name, candidate] of Object.entries(services)) {
+      if (!NAME.test(name))
+        fail("AZD_PROJECT_UNSUPPORTED", `Service name ${safeKey(name)} is not supported`);
+      const service = plain(candidate, `Service ${name}`, "AZD_PROJECT_UNSUPPORTED");
+      assertDeclaredGroup(service.resourceGroup, request, `Service ${name} resourceGroup`);
+      if (service.hooks === void 0)
+        continue;
+      const serviceDirectory = service.project === void 0 || service.project === "." ? "" : projectPath(service.project, `Service ${name} project`);
+      sites.push({
+        scope: `service:${name}`,
+        events: SERVICE_HOOK_EVENTS,
+        declaration: service.hooks,
+        bases: serviceDirectory.length === 0 ? [""] : ["", serviceDirectory]
+      });
+    }
+  }
+  const hooks = [];
+  for (const site of sites)
+    hooks.push(...await inventoryHooks(files2, site));
+  remoteModules.sort((left, right) => compare(left.root, right.root) || compare(left.file, right.file) || compare(left.reference, right.reference));
+  hooks.sort((left, right) => compare(left.scope, right.scope) || compare(left.event, right.event) || left.order - right.order || compare(left.platform, right.platform));
+  const body = {
+    schemaVersion: CONTRACT_VERSION,
+    projectId: request.projectId,
+    runId: request.runId,
+    track: "bicep",
+    executor: "azd",
+    azdVersion: request.azdVersion,
+    projectName,
+    configHash: sha256Hex(manifest2),
+    infra: { provider: "bicep", layered, roots },
+    environment,
+    parametersHash: calculatePolicyValidationDigest(roots.map(({ name, resolvedParametersHash }) => [name, resolvedParametersHash])),
+    hooks,
+    extensions: project.requiredVersions === void 0 ? [] : declaredExtensions(project.requiredVersions, request.azdVersion),
+    remoteModules,
+    executionEnvelope: buildAzdExecutionEnvelope({
+      environmentName: request.environmentName,
+      ...request.cloud === void 0 ? {} : { cloud: request.cloud },
+      target: request.target
+    })
+  };
+  const binding = { ...body, bindingHash: calculateAzdBindingHash(body) };
+  if (!hasValidAzdBinding(binding))
+    fail("AZD_BINDING_INPUT_INVALID", "The azd binding inputs exceed the supported contract bounds");
+  return binding;
+}
+function diffAzdBindings(accepted, current) {
+  const section = (name, left, right) => calculatePolicyValidationDigest(left) === calculatePolicyValidationDigest(right) ? [] : [name];
+  return [
+    ...section("azd version", accepted.azdVersion, current.azdVersion),
+    ...section("azure.yaml", accepted.configHash, current.configHash),
+    ...section("infrastructure", accepted.infra, current.infra),
+    ...section("environment", accepted.environment, current.environment),
+    ...section("parameters", accepted.parametersHash, current.parametersHash),
+    ...section("hooks", accepted.hooks, current.hooks),
+    ...section("extensions", accepted.extensions, current.extensions),
+    ...section("run identity", [accepted.projectId, accepted.runId], [current.projectId, current.runId])
+  ];
+}
+async function assertAzdBindingUnchanged(accepted, request) {
+  if (!hasValidAzdBinding(accepted))
+    fail("AZD_BINDING_CHANGED", "The accepted azd binding is not a valid binding");
+  const current = await inspectAzdBicepProject(request);
+  if (current.bindingHash !== accepted.bindingHash) {
+    const changed = diffAzdBindings(accepted, current);
+    fail("AZD_BINDING_CHANGED", `The azd binding changed since the preview (${changed.length === 0 ? "binding" : changed.join(", ")}); create a new preview and approval`);
+  }
+  return current;
+}
+var AZD_HOOKS_EXTENSIONS_WARNING = "This project declares hooks/extensions. They run with your Azure credentials and are not described by the what-if preview.";
+var display = (value, max = 200) => {
+  const line = JSON.stringify(value);
+  return line.length > max ? `${line.slice(0, max)}...` : line;
+};
+function describeAzdBinding(binding) {
+  const warnings = [
+    `azd ${binding.azdVersion} recompiles the Bicep source and re-resolves parameters when it provisions; the what-if is a prediction against current Azure state, not an immutable plan.`
+  ];
+  if (binding.hooks.length > 0 || binding.extensions.length > 0)
+    warnings.push(AZD_HOOKS_EXTENSIONS_WARNING);
+  if (binding.remoteModules.length > 0)
+    warnings.push(`${binding.remoteModules.length} remote Bicep module reference(s) are pinned by exact tag or digest; the executor must verify the resolved artifact matches before provisioning.`);
+  if (binding.infra.layered)
+    warnings.push(`Provisioning runs ${binding.infra.roots.length} layers in dependency order; each layer is previewed on its own.`);
+  const inventory = [
+    ...binding.infra.roots.map((root) => `infra ${root.name}: ${root.path}/${root.module}.bicep tree ${root.treeHash.slice(0, 12)} parameters ${root.resolvedParametersHash.slice(0, 12)}${root.dependsOn.length === 0 ? "" : ` after ${root.dependsOn.join(", ")}`}`),
+    ...binding.hooks.map((hook) => `hook ${hook.scope} ${hook.event} #${hook.order} (${hook.platform}${hook.shell === void 0 ? "" : `, ${hook.shell}`}${hook.workingDirectory === void 0 ? "" : `, dir ${hook.workingDirectory}`}): run ${display(hook.run)}${hook.path === void 0 ? "" : `, script ${hook.path} ${hook.contentHash.slice(0, 12)}`}${hook.continueOnError ? ", continues on error" : ""}${hook.interactive ? ", interactive" : ""}`),
+    ...binding.extensions.map((extension) => `extension ${extension.id} ${extension.version} (${extension.source})`),
+    ...binding.remoteModules.map((module) => `module ${module.root} ${module.file}: ${module.reference} (${module.pin.type} ${module.pin.type === "digest" ? module.pin.value.slice(0, 12) : module.pin.value})`),
+    `identity preflight: cloud ${binding.executionEnvelope.identityPreflight.cloud}, tenant ${binding.executionEnvelope.identityPreflight.tenantId}, subscription ${binding.executionEnvelope.identityPreflight.subscriptionId}`
+  ];
+  return { bindingHash: binding.bindingHash, warnings, inventory };
+}
+
+// packages/capabilities/dist/bound-envelope-transport.js
+import { createHash as createHash6 } from "node:crypto";
+function sha256(bytes) {
+  return createHash6("sha256").update(bytes).digest("hex");
 }
 function canonicalBindings(bindings) {
   const canonical3 = {};
@@ -20619,95 +24530,6 @@ var BoundEnvelopeTransport = class {
 };
 
 // packages/capabilities/dist/command-plans.js
-function withBicepParameters(args, parametersFile) {
-  return parametersFile === void 0 ? args : [...args, "--parameters", parametersFile];
-}
-var BicepCommandAdapter = class {
-  validate(templateFile, cwd) {
-    return { executable: "bicep", args: ["build", templateFile], ...cwd === void 0 ? {} : { cwd } };
-  }
-  preview(target) {
-    const args = withBicepParameters([
-      "deployment",
-      "group",
-      "what-if",
-      "--resource-group",
-      target.resourceGroup,
-      "--name",
-      target.deploymentName,
-      "--template-file",
-      target.templateFile,
-      "--no-pretty-print",
-      "--output",
-      "json"
-    ], target.parametersFile);
-    return { executable: "az", args, ...target.cwd === void 0 ? {} : { cwd: target.cwd } };
-  }
-  apply(target) {
-    const args = withBicepParameters([
-      "deployment",
-      "group",
-      "create",
-      "--resource-group",
-      target.resourceGroup,
-      "--name",
-      target.deploymentName,
-      "--template-file",
-      target.templateFile,
-      "--output",
-      "json"
-    ], target.parametersFile);
-    return { executable: "az", args, ...target.cwd === void 0 ? {} : { cwd: target.cwd } };
-  }
-  stackApply(target) {
-    const args = withBicepParameters([
-      "stack",
-      "group",
-      "create",
-      "--resource-group",
-      target.resourceGroup,
-      "--name",
-      target.stackName,
-      "--template-file",
-      target.templateFile,
-      "--action-on-unmanage",
-      target.actionOnUnmanage,
-      "--deny-settings-mode",
-      target.denySettingsMode,
-      "--yes",
-      "--output",
-      "json"
-    ], target.parametersFile);
-    return { executable: "az", args, ...target.cwd === void 0 ? {} : { cwd: target.cwd } };
-  }
-  stackDestroy(target) {
-    return {
-      executable: "az",
-      args: [
-        "stack",
-        "group",
-        "delete",
-        "--resource-group",
-        target.resourceGroup,
-        "--name",
-        target.stackName,
-        "--action-on-unmanage",
-        target.actionOnUnmanage,
-        "--yes",
-        "--output",
-        "json"
-      ],
-      ...target.cwd === void 0 ? {} : { cwd: target.cwd }
-    };
-  }
-  stackList(target) {
-    return {
-      executable: "az",
-      args: ["stack", "group", "list", "--resource-group", target.resourceGroup, "--output", "json"],
-      ...target.cwd === void 0 ? {} : { cwd: target.cwd }
-    };
-  }
-};
 var TerraformCommandAdapter = class {
   providerSchemas(cwd) {
     return { executable: "terraform", args: ["providers", "schema", "-json"], cwd };
@@ -20753,6 +24575,67 @@ var TerraformCommandAdapter = class {
     }
   }
 };
+var AzureCliReadAdapter = class {
+  resourceGraph(query, subscriptions = []) {
+    return {
+      executable: "az",
+      args: [
+        "graph",
+        "query",
+        "--graph-query",
+        query,
+        ...subscriptions.length === 0 ? [] : ["--subscriptions", ...subscriptions],
+        "--output",
+        "json"
+      ]
+    };
+  }
+  /** Resource groups of the subscription tagged `azd-env-name`, which is how azd finds an environment's groups. */
+  taggedResourceGroups(subscriptionId, environmentName) {
+    return {
+      executable: "az",
+      args: [
+        "group",
+        "list",
+        "--subscription",
+        subscriptionId,
+        "--tag",
+        `azd-env-name=${environmentName}`,
+        "--output",
+        "json"
+      ]
+    };
+  }
+  resourceGroupResources(subscriptionId, resourceGroup) {
+    return {
+      executable: "az",
+      args: [
+        "resource",
+        "list",
+        "--subscription",
+        subscriptionId,
+        "--resource-group",
+        resourceGroup,
+        "--output",
+        "json"
+      ]
+    };
+  }
+  /** One resource by its exact ID, including child and extension resources that a group listing omits. */
+  resourceById(resourceId) {
+    return { executable: "az", args: ["resource", "show", "--ids", resourceId, "--output", "json"] };
+  }
+  /** The signed-in Azure CLI account: cloud name, tenant and default subscription. */
+  account() {
+    return { executable: "az", args: ["account", "show", "--output", "json"] };
+  }
+  armGet(resourceId, apiVersion) {
+    return {
+      executable: "az",
+      args: ["rest", "--method", "get", "--url", `${resourceId}?api-version=${encodeURIComponent(apiVersion)}`]
+    };
+  }
+};
 
 // packages/capabilities/dist/design-capabilities.js
 var designCapabilityIds = {
@@ -20782,7 +24665,7 @@ var unavailableDesignCapabilities = [
 ];
 
 // packages/capabilities/dist/governance-baseline.js
-import { createHash as createHash6 } from "node:crypto";
+import { createHash as createHash7 } from "node:crypto";
 var GovernanceBaselineError = class extends Error {
   code;
   constructor(code) {
@@ -20793,36 +24676,36 @@ var GovernanceBaselineError = class extends Error {
 };
 var SUBSCRIPTION_ID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu;
 var MAX_INPUT_BYTES = 2e7;
-function fail(code = "invalid-input") {
+function fail2(code = "invalid-input") {
   throw new GovernanceBaselineError(code);
 }
-function record(value) {
+function record2(value) {
   if (value === null || typeof value !== "object" || Array.isArray(value))
-    fail();
+    fail2();
   return value;
 }
-function text(value) {
+function text2(value) {
   if (typeof value !== "string" || value.length === 0 || value.length > 4096)
-    fail();
+    fail2();
   return value;
 }
 function count(value) {
   if (typeof value !== "number" || !Number.isSafeInteger(value) || value < 0)
-    fail();
+    fail2();
   return value;
 }
 function array2(value) {
   if (!Array.isArray(value))
-    fail();
+    fail2();
   return value;
 }
 function strings(value) {
-  return [...new Set(array2(value).map(text))].sort();
+  return [...new Set(array2(value).map(text2))].sort();
 }
 function subscription(value) {
-  const result = text(value);
+  const result = text2(value);
   if (!SUBSCRIPTION_ID.test(result))
-    fail("target-mismatch");
+    fail2("target-mismatch");
   return result.toLowerCase();
 }
 function boundedJson(value) {
@@ -20831,27 +24714,27 @@ function boundedJson(value) {
   while (pending.length > 0) {
     const current = pending.pop();
     if (++nodes > 4096 || current.depth > 16)
-      fail();
+      fail2();
     if (typeof current.value === "number" && !Number.isFinite(current.value))
-      fail();
+      fail2();
     if (current.value !== null && typeof current.value === "object") {
       for (const child of Object.values(current.value))
         pending.push({ value: child, depth: current.depth + 1 });
     } else if (current.value !== null && !["string", "number", "boolean"].includes(typeof current.value))
-      fail();
+      fail2();
   }
   if (Buffer.byteLength(JSON.stringify(value)) > 65536)
-    fail();
+    fail2();
   return value;
 }
 function timestamp(value) {
-  const result = text(value);
+  const result = text2(value);
   if (!/^\d{4}-\d{2}-\d{2}T(?:[01]\d|2[0-3]):[0-5]\d:[0-5]\d(?:\.\d+)?(?:Z|[+-](?:[01]\d|2[0-3]):[0-5]\d)$/u.test(result))
-    fail();
+    fail2();
   const parsed = Date.parse(result);
   const date5 = result.slice(0, 10);
   if (!Number.isFinite(parsed) || (/* @__PURE__ */ new Date(`${date5}T00:00:00Z`)).toISOString().slice(0, 10) !== date5)
-    fail();
+    fail2();
   return parsed;
 }
 function canonical(value) {
@@ -20865,20 +24748,20 @@ function canonical(value) {
 function jsonInput(input2) {
   try {
     if (input2 instanceof Uint8Array && input2.byteLength > MAX_INPUT_BYTES)
-      fail();
+      fail2();
     const encoded = input2 instanceof Uint8Array ? new TextDecoder("utf-8", { fatal: true }).decode(input2) : typeof input2 === "string" ? input2 : JSON.stringify(input2, (_key, value) => {
       if (typeof value === "number" && !Number.isFinite(value))
-        fail();
+        fail2();
       return value;
     });
     if (typeof encoded !== "string" || Buffer.byteLength(encoded) > MAX_INPUT_BYTES)
-      fail();
+      fail2();
     const parsed = JSON.parse(encoded);
     const pending = [{ value: parsed, depth: 0 }];
     while (pending.length > 0) {
       const { value, depth } = pending.pop();
       if (depth > 64)
-        fail();
+        fail2();
       if (value !== null && typeof value === "object") {
         for (const child of Object.values(value))
           pending.push({ value: child, depth: depth + 1 });
@@ -20886,7 +24769,7 @@ function jsonInput(input2) {
     }
     return parsed;
   } catch {
-    return fail();
+    return fail2();
   }
 }
 function scopeSegment(value) {
@@ -20896,30 +24779,30 @@ var POLICY_RESOURCE_NAME = String.raw`[^/?#%\s\p{Cc}](?:[^/?#%\p{Cc}]*[^/?#%\s\p
 var POLICY_ASSIGNMENT_SUFFIX = new RegExp(`^/providers/microsoft\\.authorization/policyassignments/${POLICY_RESOURCE_NAME}$`, "iu");
 var POLICY_EXEMPTION_SUFFIX = new RegExp(`^/providers/microsoft\\.authorization/policyexemptions/${POLICY_RESOURCE_NAME}$`, "iu");
 function scope(value, subscriptionId) {
-  const result = text(value);
+  const result = text2(value);
   const normalized = result.toLowerCase();
   const segments = normalized.split("/");
   if (segments[0] !== "")
-    fail("target-mismatch");
+    fail2("target-mismatch");
   if (segments.length === 5 && segments[1] === "providers" && segments[2] === "microsoft.management" && segments[3] === "managementgroups" && scopeSegment(segments[4])) {
     return result;
   }
   if (segments[1] !== "subscriptions" || segments[2] !== subscriptionId || !SUBSCRIPTION_ID.test(segments[2] ?? ""))
-    fail("target-mismatch");
+    fail2("target-mismatch");
   let offset = 3;
   if (segments[offset] === "resourcegroups") {
     if (!scopeSegment(segments[offset + 1] ?? ""))
-      fail("target-mismatch");
+      fail2("target-mismatch");
     offset += 2;
   }
   if (offset === segments.length)
     return result;
   if (segments[offset] !== "providers" || !scopeSegment(segments[offset + 1] ?? ""))
-    fail("target-mismatch");
+    fail2("target-mismatch");
   offset += 2;
   const resourceSegments = segments.slice(offset);
   if (resourceSegments.length < 2 || resourceSegments.length % 2 !== 0 || !resourceSegments.every(scopeSegment)) {
-    fail("target-mismatch");
+    fail2("target-mismatch");
   }
   return result;
 }
@@ -20928,34 +24811,34 @@ function enforcementMode(source2) {
     return void 0;
   const mode = source2.enforcementMode;
   if (mode !== "Default" && mode !== "DoNotEnforce")
-    fail();
+    fail2();
   return mode;
 }
 function finding(value, subscriptionId, descendants = false) {
-  const source2 = record(value);
+  const source2 = record2(value);
   const mode = enforcementMode(source2);
-  const effect = text(source2.effect);
+  const effect = text2(source2.effect);
   if (!["deny", "audit", "auditIfNotExists", "append", "modify", "deployIfNotExists", "disabled"].includes(effect))
-    fail();
-  const classification = text(source2.classification);
+    fail2();
+  const classification = text2(source2.classification);
   if (!["blocker", "auto-remediate", "informational"].includes(classification))
-    fail();
+    fail2();
   function readExemption(value2) {
-    const reported = record(value2);
-    const category = text(reported.category);
+    const reported = record2(value2);
+    const category = text2(reported.category);
     if (category !== "Waiver" && category !== "Mitigated")
-      fail();
+      fail2();
     let provenance = {};
     if (descendants || ["id", "scope", "expiresOn"].some((key) => Object.hasOwn(reported, key))) {
-      const exemptionId = text(reported.id);
+      const exemptionId = text2(reported.id);
       const exemptionScope = scope(reported.scope, subscriptionId);
       const assignmentScope = scope(source2.scope, subscriptionId).toLowerCase();
       if (descendants && !assignmentScope.startsWith("/providers/microsoft.management/managementgroups/") && exemptionScope.toLowerCase() !== assignmentScope && !exemptionScope.toLowerCase().startsWith(`${assignmentScope}/`))
-        fail("target-mismatch");
+        fail2("target-mismatch");
       const suffix = exemptionId.slice(exemptionScope.length);
-      if (exemptionId.slice(0, exemptionScope.length).toLowerCase() !== exemptionScope.toLowerCase() || !POLICY_EXEMPTION_SUFFIX.test(suffix) || !(descendants && exemptionScope.toLowerCase().startsWith(`/subscriptions/${subscriptionId}/`)) && exemptionScope.toLowerCase() !== `/subscriptions/${subscriptionId}` && (!/^\/providers\/microsoft\.management\/managementgroups\/[^/?#\s]+$/iu.test(exemptionScope) || exemptionScope.toLowerCase() !== text(source2.scope).toLowerCase()))
-        fail("target-mismatch");
-      const expiresOn = reported.expiresOn === null ? null : text(reported.expiresOn);
+      if (exemptionId.slice(0, exemptionScope.length).toLowerCase() !== exemptionScope.toLowerCase() || !POLICY_EXEMPTION_SUFFIX.test(suffix) || !(descendants && exemptionScope.toLowerCase().startsWith(`/subscriptions/${subscriptionId}/`)) && exemptionScope.toLowerCase() !== `/subscriptions/${subscriptionId}` && (!/^\/providers\/microsoft\.management\/managementgroups\/[^/?#\s]+$/iu.test(exemptionScope) || exemptionScope.toLowerCase() !== text2(source2.scope).toLowerCase()))
+        fail2("target-mismatch");
+      const expiresOn = reported.expiresOn === null ? null : text2(reported.expiresOn);
       if (expiresOn !== null)
         timestamp(expiresOn);
       provenance = { id: exemptionId, scope: exemptionScope, expiresOn };
@@ -20970,22 +24853,22 @@ function finding(value, subscriptionId, descendants = false) {
   const exemption = source2.exemption === null ? null : readExemption(source2.exemption);
   const reportedExemptions = descendants ? array2(source2.reported_exemptions).map(readExemption) : void 0;
   if (descendants && (exemption !== null || classification !== (effect === "deny" ? "blocker" : ["modify", "deployIfNotExists"].includes(effect) ? "auto-remediate" : "informational")))
-    fail("incomplete");
+    fail2("incomplete");
   if (reportedExemptions && new Set(reportedExemptions.map((item) => item.id.toLowerCase())).size !== reportedExemptions.length)
-    fail("incomplete");
+    fail2("incomplete");
   const findingScope = scope(source2.scope, subscriptionId);
-  const assignmentId = text(source2.assignment_id);
+  const assignmentId = text2(source2.assignment_id);
   if (assignmentId.slice(0, findingScope.length).toLowerCase() !== findingScope.toLowerCase() || !POLICY_ASSIGNMENT_SUFFIX.test(assignmentId.slice(findingScope.length)))
-    fail("target-mismatch");
+    fail2("target-mismatch");
   return {
-    policyId: text(source2.policy_id),
+    policyId: text2(source2.policy_id),
     assignmentId,
-    ...source2.policyDefinitionReferenceId === void 0 ? {} : { policyDefinitionReferenceId: text(source2.policyDefinitionReferenceId) },
+    ...source2.policyDefinitionReferenceId === void 0 ? {} : { policyDefinitionReferenceId: text2(source2.policyDefinitionReferenceId) },
     ...source2.required_value === void 0 ? {} : { requiredValue: boundedJson(source2.required_value) },
     ...source2.assignment_parameters === void 0 ? {} : {
-      effectiveParameters: boundedJson(record(source2.assignment_parameters))
+      effectiveParameters: boundedJson(record2(source2.assignment_parameters))
     },
-    displayName: text(source2.display_name),
+    displayName: text2(source2.display_name),
     scope: findingScope,
     effect,
     ...mode === void 0 ? {} : { enforcementMode: mode },
@@ -20997,87 +24880,87 @@ function finding(value, subscriptionId, descendants = false) {
   };
 }
 function selectEntry(value, subscriptionId, root, now, requireFresh) {
-  const entry = record(value);
+  const entry = record2(value);
   if (entry.schema_version !== "governance-constraints-v1" || entry.source !== "github-actions-baseline")
-    fail();
-  const metadata2 = record(entry.discovery_metadata);
+    fail2();
+  const metadata2 = record2(entry.discovery_metadata);
   if (entry.discovery_status !== "COMPLETE" || metadata2.discovery_status !== "COMPLETE" || "error" in entry || "errors" in entry || "error" in metadata2 || "errors" in metadata2)
-    fail("incomplete");
-  const metadataScope = record(metadata2.scope);
+    fail2("incomplete");
+  const metadataScope = record2(metadata2.scope);
   const descendants = metadataScope.coverage === "subscription-and-descendants-v1";
   if (metadataScope.coverage !== void 0 && !descendants)
-    fail("incomplete");
+    fail2("incomplete");
   if (subscription(entry.subscription_id) !== subscriptionId || subscription(metadataScope.subscription_id) !== subscriptionId)
-    fail("target-mismatch");
+    fail2("target-mismatch");
   const managementGroups = strings(metadataScope.management_groups);
   const discoveredAt = timestamp(entry.discovered_at);
   if (timestamp(metadata2.discovered_at) !== discoveredAt)
-    fail("incomplete");
+    fail2("incomplete");
   const ttlDays = count(metadata2.ttl_days);
   if (ttlDays < 1 || ttlDays > 90)
-    fail();
+    fail2();
   const expiresAt = discoveredAt + GOVERNANCE_MAX_AGE_MS;
   if (now < discoveredAt || requireFresh && now >= expiresAt)
-    fail("stale");
+    fail2("stale");
   const signature = metadata2.completeness_signature;
   if (typeof signature !== "string" || signature !== "" && !/^sha256:[0-9a-f]{64}$/u.test(signature))
-    fail();
-  const apiVersions = record(metadata2.api_versions);
-  const pageCounts = record(metadata2.page_counts);
+    fail2();
+  const apiVersions = record2(metadata2.api_versions);
+  const pageCounts = record2(metadata2.page_counts);
   for (const endpoint of ["policyAssignments", "policyDefinitions", "policyExemptions"]) {
-    text(apiVersions[endpoint]);
+    text2(apiVersions[endpoint]);
     count(pageCounts[endpoint]);
   }
   const rawFindings = array2(entry.findings);
   if (Object.hasOwn(entry, "policies"))
-    fail();
+    fail2();
   const findings = rawFindings.map((item) => finding(item, subscriptionId, descendants));
   const findingIdentities = findings.map((item) => canonical([item.assignmentId.toLowerCase(), item.policyId.toLowerCase(), item.policyDefinitionReferenceId ?? null]));
   if (new Set(findingIdentities).size !== findings.length)
-    fail("incomplete");
+    fail2("incomplete");
   const assignmentModes = /* @__PURE__ */ new Map();
   for (const item of findings) {
     if (item.enforcementMode === void 0)
       continue;
     const mode = assignmentModes.get(item.assignmentId.toLowerCase());
     if (mode !== void 0 && mode !== item.enforcementMode)
-      fail("incomplete");
+      fail2("incomplete");
     assignmentModes.set(item.assignmentId.toLowerCase(), item.enforcementMode);
   }
   findings.sort((left, right) => canonical(left) < canonical(right) ? -1 : canonical(left) > canonical(right) ? 1 : 0);
   for (const item of findings) {
     const inherited = /\/managementgroups\/([^/]+)$/iu.exec(item.scope)?.[1];
     if (inherited && !managementGroups.some((group) => group.toLowerCase() === inherited.toLowerCase()))
-      fail("target-mismatch");
+      fail2("target-mismatch");
   }
   const inventory = array2(entry.assignment_inventory).map((item) => {
-    const assignment = record(item);
+    const assignment = record2(item);
     enforcementMode(assignment);
     const assignmentScope = scope(assignment.scope, subscriptionId);
     const inherited = /\/managementgroups\/([^/]+)$/iu.exec(assignmentScope)?.[1];
     if (inherited && !managementGroups.some((group) => group.toLowerCase() === inherited.toLowerCase()))
-      fail("target-mismatch");
-    text(assignment.displayName);
-    text(assignment.policyDefinitionId);
+      fail2("target-mismatch");
+    text2(assignment.displayName);
+    text2(assignment.policyDefinitionId);
     const expectedType = assignmentScope.toLowerCase().startsWith("/providers/") ? "management-group" : "subscription";
     if (assignment.assignmentType !== expectedType)
-      fail("incomplete");
+      fail2("incomplete");
     return expectedType;
   });
   if (descendants) {
     const inventoryIds = array2(entry.assignment_inventory).map((item) => {
-      const assignment = record(item);
-      const assignmentId = text(assignment.assignmentId).toLowerCase();
+      const assignment = record2(item);
+      const assignmentId = text2(assignment.assignmentId).toLowerCase();
       const assignmentScope = scope(assignment.scope, subscriptionId).toLowerCase();
       if (!assignmentId.startsWith(assignmentScope) || !POLICY_ASSIGNMENT_SUFFIX.test(assignmentId.slice(assignmentScope.length)))
-        fail("target-mismatch");
+        fail2("target-mismatch");
       return assignmentId;
     });
     const findingIds = new Set(findings.map((item) => item.assignmentId.toLowerCase()));
     if (new Set(inventoryIds).size !== inventoryIds.length || inventoryIds.length !== findingIds.size || inventoryIds.some((id) => !findingIds.has(id)))
-      fail("incomplete");
+      fail2("incomplete");
   }
-  const summary = record(entry.discovery_summary);
+  const summary = record2(entry.discovery_summary);
   for (const key of [
     "assignment_total",
     "assignment_kept",
@@ -21096,28 +24979,28 @@ function selectEntry(value, subscriptionId, root, now, requireFresh) {
   const findingAssignments = new Set(findings.map((item) => item.assignmentId.toLowerCase())).size;
   const classifiedMembers = findings.length + (descendants ? 0 : Number(summary.audit_count) + Number(summary.disabled_count));
   if (descendants && (count(summary.audit_count) !== findings.filter((item) => item.effect === "audit" || item.effect === "auditIfNotExists").length || count(summary.disabled_count) !== findings.filter((item) => item.effect === "disabled").length || count(summary.classified_policy_count) !== findings.length || count(summary.other_effect_count) !== 0 || count(summary.defender_auto_filtered) !== 0 || findingAssignments !== inventory.length))
-    fail("incomplete");
+    fail2("incomplete");
   if (findingAssignments > inventory.length || findingAssignments + Number(summary.audit_count) + Number(summary.disabled_count) < inventory.length || inventory.length === 0 && classifiedMembers !== 0)
-    fail("incomplete");
+    fail2("incomplete");
   if (summary.classification_coverage !== void 0) {
-    const coverage = record(summary.classification_coverage);
+    const coverage = record2(summary.classification_coverage);
     if (count(coverage.assignment_count) !== inventory.length || count(coverage.member_count) !== classifiedMembers || count(coverage.finding_count) !== findings.length || count(coverage.audit_count) !== summary.audit_count || count(coverage.disabled_count) !== summary.disabled_count || count(coverage.unclassified_count) !== 0)
-      fail("incomplete");
+      fail2("incomplete");
   }
   if (summary.assignment_kept !== inventory.length || summary.assignment_total !== Number(summary.assignment_kept) + Number(summary.defender_auto_filtered) + notScopeExcluded || pageCounts.policyAssignments !== summary.assignment_total || summary.subscription_scope_count !== inventory.filter((kind) => kind === "subscription").length || summary.management_group_inherited_count !== inventory.filter((kind) => kind === "management-group").length || summary.blocker_count !== findings.filter((item) => item.classification === "blocker").length || summary.auto_remediate_count !== findings.filter((item) => item.classification === "auto-remediate").length || summary.informational_count !== findings.filter((item) => item.classification === "informational").length || summary.exempted_count !== findings.filter((item) => item.exemption !== null).length || inventory.length === 0 && findings.length > 0)
-    fail("incomplete");
+    fail2("incomplete");
   const allowedLocations = strings(entry.allowed_locations);
   if (allowedLocations.length > 256 || array2(entry.tags_required).length > 256)
-    fail();
+    fail2();
   const tagsRequired = array2(entry.tags_required).map((tag) => {
-    const reported = record(tag);
+    const reported = record2(tag);
     const allowedValues = reported.allowed_values === void 0 ? void 0 : strings(reported.allowed_values);
     if (allowedValues && allowedValues.length > 256)
-      fail();
+      fail2();
     return {
-      name: text(reported.name),
+      name: text2(reported.name),
       ...allowedValues === void 0 ? {} : { allowedValues },
-      ...reported.default === void 0 ? {} : { default: text(reported.default) }
+      ...reported.default === void 0 ? {} : { default: text2(reported.default) }
     };
   }).sort((left, right) => canonical(left) < canonical(right) ? -1 : canonical(left) > canonical(right) ? 1 : 0);
   return {
@@ -21125,7 +25008,7 @@ function selectEntry(value, subscriptionId, root, now, requireFresh) {
       schemaVersion: "governance-baseline-selection-v2",
       subscriptionId,
       targetScope: `/subscriptions/${subscriptionId}`,
-      contentHash: createHash6("sha256").update(canonical({
+      contentHash: createHash7("sha256").update(canonical({
         root,
         entry: Object.fromEntries(Object.entries(entry).filter(([key]) => key !== "discovered_at" && key !== "ttl_days").map(([key, value2]) => [
           key,
@@ -21167,42 +25050,42 @@ function validateGovernanceBaseline(input2, options, validateBaseline, requireFr
     subscriptionId = subscription(options.subscriptionId);
     now = timestamp(options.now);
     if (typeof validateBaseline !== "function")
-      fail();
+      fail2();
   } catch {
-    return fail("invalid-options");
+    return fail2("invalid-options");
   }
-  const baseline = record(jsonInput(input2));
+  const baseline = record2(jsonInput(input2));
   try {
     if (validateBaseline(baseline) !== true)
-      fail();
+      fail2();
   } catch {
-    return fail();
+    return fail2();
   }
   if (baseline.schema_version !== "governance-baseline-v2")
-    fail();
+    fail2();
   if (baseline.coverage_status !== "COMPLETE" || array2(baseline.subscriptions_skipped).length !== 0)
-    fail("incomplete");
+    fail2("incomplete");
   const hasManagementGroup = Object.hasOwn(baseline, "management_group_id");
   if (hasManagementGroup === Object.hasOwn(baseline, "subscription_id"))
-    fail();
-  const root = hasManagementGroup ? { kind: "management-group", managementGroupId: text(baseline.management_group_id) } : { kind: "subscription", subscriptionId: subscription(baseline.subscription_id) };
+    fail2();
+  const root = hasManagementGroup ? { kind: "management-group", managementGroupId: text2(baseline.management_group_id) } : { kind: "subscription", subscriptionId: subscription(baseline.subscription_id) };
   if (root.kind === "subscription" && root.subscriptionId !== subscriptionId)
-    fail("target-mismatch");
-  const entries = Object.entries(record(baseline.subscriptions));
+    fail2("target-mismatch");
+  const entries = Object.entries(record2(baseline.subscriptions));
   const excluded = array2(baseline.subscriptions_excluded).map((item) => {
-    const exclusion2 = record(item);
+    const exclusion2 = record2(item);
     if (exclusion2.reason !== "disabled" && exclusion2.reason !== "AAD_quota")
-      fail("incomplete");
+      fail2("incomplete");
     return subscription(exclusion2.subscription_id);
   });
   const ids = entries.map(([key]) => subscription(key));
   if ((/* @__PURE__ */ new Set([...ids, ...excluded])).size !== ids.length + excluded.length || !ids.includes(subscriptionId))
-    fail("target-mismatch");
+    fail2("target-mismatch");
   if (root.kind === "subscription" && (entries.length !== 1 || excluded.length !== 0))
-    fail("target-mismatch");
-  const summary = record(baseline.summary);
+    fail2("target-mismatch");
+  const summary = record2(baseline.summary);
   if (count(baseline.subscriptions_processed) !== entries.length || count(baseline.subscriptions_discovered) !== entries.length + excluded.length || count(summary.subscriptions_complete) !== entries.length)
-    fail("incomplete");
+    fail2("incomplete");
   let selected;
   let totalFindings = 0;
   let totalBlockers = 0;
@@ -21217,20 +25100,20 @@ function validateGovernanceBaseline(input2, options, validateBaseline, requireFr
       selected = result;
   }
   if (count(summary.total_findings) !== totalFindings || count(summary.total_blockers) !== totalBlockers || count(summary.total_auto_remediate) !== totalAutoRemediate)
-    fail("incomplete");
+    fail2("incomplete");
   if (!selected)
-    fail("target-mismatch");
+    fail2("target-mismatch");
   if (options.targetScope === void 0)
     return selected;
-  const targetScope = text(options.targetScope).toLowerCase();
+  const targetScope = text2(options.targetScope).toLowerCase();
   const subscriptionScope = `/subscriptions/${subscriptionId}`;
   if (targetScope !== subscriptionScope && !new RegExp(`^${subscriptionScope}/resourcegroups/[^/?#\\s]+$`, "u").test(targetScope))
-    fail("invalid-options");
+    fail2("invalid-options");
   scope(targetScope, subscriptionId);
-  const selectedEntry = record(entries.find(([key]) => subscription(key) === subscriptionId)[1]);
-  const selectedMetadata = record(selectedEntry.discovery_metadata);
-  if (record(selectedMetadata.scope).coverage !== "subscription-and-descendants-v1")
-    fail("incomplete");
+  const selectedEntry = record2(entries.find(([key]) => subscription(key) === subscriptionId)[1]);
+  const selectedMetadata = record2(selectedEntry.discovery_metadata);
+  if (record2(selectedMetadata.scope).coverage !== "subscription-and-descendants-v1")
+    fail2("incomplete");
   const applies = (value) => {
     const candidate = scope(value, subscriptionId).toLowerCase();
     return candidate.startsWith("/providers/microsoft.management/managementgroups/") || candidate === targetScope || candidate.startsWith(`${targetScope}/`) || targetScope.startsWith(`${candidate}/`);
@@ -21244,7 +25127,7 @@ function validateGovernanceBaseline(input2, options, validateBaseline, requireFr
       ...selected.snapshot,
       schemaVersion: "governance-baseline-selection-v2",
       targetScope,
-      contentHash: createHash6("sha256").update(canonical({ sourceHash: selected.snapshot.contentHash, targetScope })).digest("hex"),
+      contentHash: createHash7("sha256").update(canonical({ sourceHash: selected.snapshot.contentHash, targetScope })).digest("hex"),
       findings,
       tagsRequired: [],
       allowedLocations: []
@@ -21253,7 +25136,7 @@ function validateGovernanceBaseline(input2, options, validateBaseline, requireFr
       ...selected.constraints,
       targetScope,
       summary: {
-        assignmentCount: array2(selectedEntry.assignment_inventory).filter((item) => applies(record(item).scope)).length,
+        assignmentCount: array2(selectedEntry.assignment_inventory).filter((item) => applies(record2(item).scope)).length,
         denyCount: findings.filter((item) => item.effect === "deny").length,
         modifyCount: findings.filter((item) => item.effect === "modify").length,
         auditCount: findings.filter((item) => item.effect === "audit" || item.effect === "auditIfNotExists").length,
@@ -21273,28 +25156,28 @@ function inspectGovernanceBaseline(input2, options, validateBaseline) {
   };
 }
 function importGovernanceReference(input2, options) {
-  const source2 = record(jsonInput(input2));
+  const source2 = record2(jsonInput(input2));
   if (source2.schema_version !== "governance-reference-v1" || source2.source !== "alz-corp-reference")
-    fail();
-  const library = record(source2.library);
-  const release2 = text(library.release);
-  const commit = text(library.commit);
+    fail2();
+  const library = record2(source2.library);
+  const release2 = text2(library.release);
+  const commit = text2(library.commit);
   if (!/^[0-9a-f]{40}$/u.test(commit))
-    fail();
+    fail2();
   const now = timestamp(options.now);
   const findings = array2(source2.policies).map((item) => finding(item, ""));
   const identities = findings.map((item) => canonical([item.assignmentId.toLowerCase(), item.policyId.toLowerCase(), item.policyDefinitionReferenceId ?? null]));
   if (findings.length === 0 || new Set(identities).size !== findings.length)
-    fail("incomplete");
+    fail2("incomplete");
   const managementGroups = [...new Set(findings.map((item) => item.scope.split("/").at(-1).toLowerCase()))].sort();
-  const targetScope = text(options.targetScope);
+  const targetScope = text2(options.targetScope);
   const subscriptionId = /^\/subscriptions\/([0-9a-f-]{36})(?:\/|$)/iu.exec(targetScope)?.[1]?.toLowerCase() ?? "";
   return {
     snapshot: {
       schemaVersion: "governance-baseline-selection-v2",
       subscriptionId,
       targetScope: targetScope.toLowerCase(),
-      contentHash: createHash6("sha256").update(canonical({ release: release2, commit, findings, targetScope: targetScope.toLowerCase() })).digest("hex"),
+      contentHash: createHash7("sha256").update(canonical({ release: release2, commit, findings, targetScope: targetScope.toLowerCase() })).digest("hex"),
       provenance: {
         root: { kind: "management-group", managementGroupId: managementGroups[0] },
         source: "alz-corp-reference",
@@ -21326,7 +25209,7 @@ function importGovernanceReference(input2, options) {
 }
 
 // packages/capabilities/dist/governance-setup.js
-var record2 = (value) => value !== null && typeof value === "object" && !Array.isArray(value) ? value : {};
+var record3 = (value) => value !== null && typeof value === "object" && !Array.isArray(value) ? value : {};
 var sameId = (actual, expected) => typeof actual === "string" && actual.toLowerCase() === expected.toLowerCase();
 function planGovernanceProvision(setup, evidence) {
   setup = structuredClone(setup);
@@ -21342,9 +25225,9 @@ function planGovernanceProvision(setup, evidence) {
   const blockers = [...setup.blockers];
   const actions = [];
   const federationName = `apex-governance-${calculatePolicyValidationDigest({ repository: setup.config.repository, subject: setup.federation?.subject ?? null }).slice(0, 24)}`;
-  const account = record2(evidence.account), application = record2(evidence.application), principal = record2(evidence.principal);
-  const environment = record2(evidence.environment), branches = record2(environment.deployment_branch_policy);
-  const role = record2(evidence.readerRole);
+  const account = record3(evidence.account), application = record3(evidence.application), principal = record3(evidence.principal);
+  const environment = record3(evidence.environment), branches = record3(environment.deployment_branch_policy);
+  const role = record3(evidence.readerRole);
   const appId = application.id;
   const validAppId = typeof appId === "string" && value_exports2.Check(GovernanceSetupConfigV1Schema.properties.tenantId, appId);
   if (setup.config.identity.mode !== "reuse")
@@ -21357,20 +25240,20 @@ function planGovernanceProvision(setup, evidence) {
       blockers.push("The reused single-tenant application and enabled service principal are not verified in the selected tenant.");
   }
   const rules = Array.isArray(environment.protection_rules) ? environment.protection_rules : [];
-  if (environment.name !== "governance" || branches.protected_branches !== true || branches.custom_branch_policies !== false || !rules.some((rule) => record2(rule).type === "required_reviewers" && record2(rule).prevent_self_review === true && Array.isArray(record2(rule).reviewers) && record2(rule).reviewers.length > 0))
+  if (environment.name !== "governance" || branches.protected_branches !== true || branches.custom_branch_policies !== false || !rules.some((rule) => record3(rule).type === "required_reviewers" && record3(rule).prevent_self_review === true && Array.isArray(record3(rule).reviewers) && record3(rule).reviewers.length > 0))
     blockers.push("An existing governance environment must require reviewers, prevent self-review, and allow protected branches only; configure protections administratively.");
   const permissions = Array.isArray(role.permissions) ? role.permissions : [];
-  const permission = record2(permissions[0]);
+  const permission = record3(permissions[0]);
   if (!sameId(role.name, setup.proposedRole.id) || role.roleType !== "BuiltInRole" || role.roleName !== "Reader" || permissions.length !== 1 || JSON.stringify(permission.actions) !== '["*/read"]' || JSON.stringify(permission.notActions) !== "[]" || JSON.stringify(permission.dataActions) !== "[]" || JSON.stringify(permission.notDataActions) !== "[]")
     blockers.push("The Reader role definition is missing or differs from its approved read-only permissions.");
   if (!Array.isArray(federations) || federations.length > 100)
     blockers.push("Federated credential inventory is missing or exceeds bounds.");
   else if (setup.federation !== void 0) {
     const matches = federations.filter((item) => {
-      const credential = record2(item);
+      const credential = record3(item);
       return credential.issuer === setup.federation.issuer && credential.subject === setup.federation.subject && JSON.stringify(credential.audiences) === JSON.stringify([setup.federation.audience]);
     });
-    const collision = federations.some((item) => (record2(item).name === federationName || record2(item).issuer === setup.federation.issuer && record2(item).subject === setup.federation.subject) && !matches.includes(item));
+    const collision = federations.some((item) => (record3(item).name === federationName || record3(item).issuer === setup.federation.issuer && record3(item).subject === setup.federation.subject) && !matches.includes(item));
     if (collision || matches.length > 1)
       blockers.push("Existing federation conflicts with the proposed exact trust or is duplicated; no credential will be overwritten.");
     else if (matches.length === 0)
@@ -21382,17 +25265,17 @@ function planGovernanceProvision(setup, evidence) {
     const identity = setup.config.identity;
     const readerDefinition = new RegExp(`^/(?:subscriptions/[a-f0-9-]{36}/)?providers/microsoft\\.authorization/roledefinitions/${setup.proposedRole.id}$`, "i");
     const unexpectedGrant = assignments.some((item) => {
-      const assignment = record2(item);
+      const assignment = record3(item);
       return !sameId(assignment.principalId, identity.principalId) || typeof assignment.scope !== "string" || assignment.scope.length === 0 || typeof assignment.roleDefinitionId !== "string" || !readerDefinition.test(assignment.roleDefinitionId) || assignment.condition !== void 0 && assignment.condition !== null && assignment.condition !== "";
     });
     if (unexpectedGrant)
       blockers.push("Observed direct or inherited access is not exclusively unconditional Reader; review the identity's existing privileges before adding federation.");
     const matches = assignments.filter((item) => {
-      const assignment = record2(item);
+      const assignment = record3(item);
       return sameId(assignment.principalId, identity.principalId) && sameId(assignment.scope, setup.proposedRole.scope) && typeof assignment.roleDefinitionId === "string" && assignment.roleDefinitionId.toLowerCase().endsWith(`/roledefinitions/${setup.proposedRole.id}`) && (assignment.condition === void 0 || assignment.condition === null || assignment.condition === "");
     });
     const constrained = assignments.some((item) => {
-      const assignment = record2(item);
+      const assignment = record3(item);
       return sameId(assignment.principalId, identity.principalId) && sameId(assignment.scope, setup.proposedRole.scope) && typeof assignment.roleDefinitionId === "string" && assignment.roleDefinitionId.toLowerCase().endsWith(`/roledefinitions/${setup.proposedRole.id}`) && assignment.condition !== void 0 && assignment.condition !== null && assignment.condition !== "";
     });
     if (constrained)
@@ -21491,7 +25374,7 @@ function planGovernanceSetup(config2, repositoryEvidence, oidcEvidence) {
 }
 
 // packages/capabilities/dist/repository-publish.js
-var record3 = (value) => value !== null && typeof value === "object" && !Array.isArray(value) ? value : {};
+var record4 = (value) => value !== null && typeof value === "object" && !Array.isArray(value) ? value : {};
 var strings2 = (value, limit) => {
   if (!Array.isArray(value))
     return { values: [], truncated: false };
@@ -21514,17 +25397,17 @@ function planRepositoryPublish(config2, evidence) {
   const fullName = `${config2.owner}/${config2.name}`;
   const blockers = [];
   const actions = [];
-  const viewer = record3(evidence.viewer);
+  const viewer = record4(evidence.viewer);
   const authenticated = typeof viewer.login === "string" && viewer.login.length > 0;
   if (!authenticated)
     blockers.push("GitHub authentication was not observed; sign in interactively with the GitHub CLI before publishing.");
-  const ownerRecord = record3(evidence.owner);
+  const ownerRecord = record4(evidence.owner);
   const ownerType = ownerRecord.type === "Organization" ? "organization" : ownerRecord.type === "User" ? "user" : "unknown";
   if (authenticated && ownerType === "user" && typeof ownerRecord.login === "string" && ownerRecord.login.toLowerCase() !== String(viewer.login).toLowerCase())
     blockers.push("The requested owner is a different user account; choose your own account or an organization you can administer.");
   if (config2.visibility === "internal" && ownerType !== "organization")
     blockers.push("Internal visibility requires an organization owner.");
-  const local = record3(evidence.local);
+  const local = record4(evidence.local);
   const branch = typeof local.branch === "string" ? local.branch : "";
   const commit = typeof local.commit === "string" && /^[0-9a-f]{40}$/u.test(local.commit) ? local.commit : "";
   const commitCount = Number.isSafeInteger(local.commitCount) ? Math.max(0, Number(local.commitCount)) : 0;
@@ -21538,7 +25421,7 @@ function planRepositoryPublish(config2, evidence) {
     blockers.push("The checked-out branch differs from the requested branch; check out the branch before publishing.");
   if (uncommittedChanges.length > 0)
     blockers.push("Uncommitted or untracked changes are present; commit or exclude them so the push contains only reviewed changes.");
-  const existing = record3(evidence.repository);
+  const existing = record4(evidence.repository);
   const exists = typeof existing.full_name === "string";
   let visibility = config2.visibility;
   if (exists) {
@@ -21553,7 +25436,7 @@ function planRepositoryPublish(config2, evidence) {
   } else {
     actions.push("create-repository");
   }
-  const remotes = record3(local.remotes);
+  const remotes = record4(local.remotes);
   const configuredRemote = remotes[config2.remote];
   if (typeof configuredRemote === "string" && configuredRemote.length > 0) {
     if (!configuredRemote.toLowerCase().includes(fullName.toLowerCase()))
@@ -21602,7 +25485,7 @@ function planRepositoryPublish(config2, evidence) {
 }
 
 // packages/capabilities/dist/iac.js
-import { createHash as createHash7 } from "node:crypto";
+import { createHash as createHash8 } from "node:crypto";
 var IacProviderError = class extends Error {
   code;
   constructor(code, message) {
@@ -21668,13 +25551,13 @@ function canonical2(value) {
     return `[${value.map(canonical2).join(",")}]`;
   }
   if (value !== null && typeof value === "object") {
-    const record5 = value;
-    return `{${Object.keys(record5).sort().map((key) => `${JSON.stringify(key)}:${canonical2(record5[key])}`).join(",")}}`;
+    const record6 = value;
+    return `{${Object.keys(record6).sort().map((key) => `${JSON.stringify(key)}:${canonical2(record6[key])}`).join(",")}}`;
   }
   return JSON.stringify(value);
 }
 function sha2562(value) {
-  return createHash7("sha256").update(canonical2(value)).digest("hex");
+  return createHash8("sha256").update(canonical2(value)).digest("hex");
 }
 var FakeIaCProvider = class {
   track;
@@ -21773,7 +25656,7 @@ var FakeIaCProvider = class {
       this.#resources.clear();
     }
     const operationId = this.#nextId();
-    const record5 = {
+    const record6 = {
       schemaVersion: "1.0.0",
       operationId,
       projectId: preview.projectId,
@@ -21786,8 +25669,8 @@ var FakeIaCProvider = class {
       ownerEpoch: authority.ownerEpoch,
       updatedAt: this.#now().toISOString()
     };
-    this.#operations.set(operationId, record5);
-    return record5;
+    this.#operations.set(operationId, record6);
+    return record6;
   }
   #authorize(operation, preview, approval, authority) {
     const latest = this.#latestPreviews.get(this.#previewKey(preview.projectId, preview.runId, operation));
@@ -22035,6 +25918,7 @@ function assertTrack(binding, expected) {
   if (binding.track !== expected)
     throw new TypeError(`Binding track '${binding.track}' is not '${expected}'`);
 }
+var AZD_GENERATED_TEMPLATE = "infra/main.bicep";
 function generateBicepTree(intent, binding, options = {}) {
   assertTrack(binding, "bicep");
   const contexts = resourceContexts(intent, binding);
@@ -22096,13 +25980,22 @@ ${renderedParameters.join("\n")}
 param ${name} string`).join("\n\n");
   const content = ["targetScope = 'resourceGroup'", descriptions, blocks.join("\n\n")].filter((part) => part.length > 0).join("\n\n") + "\n";
   return virtualTree([
-    { path: "main.bicep", content },
     {
-      path: "bicepconfig.json",
+      path: "azure.yaml",
+      content: `name: ${intent.projectId}
+infra:
+  provider: bicep
+  path: infra
+  module: main
+`
+    },
+    { path: AZD_GENERATED_TEMPLATE, content },
+    {
+      path: "infra/bicepconfig.json",
       content: `${JSON.stringify({ experimentalFeaturesEnabled: { symbolicNameCodegen: true } }, null, 2)}
 `
     }
-  ], manifest(intent, binding, contexts, "main.bicep", existing));
+  ], manifest(intent, binding, contexts, AZD_GENERATED_TEMPLATE, existing));
 }
 function exactProviderConstraint(value, fallback, label) {
   const constraint = value ?? fallback;
@@ -22221,7 +26114,7 @@ function object(value) {
 function array3(value) {
   return Array.isArray(value) ? value : [];
 }
-function text2(value) {
+function text3(value) {
   return typeof value === "string" && value.length > 0 ? value : void 0;
 }
 function parseJsonProcessOutput(source2, stdout2) {
@@ -22232,48 +26125,82 @@ function parseJsonProcessOutput(source2, stdout2) {
     throw new IacOutputParseError(source2, `Invalid ${source2} JSON output: ${reason}`);
   }
 }
-function normalizeAzureWhatIf(value) {
-  const root = object(value);
-  if (root === void 0) {
-    throw new IacOutputParseError("azure-what-if", "Azure what-if output must be a JSON object");
+function azdIdentity(resourceId) {
+  const marker = resourceId.toLowerCase().lastIndexOf("/providers/");
+  if (marker === -1)
+    return void 0;
+  const segments = resourceId.slice(marker + "/providers/".length).split("/");
+  if (segments.length < 3 || segments.length % 2 === 0)
+    return void 0;
+  const types = [segments[0]];
+  const names = [];
+  for (let index = 1; index < segments.length; index += 2) {
+    types.push(segments[index]);
+    names.push(segments[index + 1]);
   }
-  const properties = object(root.properties);
-  const rawChanges = array3(properties?.changes ?? root.changes);
-  if (!Array.isArray(properties?.changes ?? root.changes)) {
-    throw new IacOutputParseError("azure-what-if", "Azure what-if output does not contain a changes array");
+  return `${types.join("/")}\0${names.join("/")}`.toLowerCase();
+}
+function azdPreviewEnvelopes(stdout2) {
+  const envelopes = [];
+  for (const line of stdout2.split(/\r?\n/u)) {
+    const trimmed = line.trim();
+    if (trimmed.length === 0)
+      continue;
+    let event;
+    try {
+      event = JSON.parse(trimmed);
+    } catch {
+      continue;
+    }
+    const envelope = object(event);
+    if (envelope?.type === "consoleMessage" && (Array.isArray(envelope.data) || envelope.data === null)) {
+      envelopes.push(envelope.data);
+    }
+  }
+  return envelopes;
+}
+function normalizeAzdPreview(stdout2, accepted) {
+  const previews = azdPreviewEnvelopes(stdout2);
+  if (previews.length !== 1) {
+    throw new IacOutputParseError("azd-preview", previews.length === 0 ? "azd did not print a provisioning preview event" : "azd printed more than one provisioning preview event");
+  }
+  const raw = previews[0] === null ? [] : previews[0];
+  const byIdentity = /* @__PURE__ */ new Map();
+  for (const { resourceId } of accepted) {
+    const identity = azdIdentity(resourceId);
+    if (identity === void 0)
+      continue;
+    byIdentity.set(identity, byIdentity.has(identity) ? null : resourceId);
   }
   const blockers = [];
-  const changes = rawChanges.map((entry, index) => {
+  const changes = raw.map((entry, index) => {
     const change = object(entry);
-    if (change === void 0)
-      blockers.push(`Azure what-if change ${index} is not a JSON object`);
-    const resourceId = text2(change?.resourceId) ?? text2(change?.id) ?? `unknown-azure-resource-${index}`;
-    const rawType = text2(change?.changeType) ?? text2(change?.result) ?? "Unknown";
-    const normalized = rawType.toLowerCase().replaceAll(/[^a-z]/g, "");
-    const action = normalized === "create" ? "create" : normalized === "modify" || normalized === "update" || normalized === "deploy" ? "update" : normalized === "delete" ? "delete" : normalized === "nochange" || normalized === "noeffect" || normalized === "ignore" ? "no-op" : "unknown";
-    if (action === "unknown") {
-      blockers.push(`Azure what-if returned unsupported or unevaluated change '${rawType}' for '${resourceId}'`);
+    const type = text3(change?.Type);
+    const name = text3(change?.Name);
+    const rawType = text3(change?.Operation) ?? "Unknown";
+    if (change === void 0 || type === void 0 || name === void 0) {
+      blockers.push(`azd preview change ${index} is malformed`);
     }
-    if (action !== "no-op" && resourceId.startsWith("unknown-")) {
-      blockers.push(`Azure material change ${index} has no stable resource ID`);
+    const identity = `${type ?? ""}\0${name ?? ""}`.toLowerCase();
+    const resolved = byIdentity.get(identity);
+    const resourceId = resolved ?? `azd-unresolved:${type ?? "unknown"}/${name ?? index}`;
+    const normalized = rawType.toLowerCase().replaceAll(/[^a-z]/g, "");
+    const action = normalized === "create" ? "create" : normalized === "modify" || normalized === "deploy" ? "update" : normalized === "delete" ? "delete" : normalized === "nochange" || normalized === "ignore" ? "no-op" : "unknown";
+    if (action === "unknown") {
+      blockers.push(`azd preview returned unsupported or unevaluated change '${rawType}' for '${type}/${name}'`);
+    } else if (action !== "no-op" && (resolved === void 0 || resolved === null)) {
+      blockers.push(`azd preview reports a ${action} of '${type}/${name}' that does not resolve to exactly one accepted resource`);
     }
     return {
       resourceId,
       action,
       material: action !== "no-op",
-      details: `Azure changeType: ${rawType}`
+      details: `azd operation: ${rawType}`
     };
   });
-  const materialIds = changes.filter(({ material }) => material).map(({ resourceId }) => resourceId);
-  for (const duplicate of materialIds.filter((id, index) => materialIds.indexOf(id) !== index)) {
-    blockers.push(`Azure what-if contains duplicate material resource ID '${duplicate}'`);
-  }
-  for (const diagnostic of array3(properties?.diagnostics ?? root.diagnostics)) {
-    const item = object(diagnostic);
-    const level = text2(item?.level)?.toLowerCase();
-    if (level === "error" || level === "warning") {
-      blockers.push(text2(item?.message) ?? `Azure what-if ${level} diagnostic`);
-    }
+  const materialIds = changes.filter(({ material }) => material).map(({ resourceId }) => resourceId.toLowerCase());
+  for (const duplicate of new Set(materialIds.filter((id, index) => materialIds.indexOf(id) !== index))) {
+    blockers.push(`azd preview contains duplicate material resource '${duplicate}'`);
   }
   return { changes, blockers };
 }
@@ -22308,7 +26235,7 @@ function normalizeTerraformPlan(value) {
     const actions = validActions ? rawActions : [];
     if (!validActions)
       blockers.push(`Terraform resource change ${index} has malformed actions`);
-    const resourceId = text2(resource?.address) ?? `unknown-terraform-resource-${index}`;
+    const resourceId = text3(resource?.address) ?? `unknown-terraform-resource-${index}`;
     const signature = actions.join(",");
     const action = signature === "create" ? "create" : signature === "update" ? "update" : signature === "delete" ? "delete" : signature === "no-op" || signature === "read" ? "no-op" : signature === "delete,create" || signature === "create,delete" ? "replace" : "unknown";
     if (action === "unknown") {
@@ -22336,7 +26263,7 @@ function normalizeTerraformPlan(value) {
   }
   const priorState = object(root.prior_state);
   const stateValues = object(priorState?.values);
-  const lineage = text2(priorState?.lineage) ?? text2(stateValues?.lineage);
+  const lineage = text3(priorState?.lineage) ?? text3(stateValues?.lineage);
   const serialValue = priorState?.serial ?? stateValues?.serial;
   const serial = typeof serialValue === "number" && Number.isInteger(serialValue) && serialValue >= 0 ? serialValue : void 0;
   return {
@@ -22346,67 +26273,53 @@ function normalizeTerraformPlan(value) {
     ...serial === void 0 ? {} : { stateSerial: serial }
   };
 }
-function selectAzureDeploymentStack(value, resourceGroup, stackName) {
-  if (!Array.isArray(value)) {
-    throw new IacOutputParseError("azure-stack", "Azure stack list output must be a JSON array");
-  }
-  const names = /* @__PURE__ */ new Set();
-  let selected = null;
-  for (const [index, entry] of value.entries()) {
-    const stack = object(entry);
-    const name = text2(stack?.name);
-    const id = text2(stack?.id);
-    if (stack === void 0 || name === void 0 || id === void 0) {
-      throw new IacOutputParseError("azure-stack", `Azure stack list entry ${index} is malformed`);
-    }
-    const normalizedName = name.toLowerCase();
-    if (names.has(normalizedName)) {
-      throw new IacOutputParseError("azure-stack", `Azure stack list contains duplicate name '${name}'`);
-    }
-    names.add(normalizedName);
-    const expectedSuffix = `/resourcegroups/${resourceGroup.toLowerCase()}/providers/microsoft.resources/deploymentstacks/${normalizedName}`;
-    if (!id.toLowerCase().endsWith(expectedSuffix)) {
-      throw new IacOutputParseError("azure-stack", `Azure stack '${name}' is outside the requested resource group`);
-    }
-    if (normalizedName === stackName.toLowerCase())
-      selected = stack;
-  }
-  if (selected === null)
-    return null;
-  const properties = object(selected.properties);
-  if (!Array.isArray(properties?.resources) && !Array.isArray(selected.resources)) {
-    throw new IacOutputParseError("azure-stack", `Azure stack '${stackName}' has malformed managed resources`);
-  }
-  return selected;
+var AZD_ENV_TAG = "azd-env-name";
+function azureReadArray(source2, stdout2) {
+  const value = parseJsonProcessOutput("azure-read", stdout2);
+  if (!Array.isArray(value))
+    throw new IacOutputParseError("azure-read", `${source2} output must be a JSON array`);
+  return value;
 }
-function normalizeAzureStackResources(value) {
-  const root = object(value);
-  if (root === void 0) {
-    throw new IacOutputParseError("azure-stack", "Azure stack output must be a JSON object");
+function normalizeAzdTaggedGroups(stdout2, environmentName) {
+  const names = /* @__PURE__ */ new Set();
+  for (const [index, entry] of azureReadArray("Azure group list", stdout2).entries()) {
+    const group = object(entry);
+    const name = text3(group?.name);
+    if (group === void 0 || name === void 0)
+      throw new IacOutputParseError("azure-read", `Azure group list entry ${index} is malformed`);
+    if (object(group.tags)?.[AZD_ENV_TAG] === environmentName)
+      names.add(name);
   }
-  const properties = object(root.properties);
-  const resources = array3(properties?.resources ?? root.resources);
-  return resources.map((entry, index) => {
+  return { taggedGroups: [...names].sort((left, right) => left.localeCompare(right)) };
+}
+function normalizeAzdGroupResources(stdout2, groupScope) {
+  const prefix = `${groupScope.toLowerCase()}/`;
+  const seen = /* @__PURE__ */ new Set();
+  const resources = azureReadArray("Azure resource list", stdout2).map((entry, index) => {
     const resource = object(entry);
-    const resourceId = text2(resource?.id) ?? text2(resource?.resourceId);
-    if (resourceId === void 0) {
-      throw new IacOutputParseError("azure-stack", `Azure stack resource ${index} has no resource ID`);
-    }
+    const resourceId = text3(resource?.id);
+    const type = text3(resource?.type);
+    if (resource === void 0 || resourceId === void 0 || type === void 0)
+      throw new IacOutputParseError("azure-read", `Azure resource list entry ${index} is malformed`);
+    if (!resourceId.toLowerCase().startsWith(prefix) || seen.has(resourceId.toLowerCase()))
+      throw new IacOutputParseError("azure-read", `Azure resource '${resourceId}' is outside the approved resource group`);
+    seen.add(resourceId.toLowerCase());
     return {
-      logicalId: text2(resource?.name) ?? resourceId,
+      logicalId: text3(resource.name) ?? resourceId,
       resourceId,
-      type: text2(resource?.type) ?? "unknown",
-      location: text2(resource?.location) ?? "global",
-      properties: object(resource?.properties) ?? {}
+      type,
+      location: text3(resource.location) ?? "global",
+      properties: {}
     };
   });
+  return resources.sort((left, right) => left.resourceId.toLowerCase().localeCompare(right.resourceId.toLowerCase()));
 }
 
 // packages/capabilities/dist/local-plan-transport.js
-import { createCipheriv, createDecipheriv, createHash as createHash8, randomBytes as randomBytes2 } from "node:crypto";
+import { createCipheriv, createDecipheriv, createHash as createHash9, randomBytes as randomBytes2 } from "node:crypto";
 import { chmod, mkdtemp as mkdtemp2, readFile as readFile10, rm as rm9, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
-import { join as join15 } from "node:path";
+import { join as join16 } from "node:path";
 function requireKey(key) {
   if (key.byteLength !== 32) {
     throw new TypeError("Local plan transport requires a caller-supplied 32-byte key");
@@ -22414,7 +26327,7 @@ function requireKey(key) {
   return Buffer.from(key);
 }
 function digest(bytes) {
-  return createHash8("sha256").update(bytes).digest("hex");
+  return createHash9("sha256").update(bytes).digest("hex");
 }
 function authenticatedMetadata(metadata2) {
   return Buffer.from(JSON.stringify({
@@ -22475,8 +26388,8 @@ var LocalEncryptedPlanTransport = class {
     return plaintext;
   }
   async decryptToRestrictiveTemp(encrypted, key, recipient) {
-    const directory = await mkdtemp2(join15(tmpdir(), "apex-local-plan-"));
-    const path2 = join15(directory, "saved.tfplan");
+    const directory = await mkdtemp2(join16(tmpdir(), "apex-local-plan-"));
+    const path2 = join16(directory, "saved.tfplan");
     try {
       await writeFile(path2, this.decrypt(encrypted, key, recipient), { mode: 384, flag: "wx" });
       await chmod(path2, 384);
@@ -22503,11 +26416,80 @@ var LocalEncryptedPlanTransport = class {
 };
 
 // packages/capabilities/dist/native-iac-providers.js
-import { createHash as createHash10, randomUUID } from "node:crypto";
-import { constants as constants11 } from "node:fs";
-import { lstat as lstat11, mkdir as mkdir9, mkdtemp as mkdtemp3, open as open11, opendir, readFile as readFile11, realpath as realpath5, rm as rm10, writeFile as writeFile2 } from "node:fs/promises";
+import { createHash as createHash11, randomUUID } from "node:crypto";
+import { constants as constants13 } from "node:fs";
+import { lstat as lstat12, mkdir as mkdir9, mkdtemp as mkdtemp3, open as open12, opendir as opendir2, readFile as readFile11, realpath as realpath6, rm as rm10, writeFile as writeFile2 } from "node:fs/promises";
 import { tmpdir as tmpdir2 } from "node:os";
-import { dirname as dirname9, isAbsolute as isAbsolute5, relative as relative5, resolve as resolve14, sep as sep3 } from "node:path";
+import { dirname as dirname9, isAbsolute as isAbsolute7, relative as relative6, resolve as resolve15, sep as sep4 } from "node:path";
+
+// packages/capabilities/dist/process-runner.js
+import { spawn } from "node:child_process";
+
+// packages/capabilities/dist/executable-resolution.js
+import { accessSync, constants as constants12, statSync } from "node:fs";
+import { posix, win32 } from "node:path";
+var DEFAULT_PATHEXT = ".COM;.EXE;.BAT;.CMD";
+function environmentValue(env, name, platform) {
+  if (platform !== "win32")
+    return env[name];
+  const key = Object.keys(env).filter((candidate) => candidate.toUpperCase() === name).sort()[0];
+  return key === void 0 ? void 0 : env[key];
+}
+function defaultIsExecutableFile(path2, platform) {
+  try {
+    if (!statSync(path2).isFile())
+      return false;
+    if (platform !== "win32")
+      accessSync(path2, constants12.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function resolveExecutable(executable, options = {}) {
+  const platform = options.platform ?? process.platform;
+  const env = options.env ?? process.env;
+  const isExecutableFile = options.isExecutableFile ?? defaultIsExecutableFile;
+  const path2 = platform === "win32" ? win32 : posix;
+  const extensions = platform === "win32" ? (environmentValue(env, "PATHEXT", platform) ?? DEFAULT_PATHEXT).split(";").map((extension) => extension.trim().toLowerCase()).filter((extension) => extension.startsWith(".")) : [""];
+  const candidatesFor = (base) => {
+    if (platform !== "win32")
+      return [base];
+    const extension = path2.extname(base).toLowerCase();
+    return extensions.includes(extension) ? [base] : extensions.map((suffix) => `${base}${suffix}`);
+  };
+  const hasDirectory = executable.includes("/") || platform === "win32" && executable.includes("\\");
+  if (hasDirectory || path2.isAbsolute(executable))
+    return candidatesFor(executable).find((candidate) => isExecutableFile(candidate, platform));
+  const directories = (environmentValue(env, "PATH", platform) ?? "").split(path2.delimiter).map((directory) => directory.trim().replace(/^"(.*)"$/u, "$1")).filter((directory) => directory.length > 0);
+  for (const directory of directories) {
+    const found = candidatesFor(path2.join(directory, executable)).find((candidate) => isExecutableFile(candidate, platform));
+    if (found !== void 0)
+      return found;
+  }
+  return void 0;
+}
+function quoteForCmd(value) {
+  if (/["%!\r\n\0]/u.test(value))
+    throw new TypeError("Argument cannot be passed safely to a Windows command script");
+  return value.length === 0 || /[\s&|<>()^,;=]/u.test(value) ? `"${value}"` : value;
+}
+function planLaunch(executable, args, options = {}) {
+  const platform = options.platform ?? process.platform;
+  const resolved = resolveExecutable(executable, options);
+  if (resolved === void 0)
+    return { command: executable, args: [...args], windowsVerbatimArguments: false };
+  if (platform === "win32" && /\.(?:cmd|bat)$/iu.test(resolved)) {
+    const env = options.env ?? process.env;
+    const commandLine = [resolved, ...args].map(quoteForCmd).join(" ");
+    return {
+      command: environmentValue(env, "COMSPEC", platform) ?? "cmd.exe",
+      args: ["/d", "/s", "/c", `"${commandLine}"`],
+      windowsVerbatimArguments: true
+    };
+  }
+  return { command: resolved, args: [...args], windowsVerbatimArguments: false };
+}
 
 // packages/capabilities/dist/secret-redaction.js
 var REDACTED = "[REDACTED]";
@@ -22525,11 +26507,11 @@ function sanitize(value, sensitive, mode) {
       return sanitized === void 0 ? [] : [sanitized];
     });
   }
-  const record5 = object2(value);
-  if (record5 !== void 0) {
+  const record6 = object2(value);
+  if (record6 !== void 0) {
     const sensitivity = object2(sensitive) ?? {};
     const sanitized = {};
-    for (const [key, item] of Object.entries(record5)) {
+    for (const [key, item] of Object.entries(record6)) {
       if (SECRET_FIELD_PATTERN.test(key)) {
         if (mode === "replace")
           sanitized[key] = REDACTED;
@@ -22555,16 +26537,111 @@ function secretFreeProperties(value, sensitive) {
   return properties;
 }
 
+// packages/capabilities/dist/process-runner.js
+var ProcessRunnerError = class extends Error {
+  code;
+  result;
+  constructor(code, message, result) {
+    super(message);
+    this.code = code;
+    this.result = result;
+    this.name = "ProcessRunnerError";
+  }
+};
+var REDACTED2 = "[REDACTED]";
+function redactProcessOutput(value) {
+  try {
+    return JSON.stringify(redactStructuredSecrets(JSON.parse(value)));
+  } catch {
+    return value.replace(/\bBearer\s+[^\s]+/gi, `Bearer ${REDACTED2}`).replace(/\b(password|passwd|secret|token|api[_-]?key|client[_-]?secret|connectionString|credential)\s*[:=]\s*([^\s,;]+)/gi, `$1=${REDACTED2}`).replace(/((?:AccountKey|SharedAccessSignature|ClientSecret)\s*=)[^;\r\n]+/gi, `$1${REDACTED2}`).replace(/([?&](?:sig|token|key|secret)=)[^&\s]+/gi, `$1${REDACTED2}`);
+  }
+}
+var ProcessRunner = class {
+  async run(request) {
+    if (!Array.isArray(request.args)) {
+      throw new TypeError("Process arguments must be an explicit array");
+    }
+    let launch;
+    try {
+      launch = planLaunch(request.executable, request.args, { env: request.env ?? process.env });
+    } catch (error62) {
+      throw new ProcessRunnerError("PROCESS_SPAWN_ERROR", error62.message);
+    }
+    const options = {
+      shell: false,
+      windowsHide: true,
+      windowsVerbatimArguments: launch.windowsVerbatimArguments,
+      ...request.cwd === void 0 ? {} : { cwd: request.cwd },
+      ...request.env === void 0 ? {} : { env: request.env }
+    };
+    return await new Promise((resolve23, reject) => {
+      const child = spawn(launch.command, [...launch.args], options);
+      let stdout2 = Buffer.alloc(0);
+      let stderr = Buffer.alloc(0);
+      let outputTruncated = false;
+      let timedOut = false;
+      const append = (current, chunk) => {
+        const remaining = request.maxOutputBytes - stdout2.length - stderr.length;
+        if (remaining <= 0) {
+          outputTruncated = true;
+          child.kill("SIGKILL");
+          return current;
+        }
+        if (chunk.length > remaining) {
+          outputTruncated = true;
+          child.kill("SIGKILL");
+          return Buffer.concat([current, chunk.subarray(0, remaining)]);
+        }
+        return Buffer.concat([current, chunk]);
+      };
+      child.stdout.on("data", (chunk) => {
+        stdout2 = append(stdout2, chunk);
+      });
+      child.stderr.on("data", (chunk) => {
+        stderr = append(stderr, chunk);
+      });
+      const timeout = setTimeout(() => {
+        timedOut = true;
+        child.kill("SIGKILL");
+      }, request.timeoutMs);
+      child.once("error", (error62) => {
+        clearTimeout(timeout);
+        reject(new ProcessRunnerError("PROCESS_SPAWN_ERROR", error62.message));
+      });
+      child.once("close", (exitCode, signal) => {
+        clearTimeout(timeout);
+        const result = {
+          exitCode,
+          signal,
+          stdout: redactProcessOutput(stdout2.toString("utf8")),
+          stderr: redactProcessOutput(stderr.toString("utf8")),
+          timedOut,
+          outputTruncated
+        };
+        if (timedOut) {
+          reject(new ProcessRunnerError("PROCESS_TIMEOUT", `Process '${request.executable}' timed out`, result));
+        } else if (outputTruncated) {
+          reject(new ProcessRunnerError("PROCESS_OUTPUT_LIMIT", `Process '${request.executable}' exceeded its output limit`, result));
+        } else if (exitCode !== 0) {
+          reject(new ProcessRunnerError("PROCESS_EXIT_NONZERO", `Process '${request.executable}' exited with code ${String(exitCode)}`, result));
+        } else {
+          resolve23(result);
+        }
+      });
+    });
+  }
+};
+
 // packages/capabilities/dist/policy-validation.js
-import { createHash as createHash9 } from "node:crypto";
+import { createHash as createHash10 } from "node:crypto";
 function object3(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value) ? value : void 0;
 }
 function own(value, key) {
-  const record5 = object3(value);
-  return record5 !== void 0 && Object.hasOwn(record5, key) ? record5[key] : void 0;
+  const record6 = object3(value);
+  return record6 !== void 0 && Object.hasOwn(record6, key) ? record6[key] : void 0;
 }
-function text3(value) {
+function text4(value) {
   return typeof value === "string" && value.length > 0 ? value : void 0;
 }
 function expression(value, track) {
@@ -22604,7 +26681,7 @@ function matchingKnownValues(planned, after, unknown2) {
 function resourcesFromJson(json2, track) {
   if (Buffer.byteLength(json2, "utf8") > POLICY_VALIDATION_LIMITS.bytes)
     throw new TypeError("POLICY_VALIDATION_LIMIT_EXCEEDED");
-  const parsed = parseJsonProcessOutput(track === "bicep" ? "azure-what-if" : "terraform-plan", json2);
+  const parsed = parseJsonProcessOutput(track === "bicep" ? "bicep-build" : "terraform-plan", json2);
   assertPolicyValidationJson(parsed);
   const root = object3(parsed);
   if (root === void 0)
@@ -22620,18 +26697,18 @@ function resourcesFromJson(json2, track) {
         if (resource === void 0)
           throw new Error("POLICY_VALIDATION_INVALID_SOURCE");
         const unsupported = inheritedUnsupported || Object.hasOwn(resource, "copy") || Object.hasOwn(resource, "condition") && resource.condition !== true || resource.existing === true;
-        const physicalId = text3(own(resource, "id"));
+        const physicalId = text4(own(resource, "id"));
         const symbols = parentSymbols !== null && symbol2 !== void 0 ? [...parentSymbols, symbol2] : null;
         resources.push({
           value: resource,
           unsupported,
-          ...text3(resource.type) === void 0 ? {} : { resourceType: text3(resource.type) },
+          ...text4(resource.type) === void 0 ? {} : { resourceType: text4(resource.type) },
           ...physicalId === void 0 ? {} : { physicalId },
           ...symbols === null ? {} : { codeSymbol: symbols.join("::") }
         });
         if (Object.hasOwn(resource, "resources"))
           visit2(resource.resources, unsupported, symbols);
-        if (text3(resource.type)?.toLowerCase() === "microsoft.resources/deployments") {
+        if (text4(resource.type)?.toLowerCase() === "microsoft.resources/deployments") {
           const properties = object3(resource.properties);
           if (properties !== void 0 && Object.hasOwn(properties, "template")) {
             const template = object3(properties.template);
@@ -22656,7 +26733,7 @@ function resourcesFromJson(json2, track) {
         throw new Error("POLICY_VALIDATION_INVALID_SOURCE");
       for (const entry of module.resources ?? []) {
         const resource = object3(entry);
-        const address = text3(own(resource, "address"));
+        const address = text4(own(resource, "address"));
         const values = object3(own(resource, "values"));
         if (resource === void 0 || address === void 0 || values === void 0)
           throw new Error("POLICY_VALIDATION_INVALID_SOURCE");
@@ -22665,10 +26742,10 @@ function resourcesFromJson(json2, track) {
         const unknown2 = own(change, "after_unknown");
         const actions = own(change, "actions");
         const after = object3(own(change, "after"));
-        const physicalId = text3(own(values, "id"));
+        const physicalId = text4(own(values, "id"));
         resources.push({
           codeSymbol: address,
-          ...text3(resource.type) !== void 0 && own(matchingChanges[0], "type") === resource.type ? { resourceType: text3(resource.type) } : {},
+          ...text4(resource.type) !== void 0 && own(matchingChanges[0], "type") === resource.type ? { resourceType: text4(resource.type) } : {},
           ...physicalId === void 0 ? {} : { physicalId },
           value: values,
           unknown: unknown2,
@@ -22707,10 +26784,10 @@ function observeBoundProperty(mapping, request, resources) {
     return { outcome: "unsupported", reason: "resource-not-bound" };
   if (resources === void 0)
     return { outcome: "unsupported", reason: "invalid-source" };
-  const physicalId = text3(own(binding, "physicalId"));
+  const physicalId = text4(own(binding, "physicalId"));
   if (Object.hasOwn(binding, "physicalId") && physicalId === void 0)
     return { outcome: "unsupported", reason: "unsupported-resource" };
-  const codeSymbol = request.track === "terraform" ? text3(own(binding, "terraformAddress")) ?? text3(own(binding, "codeSymbol")) : text3(own(binding, "codeSymbol"));
+  const codeSymbol = request.track === "terraform" ? text4(own(binding, "terraformAddress")) ?? text4(own(binding, "codeSymbol")) : text4(own(binding, "codeSymbol"));
   if (codeSymbol === void 0 && (request.track === "terraform" || physicalId === void 0)) {
     return { outcome: "unsupported", reason: "resource-not-bound" };
   }
@@ -22755,7 +26832,7 @@ function validateStorageSecurityBindings(request) {
   } catch {
     resources = void 0;
   }
-  const inputHash = createHash9("sha256").update(request.json).digest("hex");
+  const inputHash = createHash10("sha256").update(request.json).digest("hex");
   return Object.freeze(Object.fromEntries(Object.entries(request.bindings).map(([logicalId, binding]) => {
     const results = controls.map(([propertyPath, expectedValue]) => Object.freeze({
       propertyPath,
@@ -22782,7 +26859,7 @@ function validateBicepStorageDiagnostics(request) {
     binding: request.binding,
     workspaceResourceId: request.workspaceResourceId
   });
-  const inputHash = createHash9("sha256").update(request.json).digest("hex");
+  const inputHash = createHash10("sha256").update(request.json).digest("hex");
   const result = (outcome, reason) => ({
     coverage: "bicep-storage-service-diagnostics-v1",
     fullBaselineEvaluated: false,
@@ -22849,7 +26926,7 @@ function validateBicepResourceParity(request) {
     sourceHash: request.sourceHash,
     manifestHash: calculatePolicyValidationDigest(request.manifest),
     ...request.binding === void 0 ? {} : { bindingHash: calculatePolicyValidationDigest(request.binding) },
-    inputHash: createHash9("sha256").update(request.json).digest("hex"),
+    inputHash: createHash10("sha256").update(request.json).digest("hex"),
     outcome,
     reason
   });
@@ -22927,9 +27004,9 @@ function validateBicepStorageBaseline(request) {
   };
   if (hasCredential(parsed))
     return result("fail", "credential-content");
-  const onlyKeys = (value, keys) => object3(value) !== void 0 && Object.keys(value).every((key) => keys.includes(key));
+  const onlyKeys2 = (value, keys) => object3(value) !== void 0 && Object.keys(value).every((key) => keys.includes(key));
   const template = object3(parsed);
-  if (!onlyKeys(template, [
+  if (!onlyKeys2(template, [
     "$schema",
     "contentVersion",
     "languageVersion",
@@ -22938,10 +27015,10 @@ function validateBicepStorageBaseline(request) {
     "parameters",
     "variables",
     "outputs"
-  ]) || ["parameters", "variables", "outputs"].some((key) => Object.hasOwn(template, key) && (!onlyKeys(template[key], []) || Object.keys(template[key]).length !== 0)))
+  ]) || ["parameters", "variables", "outputs"].some((key) => Object.hasOwn(template, key) && (!onlyKeys2(template[key], []) || Object.keys(template[key]).length !== 0)))
     return result("unsupported", "unsupported-resource");
   for (const resource of resources) {
-    if (!onlyKeys(resource.value, [
+    if (!onlyKeys2(resource.value, [
       "type",
       "apiVersion",
       "name",
@@ -22956,9 +27033,9 @@ function validateBicepStorageBaseline(request) {
     ]))
       return result("unsupported", "unsupported-resource");
     if (resource.resourceType?.toLowerCase() === "microsoft.insights/diagnosticsettings") {
-      if (!onlyKeys(resource.value.properties, ["workspaceId", "logs", "metrics", "logAnalyticsDestinationType"]))
+      if (!onlyKeys2(resource.value.properties, ["workspaceId", "logs", "metrics", "logAnalyticsDestinationType"]))
         return result("unsupported", "unsupported-resource");
-    } else if (resource.resourceType?.toLowerCase() !== "microsoft.storage/storageaccounts" && resource.value.properties !== void 0 && !onlyKeys(resource.value.properties, []))
+    } else if (resource.resourceType?.toLowerCase() !== "microsoft.storage/storageaccounts" && resource.value.properties !== void 0 && !onlyKeys2(resource.value.properties, []))
       return result("unsupported", "unsupported-resource");
   }
   for (const account of accounts) {
@@ -22967,7 +27044,7 @@ function validateBicepStorageBaseline(request) {
     const encryption = object3(properties?.encryption);
     const encryptionServices = object3(encryption?.services);
     const identity = object3(account.value.identity);
-    if (!onlyKeys(properties, [
+    if (!onlyKeys2(properties, [
       "minimumTlsVersion",
       "supportsHttpsTrafficOnly",
       "allowBlobPublicAccess",
@@ -22977,7 +27054,7 @@ function validateBicepStorageBaseline(request) {
       "networkAcls",
       "encryption",
       "accessTier"
-    ]) || !onlyKeys(network, ["defaultAction", "bypass", "ipRules", "virtualNetworkRules"]) || !onlyKeys(identity, ["type"]) || !onlyKeys(encryption, ["keySource", "requireInfrastructureEncryption", "services"]) || !onlyKeys(encryptionServices, ["blob", "file"]) || !["blob", "file"].every((service) => onlyKeys(own(encryptionServices, service), ["enabled", "keyType"])))
+    ]) || !onlyKeys2(network, ["defaultAction", "bypass", "ipRules", "virtualNetworkRules"]) || !onlyKeys2(identity, ["type"]) || !onlyKeys2(encryption, ["keySource", "requireInfrastructureEncryption", "services"]) || !onlyKeys2(encryptionServices, ["blob", "file"]) || !["blob", "file"].every((service) => onlyKeys2(own(encryptionServices, service), ["enabled", "keyType"])))
       return result("unsupported", "unsupported-resource");
     if (properties === void 0 || !STORAGE_PROPERTY_HARDENING_CONTROLS.bicep.every(([path2, expected]) => properties[path2.slice("properties.".length)] === expected) || properties.publicNetworkAccess !== "Disabled" || properties.defaultToOAuthAuthentication !== true || network?.defaultAction !== "Deny" || network.bypass !== "None" || !Array.isArray(network.ipRules) || network.ipRules.length !== 0 || !Array.isArray(network.virtualNetworkRules) || network.virtualNetworkRules.length !== 0 || encryption?.keySource !== "Microsoft.Storage" || encryption.requireInfrastructureEncryption !== true || !["blob", "file"].every((service) => own(own(encryptionServices, service), "enabled") === true) || identity?.type !== "SystemAssigned")
       return result("fail", "storage-controls");
@@ -23038,7 +27115,7 @@ function validatePolicyProperties(request) {
     policyMapHash: request.policyMapHash,
     policyMapContentHash,
     logicalResourceManifestHash,
-    inputHash: createHash9("sha256").update(request.json).digest("hex"),
+    inputHash: createHash10("sha256").update(request.json).digest("hex"),
     outcome: results.some((result) => result.outcome === "fail") ? "fail" : results.length === 0 || results.some((result) => result.outcome === "unsupported") ? "unsupported" : "pass",
     results
   };
@@ -23075,23 +27152,23 @@ function terraformStateIdentityOutput(stdout2) {
   return stdout2.trim().length === 0 ? {} : terraformStateIdentity(parseJsonProcessOutput("terraform-state", stdout2));
 }
 var maxGeneratedSourceBytes = 16 * 1024 * 1024;
-function pathEscapes(parent, child) {
-  const relation = relative5(parent, child);
-  return relation === "" || relation === ".." || relation.startsWith(`..${sep3}`) || isAbsolute5(relation);
+function pathEscapes2(parent, child) {
+  const relation = relative6(parent, child);
+  return relation === "" || relation === ".." || relation.startsWith(`..${sep4}`) || isAbsolute7(relation);
 }
 function sourceBindingError() {
   return new IacProviderError("PREVIEW_HASH_MISMATCH", "Native preview source does not match the accepted generated tree");
 }
 async function readGeneratedSource(source2, accepted, outputs = /* @__PURE__ */ new Set()) {
   try {
-    const rootPath = resolve14(source2.rootPath);
-    if (!isAbsolute5(source2.rootPath) || !/^[a-f0-9]{64}$/.test(source2.treeHash))
+    const rootPath = resolve15(source2.rootPath);
+    if (!isAbsolute7(source2.rootPath) || !/^[a-f0-9]{64}$/.test(source2.treeHash))
       throw sourceBindingError();
-    const rootStat = await lstat11(rootPath);
+    const rootStat = await lstat12(rootPath);
     if (!rootStat.isDirectory() || rootStat.isSymbolicLink()) {
       throw sourceBindingError();
     }
-    const rootRealPath = await realpath5(rootPath);
+    const rootRealPath = await realpath6(rootPath);
     let bytes = 0;
     let entries = 0;
     const files2 = [];
@@ -23100,18 +27177,20 @@ async function readGeneratedSource(source2, accepted, outputs = /* @__PURE__ */ 
     const visit2 = async (directory, depth) => {
       if (depth > 64)
         throw sourceBindingError();
-      const handle = await opendir(directory);
+      const handle = await opendir2(directory);
       for await (const entry of handle) {
+        if (depth === 0 && entry.name === ".azure")
+          continue;
         if (++entries > 4096)
           throw sourceBindingError();
-        const filePath = resolve14(directory, entry.name);
-        if (pathEscapes(rootPath, filePath) || pathEscapes(rootRealPath, await realpath5(filePath))) {
+        const filePath = resolve15(directory, entry.name);
+        if (pathEscapes2(rootPath, filePath) || pathEscapes2(rootRealPath, await realpath6(filePath))) {
           throw sourceBindingError();
         }
-        const metadata2 = await lstat11(filePath);
+        const metadata2 = await lstat12(filePath);
         if (metadata2.isSymbolicLink() || metadata2.isFile() && metadata2.nlink !== 1)
           throw sourceBindingError();
-        const path2 = relative5(rootPath, filePath).split(sep3).join("/");
+        const path2 = relative6(rootPath, filePath).split(sep4).join("/");
         const isAccepted = accepted?.paths.has(path2) === true;
         if (accepted !== void 0 && !isAccepted && outputs.has(filePath)) {
           if (path2 === ".terraform" ? metadata2.isDirectory() : metadata2.isFile())
@@ -23124,7 +27203,7 @@ async function readGeneratedSource(source2, accepted, outputs = /* @__PURE__ */ 
         }
         if (!metadata2.isFile() || metadata2.size > maxGeneratedSourceBytes - bytes)
           throw sourceBindingError();
-        const input2 = await open11(filePath, constants11.O_RDONLY | constants11.O_NOFOLLOW | constants11.O_NONBLOCK);
+        const input2 = await open12(filePath, constants13.O_RDONLY | constants13.O_NOFOLLOW | constants13.O_NONBLOCK);
         try {
           const opened = await input2.stat();
           if (!opened.isFile() || opened.nlink !== 1)
@@ -23143,7 +27222,7 @@ async function readGeneratedSource(source2, accepted, outputs = /* @__PURE__ */ 
           const buffer = Buffer.concat(chunks);
           const content = new TextDecoder("utf-8", { fatal: true, ignoreBOM: true }).decode(buffer);
           files2.push({ path: path2, content });
-          fileHashes.set(path2, createHash10("sha256").update(buffer).digest("hex"));
+          fileHashes.set(path2, createHash11("sha256").update(buffer).digest("hex"));
           fileContents.set(path2, buffer);
         } finally {
           await input2.close();
@@ -23172,15 +27251,15 @@ async function bindGeneratedSource(request, cwd, templateFile, parametersFile, a
   if (request.generatedSource === void 0)
     return void 0;
   const source2 = await readGeneratedSource({ ...request.generatedSource }, accepted, outputs);
-  if (resolve14(cwd ?? process.cwd()) !== source2.rootPath)
+  if (resolve15(cwd ?? process.cwd()) !== source2.rootPath)
     throw sourceBindingError();
-  if (templateFile !== void 0 && resolve14(source2.rootPath, templateFile) !== resolve14(source2.rootPath, "main.bicep")) {
+  if (templateFile !== void 0 && resolve15(source2.rootPath, templateFile) !== resolve15(source2.rootPath, AZD_GENERATED_TEMPLATE)) {
     throw sourceBindingError();
   }
   for (const file2 of [templateFile, parametersFile]) {
     if (file2 === void 0)
       continue;
-    const path2 = relative5(source2.rootPath, resolve14(source2.rootPath, file2)).split(sep3).join("/");
+    const path2 = relative6(source2.rootPath, resolve15(source2.rootPath, file2)).split(sep4).join("/");
     if (!source2.paths.has(path2))
       throw sourceBindingError();
   }
@@ -23211,6 +27290,7 @@ var NativeProviderBase = class {
       executable: plan.executable,
       args: plan.args,
       ...plan.cwd === void 0 ? {} : { cwd: plan.cwd },
+      ...plan.env === void 0 ? {} : { env: { ...process.env, ...plan.env } },
       timeoutMs: this.#timeoutMs,
       maxOutputBytes: this.#maxOutputBytes
     });
@@ -23293,8 +27373,8 @@ var NativeProviderBase = class {
     if (source2 === void 0)
       throw sourceBindingError();
     if (track === "terraform") {
-      const cache = resolve14(source2.rootPath, ".terraform");
-      const existing = await lstat11(cache).catch((error62) => {
+      const cache = resolve15(source2.rootPath, ".terraform");
+      const existing = await lstat12(cache).catch((error62) => {
         if (error62.code === "ENOENT")
           return void 0;
         throw sourceBindingError();
@@ -23305,10 +27385,10 @@ var NativeProviderBase = class {
     let scratchRoot;
     try {
       try {
-        scratchRoot = await mkdtemp3(resolve14(await realpath5(tmpdir2()), "apex-native-validation-"));
+        scratchRoot = await mkdtemp3(resolve15(await realpath6(tmpdir2()), "apex-native-validation-"));
         for (const path2 of source2.paths) {
-          const destination = resolve14(scratchRoot, path2);
-          if (!destination.startsWith(`${scratchRoot}${sep3}`))
+          const destination = resolve15(scratchRoot, path2);
+          if (!destination.startsWith(`${scratchRoot}${sep4}`))
             throw sourceBindingError();
           await mkdir9(dirname9(destination), { recursive: true, mode: 448 });
           await writeFile2(destination, source2.fileContents.get(path2), { flag: "wx", mode: 384 });
@@ -23319,8 +27399,8 @@ var NativeProviderBase = class {
       const scratch = await readGeneratedSource({ rootPath: scratchRoot, treeHash: source2.treeHash });
       const outputs = /* @__PURE__ */ new Set();
       if (track === "terraform") {
-        outputs.add(resolve14(scratchRoot, ".terraform"));
-        outputs.add(resolve14(scratchRoot, ".terraform.lock.hcl"));
+        outputs.add(resolve15(scratchRoot, ".terraform"));
+        outputs.add(resolve15(scratchRoot, ".terraform.lock.hcl"));
       }
       const verify = async () => {
         if (cwd() === void 0)
@@ -23330,7 +27410,7 @@ var NativeProviderBase = class {
           for (const path2 of [".terraform", ".terraform.lock.hcl"]) {
             if (source2.paths.has(path2))
               continue;
-            const metadata2 = await lstat11(resolve14(source2.rootPath, path2)).catch((error62) => {
+            const metadata2 = await lstat12(resolve15(source2.rootPath, path2)).catch((error62) => {
               if (error62.code === "ENOENT")
                 return void 0;
               throw sourceBindingError();
@@ -23467,7 +27547,7 @@ var NativeProviderBase = class {
   }
   record(operation, preview, approval, authority, providerOperationId, validatorIds = []) {
     const operationId = this.nextId();
-    const record5 = {
+    const record6 = {
       schemaVersion: "1.0.0",
       operationId,
       projectId: preview.projectId,
@@ -23480,14 +27560,14 @@ var NativeProviderBase = class {
       ownerEpoch: authority.ownerEpoch,
       updatedAt: this.now().toISOString()
     };
-    this.#operations.set(operationId, record5);
+    this.#operations.set(operationId, record6);
     this.#executionEvidence.set(operationId, {
       mode: "native",
       operationId,
       previewHash: preview.previewHash,
       validatorIds: [...validatorIds]
     });
-    return record5;
+    return record6;
   }
   async reconcile(operationId) {
     return this.#operations.get(operationId);
@@ -23565,34 +27645,41 @@ var NativeProviderBase = class {
     return { ...base, previewHash: sha2562(base) };
   }
 };
-var NativeBicepProvider = class extends NativeProviderBase {
+var AZD_GROUP_SCOPE = /^\/subscriptions\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})\/resourceGroups\/([^/]+)$/iu;
+var AZD_PROCESS_ENV = { AZD_SKIP_UPDATE_CHECK: "true" };
+var AzdBicepProvider = class extends NativeProviderBase {
   track = "bicep";
   #target;
-  #commands = new BicepCommandAdapter();
+  #reads = new AzureCliReadAdapter();
   #bindings = /* @__PURE__ */ new Map();
+  #targets = /* @__PURE__ */ new Map();
   constructor(options) {
     super(options);
-    const actionOnUnmanage = options.target.actionOnUnmanage ?? "detachAll";
-    this.#target = { ...options.target, actionOnUnmanage };
-    if (!["deleteAll", "deleteResources", "detachAll"].includes(this.#target.actionOnUnmanage)) {
-      throw new TypeError("Invalid Bicep stack action-on-unmanage");
-    }
-    if (!["denyDelete", "denyWriteAndDelete", "none"].includes(this.#target.denySettingsMode)) {
-      throw new TypeError("Invalid Bicep stack deny-settings-mode");
-    }
-    if (actionOnUnmanage === "deleteResources" && options.target.ownershipAuthorizesDeleteResources !== true) {
-      throw new TypeError("deleteResources requires an explicit ownership authorization");
-    }
-    if (actionOnUnmanage === "deleteAll" && (options.target.dedicatedSandboxResourceGroup !== true || options.target.allowDeleteAll !== true)) {
-      throw new TypeError("deleteAll requires an explicitly authorized dedicated sandbox resource group");
-    }
+    if (!value_exports2.Check(EnvironmentSchema, options.target.environmentName))
+      throw new AzdBindingError("AZD_BINDING_INPUT_INVALID", "The azd environment name is invalid");
+    this.#target = options.target;
   }
   async validate() {
     await this.#compiledTemplate();
     return [];
   }
   async validateSource(request) {
-    return await this.validateBoundSource(request, this.track, () => this.#target.cwd, this.#target.templateFile);
+    return await this.validateBoundSource(request, this.track, () => this.#target.projectRoot, AZD_GENERATED_TEMPLATE);
+  }
+  approvalMaterial(previewHash) {
+    for (const binding of this.#bindings.values()) {
+      if (binding.preview.previewHash !== previewHash)
+        continue;
+      const material = describeAzdBinding(binding.azdBinding);
+      return binding.preview.operation === "destroy" ? {
+        ...material,
+        warnings: [
+          ...material.warnings,
+          "azd down deletes the entire approved resource group and everything in it, including child and extension resources that Azure does not list and so are not shown above. It runs without --purge, so soft-deleted resources such as Key Vaults are not purged and keep their names reserved."
+        ]
+      } : material;
+    }
+    return void 0;
   }
   async previewApply(request) {
     if (request.policyValidation !== void 0) {
@@ -23603,20 +27690,23 @@ var NativeBicepProvider = class extends NativeProviderBase {
         throw new IacProviderError("PREVIEW_HASH_MISMATCH", "Bicep policy validation inputs are invalid");
       }
     }
-    const source2 = await bindGeneratedSource(request, this.#target.cwd, this.#target.templateFile, this.#target.parametersFile);
-    const policyInputs = request.policyValidation?.policyMap.mappings.length ? await this.#inputHashes(source2) : void 0;
-    const [stdout2, stackResources] = await Promise.all([
-      this.run(this.#commands.preview(this.#target)),
-      this.#currentStackResources()
+    const target = this.#approvedTarget(request);
+    const source2 = await bindGeneratedSource(request, this.#target.projectRoot, AZD_GENERATED_TEMPLATE);
+    const azdVersion = await this.#assertAzd();
+    await this.#ensureEnvironment(target);
+    const inspected = await this.#inspect(target, azdVersion);
+    await this.#assertIdentity(inspected);
+    const [stdout2, owned] = await Promise.all([
+      this.run(this.#azdPlan("provision-preview", inspected)),
+      this.#ownedState(target)
     ]);
-    const normalized = normalizeAzureWhatIf(parseJsonProcessOutput("azure-what-if", stdout2));
-    const previewIds = new Set(normalized.changes.map(({ resourceId }) => resourceId.toLowerCase()));
-    const unrepresented = stackResources.filter(({ resourceId }) => !previewIds.has(resourceId.toLowerCase()));
-    if (unrepresented.length > 0) {
-      normalized.blockers.push(`Group what-if cannot prove action-on-unmanage behavior for current stack resources: ${unrepresented.map(({ resourceId }) => resourceId).join(", ")}`);
-    }
+    const normalized = normalizeAzdPreview(stdout2, request.resources);
+    normalized.blockers.push(...this.#ownershipBlockers(target, owned));
+    await this.#assertInputsUnchanged(inspected, target, azdVersion);
+    if (source2 !== void 0)
+      await readGeneratedSource(source2, source2);
     let policy = {};
-    if (policyInputs !== void 0) {
+    if (request.policyValidation?.policyMap.mappings.length) {
       let compiled = "";
       try {
         compiled = await this.#compiledTemplate();
@@ -23625,15 +27715,36 @@ var NativeBicepProvider = class extends NativeProviderBase {
       }
       policy = this.evaluatePolicy(this.track, request, compiled, normalized.blockers);
     }
-    return await this.#bind(request, "apply", normalized, stackResources, policy, policyInputs, source2);
+    return await this.#bind(request, "apply", target, normalized, inspected, owned, policy);
   }
   async previewDestroy(request) {
-    const source2 = await bindGeneratedSource(request, this.#target.cwd, this.#target.templateFile, this.#target.parametersFile);
-    const resources = await this.#currentStackResources();
-    return await this.#bind(request, "destroy", {
-      changes: resources.map((resource) => ({ resourceId: resource.resourceId, action: "delete", material: true })),
-      blockers: []
-    }, resources, {}, void 0, source2);
+    const target = this.#approvedTarget(request);
+    const source2 = await bindGeneratedSource(request, this.#target.projectRoot, AZD_GENERATED_TEMPLATE);
+    const azdVersion = await this.#assertAzd();
+    await this.#ensureEnvironment(target);
+    const inspected = await this.#inspect(target, azdVersion);
+    await this.#assertIdentity(inspected);
+    const listedState = await this.#ownedState(target);
+    const owned = {
+      ...listedState,
+      resources: [
+        ...listedState.resources,
+        ...await this.#readUnlisted(target, listedState.resources, request.resources.map(({ resourceId }) => resourceId))
+      ]
+    };
+    const normalized = {
+      changes: owned.resources.map(({ resourceId }) => ({
+        resourceId,
+        action: "delete",
+        material: true,
+        details: "azd down deletes the whole resource group"
+      })),
+      blockers: this.#ownershipBlockers(target, owned)
+    };
+    await this.#assertInputsUnchanged(inspected, target, azdVersion);
+    if (source2 !== void 0)
+      await readGeneratedSource(source2, source2);
+    return await this.#bind(request, "destroy", target, normalized, inspected, owned);
   }
   async apply(preview, approval, authority) {
     return await this.#execute("apply", preview, approval, authority);
@@ -23642,25 +27753,201 @@ var NativeBicepProvider = class extends NativeProviderBase {
     return await this.#execute("destroy", preview, approval, authority);
   }
   async inventory(projectId, runId) {
-    const resources = await this.#currentStackResources();
+    const target = this.#targets.get(`${projectId}\0${runId}`);
+    if (target === void 0)
+      throw new IacProviderError("PREVIEW_HASH_MISMATCH", "No approved azd target is known for this run");
+    const owned = await this.#ownedState(target);
+    if (owned.resources.length > 0 && !this.#isTagged(target, owned))
+      throw new IacProviderError("PREVIEW_BLOCKED", "The approved resource group is not tagged for the azd environment, so ownership cannot be proven");
+    const resources = [...owned.resources, ...await this.#unlistedPlannedResources(target, owned.resources)];
     return {
       schemaVersion: "1.0.0",
       projectId,
       runId,
       deploymentHash: sha2562(resources),
       collectedAt: this.now().toISOString(),
-      resources: [...resources]
+      resources: resources.map((resource) => ({ ...resource, properties: { ...resource.properties } }))
     };
   }
-  async #bind(request, operation, normalized, stackResources, policy = {}, policyInputs, source2) {
-    if (source2 !== void 0)
-      await readGeneratedSource(source2, source2);
-    const { templateHash, parametersHash } = await this.#inputHashes(source2);
-    if (policyInputs !== void 0 && (policyInputs.templateHash !== templateHash || policyInputs.parametersHash !== parametersHash)) {
-      normalized.blockers.push("Bicep inputs changed during policy validation preview");
+  /**
+   * A group listing omits child and extension resources, so the given IDs the listing lacks are read one by one.
+   * Anything Azure does not return is left out, which the inventory coverage check then reports.
+   */
+  async #readUnlisted(target, listed, resourceIds) {
+    const known = new Set(listed.map(({ resourceId }) => resourceId.toLowerCase()));
+    const found = [];
+    for (const resourceId of resourceIds) {
+      if (known.has(resourceId.toLowerCase()))
+        continue;
+      known.add(resourceId.toLowerCase());
+      let stdout2;
+      try {
+        stdout2 = await this.run(this.#reads.resourceById(resourceId));
+      } catch (error62) {
+        if (error62 instanceof ProcessRunnerError && /NotFound|could not be found/iu.test(error62.result?.stderr ?? ""))
+          continue;
+        throw error62;
+      }
+      found.push(...normalizeAzdGroupResources(`[${stdout2}]`, target.scope));
     }
-    const stackStateHash = sha2562(stackResources);
-    const providerBindingHash = this.#providerBindingHash(templateHash, parametersHash, stackStateHash, policy);
+    return found;
+  }
+  /** The material resources of the latest approved apply preview, which a group listing may omit. */
+  async #unlistedPlannedResources(target, listed) {
+    const key = `${target.projectId}\0${target.runId}\0apply`;
+    const latest = this.#bindings.get(key) ?? await this.bindingStore?.loadLatest?.(target.projectId, target.runId, "apply");
+    if (latest?.kind !== "bicep")
+      return [];
+    return await this.#readUnlisted(target, listed, latest.preview.changes.filter(({ material, action }) => material && action !== "delete" && action !== "no-op").map(({ resourceId }) => resourceId));
+  }
+  #approvedTarget(request) {
+    const match = AZD_GROUP_SCOPE.exec(request.target);
+    if (match === null)
+      throw new AzdBindingError("AZD_PROJECT_UNSUPPORTED", "The azd executor requires an exact resource-group target scope");
+    const target = {
+      projectId: request.projectId,
+      runId: request.runId,
+      subscriptionId: match[1].toLowerCase(),
+      resourceGroup: match[2],
+      scope: request.target
+    };
+    this.#targets.set(`${request.projectId}\0${request.runId}`, target);
+    return target;
+  }
+  #azdPlan(operation, binding) {
+    return {
+      executable: "azd",
+      args: buildAzdArguments(binding.executionEnvelope, operation, this.#target.projectRoot),
+      cwd: this.#target.projectRoot,
+      env: AZD_PROCESS_ENV
+    };
+  }
+  /** Fails closed unless the installed azd is exactly the pinned release. */
+  async #assertAzd() {
+    let found = true;
+    let installedVersion;
+    try {
+      const stdout2 = await this.run({ executable: "azd", args: ["version"], env: AZD_PROCESS_ENV });
+      installedVersion = /\bazd version (\d+\.\d+\.\d+)(?:\s|$)/u.exec(stdout2)?.[1];
+    } catch (error62) {
+      if (error62 instanceof ProcessRunnerError && error62.code === "PROCESS_SPAWN_ERROR")
+        found = false;
+    }
+    const result = evaluateAzdPrerequisite({ pinnedVersion: this.#target.azdVersion, found, installedVersion });
+    if (!result.ok || installedVersion === void 0)
+      throw new AzdBindingError(result.code ?? "AZD_VERSION_UNAVAILABLE", `${result.value}. ${result.remedy ?? ""}`.trim());
+    return installedVersion;
+  }
+  /** Creates the allowlisted, non-secret azd environment file when the project has none; an existing one is bound as is. */
+  async #ensureEnvironment(target) {
+    const azure = resolve15(this.#target.projectRoot, ".azure");
+    const directory = resolve15(azure, this.#target.environmentName);
+    const existing = await lstat12(azure).catch((error62) => {
+      if (error62.code === "ENOENT")
+        return void 0;
+      throw error62;
+    });
+    if (existing !== void 0 && (!existing.isDirectory() || existing.isSymbolicLink()))
+      throw new AzdBindingError("AZD_PATH_UNSAFE", "The azd environment directory is not a plain directory");
+    const lines = [
+      ["AZURE_ENV_NAME", this.#target.environmentName],
+      ["AZURE_LOCATION", this.#target.location.toLowerCase()],
+      ["AZURE_RESOURCE_GROUP", target.resourceGroup],
+      ["AZURE_SUBSCRIPTION_ID", target.subscriptionId],
+      ["AZURE_TENANT_ID", this.#target.tenantId.toLowerCase()]
+    ].map(([key, value]) => `${key}="${value}"
+`);
+    await mkdir9(directory, { recursive: true, mode: 448 });
+    if (!(await lstat12(directory)).isDirectory())
+      throw new AzdBindingError("AZD_PATH_UNSAFE", "The azd environment directory is not a plain directory");
+    try {
+      await writeFile2(resolve15(directory, ".env"), lines.join(""), { flag: "wx", mode: 384 });
+    } catch (error62) {
+      if (error62.code !== "EEXIST")
+        throw error62;
+    }
+  }
+  #bindingRequest(target, azdVersion) {
+    return {
+      ...this.#target.cloud === void 0 ? {} : { cloud: this.#target.cloud },
+      projectId: target.projectId,
+      runId: target.runId,
+      projectRoot: this.#target.projectRoot,
+      environmentName: this.#target.environmentName,
+      azdVersion,
+      target: {
+        subscriptionId: target.subscriptionId,
+        location: this.#target.location,
+        tenantId: this.#target.tenantId,
+        resourceGroup: target.resourceGroup
+      }
+    };
+  }
+  async #inspect(target, azdVersion) {
+    const binding = await inspectAzdBicepProject(this.#bindingRequest(target, azdVersion));
+    if (binding.infra.layered)
+      throw new AzdBindingError("AZD_LAYER_UNSUPPORTED", "azd previews one layer at a time, so a layered project cannot be previewed as a whole; use a single infrastructure root");
+    return binding;
+  }
+  async #assertInputsUnchanged(accepted, target, azdVersion) {
+    try {
+      return await assertAzdBindingUnchanged(accepted, this.#bindingRequest(target, azdVersion));
+    } catch (error62) {
+      if (error62 instanceof AzdBindingError)
+        throw new IacProviderError("PREVIEW_HASH_MISMATCH", error62.message);
+      throw error62;
+    }
+  }
+  /** The cloud, tenant and default subscription the Azure CLI reports must equal the approved target before any run. */
+  async #assertIdentity(binding) {
+    let account = {};
+    try {
+      account = parseJsonProcessOutput("azure-read", await this.run(this.#reads.account()));
+    } catch {
+    }
+    const text5 = (value) => typeof value === "string" ? value : void 0;
+    assertAzdIdentityMatchesBinding({
+      ...text5(account.environmentName) === void 0 ? {} : { cloud: text5(account.environmentName) },
+      ...text5(account.tenantId) === void 0 ? {} : { tenantId: text5(account.tenantId) },
+      ...text5(account.id) === void 0 ? {} : { azureCliDefaultSubscriptionId: text5(account.id) }
+    }, binding);
+  }
+  async #readOrMissing(plan) {
+    try {
+      return await this.run(plan);
+    } catch (error62) {
+      if (error62 instanceof ProcessRunnerError && /ResourceGroupNotFound/u.test(error62.result?.stderr ?? error62.message))
+        return void 0;
+      throw error62;
+    }
+  }
+  async #ownedState(target) {
+    const [groups, resources] = await Promise.all([
+      this.run(this.#reads.taggedResourceGroups(target.subscriptionId, this.#target.environmentName)),
+      this.#readOrMissing(this.#reads.resourceGroupResources(target.subscriptionId, target.resourceGroup))
+    ]);
+    const { taggedGroups } = normalizeAzdTaggedGroups(groups, this.#target.environmentName);
+    const listed = resources === void 0 ? [] : normalizeAzdGroupResources(resources, target.scope);
+    return {
+      taggedGroups,
+      resources: listed,
+      hash: sha2562({ taggedGroups: taggedGroups.map((name) => name.toLowerCase()), resources: listed })
+    };
+  }
+  #isTagged(target, owned) {
+    return owned.taggedGroups.some((name) => name.toLowerCase() === target.resourceGroup.toLowerCase());
+  }
+  #ownershipBlockers(target, owned) {
+    const blockers = [];
+    if (!this.#isTagged(target, owned))
+      blockers.push(`The approved resource group is not tagged azd-env-name=${this.#target.environmentName}; azd finds an environment's resources through that tag`);
+    const others = owned.taggedGroups.filter((name) => name.toLowerCase() !== target.resourceGroup.toLowerCase());
+    if (others.length > 0)
+      blockers.push(`Other resource groups carry azd-env-name=${this.#target.environmentName}: ${others.join(", ")}; the environment must own only the approved group`);
+    return blockers;
+  }
+  async #bind(request, operation, target, normalized, azdBinding, owned, policy = {}) {
+    const providerBindingHash = this.#providerBindingHash(azdBinding.bindingHash, owned.hash, policy);
     const preview = this.createPreview(this.track, operation, request, normalized, {
       artifactHash: providerBindingHash
     });
@@ -23668,58 +27955,29 @@ var NativeBicepProvider = class extends NativeProviderBase {
       kind: "bicep",
       preview,
       providerBindingHash,
-      templateHash,
-      parametersHash,
-      stackStateHash,
+      azdBinding,
+      ownedStateHash: owned.hash,
       ...policy
     };
+    this.#targets.set(`${target.projectId}\0${target.runId}`, target);
     this.#bindings.set(this.previewKey(request, operation), binding);
     await this.bindingStore?.save(preview.previewHash, binding);
     this.rememberPolicy(preview, binding);
     return preview;
   }
-  #providerBindingHash(templateHash, parametersHash, stackStateHash, policy) {
+  #providerBindingHash(azdBindingHash, ownedStateHash, policy) {
     return sha2562({
-      resourceGroup: this.#target.resourceGroup,
-      stackName: this.#target.stackName,
-      actionOnUnmanage: this.#target.actionOnUnmanage,
-      denySettingsMode: this.#target.denySettingsMode,
-      templateHash,
-      parametersHash,
-      stackStateHash,
+      azdBindingHash,
+      ownedStateHash,
       ...policy.policyValidationBinding === void 0 ? {} : { policyValidation: policy.policyValidationBinding }
     });
-  }
-  async #inputHashes(source2) {
-    const fileHash = async (file2) => {
-      if (source2 === void 0)
-        return await this.#rawFileHash(file2);
-      const path2 = relative5(source2.rootPath, resolve14(source2.rootPath, file2)).split(sep3).join("/");
-      const hash2 = source2.fileHashes.get(path2);
-      if (hash2 === void 0)
-        throw sourceBindingError();
-      return hash2;
-    };
-    return {
-      templateHash: await fileHash(this.#target.templateFile),
-      parametersHash: this.#target.parametersFile === void 0 ? createHash10("sha256").update(Buffer.alloc(0)).digest("hex") : await fileHash(this.#target.parametersFile)
-    };
   }
   async #compiledTemplate() {
     return await this.run({
       executable: "bicep",
-      args: ["build", this.#target.templateFile, "--stdout"],
-      ...this.#target.cwd === void 0 ? {} : { cwd: this.#target.cwd }
+      args: ["build", AZD_GENERATED_TEMPLATE, "--stdout"],
+      cwd: this.#target.projectRoot
     });
-  }
-  async #rawFileHash(path2) {
-    const filePath = isAbsolute5(path2) ? path2 : resolve14(this.#target.cwd ?? process.cwd(), path2);
-    return createHash10("sha256").update(await readFile11(filePath)).digest("hex");
-  }
-  async #currentStackResources() {
-    const stdout2 = await this.run(this.#commands.stackList(this.#target));
-    const selected = selectAzureDeploymentStack(parseJsonProcessOutput("azure-stack", stdout2), this.#target.resourceGroup, this.#target.stackName);
-    return selected === null ? [] : normalizeAzureStackResources(selected);
   }
   async #execute(operation, preview, approval, suppliedAuthority) {
     const key = `${preview.projectId}\0${preview.runId}\0${operation}`;
@@ -23733,25 +27991,39 @@ var NativeBicepProvider = class extends NativeProviderBase {
     }
     const authority = await this.authorize(this.track, operation, preview, approval, suppliedAuthority, latestBinding?.preview.previewHash ?? binding?.preview.previewHash);
     if (binding === void 0 || binding.preview.previewHash !== preview.previewHash) {
-      throw new IacProviderError("PREVIEW_HASH_MISMATCH", "No exact Bicep stack binding is available for this preview");
+      throw new IacProviderError("PREVIEW_HASH_MISMATCH", "No exact azd binding is available for this preview");
     }
     this.verifyPolicy(preview, binding);
-    if (binding.policyValidationBinding !== void 0 && createHash10("sha256").update(await this.#compiledTemplate()).digest("hex") !== binding.policyValidationBinding.inputHash) {
+    if (binding.policyValidationBinding !== void 0 && createHash11("sha256").update(await this.#compiledTemplate()).digest("hex") !== binding.policyValidationBinding.inputHash) {
       throw new IacProviderError("PREVIEW_HASH_MISMATCH", "Bicep compiler output changed after policy validation");
     }
-    const { templateHash, parametersHash } = await this.#inputHashes();
-    const stackStateHash = sha2562(await this.#currentStackResources());
-    if (templateHash !== binding.templateHash || parametersHash !== binding.parametersHash || stackStateHash !== binding.stackStateHash || preview.artifactHash !== binding.providerBindingHash || preview.artifactHash !== this.#providerBindingHash(templateHash, parametersHash, stackStateHash, binding)) {
-      throw new IacProviderError("PREVIEW_HASH_MISMATCH", "Bicep stack inputs, configuration, or managed state changed after preview");
+    const accepted = binding.azdBinding;
+    const environment = accepted.environment;
+    if (preview.artifactHash !== binding.providerBindingHash || preview.artifactHash !== this.#providerBindingHash(accepted.bindingHash, binding.ownedStateHash, binding) || accepted.projectId !== preview.projectId || accepted.runId !== preview.runId || environment.name !== this.#target.environmentName || environment.target.resourceGroup === void 0) {
+      throw new IacProviderError("PREVIEW_HASH_MISMATCH", "The azd binding does not match the approved preview");
     }
+    const target = {
+      projectId: preview.projectId,
+      runId: preview.runId,
+      subscriptionId: environment.target.subscriptionId,
+      resourceGroup: environment.target.resourceGroup,
+      scope: preview.target
+    };
+    if (`/subscriptions/${target.subscriptionId}/resourceGroups/${target.resourceGroup}`.toLowerCase() !== preview.target.toLowerCase())
+      throw new IacProviderError("PREVIEW_HASH_MISMATCH", "The azd binding does not match the approved target");
+    const azdVersion = await this.#assertAzd();
+    if (azdVersion !== accepted.azdVersion)
+      throw new IacProviderError("PREVIEW_HASH_MISMATCH", "The installed azd is not the version bound at preview");
+    const current = await this.#assertInputsUnchanged(accepted, target, azdVersion);
+    await this.#assertIdentity(current);
+    const owned = await this.#ownedState(target);
+    if (owned.hash !== binding.ownedStateHash) {
+      throw new IacProviderError("PREVIEW_HASH_MISMATCH", "The azd environment's resource group or resources changed after preview");
+    }
+    this.#targets.set(`${target.projectId}\0${target.runId}`, target);
     this.rememberPolicy(preview, binding);
-    const stdout2 = await this.run(operation === "apply" ? this.#commands.stackApply(this.#target) : this.#commands.stackDestroy(this.#target));
-    let providerOperationId;
-    if (stdout2.trim().length > 0) {
-      const result = parseJsonProcessOutput("azure-stack", stdout2);
-      providerOperationId = typeof result.id === "string" ? result.id : void 0;
-    }
-    return this.record(operation, preview, approval, authority, providerOperationId, ["deploy:bicep-stack-ownership"]);
+    await this.run(this.#azdPlan(operation === "apply" ? "provision" : "down", current));
+    return this.record(operation, preview, approval, authority, void 0, ["deploy:bicep-azd-execution"]);
   }
 };
 var NativeTerraformProvider = class extends NativeProviderBase {
@@ -23848,16 +28120,16 @@ var NativeTerraformProvider = class extends NativeProviderBase {
     }
     const source2 = await bindGeneratedSource(request, this.#target.cwd);
     const requestedPlanPath = this.#target.planPath(request, operation);
-    const planPath = source2 === void 0 ? requestedPlanPath : resolve14(source2.rootPath, requestedPlanPath);
+    const planPath = source2 === void 0 ? requestedPlanPath : resolve15(source2.rootPath, requestedPlanPath);
     const outputs = /* @__PURE__ */ new Set();
     if (source2 !== void 0) {
-      const relativePlanPath = relative5(source2.rootPath, planPath).split(sep3).join("/");
+      const relativePlanPath = relative6(source2.rootPath, planPath).split(sep4).join("/");
       if (source2.paths.has(relativePlanPath) || planPath === source2.rootPath || [...source2.paths].some((path2) => path2.startsWith(`${relativePlanPath}/`)) || /\.(?:tf|tfvars)(?:\.json)?$/i.test(planPath) || relativePlanPath === ".terraform.lock.hcl" || relativePlanPath === ".terraform" || relativePlanPath.startsWith(".terraform/") || [...source2.paths].some((path2) => path2.startsWith(".terraform/"))) {
         throw sourceBindingError();
       }
       outputs.add(planPath);
-      outputs.add(resolve14(source2.rootPath, ".terraform"));
-      outputs.add(resolve14(source2.rootPath, ".terraform.lock.hcl"));
+      outputs.add(resolve15(source2.rootPath, ".terraform"));
+      outputs.add(resolve15(source2.rootPath, ".terraform.lock.hcl"));
     }
     await this.run(this.#commands.init(this.#target.cwd, true));
     const policyExpected = operation === "apply" && Boolean(request.policyValidation?.policyMap.mappings.length);
@@ -23867,11 +28139,11 @@ var NativeTerraformProvider = class extends NativeProviderBase {
     await this.run(this.#commands.preview(this.#target.cwd, planPath, operation === "destroy"));
     try {
       const planBytes = await readFile11(planPath);
-      const planDigest = createHash10("sha256").update(planBytes).digest("hex");
+      const planDigest = createHash11("sha256").update(planBytes).digest("hex");
       const showOutput = await this.run(this.#commands.showJson(this.#target.cwd, planPath));
       const normalized = normalizeTerraformPlan(parseJsonProcessOutput("terraform-plan", showOutput));
       const policy = policyExpected ? this.evaluatePolicy(this.track, request, showOutput, normalized.blockers) : {};
-      if (policyExpected && createHash10("sha256").update(await readFile11(planPath)).digest("hex") !== planDigest) {
+      if (policyExpected && createHash11("sha256").update(await readFile11(planPath)).digest("hex") !== planDigest) {
         normalized.blockers.push("Terraform saved plan changed during policy validation preview");
       }
       const authority = await this.currentAuthority();
@@ -23886,7 +28158,7 @@ var NativeTerraformProvider = class extends NativeProviderBase {
       const artifactRef = `${request.projectId}/${request.runId}/${operation}/${planDigest}.tfplan.enc`;
       const configHash = await this.#target.configHash();
       if (source2 !== void 0) {
-        if (resolve14(this.#target.cwd) !== source2.rootPath)
+        if (resolve15(this.#target.cwd) !== source2.rootPath)
           throw sourceBindingError();
         await readGeneratedSource(source2, source2, outputs);
       }
@@ -24001,12 +28273,12 @@ var NativeTerraformProvider = class extends NativeProviderBase {
 };
 
 // packages/capabilities/dist/pack-manager.js
-import { createHash as createHash11, randomUUID as randomUUID2 } from "node:crypto";
-import { constants as constants12 } from "node:fs";
-import { access, cp, lstat as lstat12, mkdir as mkdir10, readFile as readFile12, readdir as readdir8, realpath as realpath6, rm as rm11, writeFile as writeFile3 } from "node:fs/promises";
-import { dirname as dirname10, isAbsolute as isAbsolute6, join as join16, relative as relative6, resolve as resolve15, sep as sep4 } from "node:path";
+import { createHash as createHash12, randomUUID as randomUUID2 } from "node:crypto";
+import { constants as constants14 } from "node:fs";
+import { access, cp, lstat as lstat13, mkdir as mkdir10, readFile as readFile12, readdir as readdir8, realpath as realpath7, rm as rm11, writeFile as writeFile3 } from "node:fs/promises";
+import { dirname as dirname10, isAbsolute as isAbsolute8, join as join17, relative as relative7, resolve as resolve16, sep as sep5 } from "node:path";
 var HASH = /^[0-9a-f]{64}$/;
-var EMPTY_DIGEST = createHash11("sha256").update("").digest("hex");
+var EMPTY_DIGEST = createHash12("sha256").update("").digest("hex");
 var DEFAULT_TIMEOUT_MS = 12e4;
 var DEFAULT_OUTPUT_BYTES = 1024 * 1024;
 var compareText = (left, right) => left < right ? -1 : left > right ? 1 : 0;
@@ -24017,8 +28289,8 @@ var CapabilityPackManager = class {
   #clock;
   #idSource;
   constructor(options) {
-    this.#root = resolve15(options.root);
-    this.#manifestPath = resolve15(options.manifestPath ?? join16(this.#root, ".apex", "runtime", "capability-packs.v1.json"));
+    this.#root = resolve16(options.root);
+    this.#manifestPath = resolve16(options.manifestPath ?? join17(this.#root, ".apex", "runtime", "capability-packs.v1.json"));
     this.#runner = options.processRunner;
     this.#clock = options.clock;
     this.#idSource = options.idSource ?? randomUUID2;
@@ -24057,7 +28329,7 @@ var CapabilityPackManager = class {
         changed: false
       };
     }
-    const staged = join16(this.#localDirectory(), `rollback-${id}-${this.#idSource()}`);
+    const staged = join17(this.#localDirectory(), `rollback-${id}-${this.#idSource()}`);
     await mkdir10(dirname10(staged), { recursive: true });
     let previousIsStaged = false;
     let currentIsPrevious = false;
@@ -24161,7 +28433,7 @@ var CapabilityPackManager = class {
     const target = this.#packDirectory(definition.id);
     if (!replacing && await this.#exists(target))
       return { ...await this.verify(definition.id), changed: false };
-    const staged = join16(this.#localDirectory(), `capability-pack-${definition.id}-${this.#idSource()}`);
+    const staged = join17(this.#localDirectory(), `capability-pack-${definition.id}-${this.#idSource()}`);
     const previous = `${target}.previous`;
     await mkdir10(dirname10(staged), { recursive: true });
     try {
@@ -24218,7 +28490,7 @@ var CapabilityPackManager = class {
         ...lockBase,
         installationManifestDigest: this.#installationManifestDigest(lockBase)
       };
-      await writeFile3(join16(staged, "pack.lock.json"), `${JSON.stringify(packLock, null, 2)}
+      await writeFile3(join17(staged, "pack.lock.json"), `${JSON.stringify(packLock, null, 2)}
 `, { flag: "wx" });
       await this.#assertTreeSafe(staged);
       await mkdir10(dirname10(target), { recursive: true });
@@ -24253,7 +28525,7 @@ var CapabilityPackManager = class {
     if (runtime === "python") {
       if (definition.dependencyFree === true) {
         const script = this.#safeRelative(definition.script ?? prepared.executable.args.at(-1) ?? "");
-        const scriptPath = join16(staged, script);
+        const scriptPath = join17(staged, script);
         if (!HASH.test(definition.scriptDigest ?? "") || await this.#fileDigest(scriptPath) !== definition.scriptDigest)
           throw new Error("script digest mismatch");
         return;
@@ -24261,7 +28533,7 @@ var CapabilityPackManager = class {
       if (lockPath === void 0)
         throw new Error("lock-unavailable");
       if (lock.installer === "uv") {
-        const stagedLock = join16(staged, this.#safeRelative(relative6(this.#resolveManifestPath(prepared.artifact.spec), lockPath)));
+        const stagedLock = join17(staged, this.#safeRelative(relative7(this.#resolveManifestPath(prepared.artifact.spec), lockPath)));
         if (await this.#fileDigest(stagedLock) !== lock.digest)
           throw new Error("staged lock digest mismatch");
         try {
@@ -24293,7 +28565,7 @@ var CapabilityPackManager = class {
         maxOutputBytes: DEFAULT_OUTPUT_BYTES
       });
       await this.#runner.run({
-        executable: join16(staged, ".venv", process.platform === "win32" ? "Scripts" : "bin", "python"),
+        executable: join17(staged, ".venv", process.platform === "win32" ? "Scripts" : "bin", "python"),
         args: ["-m", "pip", "install", "--require-hashes", "-r", lockPath],
         cwd: staged,
         timeoutMs: DEFAULT_TIMEOUT_MS,
@@ -24306,14 +28578,14 @@ var CapabilityPackManager = class {
         throw new Error("lock-unavailable");
       if (lock.installer !== "deno")
         throw new Error("Deno capability pack requires deno installer");
-      const stagedLock = join16(staged, this.#safeRelative(relative6(this.#resolveManifestPath(prepared.artifact.spec), lockPath)));
+      const stagedLock = join17(staged, this.#safeRelative(relative7(this.#resolveManifestPath(prepared.artifact.spec), lockPath)));
       if (await this.#fileDigest(stagedLock) !== lock.digest)
         throw new Error("staged lock digest mismatch");
       await this.#runner.run({
         executable: "deno",
         args: ["cache", "--frozen", `--lock=${stagedLock}`, prepared.executable.args.at(-1)],
         cwd: staged,
-        env: { ...process.env, DENO_DIR: join16(staged, ".deno") },
+        env: { ...process.env, DENO_DIR: join17(staged, ".deno") },
         timeoutMs: DEFAULT_TIMEOUT_MS,
         maxOutputBytes: DEFAULT_OUTPUT_BYTES
       });
@@ -24436,42 +28708,42 @@ var CapabilityPackManager = class {
       throw new Error(`Unsafe capability pack id '${id}'`);
   }
   #safeRelative(path2) {
-    if (path2.length === 0 || isAbsolute6(path2) || path2.split(/[\\/]/u).includes(".."))
+    if (path2.length === 0 || isAbsolute8(path2) || path2.split(/[\\/]/u).includes(".."))
       throw new Error(`Unsafe relative path '${path2}'`);
     return path2;
   }
   #resolveManifestPath(path2) {
     const manifestRoot = dirname10(this.#manifestPath);
-    const candidate = resolve15(manifestRoot, this.#safeRelative(path2));
-    if (candidate !== manifestRoot && !candidate.startsWith(`${manifestRoot}${sep4}`))
+    const candidate = resolve16(manifestRoot, this.#safeRelative(path2));
+    if (candidate !== manifestRoot && !candidate.startsWith(`${manifestRoot}${sep5}`))
       throw new Error(`Capability pack path escapes manifest root: ${path2}`);
     return candidate;
   }
   #packDirectory(id) {
-    return join16(this.#root, ".apex", "capability-packs", id);
+    return join17(this.#root, ".apex", "capability-packs", id);
   }
   #localDirectory() {
-    return join16(this.#root, ".apex", "local");
+    return join17(this.#root, ".apex", "local");
   }
   async #readLock(directory) {
-    return JSON.parse(await readFile12(join16(directory, "pack.lock.json"), "utf8"));
+    return JSON.parse(await readFile12(join17(directory, "pack.lock.json"), "utf8"));
   }
   async #exists(path2) {
     try {
-      await access(path2, constants12.F_OK);
+      await access(path2, constants14.F_OK);
       return true;
     } catch {
       return false;
     }
   }
   async #fileDigest(path2) {
-    return createHash11("sha256").update(await readFile12(path2)).digest("hex");
+    return createHash12("sha256").update(await readFile12(path2)).digest("hex");
   }
   #generatedPaths(includePackLock = true) {
     return /* @__PURE__ */ new Set([...includePackLock ? ["pack.lock.json"] : [], ".venv", "node_modules", ".deno", "deno-dir"]);
   }
   #installationManifestDigest(lock) {
-    return createHash11("sha256").update(JSON.stringify({
+    return createHash12("sha256").update(JSON.stringify({
       sourceArtifactDigest: lock.sourceArtifactDigest,
       directLockDigest: lock.directLockDigest,
       transitiveLockDigest: lock.transitiveLockDigest,
@@ -24481,44 +28753,44 @@ var CapabilityPackManager = class {
   async #assertInstalledExecutable(directory, lock) {
     if (lock.runtime !== "python" || lock.executable.command !== "uv")
       return;
-    const executable = join16(directory, ".venv", process.platform === "win32" ? "Scripts" : "bin", process.platform === "win32" ? "azure-pricing-mcp.exe" : "azure-pricing-mcp");
-    const metadata2 = await lstat12(executable);
+    const executable = join17(directory, ".venv", process.platform === "win32" ? "Scripts" : "bin", process.platform === "win32" ? "azure-pricing-mcp.exe" : "azure-pricing-mcp");
+    const metadata2 = await lstat13(executable);
     if (!metadata2.isFile() || metadata2.isSymbolicLink())
       throw new Error("installed capability executable is missing");
   }
   async #assertTreeSafe(root) {
-    const rootPath = resolve15(root);
-    const rootStat = await lstat12(rootPath);
+    const rootPath = resolve16(root);
+    const rootStat = await lstat13(rootPath);
     if (rootStat.isSymbolicLink() || !rootStat.isDirectory())
       throw new Error(`Pack root is not a real directory: ${rootPath}`);
-    const canonicalRoot = await realpath6(rootPath);
+    const canonicalRoot = await realpath7(rootPath);
     const visit2 = async (directory) => {
       for (const entry of await readdir8(directory, { withFileTypes: true })) {
-        const path2 = join16(directory, entry.name);
-        const item = await lstat12(path2);
+        const path2 = join17(directory, entry.name);
+        const item = await lstat13(path2);
         if (item.isSymbolicLink())
-          throw new Error(`Symlink is not allowed in capability pack: ${relative6(rootPath, path2)}`);
-        const canonical3 = await realpath6(path2);
-        if (canonical3 !== canonicalRoot && !canonical3.startsWith(`${canonicalRoot}${sep4}`))
+          throw new Error(`Symlink is not allowed in capability pack: ${relative7(rootPath, path2)}`);
+        const canonical3 = await realpath7(path2);
+        if (canonical3 !== canonicalRoot && !canonical3.startsWith(`${canonicalRoot}${sep5}`))
           throw new Error(`Capability pack path escapes root: ${path2}`);
         if (item.isDirectory())
           await visit2(path2);
         else if (!item.isFile())
-          throw new Error(`Unsupported capability pack entry: ${relative6(rootPath, path2)}`);
+          throw new Error(`Unsupported capability pack entry: ${relative7(rootPath, path2)}`);
       }
     };
     await visit2(rootPath);
   }
   async #treeDigest(root, ignored = /* @__PURE__ */ new Set()) {
-    const hash2 = createHash11("sha256");
+    const hash2 = createHash12("sha256");
     const visit2 = async (directory) => {
       const entries = (await readdir8(directory, { withFileTypes: true })).sort((left, right) => compareText(left.name, right.name));
       for (const entry of entries) {
-        const path2 = join16(directory, entry.name);
-        const name = relative6(root, path2).split(sep4).join("/");
+        const path2 = join17(directory, entry.name);
+        const name = relative7(root, path2).split(sep5).join("/");
         if ([...ignored].some((ignoredPath) => name === ignoredPath || name.startsWith(`${ignoredPath}/`)))
           continue;
-        const item = await lstat12(path2);
+        const item = await lstat13(path2);
         if (item.isSymbolicLink())
           throw new Error(`Symlink is not allowed in capability pack: ${name}`);
         hash2.update(entry.isDirectory() ? `d:${name}\0` : `f:${name}\0`);
@@ -24539,172 +28811,10 @@ var CapabilityPackManager = class {
 import { createRequire } from "node:module";
 var require2 = createRequire(import.meta.url);
 
-// packages/capabilities/dist/executable-resolution.js
-import { accessSync, constants as constants13, statSync } from "node:fs";
-import { posix, win32 } from "node:path";
-var DEFAULT_PATHEXT = ".COM;.EXE;.BAT;.CMD";
-function environmentValue(env, name, platform) {
-  if (platform !== "win32")
-    return env[name];
-  const key = Object.keys(env).filter((candidate) => candidate.toUpperCase() === name).sort()[0];
-  return key === void 0 ? void 0 : env[key];
-}
-function defaultIsExecutableFile(path2, platform) {
-  try {
-    if (!statSync(path2).isFile())
-      return false;
-    if (platform !== "win32")
-      accessSync(path2, constants13.X_OK);
-    return true;
-  } catch {
-    return false;
-  }
-}
-function resolveExecutable(executable, options = {}) {
-  const platform = options.platform ?? process.platform;
-  const env = options.env ?? process.env;
-  const isExecutableFile = options.isExecutableFile ?? defaultIsExecutableFile;
-  const path2 = platform === "win32" ? win32 : posix;
-  const extensions = platform === "win32" ? (environmentValue(env, "PATHEXT", platform) ?? DEFAULT_PATHEXT).split(";").map((extension) => extension.trim().toLowerCase()).filter((extension) => extension.startsWith(".")) : [""];
-  const candidatesFor = (base) => {
-    if (platform !== "win32")
-      return [base];
-    const extension = path2.extname(base).toLowerCase();
-    return extensions.includes(extension) ? [base] : extensions.map((suffix) => `${base}${suffix}`);
-  };
-  const hasDirectory = executable.includes("/") || platform === "win32" && executable.includes("\\");
-  if (hasDirectory || path2.isAbsolute(executable))
-    return candidatesFor(executable).find((candidate) => isExecutableFile(candidate, platform));
-  const directories = (environmentValue(env, "PATH", platform) ?? "").split(path2.delimiter).map((directory) => directory.trim().replace(/^"(.*)"$/u, "$1")).filter((directory) => directory.length > 0);
-  for (const directory of directories) {
-    const found = candidatesFor(path2.join(directory, executable)).find((candidate) => isExecutableFile(candidate, platform));
-    if (found !== void 0)
-      return found;
-  }
-  return void 0;
-}
-function quoteForCmd(value) {
-  if (/["%!\r\n\0]/u.test(value))
-    throw new TypeError("Argument cannot be passed safely to a Windows command script");
-  return value.length === 0 || /[\s&|<>()^,;=]/u.test(value) ? `"${value}"` : value;
-}
-function planLaunch(executable, args, options = {}) {
-  const platform = options.platform ?? process.platform;
-  const resolved = resolveExecutable(executable, options);
-  if (resolved === void 0)
-    return { command: executable, args: [...args], windowsVerbatimArguments: false };
-  if (platform === "win32" && /\.(?:cmd|bat)$/iu.test(resolved)) {
-    const env = options.env ?? process.env;
-    const commandLine = [resolved, ...args].map(quoteForCmd).join(" ");
-    return {
-      command: environmentValue(env, "COMSPEC", platform) ?? "cmd.exe",
-      args: ["/d", "/s", "/c", `"${commandLine}"`],
-      windowsVerbatimArguments: true
-    };
-  }
-  return { command: resolved, args: [...args], windowsVerbatimArguments: false };
-}
-
-// packages/capabilities/dist/process-runner.js
-import { spawn } from "node:child_process";
-var ProcessRunnerError = class extends Error {
-  code;
-  result;
-  constructor(code, message, result) {
-    super(message);
-    this.code = code;
-    this.result = result;
-    this.name = "ProcessRunnerError";
-  }
-};
-var REDACTED2 = "[REDACTED]";
-function redactProcessOutput(value) {
-  try {
-    return JSON.stringify(redactStructuredSecrets(JSON.parse(value)));
-  } catch {
-    return value.replace(/\bBearer\s+[^\s]+/gi, `Bearer ${REDACTED2}`).replace(/\b(password|passwd|secret|token|api[_-]?key|client[_-]?secret|connectionString|credential)\s*[:=]\s*([^\s,;]+)/gi, `$1=${REDACTED2}`).replace(/((?:AccountKey|SharedAccessSignature|ClientSecret)\s*=)[^;\r\n]+/gi, `$1${REDACTED2}`).replace(/([?&](?:sig|token|key|secret)=)[^&\s]+/gi, `$1${REDACTED2}`);
-  }
-}
-var ProcessRunner = class {
-  async run(request) {
-    if (!Array.isArray(request.args)) {
-      throw new TypeError("Process arguments must be an explicit array");
-    }
-    let launch;
-    try {
-      launch = planLaunch(request.executable, request.args, { env: request.env ?? process.env });
-    } catch (error62) {
-      throw new ProcessRunnerError("PROCESS_SPAWN_ERROR", error62.message);
-    }
-    const options = {
-      shell: false,
-      windowsHide: true,
-      windowsVerbatimArguments: launch.windowsVerbatimArguments,
-      ...request.cwd === void 0 ? {} : { cwd: request.cwd },
-      ...request.env === void 0 ? {} : { env: request.env }
-    };
-    return await new Promise((resolve22, reject) => {
-      const child = spawn(launch.command, [...launch.args], options);
-      let stdout2 = Buffer.alloc(0);
-      let stderr = Buffer.alloc(0);
-      let outputTruncated = false;
-      let timedOut = false;
-      const append = (current, chunk) => {
-        const remaining = request.maxOutputBytes - stdout2.length - stderr.length;
-        if (remaining <= 0) {
-          outputTruncated = true;
-          child.kill("SIGKILL");
-          return current;
-        }
-        if (chunk.length > remaining) {
-          outputTruncated = true;
-          child.kill("SIGKILL");
-          return Buffer.concat([current, chunk.subarray(0, remaining)]);
-        }
-        return Buffer.concat([current, chunk]);
-      };
-      child.stdout.on("data", (chunk) => {
-        stdout2 = append(stdout2, chunk);
-      });
-      child.stderr.on("data", (chunk) => {
-        stderr = append(stderr, chunk);
-      });
-      const timeout = setTimeout(() => {
-        timedOut = true;
-        child.kill("SIGKILL");
-      }, request.timeoutMs);
-      child.once("error", (error62) => {
-        clearTimeout(timeout);
-        reject(new ProcessRunnerError("PROCESS_SPAWN_ERROR", error62.message));
-      });
-      child.once("close", (exitCode, signal) => {
-        clearTimeout(timeout);
-        const result = {
-          exitCode,
-          signal,
-          stdout: redactProcessOutput(stdout2.toString("utf8")),
-          stderr: redactProcessOutput(stderr.toString("utf8")),
-          timedOut,
-          outputTruncated
-        };
-        if (timedOut) {
-          reject(new ProcessRunnerError("PROCESS_TIMEOUT", `Process '${request.executable}' timed out`, result));
-        } else if (outputTruncated) {
-          reject(new ProcessRunnerError("PROCESS_OUTPUT_LIMIT", `Process '${request.executable}' exceeded its output limit`, result));
-        } else if (exitCode !== 0) {
-          reject(new ProcessRunnerError("PROCESS_EXIT_NONZERO", `Process '${request.executable}' exited with code ${String(exitCode)}`, result));
-        } else {
-          resolve22(result);
-        }
-      });
-    });
-  }
-};
-
 // packages/renderers/dist/markdown.js
 function escapeMarkdown(value) {
-  const text4 = value === null ? "null" : String(value);
-  return text4.replace(/[\u0000-\u0009\u000b\u000c\u000e-\u001f\u007f]/g, (character) => `\\u${character.charCodeAt(0).toString(16).padStart(4, "0")}`).replace(/\r\n?|\n/g, "<br>").replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
+  const text5 = value === null ? "null" : String(value);
+  return text5.replace(/[\u0000-\u0009\u000b\u000c\u000e-\u001f\u007f]/g, (character) => `\\u${character.charCodeAt(0).toString(16).padStart(4, "0")}`).replace(/\r\n?|\n/g, "<br>").replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
 }
 function markdownTable(headers, rows) {
   const header = `| ${headers.map(escapeMarkdown).join(" | ")} |`;
@@ -24970,7 +29080,7 @@ function renderDeploymentGuide(input2) {
     "## Deployment Procedure",
     "",
     "1. Inspect `apex status --json` and `apex doctor --json`; resolve missing prerequisites and stale inputs.",
-    "2. Complete required reviews, Gates 1 through 3, source generation and all native source validators for this accepted plan.",
+    "2. Complete required reviews, the Gate 1 intent confirmation, the Gate 2 and 3 readiness checkpoints, source generation and all native source validators for this accepted plan.",
     `3. With explicit cloud-operation authorization, request \`apex preview --operation apply --provider ${binding.track} --json\`. Terraform preview may perform authenticated planning.`,
     "4. Review the exact preview, resource ownership, replacements, deletions, policy results and blockers. A human must approve Gate 4 for that exact fresh preview and recipient.",
     "5. Execute only the approved preview through `apex deploy --preview PREVIEW_HASH --json`; never substitute an unbound provider command.",
@@ -24990,14 +29100,18 @@ function renderDeploymentGuide(input2) {
   ].join("\n");
 }
 function renderRunStatus(run) {
-  const gates = [...run.gates].sort((left, right) => left.gate - right.gate).map((gate) => [
-    gate.gate,
-    gate.state,
-    gate.state === "inherited" ? optional(gate.inheritedFromRunId) : "-",
-    optional(gate.decidedAt),
-    optional(gate.reason),
-    gate.dependencyHash
-  ]);
+  const gates = [...run.gates].sort((left, right) => left.gate - right.gate).map((gate) => {
+    const fields = gate;
+    return [
+      gate.gate,
+      gate.state,
+      gate.state === "inherited" ? optional(fields.inheritedFromRunId) : "-",
+      optional(fields.decidedAt),
+      optional(fields.readyAt),
+      optional(fields.reason),
+      gate.dependencyHash
+    ];
+  });
   return [
     "# Run Status",
     "",
@@ -25005,6 +29119,7 @@ function renderRunStatus(run) {
       ["Project", run.projectId],
       ["Run", run.runId],
       ["Environment", run.environment],
+      ["Purpose", run.purpose],
       ["Target scope", run.targetScope],
       ["IaC tool", run.iacTool],
       ["Parent run", optional(run.parentRunId)],
@@ -25014,7 +29129,7 @@ function renderRunStatus(run) {
     "",
     "## Gates",
     "",
-    markdownTable(["Gate", "State", "Inherited From", "Decided", "Reason", "Dependency Hash"], gates)
+    markdownTable(["Gate", "State", "Inherited From", "Decided", "Readiness Recorded", "Reason", "Dependency Hash"], gates)
   ].join("\n");
 }
 function previewAction(action) {
@@ -25089,22 +29204,22 @@ function renderArchitectureDecisionRecords(architecture, architectureHash) {
     "",
     "Design decisions from accepted Architecture data. Gate approval and implemented state are separate evidence.",
     "",
-    ...[...records].sort((left, right) => compareText2(left.id, right.id)).map((record5) => [
-      `## ${escapeMarkdown(record5.id)}: ${escapeMarkdown(record5.title)}`,
+    ...[...records].sort((left, right) => compareText2(left.id, right.id)).map((record6) => [
+      `## ${escapeMarkdown(record6.id)}: ${escapeMarkdown(record6.title)}`,
       "",
-      `Requirements: ${record5.requirementIds.map(escapeMarkdown).join(", ")}`,
+      `Requirements: ${record6.requirementIds.map(escapeMarkdown).join(", ")}`,
       "",
       "### Context",
       "",
-      escapeMarkdown(record5.context),
+      escapeMarkdown(record6.context),
       "",
       "### Decision",
       "",
-      escapeMarkdown(record5.decision),
+      escapeMarkdown(record6.decision),
       "",
       "### Alternatives Considered",
       "",
-      markdownTable(["Option", "Benefits", "Drawbacks", "Rejection Reason"], record5.alternatives.map((alternative) => [
+      markdownTable(["Option", "Benefits", "Drawbacks", "Rejection Reason"], record6.alternatives.map((alternative) => [
         alternative.option,
         alternative.benefits,
         alternative.drawbacks,
@@ -25115,23 +29230,23 @@ function renderArchitectureDecisionRecords(architecture, architectureHash) {
       "",
       "Positive:",
       "",
-      list(record5.positiveConsequences),
+      list(record6.positiveConsequences),
       "",
       "Negative:",
       "",
-      list(record5.negativeConsequences),
+      list(record6.negativeConsequences),
       "",
       "### WAF Pillar Analysis",
       "",
-      markdownTable(["Pillar", "Impact"], Object.entries(record5.wafImpacts).sort(([left], [right]) => compareText2(left, right))),
+      markdownTable(["Pillar", "Impact"], Object.entries(record6.wafImpacts).sort(([left], [right]) => compareText2(left, right))),
       "",
       "### Compliance Considerations",
       "",
-      escapeMarkdown(record5.complianceConsiderations),
+      escapeMarkdown(record6.complianceConsiderations),
       "",
       "### Implementation Notes",
       "",
-      escapeMarkdown(record5.implementationNotes),
+      escapeMarkdown(record6.implementationNotes),
       ""
     ].join("\n"))
   ].join("\n");
@@ -25386,7 +29501,7 @@ function renderQualityScorecardEvaluation(scorecard, measurements) {
 }
 
 // packages/renderers/dist/rasterizer.js
-import { createHash as createHash12 } from "node:crypto";
+import { createHash as createHash13 } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { createRequire as createRequire2 } from "node:module";
 import { fileURLToPath as fileURLToPath2 } from "node:url";
@@ -25427,7 +29542,7 @@ function loadBundledRasterizer(manifest2, base, host = currentHost()) {
       cause: error62
     });
   }
-  if (createHash12("sha256").update(bytes).digest("hex") !== binary.sha256)
+  if (createHash13("sha256").update(bytes).digest("hex") !== binary.sha256)
     throw new Error(`PNG rasterizer ${manifest2.package} binary for ${target} failed its integrity check; ${unavailable2}`);
   let binding;
   try {
@@ -25475,7 +29590,7 @@ var STATUS_COLORS = {
   "not-applicable": "#69797e"
 };
 var MAX_DIAGRAM_ROWS = 100;
-function compare(left, right) {
+function compare2(left, right) {
   return left < right ? -1 : left > right ? 1 : 0;
 }
 function xml(value) {
@@ -25522,8 +29637,8 @@ function source(spec, svg) {
   return { svg, python: pythonSource(spec) };
 }
 function renderArchitectureDiagram(architecture) {
-  const rows = architecture.components.map(({ id, service, purpose }) => ({ id, label: `${id}: ${service}`, detail: purpose })).sort((left, right) => compare(left.id, right.id));
-  const edges = architecture.components.flatMap(({ id, dependsOn }) => dependsOn.map((dependency) => ({ from: dependency, to: id }))).sort((left, right) => compare(`${left.from}\0${left.to}`, `${right.from}\0${right.to}`));
+  const rows = architecture.components.map(({ id, service, purpose }) => ({ id, label: `${id}: ${service}`, detail: purpose })).sort((left, right) => compare2(left.id, right.id));
+  const edges = architecture.components.flatMap(({ id, dependsOn }) => dependsOn.map((dependency) => ({ from: dependency, to: id }))).sort((left, right) => compare2(`${left.from}\0${left.to}`, `${right.from}\0${right.to}`));
   const columns = Math.min(3, Math.max(1, rows.length));
   const nodeWidth = 250;
   const nodeHeight = 82;
@@ -25573,9 +29688,9 @@ function renderWafAssessmentDiagram(architecture) {
   return source(spec, document(spec.title, 480, body, "Qualitative status for the five Azure Well-Architected pillars"));
 }
 function renderCostBreakdownDiagram(cost) {
-  const rows = cost.lineItems.map(({ id, service, sku, monthlyCost }) => ({ id, label: `${service} / ${sku}`, value: monthlyCost })).sort((left, right) => compare(left.id, right.id));
+  const rows = cost.lineItems.map(({ id, service, sku, monthlyCost }) => ({ id, label: `${service} / ${sku}`, value: monthlyCost })).sort((left, right) => compare2(left.id, right.id));
   const maximum = Math.max(1, ...rows.map(({ value }) => value ?? 0));
-  const notes = (cost.unpricedItems ?? []).map(({ service, sku }) => `Unpriced: ${service} / ${sku}`).sort(compare);
+  const notes = (cost.unpricedItems ?? []).map(({ service, sku }) => `Unpriced: ${service} / ${sku}`).sort(compare2);
   const height = Math.max(260, 120 + rows.length * 52 + notes.length * 20);
   const bars = rows.map((row, index) => {
     const y = 88 + index * 52;
@@ -25594,7 +29709,7 @@ function renderCostUncertaintyDiagram(cost) {
     value: monthlyCost,
     lower: uncertainty.lowerMonthlyCost,
     upper: uncertainty.upperMonthlyCost
-  })).sort((left, right) => compare(left.id, right.id));
+  })).sort((left, right) => compare2(left.id, right.id));
   const maximum = Math.max(1, ...rows.map(({ upper }) => upper));
   const height = Math.max(260, 120 + rows.length * 58);
   const ranges = rows.map((row, index) => {
@@ -25609,10 +29724,10 @@ function renderCostUncertaintyDiagram(cost) {
 }
 
 // packages/cli/dist/cli.js
-import { join as join25, resolve as resolve21 } from "node:path";
+import { join as join26, resolve as resolve22 } from "node:path";
 
 // packages/cli/dist/version.js
-var APEX_VERSION = "0.11.0-next.2";
+var APEX_VERSION = "0.11.0-next.5";
 var MINIMUM_NODE_VERSION = "24.21.0";
 function meetsMinimumVersion(current, minimum) {
   const currentParts = current.split(".").map(Number);
@@ -25685,6 +29800,9 @@ function normalizeError(error62) {
     return error62;
   if (error62 instanceof GovernanceBaselineError)
     return governanceBaselineApexError(error62);
+  if (error62 instanceof RunConfigInvalidError) {
+    return new ApexError("APEX_VALIDATION", error62.message, EXIT_CODES.validation, { issues: error62.issues }, { cause: error62 });
+  }
   if (error62 instanceof RunWriterConflictError) {
     return new ApexError("APEX_WRITER_CONFLICT", `${error62.message}; retry from that worktree, release the writer lease there, or wait for it to expire`, EXIT_CODES.conflict, { ownerWorktree: error62.ownerWorktree, expiresAt: error62.expiresAt }, { cause: error62 });
   }
@@ -25734,11 +29852,40 @@ function dependencyRevision(run, events) {
   return sha256Json({
     projectId: run.projectId,
     runId: run.runId,
+    purpose: run.purpose,
     targetScope: run.targetScope,
     iacTool: run.iacTool,
     runtimeLockHash: run.runtimeLockHash,
     artifacts
   });
+}
+
+// packages/cli/dist/purpose.js
+var DEFAULT_DEPLOYMENT_PURPOSE = "lab";
+var PURPOSE_PRODUCTION_UNAVAILABLE = "PURPOSE_PRODUCTION_UNAVAILABLE";
+function isDeploymentPurpose(value) {
+  return value_exports2.Check(DeploymentPurposeSchema, value);
+}
+function assertDeploymentPurposeUsable(purpose) {
+  if (purpose === "production")
+    throw new ApexError("APEX_VALIDATION", "Deployment purpose 'production' is unavailable until CP-28/CP-29 (#457/#458) ship the CI-owned production flow; use purpose 'lab'", EXIT_CODES.validation, { reason: PURPOSE_PRODUCTION_UNAVAILABLE, purpose });
+}
+
+// packages/cli/dist/toolchain-pin.js
+var RELEASE_VERSION = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u;
+async function bundledToolchainMinimums() {
+  try {
+    const assets = await resolveBundledAssets();
+    const entry = assets.manifest.files.find(({ path: path2 }) => path2 === "config/toolchain.v1.json");
+    const bytes = entry === void 0 ? void 0 : await readBundledFile(assets.root, entry.path);
+    if (entry === void 0 || bytes === void 0 || sha256Bytes(bytes) !== entry.sha256)
+      return {};
+    const set2 = JSON.parse(bytes.toString("utf8")).compatibilitySet;
+    const release2 = (value) => typeof value === "string" && RELEASE_VERSION.test(value) ? value : void 0;
+    return { vscode: release2(set2?.minimumVscode), copilotCli: release2(set2?.copilotCli), azd: release2(set2?.azd) };
+  } catch {
+    return {};
+  }
 }
 
 // packages/cli/dist/target-scope.js
@@ -25940,7 +30087,7 @@ __export(external_exports, {
   flattenError: () => flattenError,
   float32: () => float32,
   float64: () => float64,
-  formatError: () => formatError,
+  formatError: () => formatError2,
   fromJSONSchema: () => fromJSONSchema,
   function: () => _function,
   getDiscriminatedOption: () => getDiscriminatedOption,
@@ -26017,7 +30164,7 @@ __export(external_exports, {
   properties: () => _properties,
   property: () => _property,
   readonly: () => readonly,
-  record: () => record4,
+  record: () => record5,
   refine: () => refine,
   regex: () => _regex,
   regexes: () => regexes_exports,
@@ -26338,7 +30485,7 @@ __export(core_exports2, {
   extractDefs: () => extractDefs,
   finalize: () => finalize,
   flattenError: () => flattenError,
-  formatError: () => formatError,
+  formatError: () => formatError2,
   getDiscriminatedOption: () => getDiscriminatedOption,
   globalConfig: () => globalConfig,
   globalRegistry: () => globalRegistry,
@@ -26432,7 +30579,7 @@ __export(util_exports, {
   hide: () => hide,
   installLazyProp: () => installLazyProp,
   isObject: () => isObject,
-  isPlainObject: () => isPlainObject2,
+  isPlainObject: () => isPlainObject3,
   issue: () => issue,
   joinValues: () => joinValues,
   jsonStringifyReplacer: () => jsonStringifyReplacer,
@@ -26448,7 +30595,7 @@ __export(util_exports, {
   own: () => own2,
   parsedType: () => parsedType,
   partial: () => partial,
-  pick: () => pick,
+  pick: () => pick2,
   prefixIssues: () => prefixIssues,
   primitiveTypes: () => primitiveTypes,
   promiseAllObject: () => promiseAllObject,
@@ -26673,7 +30820,7 @@ var allowsEval = /* @__PURE__ */ cached(() => {
     return false;
   }
 });
-function isPlainObject2(o) {
+function isPlainObject3(o) {
   if (isObject(o) === false)
     return false;
   const ctor = o.constructor;
@@ -26690,7 +30837,7 @@ function isPlainObject2(o) {
   return true;
 }
 function shallowClone(o) {
-  if (isPlainObject2(o))
+  if (isPlainObject3(o))
     return { ...o };
   if (Array.isArray(o))
     return [...o];
@@ -26843,7 +30990,7 @@ var BIGINT_FORMAT_RANGES = {
   int64: [/* @__PURE__ */ BigInt("-9223372036854775808"), /* @__PURE__ */ BigInt("9223372036854775807")],
   uint64: [/* @__PURE__ */ BigInt(0), /* @__PURE__ */ BigInt("18446744073709551615")]
 };
-function pick(schema, mask) {
+function pick2(schema, mask) {
   const currDef = schema._zod.def;
   const checks = currDef.checks;
   const hasChecks = checks && checks.length > 0;
@@ -26879,7 +31026,7 @@ function omit(schema, mask) {
   return clone(schema, mergeDefs(currDef, { shape: newShape, checks: [] }));
 }
 function extend(schema, shape) {
-  if (!isPlainObject2(shape)) {
+  if (!isPlainObject3(shape)) {
     throw new Error("Invalid input to extend: expected a plain object");
   }
   const checks = schema._zod.def.checks;
@@ -26901,7 +31048,7 @@ function extended(schema, shape) {
   return newShape;
 }
 function safeExtend(schema, shape) {
-  if (!isPlainObject2(shape)) {
+  if (!isPlainObject3(shape)) {
     throw new Error("Invalid input to safeExtend: expected a plain object");
   }
   return clone(schema, mergeDefs(schema._zod.def, { shape: extended(schema, shape) }));
@@ -27418,7 +31565,7 @@ function flattenError(error62, mapper = (issue3) => issue3.message) {
   }
   return { formErrors, fieldErrors };
 }
-function formatError(error62, mapper = (issue3) => issue3.message) {
+function formatError2(error62, mapper = (issue3) => issue3.message) {
   const fieldErrors = { _errors: [] };
   const processError = (error63, path2 = []) => {
     for (const issue3 of error63.issues) {
@@ -29743,7 +33890,7 @@ function mergeValues(a, b) {
   if (a instanceof Date && b instanceof Date && +a === +b) {
     return { valid: true, data: a };
   }
-  if (isPlainObject2(a) && isPlainObject2(b)) {
+  if (isPlainObject3(a) && isPlainObject3(b)) {
     const bKeys = Object.keys(b);
     const sharedKeys = Object.keys(a).filter((key) => bKeys.indexOf(key) !== -1);
     const newObj = { ...a, ...b };
@@ -29964,7 +34111,7 @@ var $ZodRecord = /* @__PURE__ */ $constructor("$ZodRecord", (inst, def) => {
   memo3?.attach(inst);
   inst._zod.parse = (payload, ctx) => {
     const input2 = payload.value;
-    if (!isPlainObject2(input2)) {
+    if (!isPlainObject3(input2)) {
       payload.issues.push({
         expected: "record",
         code: "invalid_type",
@@ -30833,7 +34980,7 @@ var recursive = /* @__PURE__ */ new WeakMap();
 var NONE = 0;
 var ASSUMED = 1;
 var PROVEN = 2;
-function isRecursive(inst, stack, resolve22) {
+function isRecursive(inst, stack, resolve23) {
   const cached2 = recursive.get(inst);
   if (cached2 !== void 0)
     return cached2 ? PROVEN : NONE;
@@ -30843,7 +34990,7 @@ function isRecursive(inst, stack, resolve22) {
   let result = NONE;
   const check2 = (child) => {
     if (result !== PROVEN && child?._zod) {
-      const answer = isRecursive(child, stack, resolve22);
+      const answer = isRecursive(child, stack, resolve23);
       if (answer > result)
         result = answer;
     }
@@ -30854,7 +35001,7 @@ function isRecursive(inst, stack, resolve22) {
       const desc = Object.getOwnPropertyDescriptor(sh, key);
       if (spread && !desc.enumerable)
         continue;
-      const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve22) : NONE;
+      const child = desc.get ? ASSUMED : desc.value?._zod ? isRecursive(desc.value, stack, resolve23) : NONE;
       if (child > answer)
         answer = child;
     }
@@ -30918,7 +35065,7 @@ function isRecursive(inst, stack, resolve22) {
       break;
     // `$ZodLazy` caches its inner on the def, so a resolved edge is followed exactly
     case "lazy": {
-      const inner = def._cachedInner ?? (resolve22 ? inst._zod.innerType : void 0);
+      const inner = def._cachedInner ?? (resolve23 ? inst._zod.innerType : void 0);
       merge2(inner ? isRecursive(inner, stack, false) : ASSUMED);
       break;
     }
@@ -30982,7 +35129,7 @@ function bucketFor(state, inst) {
   return bucket;
 }
 var handoff;
-var open12 = [];
+var open13 = [];
 var memo = {
   alloc(_inst, payload, empty) {
     const bucket = handoff;
@@ -30991,7 +35138,7 @@ var memo = {
     handoff = void 0;
     const entry = { value: empty, issues: null };
     bucket.set(payload.value, entry);
-    open12.push(entry);
+    open13.push(entry);
     return empty;
   },
   guard(inst) {
@@ -31062,10 +35209,10 @@ var memo = {
           return payload;
         }
         handoff = bucket;
-        const depth = open12.length;
+        const depth = open13.length;
         const result = base(payload, ctx);
         handoff = void 0;
-        const entry = open12.length > depth ? open12.pop() : void 0;
+        const entry = open13.length > depth ? open13.pop() : void 0;
         if (result instanceof Promise) {
           return result.then((r) => {
             if (entry)
@@ -35116,8 +39263,8 @@ function ko_default() {
 }
 
 // node_modules/zod/v4/locales/lt.js
-var capitalizeFirstCharacter = (text4) => {
-  return text4.charAt(0).toUpperCase() + text4.slice(1);
+var capitalizeFirstCharacter = (text5) => {
+  return text5.charAt(0).toUpperCase() + text5.slice(1);
 };
 function getUnitTypeFromNumber(number4) {
   const abs = Math.abs(number4);
@@ -40045,7 +44192,7 @@ function generateIntersectionCheck(doc, ctx, schema, accessor) {
 }
 function generateRecordCheck(doc, ctx, schema, accessor) {
   const def = schema._zod.def;
-  const isPlainObjectConst = addConstant(ctx, isPlainObject2);
+  const isPlainObjectConst = addConstant(ctx, isPlainObject3);
   doc.write(`if (!${isPlainObjectConst}(${accessor})) return INVALID;`);
   const outputVar = newVar(ctx);
   const kVar = newVar(ctx);
@@ -42411,8 +46558,8 @@ function rewriteKeyNames(ctx) {
       bySchema.set(entry.schema, entry);
   }
   const rewrites = /* @__PURE__ */ new Map();
-  for (const record5 of pendingRecords.get(ctx) ?? []) {
-    const seen = ctx.seen.get(record5);
+  for (const record6 of pendingRecords.get(ctx) ?? []) {
+    const seen = ctx.seen.get(record6);
     const names = (seen?.def ?? seen?.schema)?.propertyNames;
     if (!names || names === true || rewrites.has(names))
       continue;
@@ -42880,7 +47027,7 @@ __export(schemas_exports2, {
   preprocess: () => preprocess,
   promise: () => promise,
   readonly: () => readonly,
-  record: () => record4,
+  record: () => record5,
   refine: () => refine,
   set: () => set,
   strictObject: () => strictObject,
@@ -42967,7 +47114,7 @@ var initializer2 = (inst, issues) => {
   if (_installedErrorProtos.has(proto))
     return;
   _installedErrorProtos.add(proto);
-  _lazyMethod(proto, "format", (self) => (mapper) => formatError(self, mapper));
+  _lazyMethod(proto, "format", (self) => (mapper) => formatError2(self, mapper));
   _lazyMethod(proto, "flatten", (self) => (mapper) => flattenError(self, mapper));
   _lazyMethod(proto, "addIssue", (self) => (issue3) => {
     self.issues.push(issue3);
@@ -43982,7 +48129,7 @@ var ZodRecord = /* @__PURE__ */ $constructor("ZodRecord", (inst, def) => {
   inst.keyType = def.keyType;
   inst.valueType = def.valueType;
 });
-function record4(keyType, valueType, params) {
+function record5(keyType, valueType, params) {
   if (!valueType || !valueType._zod) {
     return new ZodRecord({
       type: "record",
@@ -44457,7 +48604,7 @@ var stringbool = (...args) => _stringbool({
 }, ...args);
 function json(params) {
   const jsonSchema = lazy(() => {
-    return union([string2(params), number2(), boolean2(), _null3(), array4(jsonSchema), record4(string2(), jsonSchema)]);
+    return union([string2(params), number2(), boolean2(), _null3(), array4(jsonSchema), record5(string2(), jsonSchema)]);
   });
   return jsonSchema;
 }
@@ -45049,7 +49196,7 @@ function convertBaseSchema(schema, ctx) {
           const patterns = patternKeys.map((p) => new RegExp(p));
           const basePatternSchema = zodSchema;
           zodSchema = zodSchema.check((payload) => {
-            if (!isPlainObject2(payload.value))
+            if (!isPlainObject3(payload.value))
               return;
             const unrecognized = [];
             for (const key of Object.keys(payload.value)) {
@@ -45497,10 +49644,10 @@ var JSONValueSchema = lazy(() => union([
   number2(),
   boolean2(),
   _null3(),
-  record4(string2(), JSONValueSchema),
+  record5(string2(), JSONValueSchema),
   array4(JSONValueSchema)
 ]));
-var JSONObjectSchema = record4(string2(), JSONValueSchema);
+var JSONObjectSchema = record5(string2(), JSONValueSchema);
 var JSONArraySchema = array4(JSONValueSchema);
 var ProgressTokenSchema = union([string2(), number2().int()]);
 var CursorSchema = string2();
@@ -45605,7 +49752,7 @@ var ServerTasksCapabilitySchema = looseObject({
   requests: looseObject({ tools: looseObject({ call: JSONObjectSchema.optional() }).optional() }).optional()
 });
 var ClientCapabilitiesSchema = object4({
-  experimental: record4(string2(), JSONObjectSchema).optional(),
+  experimental: record5(string2(), JSONObjectSchema).optional(),
   sampling: object4({
     context: JSONObjectSchema.optional(),
     tools: JSONObjectSchema.optional()
@@ -45613,7 +49760,7 @@ var ClientCapabilitiesSchema = object4({
   elicitation: ElicitationCapabilitySchema.optional(),
   roots: object4({ listChanged: boolean2().optional() }).optional(),
   tasks: ClientTasksCapabilitySchema.optional(),
-  extensions: record4(string2(), JSONObjectSchema).optional()
+  extensions: record5(string2(), JSONObjectSchema).optional()
 });
 var InitializeRequestParamsSchema = BaseRequestParamsSchema.extend({
   protocolVersion: string2(),
@@ -45625,7 +49772,7 @@ var InitializeRequestSchema = RequestSchema.extend({
   params: InitializeRequestParamsSchema
 });
 var ServerCapabilitiesSchema = object4({
-  experimental: record4(string2(), JSONObjectSchema).optional(),
+  experimental: record5(string2(), JSONObjectSchema).optional(),
   logging: JSONObjectSchema.optional(),
   completions: JSONObjectSchema.optional(),
   prompts: object4({ listChanged: boolean2().optional() }).optional(),
@@ -45635,7 +49782,7 @@ var ServerCapabilitiesSchema = object4({
   }).optional(),
   tools: object4({ listChanged: boolean2().optional() }).optional(),
   tasks: ServerTasksCapabilitySchema.optional(),
-  extensions: record4(string2(), JSONObjectSchema).optional()
+  extensions: record5(string2(), JSONObjectSchema).optional()
 });
 var InitializeResultSchema = ResultSchema.extend({
   protocolVersion: string2(),
@@ -45680,7 +49827,7 @@ var PaginatedResultSchema = ResultSchema.extend({ nextCursor: CursorSchema.optio
 var ResourceContentsSchema = object4({
   uri: string2(),
   mimeType: optional2(string2()),
-  _meta: record4(string2(), unknown()).optional()
+  _meta: record5(string2(), unknown()).optional()
 });
 var TextResourceContentsSchema = ResourceContentsSchema.extend({ text: string2() });
 var Base64Schema = string2().refine((val) => {
@@ -45781,7 +49928,7 @@ var ListPromptsRequestSchema = PaginatedRequestSchema.extend({ method: literal("
 var ListPromptsResultSchema = PaginatedResultSchema.extend({ prompts: array4(PromptSchema) });
 var GetPromptRequestParamsSchema = BaseRequestParamsSchema.extend({
   name: string2(),
-  arguments: record4(string2(), string2()).optional()
+  arguments: record5(string2(), string2()).optional()
 });
 var GetPromptRequestSchema = RequestSchema.extend({
   method: literal("prompts/get"),
@@ -45791,34 +49938,34 @@ var TextContentSchema = object4({
   type: literal("text"),
   text: string2(),
   annotations: AnnotationsSchema.optional(),
-  _meta: record4(string2(), unknown()).optional()
+  _meta: record5(string2(), unknown()).optional()
 });
 var ImageContentSchema = object4({
   type: literal("image"),
   data: Base64Schema,
   mimeType: string2(),
   annotations: AnnotationsSchema.optional(),
-  _meta: record4(string2(), unknown()).optional()
+  _meta: record5(string2(), unknown()).optional()
 });
 var AudioContentSchema = object4({
   type: literal("audio"),
   data: Base64Schema,
   mimeType: string2(),
   annotations: AnnotationsSchema.optional(),
-  _meta: record4(string2(), unknown()).optional()
+  _meta: record5(string2(), unknown()).optional()
 });
 var ToolUseContentSchema = object4({
   type: literal("tool_use"),
   name: string2(),
   id: string2(),
-  input: record4(string2(), unknown()),
-  _meta: record4(string2(), unknown()).optional()
+  input: record5(string2(), unknown()),
+  _meta: record5(string2(), unknown()).optional()
 });
 var EmbeddedResourceSchema = object4({
   type: literal("resource"),
   resource: union([TextResourceContentsSchema, BlobResourceContentsSchema]),
   annotations: AnnotationsSchema.optional(),
-  _meta: record4(string2(), unknown()).optional()
+  _meta: record5(string2(), unknown()).optional()
 });
 var ResourceLinkSchema = ResourceSchema.extend({ type: literal("resource_link") });
 var ContentBlockSchema = union([
@@ -45858,13 +50005,13 @@ var ToolSchema = object4({
   description: string2().optional(),
   inputSchema: object4({
     type: literal("object"),
-    properties: record4(string2(), JSONValueSchema).optional(),
+    properties: record5(string2(), JSONValueSchema).optional(),
     required: array4(string2()).optional()
   }).catchall(unknown()),
   outputSchema: looseObject({ $schema: string2().optional() }).optional(),
   annotations: ToolAnnotationsSchema.optional(),
   execution: ToolExecutionSchema.optional(),
-  _meta: record4(string2(), unknown()).optional()
+  _meta: record5(string2(), unknown()).optional()
 });
 var ListToolsRequestSchema = PaginatedRequestSchema.extend({ method: literal("tools/list") });
 var ListToolsResultSchema = PaginatedResultSchema.extend({ tools: array4(ToolSchema) });
@@ -45876,7 +50023,7 @@ var CallToolResultSchema = ResultSchema.extend({
 var CompatibilityCallToolResultSchema = CallToolResultSchema.or(ResultSchema.extend({ toolResult: unknown() }));
 var CallToolRequestParamsSchema = TaskAugmentedRequestParamsSchema.extend({
   name: string2(),
-  arguments: record4(string2(), unknown()).optional()
+  arguments: record5(string2(), unknown()).optional()
 });
 var CallToolRequestSchema = RequestSchema.extend({
   method: literal("tools/call"),
@@ -45932,7 +50079,7 @@ var ToolResultContentSchema = object4({
   content: array4(ContentBlockSchema),
   structuredContent: unknown().optional(),
   isError: boolean2().optional(),
-  _meta: record4(string2(), unknown()).optional()
+  _meta: record5(string2(), unknown()).optional()
 });
 var SamplingContentSchema = discriminatedUnion("type", [
   TextContentSchema,
@@ -45949,7 +50096,7 @@ var SamplingMessageContentBlockSchema = discriminatedUnion("type", [
 var SamplingMessageSchema = object4({
   role: RoleSchema,
   content: union([SamplingMessageContentBlockSchema, array4(SamplingMessageContentBlockSchema)]),
-  _meta: record4(string2(), unknown()).optional()
+  _meta: record5(string2(), unknown()).optional()
 });
 var CreateMessageRequestParamsSchema = TaskAugmentedRequestParamsSchema.extend({
   messages: array4(SamplingMessageSchema),
@@ -46087,7 +50234,7 @@ var ElicitRequestFormParamsSchema = TaskAugmentedRequestParamsSchema.extend({
   message: string2(),
   requestedSchema: object4({
     type: literal("object"),
-    properties: record4(string2(), PrimitiveSchemaDefinitionSchema),
+    properties: record5(string2(), PrimitiveSchemaDefinitionSchema),
     required: array4(string2()).optional()
   }).catchall(unknown())
 });
@@ -46113,7 +50260,7 @@ var ElicitResultSchema = ResultSchema.extend({
     "decline",
     "cancel"
   ]),
-  content: preprocess((val) => val === null ? void 0 : val, record4(string2(), union([
+  content: preprocess((val) => val === null ? void 0 : val, record5(string2(), union([
     string2(),
     number2(),
     boolean2(),
@@ -46134,7 +50281,7 @@ var CompleteRequestParamsSchema = BaseRequestParamsSchema.extend({
     name: string2(),
     value: string2()
   }),
-  context: object4({ arguments: record4(string2(), string2()).optional() }).optional()
+  context: object4({ arguments: record5(string2(), string2()).optional() }).optional()
 });
 var CompleteRequestSchema = RequestSchema.extend({
   method: literal("completion/complete"),
@@ -46148,7 +50295,7 @@ var CompleteResultSchema = ResultSchema.extend({ completion: looseObject({
 var RootSchema = object4({
   uri: string2().startsWith("file://"),
   name: string2().optional(),
-  _meta: record4(string2(), unknown()).optional()
+  _meta: record5(string2(), unknown()).optional()
 });
 var ListRootsRequestSchema = RequestSchema.extend({
   method: literal("roots/list"),
@@ -46647,10 +50794,10 @@ function build$1() {
     number2(),
     boolean2(),
     _null3(),
-    record4(string2(), JSONValueSchema$1),
+    record5(string2(), JSONValueSchema$1),
     array4(JSONValueSchema$1)
   ]));
-  const JSONObjectSchema$1 = record4(string2(), JSONValueSchema$1);
+  const JSONObjectSchema$1 = record5(string2(), JSONValueSchema$1);
   const ProgressTokenSchema$1 = union([string2(), number2().int()]);
   const CursorSchema$1 = string2();
   const TaskMetadataSchema$1 = object4({ ttl: number2().optional() });
@@ -46721,7 +50868,7 @@ function build$1() {
     requests: looseObject({ tools: looseObject({ call: JSONObjectSchema$1.optional() }).optional() }).optional()
   });
   const ClientCapabilitiesSchema$1 = object4({
-    experimental: record4(string2(), JSONObjectSchema$1).optional(),
+    experimental: record5(string2(), JSONObjectSchema$1).optional(),
     sampling: object4({
       context: JSONObjectSchema$1.optional(),
       tools: JSONObjectSchema$1.optional()
@@ -46729,7 +50876,7 @@ function build$1() {
     elicitation: ElicitationCapabilitySchema2.optional(),
     roots: object4({ listChanged: boolean2().optional() }).optional(),
     tasks: ClientTasksCapabilitySchema$1.optional(),
-    extensions: record4(string2(), JSONObjectSchema$1).optional()
+    extensions: record5(string2(), JSONObjectSchema$1).optional()
   });
   const InitializeRequestParamsSchema$1 = BaseRequestParamsSchema$1.extend({
     protocolVersion: string2(),
@@ -46741,7 +50888,7 @@ function build$1() {
     params: InitializeRequestParamsSchema$1
   });
   const ServerCapabilitiesSchema$1 = object4({
-    experimental: record4(string2(), JSONObjectSchema$1).optional(),
+    experimental: record5(string2(), JSONObjectSchema$1).optional(),
     logging: JSONObjectSchema$1.optional(),
     completions: JSONObjectSchema$1.optional(),
     prompts: object4({ listChanged: boolean2().optional() }).optional(),
@@ -46751,7 +50898,7 @@ function build$1() {
     }).optional(),
     tools: object4({ listChanged: boolean2().optional() }).optional(),
     tasks: ServerTasksCapabilitySchema$1.optional(),
-    extensions: record4(string2(), JSONObjectSchema$1).optional()
+    extensions: record5(string2(), JSONObjectSchema$1).optional()
   });
   const InitializeResultSchema$1 = ResultSchema$1.extend({
     protocolVersion: string2(),
@@ -46787,7 +50934,7 @@ function build$1() {
   const ResourceContentsSchema$1 = object4({
     uri: string2(),
     mimeType: optional2(string2()),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const TextResourceContentsSchema$1 = ResourceContentsSchema$1.extend({ text: string2() });
   const Base64Schema2 = string2().refine((val) => {
@@ -46870,7 +51017,7 @@ function build$1() {
   const ListPromptsResultSchema$1 = PaginatedResultSchema$1.extend({ prompts: array4(PromptSchema$1) });
   const GetPromptRequestParamsSchema$1 = BaseRequestParamsSchema$1.extend({
     name: string2(),
-    arguments: record4(string2(), string2()).optional()
+    arguments: record5(string2(), string2()).optional()
   });
   const GetPromptRequestSchema$1 = RequestSchema$1.extend({
     method: literal("prompts/get"),
@@ -46880,34 +51027,34 @@ function build$1() {
     type: literal("text"),
     text: string2(),
     annotations: AnnotationsSchema$1.optional(),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const ImageContentSchema$1 = object4({
     type: literal("image"),
     data: Base64Schema2,
     mimeType: string2(),
     annotations: AnnotationsSchema$1.optional(),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const AudioContentSchema$1 = object4({
     type: literal("audio"),
     data: Base64Schema2,
     mimeType: string2(),
     annotations: AnnotationsSchema$1.optional(),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const ToolUseContentSchema$1 = object4({
     type: literal("tool_use"),
     name: string2(),
     id: string2(),
-    input: record4(string2(), unknown()),
-    _meta: record4(string2(), unknown()).optional()
+    input: record5(string2(), unknown()),
+    _meta: record5(string2(), unknown()).optional()
   });
   const EmbeddedResourceSchema$1 = object4({
     type: literal("resource"),
     resource: union([TextResourceContentsSchema$1, BlobResourceContentsSchema$1]),
     annotations: AnnotationsSchema$1.optional(),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const ResourceLinkSchema$1 = ResourceSchema$1.extend({ type: literal("resource_link") });
   const ContentBlockSchema$1 = union([
@@ -46947,28 +51094,28 @@ function build$1() {
     description: string2().optional(),
     inputSchema: object4({
       type: literal("object"),
-      properties: record4(string2(), JSONValueSchema$1).optional(),
+      properties: record5(string2(), JSONValueSchema$1).optional(),
       required: array4(string2()).optional()
     }).catchall(unknown()),
     outputSchema: object4({
       type: literal("object"),
-      properties: record4(string2(), JSONValueSchema$1).optional(),
+      properties: record5(string2(), JSONValueSchema$1).optional(),
       required: array4(string2()).optional()
     }).catchall(unknown()).optional(),
     annotations: ToolAnnotationsSchema$1.optional(),
     execution: ToolExecutionSchema$1.optional(),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const ListToolsRequestSchema$1 = PaginatedRequestSchema$1.extend({ method: literal("tools/list") });
   const ListToolsResultSchema$1 = PaginatedResultSchema$1.extend({ tools: array4(ToolSchema$1) });
   const CallToolResultSchema$1 = ResultSchema$1.extend({
     content: array4(ContentBlockSchema$1),
-    structuredContent: record4(string2(), unknown()).optional(),
+    structuredContent: record5(string2(), unknown()).optional(),
     isError: boolean2().optional()
   });
   const CallToolRequestParamsSchema$1 = TaskAugmentedRequestParamsSchema$1.extend({
     name: string2(),
-    arguments: record4(string2(), unknown()).optional()
+    arguments: record5(string2(), unknown()).optional()
   });
   const CallToolRequestSchema$1 = RequestSchema$1.extend({
     method: literal("tools/call"),
@@ -47020,7 +51167,7 @@ function build$1() {
     content: array4(ContentBlockSchema$1),
     structuredContent: object4({}).loose().optional(),
     isError: boolean2().optional(),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const SamplingContentSchema$1 = discriminatedUnion("type", [
     TextContentSchema$1,
@@ -47037,7 +51184,7 @@ function build$1() {
   const SamplingMessageSchema$1 = object4({
     role: RoleSchema$1,
     content: union([SamplingMessageContentBlockSchema$1, array4(SamplingMessageContentBlockSchema$1)]),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const CreateMessageRequestParamsSchema$1 = TaskAugmentedRequestParamsSchema$1.extend({
     messages: array4(SamplingMessageSchema$1),
@@ -47175,7 +51322,7 @@ function build$1() {
     message: string2(),
     requestedSchema: object4({
       type: literal("object"),
-      properties: record4(string2(), PrimitiveSchemaDefinitionSchema$1),
+      properties: record5(string2(), PrimitiveSchemaDefinitionSchema$1),
       required: array4(string2()).optional()
     }).catchall(unknown())
   });
@@ -47201,7 +51348,7 @@ function build$1() {
       "decline",
       "cancel"
     ]),
-    content: preprocess((val) => val === null ? void 0 : val, record4(string2(), union([
+    content: preprocess((val) => val === null ? void 0 : val, record5(string2(), union([
       string2(),
       number2(),
       boolean2(),
@@ -47222,7 +51369,7 @@ function build$1() {
       name: string2(),
       value: string2()
     }),
-    context: object4({ arguments: record4(string2(), string2()).optional() }).optional()
+    context: object4({ arguments: record5(string2(), string2()).optional() }).optional()
   });
   const CompleteRequestSchema$1 = RequestSchema$1.extend({
     method: literal("completion/complete"),
@@ -47236,7 +51383,7 @@ function build$1() {
   const RootSchema$1 = object4({
     uri: string2().startsWith("file://"),
     name: string2().optional(),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const ListRootsRequestSchema$1 = RequestSchema$1.extend({
     method: literal("roots/list"),
@@ -47796,10 +51943,10 @@ function build() {
     number2(),
     boolean2(),
     _null3(),
-    record4(string2(), JSONValueSchema$1),
+    record5(string2(), JSONValueSchema$1),
     array4(JSONValueSchema$1)
   ]));
-  const JSONObjectSchema$1 = record4(string2(), JSONValueSchema$1);
+  const JSONObjectSchema$1 = record5(string2(), JSONValueSchema$1);
   const ProgressTokenSchema$1 = union([string2(), number2().int()]);
   const CursorSchema$1 = string2();
   const RequestIdSchema$1 = union([string2(), number2().int()]);
@@ -47875,7 +52022,7 @@ function build() {
     requests: looseObject({ tools: looseObject({ call: JSONObjectSchema$1.optional() }).optional() }).optional()
   });
   const ClientCapabilitiesSchema$1 = object4({
-    experimental: record4(string2(), JSONObjectSchema$1).optional(),
+    experimental: record5(string2(), JSONObjectSchema$1).optional(),
     sampling: object4({
       context: JSONObjectSchema$1.optional(),
       tools: JSONObjectSchema$1.optional()
@@ -47883,10 +52030,10 @@ function build() {
     elicitation: ElicitationCapabilitySchema2.optional(),
     roots: object4({ listChanged: boolean2().optional() }).optional(),
     tasks: ClientTasksCapabilitySchema$1.optional(),
-    extensions: record4(string2(), JSONObjectSchema$1).optional()
+    extensions: record5(string2(), JSONObjectSchema$1).optional()
   });
   const ServerCapabilitiesSchema$1 = object4({
-    experimental: record4(string2(), JSONObjectSchema$1).optional(),
+    experimental: record5(string2(), JSONObjectSchema$1).optional(),
     logging: JSONObjectSchema$1.optional(),
     completions: JSONObjectSchema$1.optional(),
     prompts: object4({ listChanged: boolean2().optional() }).optional(),
@@ -47896,7 +52043,7 @@ function build() {
     }).optional(),
     tools: object4({ listChanged: boolean2().optional() }).optional(),
     tasks: ServerTasksCapabilitySchema$1.optional(),
-    extensions: record4(string2(), JSONObjectSchema$1).optional()
+    extensions: record5(string2(), JSONObjectSchema$1).optional()
   });
   const ProgressSchema$1 = object4({
     progress: number2(),
@@ -47924,7 +52071,7 @@ function build() {
   const ResourceContentsSchema$1 = object4({
     uri: string2(),
     mimeType: optional2(string2()),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const TextResourceContentsSchema$1 = ResourceContentsSchema$1.extend({ text: string2() });
   const BlobResourceContentsSchema$1 = ResourceContentsSchema$1.extend({ blob: Base64Schema2 });
@@ -47981,34 +52128,34 @@ function build() {
     type: literal("text"),
     text: string2(),
     annotations: AnnotationsSchema$1.optional(),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const ImageContentSchema$1 = object4({
     type: literal("image"),
     data: Base64Schema2,
     mimeType: string2(),
     annotations: AnnotationsSchema$1.optional(),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const AudioContentSchema$1 = object4({
     type: literal("audio"),
     data: Base64Schema2,
     mimeType: string2(),
     annotations: AnnotationsSchema$1.optional(),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const ToolUseContentSchema$1 = object4({
     type: literal("tool_use"),
     name: string2(),
     id: string2(),
-    input: record4(string2(), unknown()),
-    _meta: record4(string2(), unknown()).optional()
+    input: record5(string2(), unknown()),
+    _meta: record5(string2(), unknown()).optional()
   });
   const EmbeddedResourceSchema$1 = object4({
     type: literal("resource"),
     resource: union([TextResourceContentsSchema$1, BlobResourceContentsSchema$1]),
     annotations: AnnotationsSchema$1.optional(),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const ResourceLinkSchema$1 = ResourceSchema$1.extend({ type: literal("resource_link") });
   const ContentBlockSchema$1 = union([
@@ -48140,7 +52287,7 @@ function build() {
     message: string2(),
     requestedSchema: object4({
       type: literal("object"),
-      properties: record4(string2(), PrimitiveSchemaDefinitionSchema$1),
+      properties: record5(string2(), PrimitiveSchemaDefinitionSchema$1),
       required: array4(string2()).optional()
     }).catchall(unknown())
   });
@@ -48155,7 +52302,7 @@ function build() {
   const RootSchema$1 = object4({
     uri: string2().startsWith("file://"),
     name: string2().optional(),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const sharedClientCapabilityShape = ClientCapabilitiesSchema$1.shape;
   const ClientCapabilities2026Schema = object4({
@@ -48192,7 +52339,7 @@ function build() {
     }),
     outputSchema: looseObject({ $schema: string2().optional() }).optional(),
     annotations: ToolAnnotationsSchema$1.optional(),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const ToolResultContentSchema$1 = object4({
     type: literal("tool_result"),
@@ -48200,7 +52347,7 @@ function build() {
     content: array4(ContentBlockSchema$1),
     structuredContent: unknown().optional(),
     isError: boolean2().optional(),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const SamplingMessageContentBlockSchema$1 = union([
     TextContentSchema$1,
@@ -48212,7 +52359,7 @@ function build() {
   const SamplingMessageSchema$1 = object4({
     role: RoleSchema$1,
     content: union([SamplingMessageContentBlockSchema$1, array4(SamplingMessageContentBlockSchema$1)]),
-    _meta: record4(string2(), unknown()).optional()
+    _meta: record5(string2(), unknown()).optional()
   });
   const ResultTypeSchema = string2();
   const ResultMetaSchema = looseObject({ [SERVER_INFO_META_KEY]: ImplementationSchema$1.optional().catch(void 0) });
@@ -48302,7 +52449,7 @@ function build() {
   });
   const ListRootsRequestSchema$1 = object4({
     method: literal("roots/list"),
-    params: object4({ _meta: record4(string2(), unknown()).optional() }).optional()
+    params: object4({ _meta: record5(string2(), unknown()).optional() }).optional()
   });
   const CreateMessageResultSchema$1 = object4({
     ...SamplingMessageSchema$1.shape,
@@ -48316,7 +52463,7 @@ function build() {
       "decline",
       "cancel"
     ]),
-    content: record4(string2(), union([
+    content: record5(string2(), union([
       string2(),
       number2(),
       boolean2(),
@@ -48343,8 +52490,8 @@ function build() {
     ListRootsResultSchema$1,
     ElicitResultSchema$1
   ]);
-  const InputRequestsSchema = record4(string2(), InputRequestSchema);
-  const InputResponsesSchema = record4(string2(), InputResponseSchema);
+  const InputRequestsSchema = record5(string2(), InputRequestSchema);
+  const InputResponsesSchema = record5(string2(), InputResponseSchema);
   const InputRequiredResultSchema = wireResult({
     inputRequests: InputRequestsSchema.optional(),
     requestState: string2().optional()
@@ -48378,7 +52525,7 @@ function build() {
   }
   const callToolParamsShape = {
     name: string2(),
-    arguments: record4(string2(), unknown()).optional(),
+    arguments: record5(string2(), unknown()).optional(),
     ...retryParamsShape
   };
   const paginatedParamsShape = { cursor: CursorSchema$1.optional() };
@@ -48387,7 +52534,7 @@ function build() {
   const ListPromptsRequestSchema$1 = wireRequest("prompts/list", paginatedParamsShape);
   const GetPromptRequestSchema$1 = wireRequest("prompts/get", {
     name: string2(),
-    arguments: record4(string2(), string2()).optional(),
+    arguments: record5(string2(), string2()).optional(),
     ...retryParamsShape
   });
   const ListResourcesRequestSchema$1 = wireRequest("resources/list", paginatedParamsShape);
@@ -48402,7 +52549,7 @@ function build() {
       name: string2(),
       value: string2()
     }),
-    context: object4({ arguments: record4(string2(), string2()).optional() }).optional()
+    context: object4({ arguments: record5(string2(), string2()).optional() }).optional()
   };
   const CompleteRequestSchema$1 = wireRequest("completion/complete", completeParamsShape);
   const DiscoverRequestSchema$1 = wireRequest("server/discover", {});
@@ -48424,7 +52571,7 @@ function build() {
     "tools/list": dispatchRequest("tools/list", paginatedParamsShape),
     "prompts/get": dispatchRequest("prompts/get", {
       name: string2(),
-      arguments: record4(string2(), string2()).optional()
+      arguments: record5(string2(), string2()).optional()
     }),
     "prompts/list": dispatchRequest("prompts/list", paginatedParamsShape),
     "resources/list": dispatchRequest("resources/list", paginatedParamsShape),
@@ -49841,14 +53988,14 @@ function inputRequiredRoundsExceededMessage(method, maxRounds) {
   return `Multi-round-trip request '${method}' still required input after ${maxRounds} rounds (inputRequired.maxRounds)`;
 }
 function sleep2(ms, signal) {
-  return new Promise((resolve22, reject) => {
+  return new Promise((resolve23, reject) => {
     if (signal?.aborted) {
       reject(signal.reason instanceof SdkError ? signal.reason : new SdkError(SdkErrorCode.RequestTimeout, String(signal.reason)));
       return;
     }
     const timer = setTimeout(() => {
       signal?.removeEventListener("abort", onAbort);
-      resolve22();
+      resolve23();
     }, ms);
     const onAbort = () => {
       clearTimeout(timer);
@@ -50647,7 +54794,7 @@ var Protocol = class {
     const flowStartedAt = Date.now();
     let onAbort;
     let cleanupMessageId;
-    return new Promise((resolve22, reject) => {
+    return new Promise((resolve23, reject) => {
       const earlyReject = (error62) => {
         reject(error62);
       };
@@ -50716,7 +54863,7 @@ var Protocol = class {
         }
         if (decoded.kind === "invalid") return reject(decoded.error);
         if (decoded.kind === "input_required") {
-          if (options?.allowInputRequired === true) return resolve22(manualInputRequiredValue(decoded));
+          if (options?.allowInputRequired === true) return resolve23(manualInputRequiredValue(decoded));
           const flow = {
             codec: codec2,
             request,
@@ -50728,11 +54875,11 @@ var Protocol = class {
               params
             }, resultSchema, legOptions)
           };
-          return resolve22(this._resolveNonCompleteResult(decoded, flow));
+          return resolve23(this._resolveNonCompleteResult(decoded, flow));
         }
         const result = decoded.result;
         validateStandardSchema(resultSchema, result).then((parseResult) => {
-          if (parseResult.success) resolve22(parseResult.data);
+          if (parseResult.success) resolve23(parseResult.data);
           else reject(new SdkError(SdkErrorCode.InvalidResult, `Invalid result for ${request.method}: ${parseResult.error}`));
         }, reject);
       });
@@ -50887,28 +55034,28 @@ function mergeCapabilities(base, additional) {
   const result = { ...base };
   for (const key in additional) {
     const k = key;
-    const addValue = additional[k];
-    if (addValue === void 0) continue;
+    const addValue2 = additional[k];
+    if (addValue2 === void 0) continue;
     const baseValue = result[k];
-    result[k] = isPlainObject$1(baseValue) && isPlainObject$1(addValue) ? {
+    result[k] = isPlainObject$1(baseValue) && isPlainObject$1(addValue2) ? {
       ...baseValue,
-      ...addValue
-    } : addValue;
+      ...addValue2
+    } : addValue2;
   }
   return result;
 }
-function isPlainObject3(value) {
+function isPlainObject4(value) {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 function partitionInputResponses(inputResponses) {
   const accepted = {};
   const droppedKeys = [];
-  if (!isPlainObject3(inputResponses)) return {
+  if (!isPlainObject4(inputResponses)) return {
     accepted,
     droppedKeys
   };
   for (const [key, entry] of Object.entries(inputResponses)) {
-    if (!isPlainObject3(entry) || "method" in entry || "result" in entry) {
+    if (!isPlainObject4(entry) || "method" in entry || "result" in entry) {
       droppedKeys.push(key);
       continue;
     }
@@ -51456,9 +55603,9 @@ var require_codegen = /* @__PURE__ */ __commonJSMin(((exports) => {
       const rhs = this.rhs === void 0 ? "" : ` = ${this.rhs}`;
       return `${varKind} ${this.name}${rhs};` + _n;
     }
-    optimizeNames(names, constants15) {
+    optimizeNames(names, constants16) {
       if (!names[this.name.str]) return;
-      if (this.rhs) this.rhs = optimizeExpr(this.rhs, names, constants15);
+      if (this.rhs) this.rhs = optimizeExpr(this.rhs, names, constants16);
       return this;
     }
     get names() {
@@ -51475,9 +55622,9 @@ var require_codegen = /* @__PURE__ */ __commonJSMin(((exports) => {
     render({ _n }) {
       return `${this.lhs} = ${this.rhs};` + _n;
     }
-    optimizeNames(names, constants15) {
+    optimizeNames(names, constants16) {
       if (this.lhs instanceof code_1.Name && !names[this.lhs.str] && !this.sideEffects) return;
-      this.rhs = optimizeExpr(this.rhs, names, constants15);
+      this.rhs = optimizeExpr(this.rhs, names, constants16);
       return this;
     }
     get names() {
@@ -51536,8 +55683,8 @@ var require_codegen = /* @__PURE__ */ __commonJSMin(((exports) => {
     optimizeNodes() {
       return `${this.code}` ? this : void 0;
     }
-    optimizeNames(names, constants15) {
-      this.code = optimizeExpr(this.code, names, constants15);
+    optimizeNames(names, constants16) {
+      this.code = optimizeExpr(this.code, names, constants16);
       return this;
     }
     get names() {
@@ -51563,12 +55710,12 @@ var require_codegen = /* @__PURE__ */ __commonJSMin(((exports) => {
       }
       return nodes.length > 0 ? this : void 0;
     }
-    optimizeNames(names, constants15) {
+    optimizeNames(names, constants16) {
       const { nodes } = this;
       let i = nodes.length;
       while (i--) {
         const n = nodes[i];
-        if (n.optimizeNames(names, constants15)) continue;
+        if (n.optimizeNames(names, constants16)) continue;
         subtractNames(names, n.names);
         nodes.splice(i, 1);
       }
@@ -51615,11 +55762,11 @@ var require_codegen = /* @__PURE__ */ __commonJSMin(((exports) => {
       if (cond === false || !this.nodes.length) return void 0;
       return this;
     }
-    optimizeNames(names, constants15) {
+    optimizeNames(names, constants16) {
       var _a3;
-      this.else = (_a3 = this.else) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names, constants15);
-      if (!(super.optimizeNames(names, constants15) || this.else)) return;
-      this.condition = optimizeExpr(this.condition, names, constants15);
+      this.else = (_a3 = this.else) === null || _a3 === void 0 ? void 0 : _a3.optimizeNames(names, constants16);
+      if (!(super.optimizeNames(names, constants16) || this.else)) return;
+      this.condition = optimizeExpr(this.condition, names, constants16);
       return this;
     }
     get names() {
@@ -51641,9 +55788,9 @@ var require_codegen = /* @__PURE__ */ __commonJSMin(((exports) => {
     render(opts) {
       return `for(${this.iteration})` + super.render(opts);
     }
-    optimizeNames(names, constants15) {
-      if (!super.optimizeNames(names, constants15)) return;
-      this.iteration = optimizeExpr(this.iteration, names, constants15);
+    optimizeNames(names, constants16) {
+      if (!super.optimizeNames(names, constants16)) return;
+      this.iteration = optimizeExpr(this.iteration, names, constants16);
       return this;
     }
     get names() {
@@ -51678,9 +55825,9 @@ var require_codegen = /* @__PURE__ */ __commonJSMin(((exports) => {
     render(opts) {
       return `for(${this.varKind} ${this.name} ${this.loop} ${this.iterable})` + super.render(opts);
     }
-    optimizeNames(names, constants15) {
-      if (!super.optimizeNames(names, constants15)) return;
-      this.iterable = optimizeExpr(this.iterable, names, constants15);
+    optimizeNames(names, constants16) {
+      if (!super.optimizeNames(names, constants16)) return;
+      this.iterable = optimizeExpr(this.iterable, names, constants16);
       return this;
     }
     get names() {
@@ -51719,11 +55866,11 @@ var require_codegen = /* @__PURE__ */ __commonJSMin(((exports) => {
       (_b = this.finally) === null || _b === void 0 || _b.optimizeNodes();
       return this;
     }
-    optimizeNames(names, constants15) {
+    optimizeNames(names, constants16) {
       var _a3, _b;
-      super.optimizeNames(names, constants15);
-      (_a3 = this.catch) === null || _a3 === void 0 || _a3.optimizeNames(names, constants15);
-      (_b = this.finally) === null || _b === void 0 || _b.optimizeNames(names, constants15);
+      super.optimizeNames(names, constants16);
+      (_a3 = this.catch) === null || _a3 === void 0 || _a3.optimizeNames(names, constants16);
+      (_b = this.finally) === null || _b === void 0 || _b.optimizeNames(names, constants16);
       return this;
     }
     get names() {
@@ -51972,7 +56119,7 @@ var require_codegen = /* @__PURE__ */ __commonJSMin(((exports) => {
   function addExprNames(names, from) {
     return from instanceof code_1._CodeOrName ? addNames(names, from.names) : names;
   }
-  function optimizeExpr(expr, names, constants15) {
+  function optimizeExpr(expr, names, constants16) {
     if (expr instanceof code_1.Name) return replaceName(expr);
     if (!canOptimize(expr)) return expr;
     return new code_1._Code(expr._items.reduce((items, c) => {
@@ -51982,13 +56129,13 @@ var require_codegen = /* @__PURE__ */ __commonJSMin(((exports) => {
       return items;
     }, []));
     function replaceName(n) {
-      const c = constants15[n.str];
+      const c = constants16[n.str];
       if (c === void 0 || names[n.str] !== 1) return n;
       delete names[n.str];
       return c;
     }
     function canOptimize(e) {
-      return e instanceof code_1._Code && e._items.some((c) => c instanceof code_1.Name && names[c.str] === 1 && constants15[c.str] !== void 0);
+      return e instanceof code_1._Code && e._items.some((c) => c instanceof code_1.Name && names[c.str] === 1 && constants16[c.str] !== void 0);
     }
   }
   function subtractNames(names, from) {
@@ -53648,7 +57795,7 @@ var require_compile = /* @__PURE__ */ __commonJSMin(((exports) => {
     ref = (0, resolve_1.resolveUrl)(this.opts.uriResolver, baseId, ref);
     const schOrFunc = root.refs[ref];
     if (schOrFunc) return schOrFunc;
-    let _sch = resolve22.call(this, root, ref);
+    let _sch = resolve23.call(this, root, ref);
     if (_sch === void 0) {
       const schema = (_a3 = root.localRefs) === null || _a3 === void 0 ? void 0 : _a3[ref];
       const { schemaId } = this.opts;
@@ -53674,7 +57821,7 @@ var require_compile = /* @__PURE__ */ __commonJSMin(((exports) => {
   function sameSchemaEnv(s1, s2) {
     return s1.schema === s2.schema && s1.root === s2.root && s1.baseId === s2.baseId;
   }
-  function resolve22(root, ref) {
+  function resolve23(root, ref) {
     let sch;
     while (typeof (sch = this.refs[ref]) == "string") ref = sch;
     return sch || this.schemas[ref] || resolveSchema.call(this, root, ref);
@@ -54124,47 +58271,47 @@ var require_fast_uri = /* @__PURE__ */ __commonJSMin(((exports, module) => {
     else if (typeof uri === "object") uri = parse4(serialize2(uri, options), options);
     return uri;
   }
-  function resolve22(baseURI, relativeURI, options) {
+  function resolve23(baseURI, relativeURI, options) {
     const schemelessOptions = options ? Object.assign({ scheme: "null" }, options) : { scheme: "null" };
     const resolved = resolveComponent(parse4(baseURI, schemelessOptions), parse4(relativeURI, schemelessOptions), schemelessOptions, true);
     schemelessOptions.skipEscape = true;
     return serialize2(resolved, schemelessOptions);
   }
-  function resolveComponent(base, relative11, options, skipNormalization) {
+  function resolveComponent(base, relative12, options, skipNormalization) {
     const target = {};
     if (!skipNormalization) {
       base = parse4(serialize2(base, options), options);
-      relative11 = parse4(serialize2(relative11, options), options);
+      relative12 = parse4(serialize2(relative12, options), options);
     }
     options = options || {};
-    if (!options.tolerant && relative11.scheme) {
-      target.scheme = relative11.scheme;
-      target.userinfo = relative11.userinfo;
-      target.host = relative11.host;
-      target.port = relative11.port;
-      target.path = removeDotSegments(relative11.path || "");
-      target.query = relative11.query;
+    if (!options.tolerant && relative12.scheme) {
+      target.scheme = relative12.scheme;
+      target.userinfo = relative12.userinfo;
+      target.host = relative12.host;
+      target.port = relative12.port;
+      target.path = removeDotSegments(relative12.path || "");
+      target.query = relative12.query;
     } else {
-      if (relative11.userinfo !== void 0 || relative11.host !== void 0 || relative11.port !== void 0) {
-        target.userinfo = relative11.userinfo;
-        target.host = relative11.host;
-        target.port = relative11.port;
-        target.path = removeDotSegments(relative11.path || "");
-        target.query = relative11.query;
+      if (relative12.userinfo !== void 0 || relative12.host !== void 0 || relative12.port !== void 0) {
+        target.userinfo = relative12.userinfo;
+        target.host = relative12.host;
+        target.port = relative12.port;
+        target.path = removeDotSegments(relative12.path || "");
+        target.query = relative12.query;
       } else {
-        if (!relative11.path) {
+        if (!relative12.path) {
           target.path = base.path;
-          if (relative11.query !== void 0) target.query = relative11.query;
+          if (relative12.query !== void 0) target.query = relative12.query;
           else target.query = base.query;
         } else {
-          if (relative11.path[0] === "/") target.path = removeDotSegments(relative11.path);
+          if (relative12.path[0] === "/") target.path = removeDotSegments(relative12.path);
           else {
-            if ((base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0) && !base.path) target.path = "/" + relative11.path;
-            else if (!base.path) target.path = relative11.path;
-            else target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative11.path;
+            if ((base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0) && !base.path) target.path = "/" + relative12.path;
+            else if (!base.path) target.path = relative12.path;
+            else target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative12.path;
             target.path = removeDotSegments(target.path);
           }
-          target.query = relative11.query;
+          target.query = relative12.query;
         }
         target.userinfo = base.userinfo;
         target.host = base.host;
@@ -54172,7 +58319,7 @@ var require_fast_uri = /* @__PURE__ */ __commonJSMin(((exports, module) => {
       }
       target.scheme = base.scheme;
     }
-    target.fragment = relative11.fragment;
+    target.fragment = relative12.fragment;
     return target;
   }
   function equal(uriA, uriB, options) {
@@ -54298,7 +58445,7 @@ var require_fast_uri = /* @__PURE__ */ __commonJSMin(((exports, module) => {
   const fastUri = {
     SCHEMES,
     normalize,
-    resolve: resolve22,
+    resolve: resolve23,
     resolveComponent,
     equal,
     serialize: serialize2,
@@ -54696,7 +58843,7 @@ var require_core$3 = /* @__PURE__ */ __commonJSMin(((exports) => {
     }
     errorsText(errors = this.errors, { separator = ", ", dataVar = "data" } = {}) {
       if (!errors || errors.length === 0) return "No errors";
-      return errors.map((e) => `${dataVar}${e.instancePath} ${e.message}`).reduce((text4, msg) => text4 + separator + msg);
+      return errors.map((e) => `${dataVar}${e.instancePath} ${e.message}`).reduce((text5, msg) => text5 + separator + msg);
     }
     $dataMetaSchema(metaSchema, keywordsJsonPointers) {
       const rules = this.RULES.all;
@@ -57720,10 +61867,10 @@ var require__2020 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 var require_formats = /* @__PURE__ */ __commonJSMin(((exports) => {
   Object.defineProperty(exports, "__esModule", { value: true });
   exports.formatNames = exports.fastFormats = exports.fullFormats = void 0;
-  function fmtDef(validate2, compare2) {
+  function fmtDef(validate2, compare3) {
     return {
       validate: validate2,
-      compare: compare2
+      compare: compare3
     };
   }
   exports.fullFormats = {
@@ -59763,7 +63910,7 @@ var StdioServerTransport = class {
   }
   send(message) {
     if (this._closed) return Promise.reject(/* @__PURE__ */ new Error("StdioServerTransport is closed"));
-    return new Promise((resolve22, reject) => {
+    return new Promise((resolve23, reject) => {
       const json2 = serializeMessage(message);
       let settled = false;
       const onError = (error62) => {
@@ -59778,14 +63925,14 @@ var StdioServerTransport = class {
         settled = true;
         this._stdout.off("error", onError);
         this._stdout.off("drain", onDrain);
-        resolve22();
+        resolve23();
       };
       this._stdout.once("error", onError);
       if (this._stdout.write(json2)) {
         if (settled) return;
         settled = true;
         this._stdout.off("error", onError);
-        resolve22();
+        resolve23();
       } else if (!settled) this._stdout.once("drain", onDrain);
     });
   }
@@ -59839,14 +63986,14 @@ var StdioConnectionChannel = class {
   */
   async whenRequestsAnswered(timeoutMs) {
     if (this._closed || this._pendingRequests.size === 0) return true;
-    return await new Promise((resolve22) => {
+    return await new Promise((resolve23) => {
       const waiter = () => {
         clearTimeout(timer);
-        resolve22(true);
+        resolve23(true);
       };
       const timer = setTimeout(() => {
         this._drainWaiters = this._drainWaiters.filter((pending) => pending !== waiter);
-        resolve22(false);
+        resolve23(false);
       }, timeoutMs);
       this._drainWaiters.push(waiter);
     });
@@ -60188,25 +64335,25 @@ function toError(value) {
 }
 
 // packages/cli/dist/mcp.js
-import { createHash as createHash13, createHmac as createHmac2, randomBytes as randomBytes3, timingSafeEqual as timingSafeEqual2 } from "node:crypto";
+import { createHash as createHash14, createHmac as createHmac2, randomBytes as randomBytes3, timingSafeEqual as timingSafeEqual2 } from "node:crypto";
 import { lstatSync } from "node:fs";
-import { realpath as realpath9 } from "node:fs/promises";
-import { isAbsolute as isAbsolute9, resolve as resolve18 } from "node:path";
+import { realpath as realpath10 } from "node:fs/promises";
+import { isAbsolute as isAbsolute11, resolve as resolve19 } from "node:path";
 
 // packages/cli/dist/service.js
 var import__ = __toESM(require__(), 1);
 import { AsyncLocalStorage as AsyncLocalStorage3 } from "node:async_hooks";
-import { constants as constants14, realpathSync as realpathSync2 } from "node:fs";
-import { cp as cp2, lstat as lstat13, mkdir as mkdir11, open as open13, readFile as readFile14, readdir as readdir9, realpath as realpath7, rm as rm12, stat as stat2 } from "node:fs/promises";
+import { constants as constants15, realpathSync as realpathSync2 } from "node:fs";
+import { cp as cp2, lstat as lstat14, mkdir as mkdir11, open as open14, readFile as readFile14, readdir as readdir9, realpath as realpath8, rm as rm12, stat as stat2 } from "node:fs/promises";
 import { userInfo } from "node:os";
-import { basename as basename4, dirname as dirname11, isAbsolute as isAbsolute7, join as join18, relative as relative7, resolve as resolve16, sep as sep5 } from "node:path";
+import { basename as basename4, dirname as dirname11, isAbsolute as isAbsolute9, join as join19, relative as relative8, resolve as resolve17, sep as sep6 } from "node:path";
 
 // packages/cli/dist/host-profile.js
 import { readFile as readFile13, stat } from "node:fs/promises";
 import { homedir as homedir2, release } from "node:os";
-import { join as join17 } from "node:path";
+import { join as join18 } from "node:path";
 var MAX_COPILOT_CONFIG_BYTES = 1024 * 1024;
-var RELEASE_VERSION = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u;
+var RELEASE_VERSION2 = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u;
 function currentHostEnvironment() {
   return { platform: process.platform, release: release(), env: process.env, homedir: homedir2() };
 }
@@ -60228,7 +64375,7 @@ function isCopilotCliHost(kind) {
 }
 function firstReleaseVersion(output2) {
   for (const match of output2.matchAll(/(?<![\d.])(\d+\.\d+\.\d+)(?![\d-])/gu))
-    if (RELEASE_VERSION.test(match[1]))
+    if (RELEASE_VERSION2.test(match[1]))
       return match[1];
   return void 0;
 }
@@ -60236,7 +64383,7 @@ function copilotHome(host) {
   const configured = host.env.COPILOT_HOME?.trim();
   if (configured !== void 0 && configured.length > 0)
     return configured;
-  return join17(host.homedir, ".copilot");
+  return join18(host.homedir, ".copilot");
 }
 function hostCheck(kind) {
   const sandbox = "client local sandboxing is assumed on and not checked";
@@ -60355,7 +64502,7 @@ async function copilotPluginCheck(kind, inputs) {
   const { name, marketplace } = inputs.plugin;
   const qualified = `${name}@${marketplace}`;
   const home = copilotHome(inputs.host);
-  const configPath = join17(home, "config.json");
+  const configPath = join18(home, "config.json");
   const reinstall = kind === "windows" ? `Close every VS Code window, then run copilot plugin uninstall ${qualified} and copilot plugin install ${qualified}` : `Run copilot plugin uninstall ${qualified}, then copilot plugin install ${qualified}`;
   const installed = await readInstalledPlugins(configPath);
   if (installed === "invalid")
@@ -60901,7 +65048,7 @@ function bindingTrackMatch(value) {
             ownership: "managed",
             dependsOn: resource.dependsOn,
             generatedDependencies: [],
-            sourcePath: "main.bicep"
+            sourcePath: "infra/main.bicep"
           }))
         }
       }).issues);
@@ -61051,7 +65198,11 @@ function gateReady(expectedGate, value) {
   if (context.expectedDependencyHash === void 0 || context.gate.dependencyHash !== context.expectedDependencyHash) {
     issues.push({ path: "/gate/dependencyHash", message: "Gate is not bound to the current review dependency" });
   }
-  if (context.approval.dependencyHash !== context.gate.dependencyHash) {
+  if (context.approval === void 0) {
+    if (!isReadinessGate(context.run.purpose, expectedGate)) {
+      issues.push({ path: "/approval", message: "Human approval evidence is required for this gate" });
+    }
+  } else if (context.approval.dependencyHash !== context.gate.dependencyHash) {
     issues.push({ path: "/approval/dependencyHash", message: "Approval is not bound to the open gate" });
   }
   return issues;
@@ -61090,6 +65241,8 @@ function gateApprovalBindingComplete(value) {
   if (preview === void 0)
     return issue2("/preview", "Current deployment preview is required");
   const approval = context.approval;
+  if (approval === void 0)
+    return issue2("/approval", "Human approval evidence is required");
   const valid = approval.gate === 4 && approval.decision === "approved" && approval.projectId === context.run.projectId && approval.runId === context.run.runId && approval.previewHash === preview.previewHash && approval.dependencyHash === preview.previewHash && approval.writerEpoch === context.run.ownerEpoch && approval.writerTransferClaimHash === context.provedPreviewTransferClaimHash && approval.recipientIdentity === context.expectedApprovalRecipientIdentity && approval.expiresAt !== void 0 && Date.parse(approval.expiresAt) > Date.parse(context.now);
   return valid ? [] : issue2("/approval", "Approval does not completely bind the current preview and writer");
 }
@@ -61219,9 +65372,9 @@ function providerReceiptIncludes(id, context) {
   const evidence = context.executionEvidence;
   return operation !== void 0 && operation.state === "succeeded" && operation.projectId === context.run.projectId && operation.runId === context.run.runId && operation.operation === context.preview.operation && operation.previewHash === context.preview.previewHash && operation.approvalHash === sha256Json(context.approval) && operation.ownerEpoch === context.run.ownerEpoch && evidence?.mode === "native" && evidence.operationId === operation.operationId && evidence.previewHash === context.preview.previewHash && evidence.validatorIds.includes(id);
 }
-function deployBicepStackOwnership(value) {
+function deployBicepAzdExecution(value) {
   const context = deployContext(value);
-  return context.provider === "bicep" && providerReceiptIncludes("deploy:bicep-stack-ownership", context) ? [] : issue2("/executionEvidence", "Native Bicep stack ownership evidence is missing");
+  return context.provider === "bicep" && providerReceiptIncludes("deploy:bicep-azd-execution", context) ? [] : issue2("/executionEvidence", "azd Bicep execution evidence is missing");
 }
 function deployExactSavedPlan(value) {
   const context = deployContext(value);
@@ -61288,11 +65441,11 @@ function diagnosisReadOnly(value) {
       path: "/outputs/diagnosis/operationalHandoff/healthChecks",
       message: "Health checks must reference recorded inventory resources"
     });
-  const unpinned = [...diagnosis.causes, ...checks].flatMap(({ evidenceRefs }) => evidenceRefs).filter((reference) => !context.inputRefs.includes(reference)).sort();
-  if (unpinned.length > 0) {
+  const unpinned2 = [...diagnosis.causes, ...checks].flatMap(({ evidenceRefs }) => evidenceRefs).filter((reference) => !context.inputRefs.includes(reference)).sort();
+  if (unpinned2.length > 0) {
     issues.push({
       path: "/outputs/diagnosis/causes",
-      message: `Diagnosis evidence was not pinned to the task: ${unpinned.join(", ")}`
+      message: `Diagnosis evidence was not pinned to the task: ${unpinned2.join(", ")}`
     });
   }
   return issues;
@@ -61432,7 +65585,7 @@ function registerWorkflowValidators(registry2) {
   registry2.registerHandler("terraform:saved-plan-binding", terraformSavedPlanBinding, "authorization");
   registry2.registerHandler("deploy:exact-approved-operation", deployExactApprovedOperation, "authorization");
   registry2.registerHandler("deploy:stale-writer-rejection", deployStaleWriterRejection, "authorization");
-  registry2.registerHandler("deploy:bicep-stack-ownership", deployBicepStackOwnership, "authorization");
+  registry2.registerHandler("deploy:bicep-azd-execution", deployBicepAzdExecution, "authorization");
   registry2.registerHandler("deploy:exact-saved-plan", deployExactSavedPlan, "authorization");
   registry2.registerHandler("deploy:state-lineage-and-serial", deployStateLineageAndSerial, "authorization");
   registry2.registerHandler("inventory:secret-free", inventorySecretFree);
@@ -61508,21 +65661,21 @@ function repeatGuardError(error62) {
   return error62;
 }
 function isContainedPath(root, destination) {
-  const child = relative7(resolve16(root), resolve16(destination));
-  return child === "" || child !== ".." && !child.startsWith(`..${sep5}`) && !isAbsolute7(child);
+  const child = relative8(resolve17(root), resolve17(destination));
+  return child === "" || child !== ".." && !child.startsWith(`..${sep6}`) && !isAbsolute9(child);
 }
 function sameResolvedPath(left, right) {
   const normalize = (path2) => {
-    const resolved = resolve16(path2);
+    const resolved = resolve17(path2);
     return process.platform === "win32" ? resolved.toLowerCase() : resolved;
   };
   return normalize(left) === normalize(right);
 }
 function portableRelativePath(root, destination) {
-  return relative7(root, destination).split(sep5).join("/");
+  return relative8(root, destination).split(sep6).join("/");
 }
 function canonicalWorkspacePath(path2) {
-  const resolved = resolve16(path2);
+  const resolved = resolve17(path2);
   try {
     return realpathSync2(resolved);
   } catch (error62) {
@@ -61531,7 +65684,6 @@ function canonicalWorkspacePath(path2) {
     throw error62;
   }
 }
-var RELEASE_VERSION2 = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u;
 var DERIVED_DECISION_KEYS = /* @__PURE__ */ new Set([
   "projectId",
   "runId",
@@ -61844,7 +65996,7 @@ var ApexService = class _ApexService {
   reviewHomeOverride;
   reviewGuardPeers = () => [];
   constructor(root, options = {}) {
-    this.root = resolve16(root);
+    this.root = resolve17(root);
     this.reviewHomeOverride = options.reviewHome;
     this.host = options.hostEnvironment ?? currentHostEnvironment();
     this.workspacePath = canonicalWorkspacePath(options.workspacePath ?? root);
@@ -61948,6 +66100,8 @@ var ApexService = class _ApexService {
     return this.capabilityPacks(manifestPath).uninstall(id);
   }
   async init(input2) {
+    if (input2.purpose !== void 0)
+      assertDeploymentPurposeUsable(input2.purpose);
     await this.initializeWorkspace(input2);
     return this.createProject(input2);
   }
@@ -61955,7 +66109,7 @@ var ApexService = class _ApexService {
     if (await this.retiredProjectionInstalled())
       throw retiredProjectionError();
     await this.assertCleanInitialization();
-    await mkdir11(join18(this.root, ".apex"), { recursive: true });
+    await mkdir11(join19(this.root, ".apex"), { recursive: true });
     try {
       await this.ensureLocalGitBoundary();
       const assets = await resolveBundledAssets();
@@ -61964,21 +66118,21 @@ var ApexService = class _ApexService {
         version: 1,
         clientId: clientId2,
         sourceMode: input2.customizationsSource === void 0 ? "bundled-projection" : "custom-source",
-        ...input2.customizationsSource === void 0 ? {} : { customSource: resolve16(input2.customizationsSource) }
+        ...input2.customizationsSource === void 0 ? {} : { customSource: resolve17(input2.customizationsSource) }
       };
-      await atomicWriteJson(join18(this.root, ".apex", "customizations.selection.json"), selection2);
+      await atomicWriteJson(join19(this.root, ".apex", "customizations.selection.json"), selection2);
       await this.installCustomizations(input2.customizationsSource ?? assets.clientProjections[clientId2], false, assets.config, false, clientId2, assets.plugin);
       await this.installCapabilityAssets(assets);
       const runtimeLock = await this.createRuntimeLock(assets);
-      await atomicWriteJson(join18(this.root, ".apex", "apex.lock.json"), runtimeLock);
-      await atomicWriteJson(join18(this.root, ".apex", "runtime", "apex.lock.json"), runtimeLock);
+      await atomicWriteJson(join19(this.root, ".apex", "apex.lock.json"), runtimeLock);
+      await atomicWriteJson(join19(this.root, ".apex", "runtime", "apex.lock.json"), runtimeLock);
       await this.installRuntimeGeneration(runtimeLock);
       return { workspaceReady: true, projectCreated: false };
     } catch (error62) {
-      if (await this.pathExistsLstat(join18(this.root, ".apex", "customizations.lock.json"))) {
+      if (await this.pathExistsLstat(join19(this.root, ".apex", "customizations.lock.json"))) {
         await this.uninstallCustomizations();
       }
-      await rm12(join18(this.root, ".apex"), { recursive: true, force: true });
+      await rm12(join19(this.root, ".apex"), { recursive: true, force: true });
       throw error62;
     }
   }
@@ -62140,12 +66294,12 @@ var ApexService = class _ApexService {
       throw new ApexError("APEX_STALE", "Governance provisioning plan changed; review a fresh plan", EXIT_CODES.stale);
     if (initial.status !== "ready" || config2.identity.mode !== "reuse" || !initial.setup.federation || !initial.applicationObjectId)
       throw new ApexError("APEX_AUTHORIZATION", "Governance provisioning prerequisites are blocked", EXIT_CODES.authorization);
-    const lockPath = join18(this.root, ".apex-governance-setup.lock");
+    const lockPath = join19(this.root, ".apex-governance-setup.lock");
     await this.assertSafeDestination(this.root, lockPath);
-    const lock = await open13(lockPath, "wx", 384).catch(() => {
+    const lock = await open14(lockPath, "wx", 384).catch(() => {
       throw new ApexError("APEX_CONFLICT", "A governance setup lock exists; inspect interrupted work before retrying", EXIT_CODES.conflict);
     });
-    const receiptPath = join18(this.root, `.apex-governance-setup-${this.idSource()}.json`);
+    const receiptPath = join19(this.root, `.apex-governance-setup-${this.idSource()}.json`);
     const payloadPath = `${receiptPath}.federation.json`;
     const actions = [];
     const receipt = () => ({
@@ -62240,7 +66394,7 @@ var ApexService = class _ApexService {
           return {
             status: "blocked",
             ...receipt(),
-            receiptPath: relative7(this.root, receiptPath),
+            receiptPath: relative8(this.root, receiptPath),
             nextAction: "Inspect remote state and obtain a fresh provisioning plan before retrying; no rollback or further action was attempted."
           };
         }
@@ -62250,13 +66404,13 @@ var ApexService = class _ApexService {
         return {
           status: "blocked",
           ...receipt(),
-          receiptPath: relative7(this.root, receiptPath),
+          receiptPath: relative8(this.root, receiptPath),
           nextAction: "Final remote verification changed; preserve the receipt and obtain a fresh plan before retrying."
         };
       return {
         status: "configured",
         ...receipt(),
-        receiptPath: relative7(this.root, receiptPath),
+        receiptPath: relative8(this.root, receiptPath),
         nextAction: "Identity trust and Reader access are configured. GitHub variables, workflow verification, collection dispatch and reviewed-baseline acceptance remain pending."
       };
     } finally {
@@ -62338,12 +66492,12 @@ var ApexService = class _ApexService {
       throw new ApexError("APEX_STALE", "Repository publish plan changed; review a fresh plan", EXIT_CODES.stale);
     if (initial.status === "blocked")
       throw new ApexError("APEX_AUTHORIZATION", "Repository publication prerequisites are blocked", EXIT_CODES.authorization);
-    const lockPath = join18(this.root, ".apex-repository-publish.lock");
+    const lockPath = join19(this.root, ".apex-repository-publish.lock");
     await this.assertSafeDestination(this.root, lockPath);
-    const lock = await open13(lockPath, "wx", 384).catch(() => {
+    const lock = await open14(lockPath, "wx", 384).catch(() => {
       throw new ApexError("APEX_CONFLICT", "A repository publish lock exists; inspect interrupted work before retrying", EXIT_CODES.conflict);
     });
-    const receiptPath = join18(this.root, `.apex-repository-publish-${this.idSource()}.json`);
+    const receiptPath = join19(this.root, `.apex-repository-publish-${this.idSource()}.json`);
     const actions = [];
     const receipt = () => ({
       schemaVersion: CONTRACT_VERSION,
@@ -62399,7 +66553,7 @@ var ApexService = class _ApexService {
           return {
             status: "blocked",
             ...receipt(),
-            receiptPath: relative7(this.root, receiptPath),
+            receiptPath: relative8(this.root, receiptPath),
             nextAction: "Inspect the repository and remote state and obtain a fresh plan before retrying; no rollback or force push was attempted."
           };
         }
@@ -62409,13 +66563,13 @@ var ApexService = class _ApexService {
         return {
           status: "blocked",
           ...receipt(),
-          receiptPath: relative7(this.root, receiptPath),
+          receiptPath: relative8(this.root, receiptPath),
           nextAction: "Final verification did not observe the published branch; preserve the receipt and replan."
         };
       return {
         status: "published",
         ...receipt(),
-        receiptPath: relative7(this.root, receiptPath),
+        receiptPath: relative8(this.root, receiptPath),
         nextAction: "The reviewed branch is published. Governance setup, collection and client health checks remain pending; no deployment is authorized."
       };
     } finally {
@@ -62427,18 +66581,20 @@ var ApexService = class _ApexService {
     config2 = structuredClone(config2);
     if (!value_exports2.Check(OnboardingConfigV1Schema, config2) || Buffer.byteLength(JSON.stringify(config2)) > 16384)
       throw new ApexError("APEX_VALIDATION", "Onboarding configuration is malformed or oversized", EXIT_CODES.validation);
+    if (config2.purpose !== void 0)
+      assertDeploymentPurposeUsable(config2.purpose);
     const checks = [];
     const inspect = async (path2) => {
       await this.assertSafeDestination(this.root, path2);
-      return await this.pathExistsLstat(path2) ? lstat13(path2) : void 0;
+      return await this.pathExistsLstat(path2) ? lstat14(path2) : void 0;
     };
-    const repository = await inspect(join18(this.root, ".git"));
+    const repository = await inspect(join19(this.root, ".git"));
     checks.push({
       id: "repository",
       status: repository === void 0 ? config2.createRepository === true ? "pending" : "blocked" : repository.isDirectory() || repository.isFile() ? "ready" : "blocked",
       reason: repository === void 0 ? "Git boundary is missing; repository creation requires confirmation." : "Git boundary exists; remote identity and repository integrity are not assessed."
     });
-    const packagePath = join18(this.root, "node_modules", "@apexops", "cli", "package.json");
+    const packagePath = join19(this.root, "node_modules", "@apexops", "cli", "package.json");
     const runtime = await inspect(packagePath);
     let exactRuntime = false;
     if (runtime !== void 0 && runtime.isFile() && runtime.size <= 65536) {
@@ -62455,7 +66611,7 @@ var ApexService = class _ApexService {
       status: runtime === void 0 ? "pending" : exactRuntime ? "ready" : "blocked",
       reason: runtime === void 0 ? "Exact workspace APEX runtime must be installed after confirmation." : exactRuntime ? "Workspace package declares the exact runtime version; package integrity is not assessed." : "Workspace runtime version or package metadata conflicts with this installer; preserve it for review."
     });
-    const state = await inspect(join18(this.root, ".apex"));
+    const state = await inspect(join19(this.root, ".apex"));
     let resumable = false;
     if (state?.isDirectory()) {
       try {
@@ -62500,7 +66656,7 @@ var ApexService = class _ApexService {
       ".apex/customizations.lock.json",
       ".apex/apex.lock.json"
     ])
-      await this.assertSafeDestination(this.root, join18(this.root, path2));
+      await this.assertSafeDestination(this.root, join19(this.root, path2));
     if (config2.projectId === void 0) {
       const customization2 = await this.customizationSelection();
       if (!await this.workspaceHasNoProjects()) {
@@ -62524,9 +66680,10 @@ var ApexService = class _ApexService {
       throw new ApexError("APEX_CONFLICT", "Bootstrap selection does not match the requested project", EXIT_CODES.conflict);
     await this.assertSafeDestination(this.root, this.projects.runDirectory(selection2.projectId, selection2.runId));
     const run = await this.run(selection2, { readOnly: true });
+    assertDeploymentPurposeUsable(run.purpose);
     const project = await this.projects.getProject(selection2.projectId);
     const customization = await this.customizationSelection();
-    if (config2.projectId !== selection2.projectId || config2.displayName !== void 0 && config2.displayName !== project.displayName || config2.environment !== void 0 && config2.environment !== run.environment || config2.targetScope !== void 0 && config2.targetScope !== run.targetScope || config2.iacTool !== void 0 && config2.iacTool !== run.iacTool || config2.riskOwner !== void 0 && config2.riskOwner !== project.riskOwner || config2.client !== void 0 && config2.client !== customization.clientId || customization.sourceMode !== "bundled-projection")
+    if (config2.projectId !== selection2.projectId || config2.displayName !== void 0 && config2.displayName !== project.displayName || config2.environment !== void 0 && config2.environment !== run.environment || config2.purpose !== void 0 && config2.purpose !== run.purpose || config2.targetScope !== void 0 && config2.targetScope !== run.targetScope || config2.iacTool !== void 0 && config2.iacTool !== run.iacTool || config2.riskOwner !== void 0 && config2.riskOwner !== project.riskOwner || config2.client !== void 0 && config2.client !== customization.clientId || customization.sourceMode !== "bundled-projection")
       throw new ApexError("APEX_CONFLICT", "Bootstrap settings conflict with the selected initialized workspace", EXIT_CODES.conflict);
     const checks = [
       ...await this.managedFileChecks(),
@@ -62539,13 +66696,15 @@ var ApexService = class _ApexService {
     return selection2;
   }
   async bootstrap(input2) {
-    if (input2.projectId === void 0 && [input2.displayName, input2.environment, input2.targetScope, input2.iacTool, input2.riskOwner].some((value) => value !== void 0))
+    if (input2.projectId === void 0 && [input2.displayName, input2.environment, input2.purpose, input2.targetScope, input2.iacTool, input2.riskOwner].some((value) => value !== void 0))
       throw new ApexError("APEX_USAGE", "Project settings belong to explicit project creation, not workspace bootstrap", EXIT_CODES.usage);
     if (input2.projectId !== void 0 && input2.riskOwner === void 0) {
       throw new ApexError("APEX_VALIDATION", "Project risk owner must be partner or customer", EXIT_CODES.validation);
     }
+    if (input2.purpose !== void 0)
+      assertDeploymentPurposeUsable(input2.purpose);
     const riskOwner2 = input2.riskOwner;
-    if (await this.pathExistsLstat(join18(this.root, ".apex"))) {
+    if (await this.pathExistsLstat(join19(this.root, ".apex"))) {
       const { clientId: clientId2, ...settings } = input2;
       const config2 = {
         schemaVersion: CONTRACT_VERSION,
@@ -62578,9 +66737,11 @@ var ApexService = class _ApexService {
     };
   }
   async createProject(input2) {
+    const purpose = input2.purpose ?? DEFAULT_DEPLOYMENT_PURPOSE;
+    assertDeploymentPurposeUsable(purpose);
     let runtimeLock;
     try {
-      runtimeLock = JSON.parse(await readFile14(join18(this.root, ".apex", "apex.lock.json"), "utf8"));
+      runtimeLock = JSON.parse(await readFile14(join19(this.root, ".apex", "apex.lock.json"), "utf8"));
     } catch (error62) {
       if (error62.code === "ENOENT") {
         throw new ApexError("APEX_NOT_FOUND", "Initialize the workspace with apex init before creating a project", EXIT_CODES.notFound);
@@ -62599,6 +66760,7 @@ var ApexService = class _ApexService {
     });
     const run = await this.projects.createRun(input2.projectId, {
       environment: input2.environment ?? "dev",
+      purpose,
       targetScope: input2.targetScope ?? "local",
       runtimeLockHash
     });
@@ -62612,7 +66774,7 @@ var ApexService = class _ApexService {
       await this.acquireRunWriterLease(await this.run(selection2, { readOnly: true }));
     await this.ensureLocalGitBoundary();
     const assets = await resolveBundledAssets();
-    const previousRuntimeLock = JSON.parse(await readFile14(join18(this.root, ".apex", "apex.lock.json"), "utf8"));
+    const previousRuntimeLock = JSON.parse(await readFile14(join19(this.root, ".apex", "apex.lock.json"), "utf8"));
     await this.installRuntimeGeneration(previousRuntimeLock);
     const persisted = await this.customizationSelection();
     const clientId2 = persisted.clientId;
@@ -62623,23 +66785,23 @@ var ApexService = class _ApexService {
     const { installed: updated, retired, conflicts } = await this.installCustomizations(source2, true, assets.config, false, clientId2, assets.plugin);
     await this.installCapabilityAssets(assets);
     const runtimeLock = await this.createRuntimeLock(assets);
-    await atomicWriteJson(join18(this.root, ".apex", "apex.lock.json"), runtimeLock);
-    await atomicWriteJson(join18(this.root, ".apex", "runtime", "apex.lock.json"), runtimeLock);
+    await atomicWriteJson(join19(this.root, ".apex", "apex.lock.json"), runtimeLock);
+    await atomicWriteJson(join19(this.root, ".apex", "runtime", "apex.lock.json"), runtimeLock);
     await this.installRuntimeGeneration(runtimeLock);
     if (selection2 !== void 0)
-      await this.append(await this.run(selection2), "customizations.updated", { source: resolve16(source2), updated });
+      await this.append(await this.run(selection2), "customizations.updated", { source: resolve17(source2), updated });
     return { updated, retired, conflicts };
   }
   async rollbackCustomizations() {
     await this.recoverCustomizationTransaction();
-    const lockPath = join18(this.root, ".apex", "customizations.lock.json");
+    const lockPath = join19(this.root, ".apex", "customizations.lock.json");
     const current = JSON.parse(await readFile14(lockPath, "utf8"));
     if (current.previousLockRef === void 0)
       throw new ApexError("APEX_NOT_FOUND", "No prior customization bundle is available", EXIT_CODES.notFound);
     if (!this.safeManagedRelativePath(current.previousLockRef)) {
       throw new ApexError("APEX_VALIDATION", "Previous customization lock path is unsafe", EXIT_CODES.validation);
     }
-    const previousPath = resolve16(this.root, current.previousLockRef);
+    const previousPath = resolve17(this.root, current.previousLockRef);
     await this.assertSafeExistingPath(this.root, previousPath);
     const previous = JSON.parse(await readFile14(previousPath, "utf8"));
     const restored = [];
@@ -62648,13 +66810,13 @@ var ApexService = class _ApexService {
     const retained = new Set((current.externallyManaged?.retained ?? []).map(({ path: path2 }) => path2));
     for (const [root, desired, installed] of [
       [this.root, previous.files, current.files],
-      [join18(this.root, ".apex", "runtime"), previous.runtime, current.runtime]
+      [join19(this.root, ".apex", "runtime"), previous.runtime, current.runtime]
     ]) {
       for (const file2 of desired) {
         if (!this.safeManagedRelativePath(file2.path)) {
           throw new ApexError("APEX_VALIDATION", "Managed customization path is unsafe", EXIT_CODES.validation);
         }
-        const destination = resolve16(root, file2.path);
+        const destination = resolve17(root, file2.path);
         await this.assertSafeDestination(root, destination);
         if (root === this.root && retained.has(file2.path) && await this.pathExistsLstat(destination)) {
           restored.push(file2.path);
@@ -62687,7 +66849,7 @@ var ApexService = class _ApexService {
         if (!this.safeManagedRelativePath(file2.path)) {
           throw new ApexError("APEX_VALIDATION", "Managed customization path is unsafe", EXIT_CODES.validation);
         }
-        const destination = resolve16(root, file2.path);
+        const destination = resolve17(root, file2.path);
         await this.assertSafeDestination(root, destination);
         if (!await this.pathExistsLstat(destination))
           continue;
@@ -62706,12 +66868,12 @@ var ApexService = class _ApexService {
   }
   async uninstallCustomizations() {
     await this.recoverCustomizationTransaction();
-    const lockPath = join18(this.root, ".apex", "customizations.lock.json");
+    const lockPath = join19(this.root, ".apex", "customizations.lock.json");
     const lock = JSON.parse(await readFile14(lockPath, "utf8"));
     const removed = [];
     const conflicts = [];
     for (const file2 of lock.files) {
-      const destination = join18(this.root, file2.path);
+      const destination = join19(this.root, file2.path);
       if (!await this.pathExistsLstat(destination))
         continue;
       await this.assertSafeDestination(this.root, destination);
@@ -62723,7 +66885,7 @@ var ApexService = class _ApexService {
       removed.push(file2.path);
     }
     for (const { path: path2 } of lock.externallyManaged?.retained ?? []) {
-      if (this.safeManagedRelativePath(path2) && await this.pathExistsLstat(join18(this.root, path2)))
+      if (this.safeManagedRelativePath(path2) && await this.pathExistsLstat(join19(this.root, path2)))
         conflicts.push(path2);
     }
     await rm12(lockPath, { force: true });
@@ -62731,7 +66893,7 @@ var ApexService = class _ApexService {
   }
   async retiredProjectionInstalled() {
     try {
-      const value = JSON.parse(await readFile14(join18(this.root, ".apex", "customizations.selection.json"), "utf8"));
+      const value = JSON.parse(await readFile14(join19(this.root, ".apex", "customizations.selection.json"), "utf8"));
       return value.clientId === "github-copilot-vscode";
     } catch (error62) {
       if (error62.code === "ENOENT")
@@ -62743,7 +66905,7 @@ var ApexService = class _ApexService {
   async replaceRetiredProjection() {
     if (!await this.retiredProjectionInstalled())
       throw new ApexError("APEX_CONFLICT", "Workspace is already initialized", EXIT_CODES.conflict);
-    const lockPath = join18(this.root, ".apex", "customizations.lock.json");
+    const lockPath = join19(this.root, ".apex", "customizations.lock.json");
     const { removed, conflicts } = await this.exists(lockPath) ? await this.uninstallCustomizations() : { removed: [], conflicts: [] };
     if (conflicts.length > 0)
       throw new ApexError("APEX_CONFLICT", "Edited VS Code projection files remain; move them, then run `apex init --client github-copilot-cli` again", EXIT_CODES.conflict, { removed, conflicts });
@@ -62752,14 +66914,14 @@ var ApexService = class _ApexService {
       clientId: "github-copilot-cli",
       sourceMode: "bundled-projection"
     };
-    await atomicWriteJson(join18(this.root, ".apex", "customizations.selection.json"), selection2);
+    await atomicWriteJson(join19(this.root, ".apex", "customizations.selection.json"), selection2);
     const { installed, clientId: clientId2 } = await this.reinstallCustomizations();
     return { removed, installed, clientId: clientId2 };
   }
   async reinstallCustomizations(customizationsSource) {
     await this.recoverCustomizationTransaction();
     const selection2 = await this.customizationSelection();
-    const lockPath = join18(this.root, ".apex", "customizations.lock.json");
+    const lockPath = join19(this.root, ".apex", "customizations.lock.json");
     if (await this.exists(lockPath)) {
       throw new ApexError("APEX_CONFLICT", "Managed customizations are already installed", EXIT_CODES.conflict);
     }
@@ -62772,7 +66934,7 @@ var ApexService = class _ApexService {
     return { installed, clientId: selection2.clientId };
   }
   async listProjects() {
-    const directory = join18(this.root, ".apex", "projects");
+    const directory = join19(this.root, ".apex", "projects");
     let names;
     try {
       names = await readdir9(directory);
@@ -62785,7 +66947,7 @@ var ApexService = class _ApexService {
     return projects.map(({ projectId, displayName }) => ({ projectId, displayName }));
   }
   async workspaceHasNoProjects() {
-    if (await this.pathExistsLstat(join18(this.root, ".apex/config.json")))
+    if (await this.pathExistsLstat(join19(this.root, ".apex/config.json")))
       return false;
     if ((await this.listProjects()).length > 0)
       throw new ApexError("APEX_CONFLICT", "Projects exist but selection is missing; select an existing project", EXIT_CODES.conflict);
@@ -62811,8 +66973,8 @@ var ApexService = class _ApexService {
       return { projectId: replacementProjectId, runId };
     })();
     const projectDirectory = this.projects.projectDirectory(projectId);
-    await this.assertSafeExistingPath(join18(this.root, ".apex"), projectDirectory);
-    const runDirectory = join18(projectDirectory, "runs");
+    await this.assertSafeExistingPath(join19(this.root, ".apex"), projectDirectory);
+    const runDirectory = join19(projectDirectory, "runs");
     await this.assertSafeExistingPath(projectDirectory, runDirectory);
     const runIds = await readdir9(runDirectory);
     for (const runId of runIds) {
@@ -62821,9 +66983,9 @@ var ApexService = class _ApexService {
       }
     }
     for (const runId of runIds) {
-      const workDirectory = join18(this.root, ".apex", "work", runId);
+      const workDirectory = join19(this.root, ".apex", "work", runId);
       if (await this.pathExistsLstat(workDirectory)) {
-        await this.assertSafeExistingPath(join18(this.root, ".apex"), workDirectory);
+        await this.assertSafeExistingPath(join19(this.root, ".apex"), workDirectory);
         await rm12(workDirectory, { recursive: true, force: true });
         this.repeatWrites.getStore()?.removed(workDirectory);
       }
@@ -62856,7 +67018,7 @@ var ApexService = class _ApexService {
     const results = [];
     for (const project of await this.listProjects()) {
       const matches = [];
-      const runNames = await readdir9(join18(this.projects.projectDirectory(project.projectId), "runs"));
+      const runNames = await readdir9(join19(this.projects.projectDirectory(project.projectId), "runs"));
       for (const runName of runNames.sort()) {
         const run = await this.projects.getRun(project.projectId, runName);
         for (const event of await this.journal(run).replay()) {
@@ -62900,22 +67062,22 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     try {
       if (repositoryPath.startsWith("https://"))
         return await listRemoteArchetypes({ repositoryPath, revision, catalogPath }, this.readArchetypeRemoteJson.bind(this));
-      return await listArchetypeSources({ repositoryPath: resolve16(this.root, repositoryPath), revision, catalogPath });
+      return await listArchetypeSources({ repositoryPath: resolve17(this.root, repositoryPath), revision, catalogPath });
     } catch {
       throw new ApexError("APEX_VALIDATION", "Archetype discovery requires an exact commit, a local Git root or GitHub HTTPS repository, and a bounded safe catalog", EXIT_CODES.validation);
     }
   }
   async copiedArchetypeMatches(destination, proposal) {
-    const target = join18(this.root, destination);
+    const target = join19(this.root, destination);
     await this.assertSafeDestination(this.root, target);
     if (!await this.pathExistsLstat(target))
       return false;
     const conflict = () => new ApexError("APEX_CONFLICT", `Archetype destination ${destination} is modified or incomplete; preserve it for review`, EXIT_CODES.conflict);
-    if (!(await lstat13(target)).isDirectory())
+    if (!(await lstat14(target)).isDirectory())
       throw conflict();
-    if (await this.pathExistsLstat(join18(target, ".apex"))) {
+    if (await this.pathExistsLstat(join19(target, ".apex"))) {
       const child = new _ApexService(target);
-      await child.assertSafeDestination(target, join18(target, ".apex/config.json"));
+      await child.assertSafeDestination(target, join19(target, ".apex/config.json"));
       try {
         const readiness = await child.planBootstrap({ schemaVersion: CONTRACT_VERSION });
         if (readiness.status !== "ready")
@@ -62924,15 +67086,15 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         throw conflict();
       }
       for (const file2 of proposal.files) {
-        const path2 = join18(target, file2.path);
+        const path2 = join19(target, file2.path);
         await child.assertSafeDestination(target, path2);
-        const info2 = await lstat13(path2);
+        const info2 = await lstat14(path2);
         if (!info2.isFile() || info2.nlink !== 1 || info2.size !== file2.bytes || sha256Bytes(await readFile14(path2)) !== file2.hash)
           throw conflict();
       }
-      const origin = join18(target, ".apex-origin.json");
+      const origin = join19(target, ".apex-origin.json");
       await child.assertSafeDestination(target, origin);
-      const info = await lstat13(origin);
+      const info = await lstat14(origin);
       if (!info.isFile() || info.nlink !== 1 || info.size > 262144)
         throw conflict();
       try {
@@ -62952,9 +67114,9 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const seen = /* @__PURE__ */ new Set();
     const inspect = async (directory) => {
       for (const entry of await readdir9(directory, { withFileTypes: true })) {
-        const absolute = join18(directory, entry.name);
-        const path2 = relative7(target, absolute).split(sep5).join("/");
-        const info = await lstat13(absolute);
+        const absolute = join19(directory, entry.name);
+        const path2 = relative8(target, absolute).split(sep6).join("/");
+        const info = await lstat14(absolute);
         if (info.isSymbolicLink())
           throw conflict();
         if (info.isDirectory()) {
@@ -63063,15 +67225,15 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       throw new ApexError("APEX_AUTHORIZATION", "Archetype import requires explicit confirmation", EXIT_CODES.authorization);
     if (!/^[a-z][a-z0-9-]{0,62}$/.test(request.destination) || !/^[a-f0-9]{64}$/.test(request.expectedHash))
       throw new ApexError("APEX_VALIDATION", "Archetype destination or proposal hash is invalid", EXIT_CODES.validation);
-    const target = resolve16(this.root, request.destination);
+    const target = resolve17(this.root, request.destination);
     await this.assertSafeDestination(this.root, target);
     if (await this.exists(target))
       throw new ApexError("APEX_CONFLICT", "Archetype destination already exists", EXIT_CODES.conflict);
     const { proposal, contents } = await this.readArchetypeSelection(request.repositoryPath, request.revision, request.selectedPath);
     if (proposal.contentHash !== request.expectedHash)
       throw new ApexError("APEX_STALE", "Archetype proposal does not match the confirmed selection", EXIT_CODES.stale);
-    const lockPath = join18(this.root, ".apex-archetype-import.lock");
-    const lock = await open13(lockPath, "wx", 384).catch(() => {
+    const lockPath = join19(this.root, ".apex-archetype-import.lock");
+    const lock = await open14(lockPath, "wx", 384).catch(() => {
       throw new ApexError("APEX_CONFLICT", "An archetype import lock exists; inspect the interrupted import before retrying", EXIT_CODES.conflict);
     });
     try {
@@ -63085,11 +67247,11 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         const bytes = Buffer.from(contents.get(file2.path), "utf8");
         if (bytes.length !== file2.bytes || sha256Bytes(bytes) !== file2.hash)
           throw new ApexError("APEX_STALE", "Archetype content changed before import", EXIT_CODES.stale);
-        const path2 = join18(target, file2.path);
+        const path2 = join19(target, file2.path);
         await mkdir11(dirname11(path2), { recursive: true });
         await atomicWriteBytes(path2, bytes, { refuseOverwrite: true });
       }
-      await atomicWriteJson(join18(target, ".apex-origin.json"), proposal, { refuseOverwrite: true });
+      await atomicWriteJson(join19(target, ".apex-origin.json"), proposal, { refuseOverwrite: true });
       return {
         destination: request.destination,
         contentHash: proposal.contentHash,
@@ -63119,10 +67281,10 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     }
   }
   async readArchetypeSelection(repositoryPath, revision, selectedPath) {
-    return repositoryPath.startsWith("https://") ? inspectRemoteArchetype({ repositoryPath, revision, selectedPath }, this.readArchetypeRemoteJson.bind(this)) : inspectArchetypeSource({ repositoryPath: resolve16(this.root, repositoryPath), revision, selectedPath });
+    return repositoryPath.startsWith("https://") ? inspectRemoteArchetype({ repositoryPath, revision, selectedPath }, this.readArchetypeRemoteJson.bind(this)) : inspectArchetypeSource({ repositoryPath: resolve17(this.root, repositoryPath), revision, selectedPath });
   }
   async workspaceStatus() {
-    if (await this.pathExistsLstat(join18(this.root, ".apex/apex.lock.json")) && await this.workspaceHasNoProjects()) {
+    if (await this.pathExistsLstat(join19(this.root, ".apex/apex.lock.json")) && await this.workspaceHasNoProjects()) {
       await this.inspectBootstrapResume({ schemaVersion: CONTRACT_VERSION });
       return {
         status: "needs_project",
@@ -63193,7 +67355,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
   async workspaceStateToken() {
     const files2 = {};
     for (const path2 of WORKSPACE_STATE_FILES)
-      files2[path2] = await readFile14(join18(this.root, path2)).then(sha256Bytes, (error62) => {
+      files2[path2] = await readFile14(join19(this.root, path2)).then(sha256Bytes, (error62) => {
         if (error62.code === "ENOENT")
           return null;
         throw error62;
@@ -63201,7 +67363,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     return sha256Json({ version: 1, run: (await this.repeatScope())?.state ?? null, files: files2 });
   }
   repeatLockDirectory() {
-    return join18(this.root, ".apex", "local");
+    return join19(this.root, ".apex", "local");
   }
   /**
    * Runs one state-changing call through the kernel repeat guard. An identical call from the same worktree while the
@@ -63262,7 +67424,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const files2 = await snapshotRepeatFiles(await this.repeatFileRoots(selection2));
     let projects;
     try {
-      projects = await readdir9(join18(this.root, ".apex", "projects"));
+      projects = await readdir9(join19(this.root, ".apex", "projects"));
     } catch (error62) {
       if (error62.code !== "ENOENT")
         throw error62;
@@ -63286,19 +67448,19 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const events = await this.journal(selection2).replay();
     const generated = events.findLast((event) => event.type === "task.completed" && typeof event.payload.artifactHashes?.["iac-handoff"] === "string");
     const handoffHash = generated?.payload?.artifactHashes?.["iac-handoff"];
-    const roots = [join18(this.root, ".apex", "work", selection2.runId)];
+    const roots = [join19(this.root, ".apex", "work", selection2.runId)];
     if (handoffHash !== void 0)
-      roots.push(resolve16(this.root, (await this.objects.getJson(handoffHash)).rootPath));
+      roots.push(resolve17(this.root, (await this.objects.getJson(handoffHash)).rootPath));
     return roots;
   }
   /** Content hash plus the inode, size and change times that any later modification of the file would alter. */
   async repeatFileBinding(path2) {
     try {
-      const target = resolve16(this.root, path2);
-      const metadata2 = await lstat13(target, { bigint: true });
+      const target = resolve17(this.root, path2);
+      const metadata2 = await lstat14(target, { bigint: true });
       if (!metadata2.isFile() || metadata2.isSymbolicLink() || metadata2.size > 20000000n)
         return null;
-      const handle = await open13(target, constants14.O_RDONLY | constants14.O_NOFOLLOW);
+      const handle = await open14(target, constants15.O_RDONLY | constants15.O_NOFOLLOW);
       try {
         const opened = await handle.stat({ bigint: true });
         const bytes = await handle.readFile();
@@ -63328,13 +67490,14 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       head: events.at(-1)?.hash ?? null,
       events: events.length,
       task: route.task?.id ?? null,
-      blockers: route.blockers
+      blockers: route.blockers,
+      satisfiedGates: run.gates.flatMap((gate) => this.gateSatisfied(run, gate.gate, events) ? [gate.gate] : [])
     };
   }
   async nextTask() {
     const selection2 = await this.selection();
-    const run = await this.run(selection2);
-    const events = await this.journal(run).replay();
+    let run = await this.run(selection2);
+    let events = await this.journal(run).replay();
     await this.sweepCaptures(events);
     const requirements = this.artifactHash(events, "requirements");
     const governanceInput = await this.governanceInputState(run, events);
@@ -63358,7 +67521,12 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         task: await this.currentIssuedTask(run, events, TASKS[0].id) ?? await this.issueTask(run, TASKS[0], [])
       };
     }
-    const route = await this.route(run, events);
+    let route = await this.route(run, events);
+    if (route.blockers.length > 0 && route.reviewGate === void 0 && await this.retryLabReadiness(run)) {
+      run = await this.run(selection2);
+      events = await this.journal(run).replay();
+      route = await this.route(run, events);
+    }
     if (route.blockers.length > 0 && route.reviewGate !== void 0) {
       return { status: "needs_review", review: await this.pendingReview(events, route.reviewGate) };
     }
@@ -63579,7 +67747,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         }
       },
       ...reviewRequest === void 0 ? {} : { reviewRequest },
-      outputRoot: join18(this.root, ".apex", "work", run.runId, taskId),
+      outputRoot: join19(this.root, ".apex", "work", run.runId, taskId),
       status: this.completedNodeIds(events).has(task.taskType) ? "completed" : "active",
       blockers: route.blockers
     };
@@ -63681,8 +67849,8 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       throw new ApexError("APEX_VALIDATION", "Task output exceeds its size limit", EXIT_CODES.validation);
     }
     await this.acquireRunWriterLease(run);
-    const directory = join18(this.root, ".apex", "work", run.runId, taskId);
-    const path2 = join18(directory, `${output2.kind}.json`);
+    const directory = join19(this.root, ".apex", "work", run.runId, taskId);
+    const path2 = join19(directory, `${output2.kind}.json`);
     await mkdir11(directory, { recursive: true });
     await atomicWriteJson(path2, output2.value);
     const hash2 = sha256Bytes(await readFile14(path2));
@@ -63691,27 +67859,27 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const expectedHead = await this.journal(run).head();
     if (expectedHead === null)
       throw new ApexError("APEX_STALE", "Staging event was not recorded", EXIT_CODES.stale);
-    await atomicWriteJson(join18(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${taskId}.json`), {
+    await atomicWriteJson(join19(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${taskId}.json`), {
       ...task,
       expectedHead
     });
     return { taskId, kind: output2.kind, path: path2, bytes: bytes.byteLength, hash: hash2 };
   }
   async readGovernanceBaselineBytes(path2) {
-    const sourcePath = resolve16(this.root, path2);
+    const sourcePath = resolve17(this.root, path2);
     await this.assertSafeDestination(this.root, sourcePath);
-    const canonicalRoot = await realpath7(this.root);
-    const canonicalSource = await realpath7(sourcePath);
-    const metadata2 = await lstat13(sourcePath);
+    const canonicalRoot = await realpath8(this.root);
+    const canonicalSource = await realpath8(sourcePath);
+    const metadata2 = await lstat14(sourcePath);
     if (!metadata2.isFile() || metadata2.isSymbolicLink() || metadata2.size > 2e7)
       throw new ApexError("APEX_VALIDATION", "Baseline must be a regular JSON file within the size limit", EXIT_CODES.validation);
-    const handle = await open13(sourcePath, constants14.O_RDONLY | constants14.O_NOFOLLOW);
+    const handle = await open14(sourcePath, constants15.O_RDONLY | constants15.O_NOFOLLOW);
     let bytes;
     try {
       const assertUnchanged = async () => {
         await this.assertSafeDestination(this.root, sourcePath);
-        const actual = await realpath7(sourcePath);
-        const currentPath = await lstat13(sourcePath);
+        const actual = await realpath8(sourcePath);
+        const currentPath = await lstat14(sourcePath);
         const current = await handle.stat();
         if (!sameResolvedPath(actual, canonicalSource) || !isContainedPath(canonicalRoot, actual) || [currentPath, current].some((entry) => !entry.isFile() || entry.isSymbolicLink() || entry.dev !== metadata2.dev || entry.ino !== metadata2.ino || entry.size !== metadata2.size || entry.mtimeMs !== metadata2.mtimeMs || entry.ctimeMs !== metadata2.ctimeMs))
           throw new ApexError("APEX_STALE", "Governance baseline file changed", EXIT_CODES.stale);
@@ -63736,7 +67904,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
   }
   async governanceBaselineValidator() {
     const assets = await resolveBundledAssets();
-    const schema = JSON.parse(await readFile14(join18(assets.root, "schemas", "governance-baseline.schema.json"), "utf8"));
+    const schema = JSON.parse(await readFile14(join19(assets.root, "schemas", "governance-baseline.schema.json"), "utf8"));
     return new import__.Ajv2020({ strict: false }).compile(schema);
   }
   governanceBaselineOptions(run) {
@@ -63905,7 +68073,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       await this.selectedGovernanceSnapshot(run, governance2);
     }
     const bytes = await this.readGovernanceBaselineBytes(path2);
-    const candidatePath = relative7(this.root, resolve16(this.root, path2)).split(sep5).join("/");
+    const candidatePath = relative8(this.root, resolve17(this.root, path2)).split(sep6).join("/");
     const inspected = await this.inspectBaseline(run, bytes);
     const candidateHash = sha256Bytes(bytes);
     const state = await this.governanceInputState(run, events);
@@ -64042,7 +68210,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       artifactKinds: [...new Set(TASKS.filter(({ id }) => nodeIds.has(id)).flatMap(({ outputs }) => outputs))],
       governanceRevision: {
         previousGovernanceHash,
-        candidatePath: relative7(this.root, resolve16(this.root, path2)).split(sep5).join("/"),
+        candidatePath: relative8(this.root, resolve17(this.root, path2)).split(sep6).join("/"),
         candidateHash,
         ...retainedReviewHash === void 0 ? {} : { retainedReviewHash }
       }
@@ -64070,12 +68238,12 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const state = await this.governanceInputState(run, events);
     const bytes = await this.readGovernanceBaselineBytes(path2);
     const revision = this.pendingGovernanceRevision(events);
-    if (revision !== void 0 && (revision.candidatePath !== relative7(this.root, resolve16(this.root, path2)).split(sep5).join("/") || revision.candidateHash !== sha256Bytes(bytes)))
+    if (revision !== void 0 && (revision.candidatePath !== relative8(this.root, resolve17(this.root, path2)).split(sep6).join("/") || revision.candidateHash !== sha256Bytes(bytes)))
       throw new ApexError("APEX_STALE", "Governance candidate changed; confirm a new material revision before import", EXIT_CODES.stale);
     if (state !== void 0 && !state.fulfilled) {
       if (state.choice === void 0)
         throw new ApexError("APEX_AUTHORIZATION", "Governance selection requires an explicit input answer before import", EXIT_CODES.authorization);
-      if (relative7(this.root, resolve16(this.root, path2)).split(sep5).join("/") !== state.request.governance.candidatePath)
+      if (relative8(this.root, resolve17(this.root, path2)).split(sep6).join("/") !== state.request.governance.candidatePath)
         throw new ApexError("APEX_STALE", "Governance import must use the selected candidate path", EXIT_CODES.stale);
       await this.assertGovernanceCandidate(run, state.request, state.choice, bytes);
     }
@@ -64112,12 +68280,12 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       if (typeof snapshot.contentHash !== "string")
         throw new ApexError("APEX_VALIDATION", "Governance snapshot has no content digest; start a new run", EXIT_CODES.validation);
       if (snapshot.contentHash !== selection2.snapshot.contentHash || governance.constraintsRef.digest !== sha256Json(selectedSnapshot))
-        throw new ApexError("APEX_VALIDATION", "Governance content changed; reconcile governance and obtain new policy, plan and gate approvals before proceeding", EXIT_CODES.validation);
+        throw new ApexError("APEX_VALIDATION", "Governance content changed; reconcile governance and obtain new policy and plan results; Gate 2 and 3 readiness is then re-recorded and Gate 4 needs a new approval before proceeding", EXIT_CODES.validation);
       const latest = await this.latestGovernanceObservation(run, events, governanceHash, governance, snapshot);
       const observedAt = selection2.constraints.discoveredAt;
       const rawSourceDigest = sha256Bytes(bytes);
       const initialProof = state?.choice !== void 0 && this.governanceInitialImportProof(events, state.request.requestId, {
-        selectedPath: relative7(this.root, resolve16(this.root, path2)).split(sep5).join("/"),
+        selectedPath: relative8(this.root, resolve17(this.root, path2)).split(sep6).join("/"),
         rawSourceDigest,
         observedAt,
         governanceHash
@@ -64240,7 +68408,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     ]);
     return { outputHash: completed.outputHashes["governance-constraints"], summary: completed.summary };
   }
-  async stageFile(taskId, relativePath, content, expectedSha) {
+  async stageFile(taskId, relativePath2, content, expectedSha) {
     const run = await this.currentRun();
     const task = await this.readTask(run, taskId);
     const head = await this.journal(run).head();
@@ -64250,14 +68418,14 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     if (!task.taskType.startsWith("codegen-"))
       throw new ApexError("APEX_AUTHORIZATION", "Only code generation tasks may stage files", EXIT_CODES.authorization);
     await this.assertPreviousGeneratedSourceUnmodified(await this.journal(run).replay());
-    const normalized = relativePath.replaceAll("\\", "/");
-    const suffixes = [".terraform.lock.hcl", ".tfvars.example", ".bicep", ".json", ".tf", ".md"];
-    if (isAbsolute7(relativePath) || normalized.length === 0 || normalized.split("/").some((part) => part === "" || part === "." || part === "..") || !suffixes.some((suffix) => normalized.endsWith(suffix))) {
-      throw new ApexError("APEX_VALIDATION", `Unsafe or unsupported staged path: ${relativePath}`, EXIT_CODES.validation);
+    const normalized = relativePath2.replaceAll("\\", "/");
+    const suffixes = [".terraform.lock.hcl", ".tfvars.example", ".bicep", ".json", ".tf", ".md", ".yaml"];
+    if (isAbsolute9(relativePath2) || normalized.length === 0 || normalized.split("/").some((part) => part === "" || part === "." || part === "..") || !suffixes.some((suffix) => normalized.endsWith(suffix))) {
+      throw new ApexError("APEX_VALIDATION", `Unsafe or unsupported staged path: ${relativePath2}`, EXIT_CODES.validation);
     }
-    const codeRoot = resolve16(this.root, ".apex", "work", run.runId, taskId, "code");
-    const path2 = resolve16(codeRoot, normalized);
-    if (path2 !== codeRoot && !path2.startsWith(`${codeRoot}${sep5}`))
+    const codeRoot = resolve17(this.root, ".apex", "work", run.runId, taskId, "code");
+    const path2 = resolve17(codeRoot, normalized);
+    if (path2 !== codeRoot && !path2.startsWith(`${codeRoot}${sep6}`))
       throw new ApexError("APEX_VALIDATION", "Staged path escapes the code root", EXIT_CODES.validation);
     await this.assertNoSymlinkPath(codeRoot, path2);
     const bytes = typeof content === "string" ? Buffer.from(content, "utf8") : Buffer.from(content);
@@ -64267,7 +68435,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     await this.acquireRunWriterLease(run);
     let idempotent = false;
     if (await this.exists(path2)) {
-      const entry = await lstat13(path2);
+      const entry = await lstat14(path2);
       if (!entry.isFile() || entry.isSymbolicLink())
         throw new ApexError("APEX_VALIDATION", "Staged destination must be a regular file", EXIT_CODES.validation);
       if (sha256Bytes(await readFile14(path2)) !== hash2)
@@ -64308,22 +68476,27 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       ...options.lockFileContent === void 0 ? {} : { lockFileContent: options.lockFileContent }
     });
     const files2 = [];
-    const sourceRoot = previousHandoff?.treeHash === tree.treeHash ? resolve16(this.root, previousHandoff.rootPath) : resolve16(this.root, ".apex", "work", run.runId, taskId, "code");
+    const sourceRoot = previousHandoff?.treeHash === tree.treeHash ? resolve17(this.root, previousHandoff.rootPath) : resolve17(this.root, ".apex", "work", run.runId, taskId, "code");
     if (previousHandoff?.treeHash === tree.treeHash) {
-      const taskRoot = resolve16(this.root, ".apex", "work", run.runId, taskId, "code");
+      const taskRoot = resolve17(this.root, ".apex", "work", run.runId, taskId, "code");
       if (await this.exists(taskRoot))
         throw new ApexError("APEX_CONFLICT", "Current task already has staged files; resolve them before reusing unchanged source", EXIT_CODES.conflict);
       for (const file2 of tree.files) {
         const bytes = Buffer.from(file2.content, "utf8");
         files2.push({
           taskId,
-          path: join18(sourceRoot, file2.path),
+          path: join19(sourceRoot, file2.path),
           bytes: bytes.length,
           hash: sha256Bytes(bytes),
           idempotent: true
         });
       }
     } else {
+      for (const file2 of tree.files) {
+        const staged = join19(sourceRoot, file2.path);
+        if (await this.exists(staged) && sha256Bytes(await readFile14(staged)) !== sha256Bytes(Buffer.from(file2.content, "utf8")))
+          throw new ApexError("APEX_CONFLICT", `Refusing to overwrite staged file: ${file2.path}`, EXIT_CODES.conflict);
+      }
       for (const file2 of tree.files)
         files2.push(await this.stageFile(taskId, file2.path, file2.content));
     }
@@ -64343,7 +68516,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       projectId: run.projectId,
       runId: run.runId,
       track: run.iacTool,
-      rootPath: relative7(this.root, sourceRoot),
+      rootPath: relative8(this.root, sourceRoot),
       treeHash: tree.treeHash,
       intentHash,
       bindingHash,
@@ -64364,7 +68537,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     if (previousHash === void 0)
       return;
     const handoff2 = await this.objects.getJson(previousHash);
-    const rootPath = resolve16(this.root, handoff2.rootPath);
+    const rootPath = resolve17(this.root, handoff2.rootPath);
     await this.assertSafeDestination(this.root, rootPath);
     try {
       await assertGeneratedSourceUnchanged({ rootPath, treeHash: handoff2.treeHash });
@@ -64404,7 +68577,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         throw new ApexError("APEX_STALE", "Validation handoff does not bind accepted inputs", EXIT_CODES.stale);
       const policy = await this.objects.getJson(policyHash);
       const manifest2 = await this.objects.getJson(manifestHash);
-      const rootPath = resolve16(this.root, handoff2.rootPath);
+      const rootPath = resolve17(this.root, handoff2.rootPath);
       await this.assertSafeDestination(this.root, rootPath);
       const transfers = new WriterTransferStore(this.projects.runDirectory(run.projectId, run.runId), this.clock);
       await this.assertCurrentWriterAuthority(run, transfers);
@@ -64832,11 +69005,11 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     try {
       await verifyReviewFiles(request.files);
       assertSingleReviewCapture(files2);
-      const record5 = verifyIssuedReviewCapture(request, files2, await reviewCaptureKey(home));
-      const answer = parseReviewAnswer(record5.response, {
+      const record6 = verifyIssuedReviewCapture(request, files2, await reviewCaptureKey(home));
+      const answer = parseReviewAnswer(record6.response, {
         wellArchitected: descriptor.reviewSubject === "architecture"
       });
-      const captureHash = await this.objects.putJson(record5);
+      const captureHash = await this.objects.putJson(record6);
       const review2 = {
         schemaVersion: CONTRACT_VERSION,
         projectId: run.projectId,
@@ -64846,10 +69019,10 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         reviewedAt: this.clock().toISOString(),
         capture: {
           reviewer: REVIEW_AGENT,
-          nonce: record5.nonce,
+          nonce: record6.nonce,
           captureHash,
           promptSha256: request.promptSha256,
-          responseSha256: record5.responseSha256
+          responseSha256: record6.responseSha256
         },
         findings: answer.findings.map((finding2) => ({
           ...finding2,
@@ -64898,14 +69071,14 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
    */
   async pendingReviews() {
     const pending = [];
-    const projectsDirectory = join18(this.root, ".apex", "projects");
+    const projectsDirectory = join19(this.root, ".apex", "projects");
     const projectIds = await readdir9(projectsDirectory).catch((error62) => {
       if (error62.code === "ENOENT")
         return [];
       throw error62;
     });
     for (const projectId of projectIds.sort()) {
-      const runIds = await readdir9(join18(projectsDirectory, projectId, "runs")).catch((error62) => {
+      const runIds = await readdir9(join19(projectsDirectory, projectId, "runs")).catch((error62) => {
         if (["ENOENT", "ENOTDIR"].includes(error62.code ?? ""))
           return [];
         throw error62;
@@ -64913,15 +69086,15 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       for (const runId of runIds.sort()) {
         if (!value_exports2.Check(RunIdSchema, runId))
           continue;
-        const runDirectory = join18(projectsDirectory, projectId, "runs", runId);
-        const events = await new EventJournal(join18(runDirectory, "journal")).replay();
+        const runDirectory = join19(projectsDirectory, projectId, "runs", runId);
+        const events = await new EventJournal(join19(runDirectory, "journal")).replay();
         const issued = events.findLast(({ type }) => type === "task.issued")?.payload;
         if (typeof issued?.taskId !== "string" || typeof issued.review?.nonce !== "string")
           continue;
         const taskId = issued.taskId;
         if (events.some(({ type, payload }) => (type === "task.completed" || type === "task.cancelled") && payload?.taskId === taskId))
           continue;
-        const task = await readFile14(join18(runDirectory, "tasks", `${taskId}.json`), "utf8").then((text4) => JSON.parse(text4)).catch(() => void 0);
+        const task = await readFile14(join19(runDirectory, "tasks", `${taskId}.json`), "utf8").then((text5) => JSON.parse(text5)).catch(() => void 0);
         const expiresAt = typeof task?.expiresAt === "string" ? Date.parse(task.expiresAt) : Number.NaN;
         if (Number.isFinite(expiresAt) && expiresAt <= this.clock().getTime())
           continue;
@@ -65039,10 +69212,10 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     if (subjectHash === void 0 || !inputRefs.includes(subjectHash))
       throw new ApexError("APEX_STALE", "Review subject is unavailable", EXIT_CODES.stale);
     const kinds = new Map(Object.entries(this.acceptedArtifactHashes(events)).map(([kind, hash2]) => [hash2, kind]));
-    const directory = join18(this.root, ".apex", "work", run.runId, taskId, "review");
+    const directory = join19(this.root, ".apex", "work", run.runId, taskId, "review");
     const write = async (name, content) => {
       const bytes = Buffer.from(content, "utf8");
-      const path2 = join18(directory, name);
+      const path2 = join19(directory, name);
       await atomicWriteBytes(path2, bytes, { refuseOverwrite: true });
       const sha2563 = sha256Bytes(bytes);
       this.repeatWrites.getStore()?.file(path2, sha2563);
@@ -65223,7 +69396,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     if (descriptor.id === "diagnosis") {
       const diagnosis = outputs.find(({ kind }) => kind === "diagnosis").value;
       if (diagnosis.operationalHandoff !== void 0)
-        await this.writeGeneratedReview(join18(this.operationsReviewDirectory(run), "operations-runbook.md"), Buffer.from(renderOperationsRunbook(diagnosis, outputHashes.diagnosis), "utf8"));
+        await this.writeGeneratedReview(join19(this.operationsReviewDirectory(run), "operations-runbook.md"), Buffer.from(renderOperationsRunbook(diagnosis, outputHashes.diagnosis), "utf8"));
       await this.materializeOperationalIndex(run, events, diagnosis, outputHashes.diagnosis);
     }
     if (descriptor.reviewSubject !== void 0) {
@@ -65255,10 +69428,10 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     };
   }
   requirementsReviewDirectory(run) {
-    return join18(this.root, "agent-output", run.projectId, run.runId);
+    return join19(this.root, "agent-output", run.projectId, run.runId);
   }
   generatedReviewBase(path2) {
-    return join18(this.root, ".apex", "generated-review-bases", sha256Bytes(Buffer.from(relative7(this.root, path2))));
+    return join19(this.root, ".apex", "generated-review-bases", sha256Bytes(Buffer.from(relative8(this.root, path2))));
   }
   async assertGeneratedReviewUnmodified(path2) {
     await this.assertSafeDestination(this.root, path2);
@@ -65269,7 +69442,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     await this.assertSafeDestination(this.root, basePath);
     const base = await this.readOptional(basePath);
     if (base === void 0 || !current.equals(base))
-      throw new ApexError("APEX_CONFLICT", `Generated review file has manual edits: ${relative7(this.root, path2)}`, EXIT_CODES.conflict);
+      throw new ApexError("APEX_CONFLICT", `Generated review file has manual edits: ${relative8(this.root, path2)}`, EXIT_CODES.conflict);
   }
   async assertTaskReviewFilesUnmodified(run, descriptor) {
     const root = this.requirementsReviewDirectory(run);
@@ -65320,7 +69493,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         files2.push(`${descriptor.reviewSubject}/challenger-findings.md`);
     }
     for (const name of files2)
-      await this.assertGeneratedReviewUnmodified(join18(root, name));
+      await this.assertGeneratedReviewUnmodified(join19(root, name));
   }
   // Drops a previously generated file that the current render no longer produces, unless it has manual edits.
   async removeGeneratedReview(path2) {
@@ -65393,14 +69566,14 @@ ${diagnosis.operationalHandoff === void 0 ? "- Operations runbook unavailable: n
 Design estimates are not actual spend. Mapping dispositions are not compliance certification. Documented procedures are not restore-test evidence. The deployment summary identifies simulated versus native-adapter provenance. Current authorization is required for further operations.
 `;
     await Promise.all([
-      this.writeGeneratedReview(join18(directory, "deployment-summary.md"), Buffer.from(await this.renderCompletedDeploymentSummary(run, events))),
-      this.writeGeneratedReview(join18(directory, "resource-inventory.md"), Buffer.from(renderResourceInventory({
+      this.writeGeneratedReview(join19(directory, "deployment-summary.md"), Buffer.from(await this.renderCompletedDeploymentSummary(run, events))),
+      this.writeGeneratedReview(join19(directory, "resource-inventory.md"), Buffer.from(renderResourceInventory({
         ...inventory,
         resources: inventory.resources.map((resource) => ({ ...resource, properties: {} }))
       }))),
-      this.writeGeneratedReview(join18(directory, "policy-matrix.md"), Buffer.from(policy === void 0 ? "# Policy Mapping Matrix\n\nNo accepted policy map is available; compliance is not established.\n" : renderPolicyMappingMatrix(policy, policyHash))),
-      this.writeGeneratedReview(join18(directory, "cost-reference.md"), Buffer.from(costContent)),
-      this.writeGeneratedReview(join18(directory, "handoff-index.md"), Buffer.from(index))
+      this.writeGeneratedReview(join19(directory, "policy-matrix.md"), Buffer.from(policy === void 0 ? "# Policy Mapping Matrix\n\nNo accepted policy map is available; compliance is not established.\n" : renderPolicyMappingMatrix(policy, policyHash))),
+      this.writeGeneratedReview(join19(directory, "cost-reference.md"), Buffer.from(costContent)),
+      this.writeGeneratedReview(join19(directory, "handoff-index.md"), Buffer.from(index))
     ]);
   }
   reviewMarkdownText(value) {
@@ -65413,7 +69586,7 @@ Design estimates are not actual spend. Mapping dispositions are not compliance c
       throw new ApexError("APEX_INTERNAL", "Requirements review document is invalid", EXIT_CODES.internal);
     }
     const input2 = this.recordedRequirementsInput(events) ?? {};
-    const text4 = (value) => {
+    const text5 = (value) => {
       if (value === void 0)
         return "Deferred";
       if (typeof value === "string")
@@ -65437,8 +69610,8 @@ Design estimates are not actual spend. Mapping dispositions are not compliance c
     };
     await mkdir11(directory, { recursive: true });
     await Promise.all([
-      this.writeGeneratedReview(join18(directory, "01-requirements.md"), Buffer.from(document2.content, "utf8")),
-      this.writeGeneratedReview(join18(directory, "README.md"), Buffer.from(`# ${this.reviewMarkdownText(run.projectId)}
+      this.writeGeneratedReview(join19(directory, "01-requirements.md"), Buffer.from(document2.content, "utf8")),
+      this.writeGeneratedReview(join19(directory, "README.md"), Buffer.from(`# ${this.reviewMarkdownText(run.projectId)}
 
 Generated Gate 1 review package for run \`${this.reviewMarkdownText(run.runId)}\`. The APEX kernel state remains authoritative.
 
@@ -65447,7 +69620,7 @@ Generated Gate 1 review package for run \`${this.reviewMarkdownText(run.runId)}\
 - Requirements document hash: ${requirementsDocumentHash}
 - Review status: challenger findings pending
 `, "utf8")),
-      this.writeGeneratedReview(join18(directory, "service-recommendations.md"), Buffer.from(`# Service Recommendations
+      this.writeGeneratedReview(join19(directory, "service-recommendations.md"), Buffer.from(`# Service Recommendations
 
 These are user-reviewed candidate services, not Architecture decisions.
 
@@ -65458,21 +69631,21 @@ ${list(input2["service-preferences"])}
 ${this.reviewMarkdownText(requirements.architectureHandoff ?? "Architecture must evaluate the candidate services against approved requirements and current evidence.")}
 
 ## Constraints
-- Retained services: ${text4(input2["retained-services"])}
-- Prohibited services: ${text4(input2["prohibited-services"])}
-- Environment overrides: ${text4(input2["environment-overrides"])}
+- Retained services: ${text5(input2["retained-services"])}
+- Prohibited services: ${text5(input2["prohibited-services"])}
+- Environment overrides: ${text5(input2["environment-overrides"])}
 
 Architecture must validate candidates against approved requirements, governance, and current evidence.
 `, "utf8")),
-      this.writeGeneratedReview(join18(directory, "sku-preferences.md"), Buffer.from(`# SKU Preferences
+      this.writeGeneratedReview(join19(directory, "sku-preferences.md"), Buffer.from(`# SKU Preferences
 
 User constraints only. Architecture owns SKU selection.
 
-- Preference: ${text4(input2["sku-preferences"])}
-- Budget posture: ${requirements.budgetAndOperations === void 0 ? text4(input2.budget) : this.reviewMarkdownText(requirements.budgetAndOperations)}
-- Scale: ${text4(input2.scale)}
+- Preference: ${text5(input2["sku-preferences"])}
+- Budget posture: ${requirements.budgetAndOperations === void 0 ? text5(input2.budget) : this.reviewMarkdownText(requirements.budgetAndOperations)}
+- Scale: ${text5(input2.scale)}
 `, "utf8")),
-      this.writeGeneratedReview(join18(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nRequirements challenger review is pending. Gate 1 cannot be approved until the reviewer completes this document.\n", "utf8"))
+      this.writeGeneratedReview(join19(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nRequirements challenger review is pending. The Gate 1 intent confirmation cannot be given until the reviewer completes this document.\n", "utf8"))
     ]);
   }
   async materializeRequirementsChallengeFindings(run, review2) {
@@ -65481,13 +69654,13 @@ User constraints only. Architecture owns SKU selection.
 - Severity: ${this.reviewMarkdownText(severity)}
 - Finding: ${this.reviewMarkdownText(detail)}${resolution === void 0 ? "" : `
 - Resolution: ${this.reviewMarkdownText(resolution)}`}`).join("\n\n");
-    await this.writeGeneratedReview(join18(this.requirementsReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
+    await this.writeGeneratedReview(join19(this.requirementsReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
 
 ${findings}
 `, "utf8"));
   }
   architectureReviewDirectory(run) {
-    return join18(this.root, "agent-output", run.projectId, run.runId, "architecture");
+    return join19(this.root, "agent-output", run.projectId, run.runId, "architecture");
   }
   async materializeArchitectureReviewPackage(run, architecture, cost, decisions, hashes) {
     const directory = this.architectureReviewDirectory(run);
@@ -65558,8 +69731,8 @@ ${list(pillar.recommendations)}
 ${list(pillar.tradeoffs)}`).join("\n\n") ?? "- Unavailable for this historical Architecture artifact.";
     await mkdir11(directory, { recursive: true });
     await Promise.all([
-      this.writeGeneratedReview(join18(directory, "architecture-decisions.md"), Buffer.from(architecture.decisionRecords === void 0 ? "# Architecture Decision Records\n\nStructured decision records are unavailable in the accepted Architecture artifact. Alternatives and consequences have not been inferred from prose.\n" : renderArchitectureDecisionRecords(architecture, hashes.architecture), "utf8")),
-      this.writeGeneratedReview(join18(directory, "README.md"), Buffer.from(`# ${this.reviewMarkdownText(architecture.title)}
+      this.writeGeneratedReview(join19(directory, "architecture-decisions.md"), Buffer.from(architecture.decisionRecords === void 0 ? "# Architecture Decision Records\n\nStructured decision records are unavailable in the accepted Architecture artifact. Alternatives and consequences have not been inferred from prose.\n" : renderArchitectureDecisionRecords(architecture, hashes.architecture), "utf8")),
+      this.writeGeneratedReview(join19(directory, "README.md"), Buffer.from(`# ${this.reviewMarkdownText(architecture.title)}
 
 Generated Gate 2 review package for run \`${this.reviewMarkdownText(run.runId)}\`. The APEX kernel state remains authoritative.
 
@@ -65572,7 +69745,7 @@ Generated Gate 2 review package for run \`${this.reviewMarkdownText(run.runId)}\
 
 ${diagramStatus}
 `, "utf8")),
-      this.writeGeneratedReview(join18(directory, "architecture-assessment.md"), Buffer.from(`# Architecture Assessment
+      this.writeGeneratedReview(join19(directory, "architecture-assessment.md"), Buffer.from(`# Architecture Assessment
 
 ## Summary
 
@@ -65604,7 +69777,7 @@ ${list(architecture.decisions)}
 
 ${list(architecture.risks)}
 `, "utf8")),
-      this.writeGeneratedReview(join18(directory, "cost-estimate.md"), Buffer.from(`# Cost Estimate
+      this.writeGeneratedReview(join19(directory, "cost-estimate.md"), Buffer.from(`# Cost Estimate
 
 - Pricing date: ${this.reviewMarkdownText(cost.pricingDate)}
 - Pricing status: ${this.reviewMarkdownText(cost.pricingStatus ?? "complete")}
@@ -65632,17 +69805,17 @@ ${cost.lineItems.map((item) => `- ${this.reviewMarkdownText(item.service)} / ${t
 
 ${list(cost.assumptions)}
 `, "utf8")),
-      this.writeGeneratedReview(join18(directory, "sku-comparison.md"), Buffer.from(`# SKU Comparison
+      this.writeGeneratedReview(join19(directory, "sku-comparison.md"), Buffer.from(`# SKU Comparison
 
 ${table(["Logical ID", "Service", "Selected SKU", "Quantity", "Rationale"], skuRows)}
 
 These are user-confirmed Architecture decisions. Alternatives and rejected options must be recorded in the architecture assessment before Gate 2 approval.
 `, "utf8")),
-      this.writeGeneratedReview(join18(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nArchitecture challenger review is pending. Gate 2 cannot be approved until the reviewer completes this document.\n", "utf8")),
+      this.writeGeneratedReview(join19(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nArchitecture challenger review is pending. Gate 2 readiness cannot be recorded until the reviewer completes this document.\n", "utf8")),
       ...diagrams.flatMap((diagram) => "error" in diagram ? [] : [
-        this.writeGeneratedReview(join18(directory, `${diagram.name}.py`), Buffer.from(diagram.source.python, "utf8")),
-        this.writeGeneratedReview(join18(directory, `${diagram.name}.svg`), Buffer.from(diagram.source.svg, "utf8")),
-        "png" in diagram ? this.writeGeneratedReview(join18(directory, `${diagram.name}.png`), Buffer.from(diagram.png)) : this.removeGeneratedReview(join18(directory, `${diagram.name}.png`))
+        this.writeGeneratedReview(join19(directory, `${diagram.name}.py`), Buffer.from(diagram.source.python, "utf8")),
+        this.writeGeneratedReview(join19(directory, `${diagram.name}.svg`), Buffer.from(diagram.source.svg, "utf8")),
+        "png" in diagram ? this.writeGeneratedReview(join19(directory, `${diagram.name}.png`), Buffer.from(diagram.png)) : this.removeGeneratedReview(join19(directory, `${diagram.name}.png`))
       ])
     ]);
   }
@@ -65663,7 +69836,7 @@ These are user-confirmed Architecture decisions. Alternatives and rejected optio
       criterion.findingIds.map((id) => this.reviewMarkdownText(id)).join(", ") || "None",
       this.reviewMarkdownText(criterion.rationale)
     ]));
-    await this.writeGeneratedReview(join18(this.architectureReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
+    await this.writeGeneratedReview(join19(this.architectureReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
 
 ## Well-Architected Criteria
 
@@ -65673,7 +69846,7 @@ ${findings}
 `, "utf8"));
   }
   planReviewDirectory(run) {
-    return join18(this.root, "agent-output", run.projectId, run.runId, "plan");
+    return join19(this.root, "agent-output", run.projectId, run.runId, "plan");
   }
   async materializePlanReviewPackage(run, intent, binding, inputs, hashes) {
     const directory = this.planReviewDirectory(run);
@@ -65697,7 +69870,7 @@ ${findings}
     ]);
     await mkdir11(directory, { recursive: true });
     await Promise.all([
-      this.writeGeneratedReview(join18(directory, "README.md"), Buffer.from(`# Implementation Plan
+      this.writeGeneratedReview(join19(directory, "README.md"), Buffer.from(`# Implementation Plan
 
 Generated Gate 3 review package for run \`${this.reviewMarkdownText(run.runId)}\`. The APEX kernel state remains authoritative.
 
@@ -65708,9 +69881,9 @@ Generated Gate 3 review package for run \`${this.reviewMarkdownText(run.runId)}\
 
 [Deployment guide](deployment-guide.md) describes the accepted plan and remaining execution prerequisites.
 `, "utf8")),
-      this.writeGeneratedReview(join18(directory, "deployment-guide.md"), Buffer.from(this.renderAcceptedPlanGuide(run, intent, binding, inputs, hashes), "utf8")),
-      this.writeGeneratedReview(join18(directory, "implementation-plan.md"), Buffer.from(renderImplementationPlan(intent, hashes["implementation-intent"]), "utf8")),
-      this.writeGeneratedReview(join18(directory, "iac-binding.md"), Buffer.from(`# IaC Binding
+      this.writeGeneratedReview(join19(directory, "deployment-guide.md"), Buffer.from(this.renderAcceptedPlanGuide(run, intent, binding, inputs, hashes), "utf8")),
+      this.writeGeneratedReview(join19(directory, "implementation-plan.md"), Buffer.from(renderImplementationPlan(intent, hashes["implementation-intent"]), "utf8")),
+      this.writeGeneratedReview(join19(directory, "iac-binding.md"), Buffer.from(`# IaC Binding
 
 - Track: ${this.reviewMarkdownText(binding.track)}
 - Intent hash: ${binding.intentHash}
@@ -65719,13 +69892,13 @@ ${table(["Logical ID", "Implementation", "Version", "Parameters", "Diagnostic Sc
 
 Physical scope declares intended managed and protected resources; it is not evidence of module expansion or resource existence.
 `, "utf8")),
-      this.writeGeneratedReview(join18(directory, "environment-inputs.md"), Buffer.from(`# Environment Inputs
+      this.writeGeneratedReview(join19(directory, "environment-inputs.md"), Buffer.from(`# Environment Inputs
 
 - Environment: ${this.reviewMarkdownText(inputs.environment)}
 
 ${table(["Name", "Kind", "Reference or Value"], inputRows)}
 `, "utf8")),
-      this.writeGeneratedReview(join18(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nImplementation-plan challenger review is pending. Gate 3 cannot be approved until the reviewer completes this document.\n", "utf8"))
+      this.writeGeneratedReview(join19(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nImplementation-plan challenger review is pending. Gate 3 readiness cannot be recorded until the reviewer completes this document.\n", "utf8"))
     ]);
   }
   async materializePlanChallengeFindings(run, review2) {
@@ -65734,7 +69907,7 @@ ${table(["Name", "Kind", "Reference or Value"], inputRows)}
 - Severity: ${this.reviewMarkdownText(severity)}
 - Finding: ${this.reviewMarkdownText(detail)}${resolution === void 0 ? "" : `
 - Resolution: ${this.reviewMarkdownText(resolution)}`}`).join("\n\n");
-    await this.writeGeneratedReview(join18(this.planReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
+    await this.writeGeneratedReview(join19(this.planReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
 
 ${findings}
 `, "utf8"));
@@ -65747,9 +69920,9 @@ ${findings}
 - Finding: ${this.reviewMarkdownText(detail)}
 - Evidence: ${evidenceRefs.map((reference) => this.reviewMarkdownText(reference)).join(", ") || "None"}${resolution === void 0 ? "" : `
 - Resolution: ${this.reviewMarkdownText(resolution)}`}`).join("\n\n");
-    const directory = join18(this.root, "agent-output", run.projectId, run.runId, "reviews");
+    const directory = join19(this.root, "agent-output", run.projectId, run.runId, "reviews");
     await mkdir11(directory, { recursive: true });
-    await this.writeGeneratedReview(join18(directory, `${subject}-findings.md`), Buffer.from(`# ${this.reviewMarkdownText(subject)} Challenger Findings
+    await this.writeGeneratedReview(join19(directory, `${subject}-findings.md`), Buffer.from(`# ${this.reviewMarkdownText(subject)} Challenger Findings
 
 - Reviewed artifact kind: ${this.reviewMarkdownText(review2.subjectKind)}
 - Review subject hash: ${review2.subjectHash}
@@ -65759,10 +69932,10 @@ ${findings}
 `, "utf8"));
   }
   async materializeValidationReport(run, evidence, taskType, evidenceModes) {
-    const directory = join18(this.root, "agent-output", run.projectId, run.runId, "validation");
+    const directory = join19(this.root, "agent-output", run.projectId, run.runId, "validation");
     const entries = evidence.entries.length === 0 ? "- No validation evidence entries were produced." : evidence.entries.map(({ kind, hash: hash2, bytes, required: required3, retention }) => `- ${this.reviewMarkdownText(kind)}: ${hash2} (${bytes} bytes; ${required3 ? "required" : "optional"}; ${this.reviewMarkdownText(retention)}; ${this.reviewMarkdownText(evidenceModes[kind] ?? "simulated")})`).join("\n");
     await mkdir11(directory, { recursive: true });
-    await this.writeGeneratedReview(join18(directory, "validation-report.md"), Buffer.from(`# Validation Report
+    await this.writeGeneratedReview(join19(directory, "validation-report.md"), Buffer.from(`# Validation Report
 
 - Task: ${this.reviewMarkdownText(taskType)}
 - Track: ${this.reviewMarkdownText(run.iacTool)}
@@ -65799,7 +69972,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       if (templateDefinition === void 0) {
         throw new ApexError("APEX_INTERNAL", "Requirements template is unregistered", EXIT_CODES.internal);
       }
-      const content = await readFile14(join18(assets.customizations, templateDefinition.assetPath), "utf8");
+      const content = await readFile14(join19(assets.customizations, templateDefinition.assetPath), "utf8");
       return { content, hash: sha256Bytes(Buffer.from(content, "utf8")) };
     })();
     return this.requirementsDocumentTemplate;
@@ -66011,8 +70184,15 @@ Only native entries reference runtime-executed source-bound command receipts. Si
   async decideGateNumber(gateNumber, decision, actor, options = {}) {
     await this.assertNoPendingReview("gateDecide");
     const run = await this.currentRun();
+    if (isReadinessGate(run.purpose, gateNumber)) {
+      throw new ApexError("APEX_VALIDATION", `Gate ${gateNumber} is a kernel readiness checkpoint for a ${run.purpose} run: it is recorded automatically once its required reviews and checks pass and has no human decision; resolve blocking review findings or validation failures instead, and confirm Gate 1 and the final Gate 4 preview`, EXIT_CODES.validation, { reason: "GATE_READINESS_AUTOMATIC", gate: gateNumber, purpose: run.purpose });
+    }
     if (gateNumber === 4)
-      await this.assertGeneratedReviewUnmodified(join18(this.operationsReviewDirectory(run), "approval.md"));
+      assertDeploymentPurposeUsable(run.purpose);
+    if (gateNumber === 4) {
+      for (const name of ["README.md", "deployment-preview.md", "approval.md"])
+        await this.assertGeneratedReviewUnmodified(join19(this.operationsReviewDirectory(run), name));
+    }
     const gate = run.gates.find(({ gate: gate2 }) => gate2 === gateNumber);
     if (gate === void 0)
       throw new ApexError("APEX_USAGE", `Unknown gate ${gateNumber}`, EXIT_CODES.usage);
@@ -66157,7 +70337,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
             throw new ApexError("APEX_VALIDATION", "Preview requires current runtime-owned native validation", EXIT_CODES.validation);
         }
       }
-      const generatedRoot = handoff2 === void 0 ? void 0 : resolve16(this.root, handoff2.rootPath);
+      const generatedRoot = handoff2 === void 0 ? void 0 : resolve17(this.root, handoff2.rootPath);
       if (options.operation === "apply") {
         if (generatedRoot === void 0 || handoff2 === void 0)
           throw new ApexError("APEX_STALE", "Accepted generated source is required for native preview", EXIT_CODES.stale);
@@ -66228,7 +70408,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
         ...attestationHash === void 0 ? {} : { attestationHash },
         ...policyValidationHash === void 0 ? {} : { policyValidationHash }
       });
-      await this.materializeOperationsPreviewPackage(run, preview2, previewObjectHash2);
+      await this.materializeOperationsPreviewPackage(run, preview2, previewObjectHash2, provider.approvalMaterial?.(preview2.previewHash));
       await this.openRunGate(await this.currentRun(), 4, preview2.previewHash);
       return preview2;
     }
@@ -66269,7 +70449,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       targetScope: run.targetScope
     });
     for (const name of ["README.md", "deployment-preview.md"])
-      await this.assertGeneratedReviewUnmodified(join18(this.operationsReviewDirectory(run), name));
+      await this.assertGeneratedReviewUnmodified(join19(this.operationsReviewDirectory(run), name));
     await this.append(run, "preview.created", {
       previewHash: preview.previewHash,
       previewObjectHash,
@@ -66284,14 +70464,15 @@ Only native entries reference runtime-executed source-bound command receipts. Si
     return preview;
   }
   operationsReviewDirectory(run) {
-    return join18(this.root, "agent-output", run.projectId, run.runId, "operations");
+    return join19(this.root, "agent-output", run.projectId, run.runId, "operations");
   }
-  async materializeOperationsPreviewPackage(run, preview, previewObjectHash) {
+  async materializeOperationsPreviewPackage(run, preview, previewObjectHash, executor) {
     const directory = this.operationsReviewDirectory(run);
     const changes = preview.changes.length === 0 ? "- No changes." : preview.changes.map(({ resourceId, action, material, details }) => {
       const detail = details === void 0 ? "" : `: ${this.reviewMarkdownText(details)}`;
       return `- ${this.reviewMarkdownText(action)} ${this.reviewMarkdownText(resourceId)}${material ? " (material)" : ""}${detail}`;
     }).join("\n");
+    const approvalContext = await this.approvalContextMarkdown(run, await this.journal(run).replay());
     const previewContent = [
       "# Deployment Preview",
       "",
@@ -66307,11 +70488,19 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       "## Blockers",
       "",
       preview.blockers.length === 0 ? "- None." : preview.blockers.map((blocker) => `- ${this.reviewMarkdownText(blocker)}`).join("\n"),
-      ""
+      "",
+      ...executor === void 0 ? [] : [
+        "## Executor (azd)",
+        "",
+        ...executor.warnings.map((warning) => `- Warning: ${this.reviewMarkdownText(warning)}`),
+        ...executor.inventory.map((line) => `- ${this.reviewMarkdownText(line)}`),
+        ""
+      ],
+      approvalContext
     ].join("\n");
     await mkdir11(directory, { recursive: true });
     await Promise.all([
-      this.writeGeneratedReview(join18(directory, "README.md"), Buffer.from(`# Operations Review
+      this.writeGeneratedReview(join19(directory, "README.md"), Buffer.from(`# Operations Review
 
 Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.runId)}\`. The APEX kernel state remains authoritative.
 
@@ -66319,8 +70508,63 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
 - Preview object hash: ${previewObjectHash}
 - Gate 4 status: pending human terminal approval
 `, "utf8")),
-      this.writeGeneratedReview(join18(directory, "deployment-preview.md"), Buffer.from(previewContent, "utf8"))
+      this.writeGeneratedReview(join19(directory, "deployment-preview.md"), Buffer.from(previewContent, "utf8"))
     ]);
+  }
+  /** Deterministic, bounded summary so the single final approval is informed by accepted evidence. */
+  async approvalContextMarkdown(run, events) {
+    const text5 = (value, max = 240) => this.reviewMarkdownText(value.length > max ? `${value.slice(0, max - 1)}\u2026` : value);
+    const gateState = (gateNumber) => run.gates.find(({ gate }) => gate === gateNumber)?.state ?? "unknown";
+    const gateLines = run.purpose === "lab" ? [
+      `- Gate 1: human intent confirmation (${gateState(1)})`,
+      `- Gates 2 and 3: kernel readiness checkpoints (${gateState(2)}, ${gateState(3)}); not human approvals`
+    ] : [1, 2, 3].map((gateNumber) => `- Gate ${gateNumber}: ${gateState(gateNumber)}`);
+    const lines = [
+      "## Approval Context",
+      "",
+      `- Purpose: ${text5(run.purpose)}`,
+      `- Target: ${text5(run.targetScope)}`,
+      `- Environment: ${text5(run.environment)}`,
+      `- IaC track: ${text5(run.iacTool)}`,
+      ...gateLines,
+      "",
+      "## Architecture",
+      ""
+    ];
+    const architectureHash = this.artifactHash(events, "architecture");
+    if (architectureHash === void 0) {
+      lines.push("- Accepted architecture is unavailable.", "");
+    } else {
+      const architecture = await this.objects.getJson(architectureHash);
+      lines.push(`- Title: ${text5(architecture.title)}`, `- Summary: ${text5(architecture.summary, 600)}`, `- Architecture hash: ${architectureHash}`, "", "### Components", "", ...architecture.components.slice(0, 25).map(({ id, service, purpose }) => `- ${text5(id)} (${text5(service)}): ${text5(purpose)}`), ...architecture.components.length > 25 ? [`- ${architecture.components.length - 25} more components`] : [], "", "### Architecture Risks", "", ...architecture.risks.length === 0 ? ["- None recorded."] : architecture.risks.slice(0, 10).map((risk) => `- ${text5(risk)}`), ...architecture.risks.length > 10 ? [`- ${architecture.risks.length - 10} more risks`] : [], "");
+    }
+    lines.push("## Cost Estimate", "");
+    const costHash = this.artifactHash(events, "cost-estimate");
+    if (costHash === void 0) {
+      lines.push("- Accepted cost estimate is unavailable.", "");
+    } else {
+      const cost = await this.objects.getJson(costHash);
+      const items = [...cost.lineItems].sort((left, right) => right.monthlyCost - left.monthlyCost || (left.id < right.id ? -1 : 1));
+      lines.push(`- Estimated monthly total: ${cost.totalMonthlyCost} ${text5(cost.currency)}`, `- Pricing date: ${text5(cost.pricingDate)}`, `- Pricing status: ${cost.pricingStatus ?? "complete"}`, `- Unpriced items: ${cost.unpricedItems?.length ?? 0}`, `- Cost estimate hash: ${costHash}`, "", ...items.slice(0, 20).map(({ id, service, sku, monthlyCost }) => `- ${text5(id)} (${text5(service)}, ${text5(sku)}): ${monthlyCost}`), ...items.length > 20 ? [`- ${items.length - 20} more line items`] : [], "", ...cost.assumptions.length === 0 ? [] : ["### Cost Assumptions", "", ...cost.assumptions.slice(0, 10).map((item) => `- ${text5(item)}`), ""]);
+    }
+    lines.push("## Accepted Risks", "");
+    const currentReviewHashes = new Set(["requirements-review", "architecture-review", "plan-review"].flatMap((nodeId) => {
+      const hash2 = this.latestPayloadHash(events, "task.completed", "reviewHash", (payload) => payload.nodeId === nodeId);
+      return hash2 === void 0 ? [] : [hash2];
+    }));
+    const now = this.clock().getTime();
+    const accepted = /* @__PURE__ */ new Map();
+    for (const event of events) {
+      if (event.type !== "review.resolved")
+        continue;
+      const resolution = event.payload.resolution;
+      if (resolution?.disposition === "accepted-risk" && currentReviewHashes.has(resolution.reviewHash) && resolution.expiresAt !== void 0 && Date.parse(resolution.expiresAt) > now) {
+        accepted.set(`${resolution.reviewHash}:${resolution.findingId}`, resolution);
+      }
+    }
+    const risks = [...accepted.values()].sort((left, right) => left.findingId < right.findingId ? -1 : 1);
+    lines.push(...risks.length === 0 ? ["- None."] : risks.slice(0, 20).map((risk) => `- ${text5(risk.findingId)} (expires ${text5(risk.expiresAt ?? "")}, owner ${text5(risk.owner ?? risk.actor)}): ${text5(risk.rationale)}`), ...risks.length > 20 ? [`- ${risks.length - 20} more accepted risks`] : [], "");
+    return lines.join("\n");
   }
   async materializeOperationsApprovalPackage(run, approval, approvalHash) {
     const content = [
@@ -66336,7 +70580,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       "This approval authorizes only the exact preview above.",
       ""
     ].join("\n");
-    await this.writeGeneratedReview(join18(this.operationsReviewDirectory(run), "approval.md"), Buffer.from(content, "utf8"));
+    await this.writeGeneratedReview(join19(this.operationsReviewDirectory(run), "approval.md"), Buffer.from(content, "utf8"));
   }
   async currentPreview() {
     const run = await this.currentRun();
@@ -66519,7 +70763,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         resource
       ]));
       const seen = /* @__PURE__ */ new Set();
-      inventory.resources = inventory.resources.map((resource) => {
+      const protectedIds = await this.nativeBicepProtectedResourceIds(run, events);
+      inventory.resources = inventory.resources.filter(({ resourceId }) => !protectedIds.has(resourceId.toLowerCase())).map((resource) => {
         const identity = resource.resourceId.toLowerCase();
         const accepted = managed.get(identity);
         if (accepted === void 0 || seen.has(identity)) {
@@ -66553,15 +70798,22 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       throw new ApexError("APEX_NOT_FOUND", "No inventory exists for this run", EXIT_CODES.notFound);
     return this.objects.getJson(hash2);
   }
-  async promote(environment, targetScope) {
+  async promote(environment, targetScope, purpose) {
     await this.assertNoPendingReview("promote");
     const source2 = await this.currentRun();
+    assertDeploymentPurposeUsable(source2.purpose);
+    if (purpose !== void 0) {
+      assertDeploymentPurposeUsable(purpose);
+      if (purpose !== source2.purpose)
+        throw new ApexError("APEX_VALIDATION", `Deployment purpose cannot change within a run (this run is '${source2.purpose}'); start a new project with the purpose you need`, EXIT_CODES.validation);
+    }
     const sourceEvents = await this.journal(source2).replay();
-    if (![1, 2, 3].every((gate) => this.gateApproved(source2, gate)))
-      throw new ApexError("APEX_AUTHORIZATION", "Promotion requires approved Gates 1-3", EXIT_CODES.authorization);
+    if (![1, 2, 3].every((gate) => this.gateSatisfied(source2, gate, sourceEvents)))
+      throw new ApexError("APEX_AUTHORIZATION", "Promotion requires an approved Gate 1 and approved or recorded-ready Gates 2 and 3", EXIT_CODES.authorization);
     await this.acquireRunWriterLease(source2);
     const promoted = await this.projects.createRun(source2.projectId, {
       environment,
+      purpose: source2.purpose,
       targetScope,
       runtimeLockHash: source2.runtimeLockHash,
       iacTool: source2.iacTool,
@@ -66570,15 +70822,14 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     const sameScope = source2.targetScope === targetScope;
     const inherited = promoted.gates.map((gate) => {
       const sourceGate = source2.gates.find(({ gate: number4 }) => number4 === gate.gate);
-      const inheritable = gate.gate === 1 || sameScope && gate.gate <= 3;
+      const inheritable = sameScope && gate.gate <= 3;
       return inheritable && (sourceGate.state === "approved" || sourceGate.state === "inherited") ? inheritGate(sourceGate, source2.runId, sourceGate.dependencyHash, this.clock().toISOString()) : gate;
     });
     const updated = { ...promoted, gates: inherited };
     await atomicWriteJson(this.runPath(updated), updated);
     const neutralNodes = /* @__PURE__ */ new Set([
       "requirements",
-      "requirements-review",
-      ...sameScope ? ["governance-discovery", "architecture", "architecture-review", "plan", "plan-review"] : []
+      ...sameScope ? ["requirements-review", "governance-discovery", "architecture", "architecture-review", "plan", "plan-review"] : []
     ]);
     const inheritedReviewHashes = /* @__PURE__ */ new Set();
     for (const event of sourceEvents) {
@@ -66630,7 +70881,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       sourceDependencyRevision: this.dependencyRevision(source2, sourceEvents),
       targetScopeChanged: !sameScope,
       invalidated: [
-        ...!sameScope ? ["governance", "gate-2", "gate-3"] : [],
+        ...!sameScope ? ["requirements-review", "governance", "gate-1", "gate-2", "gate-3"] : [],
         "codegen",
         "validation",
         "preview",
@@ -66639,11 +70890,28 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         "inventory"
       ]
     });
+    const reopen = [];
+    if (sameScope) {
+      for (const [gateNumber, reviewNode] of [
+        [2, "architecture-review"],
+        [3, "plan-review"]
+      ]) {
+        if (source2.gates.find(({ gate }) => gate === gateNumber)?.state === "ready")
+          reopen.push([gateNumber, reviewNode]);
+      }
+    }
+    for (const [gateNumber, reviewNode] of reopen) {
+      const promotedEvents = await this.journal(updated).replay();
+      const reviewDependencyHash = this.latestPayloadHash(promotedEvents, "task.completed", "dependencyHash", (payload) => payload.nodeId === reviewNode);
+      if (reviewDependencyHash === void 0 || this.reviewBlockers(promotedEvents, reviewNode).length > 0)
+        break;
+      await this.openRunGate(await this.runRepository(updated).read(), gateNumber, reviewDependencyHash);
+    }
     await this.writeSelection({ projectId: updated.projectId, runId: updated.runId });
-    return updated;
+    return this.runRepository(updated).read();
   }
   async doctor(fix = false, yes = false, live = false) {
-    const apexExists = await this.exists(join18(this.root, ".apex"));
+    const apexExists = await this.exists(join19(this.root, ".apex"));
     if (fix && yes && apexExists) {
       await this.ensureLocalGitBoundary(true);
       const assets = await resolveBundledAssets();
@@ -66654,7 +70922,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       const clientId2 = selection2.clientId;
       await this.installCustomizations(assets.clientProjections[clientId2], true, assets.config, true, clientId2, assets.plugin);
       await this.installCapabilityAssets(assets);
-      await atomicWriteJson(join18(this.root, ".apex", "apex.lock.json"), await this.createRuntimeLock(assets));
+      await atomicWriteJson(join19(this.root, ".apex", "apex.lock.json"), await this.createRuntimeLock(assets));
     }
     const checks = [
       {
@@ -66664,7 +70932,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         remedy: `Install Node.js ${MINIMUM_NODE_VERSION} or newer`
       },
       { id: "workspace", ok: await this.exists(this.root), value: this.root, remedy: "Restore the workspace root" },
-      { id: "apex", ok: apexExists, value: join18(this.root, ".apex"), remedy: "Run apex init" },
+      { id: "apex", ok: apexExists, value: join19(this.root, ".apex"), remedy: "Run apex init" },
       ...await this.hostChecks()
     ];
     if (apexExists && await this.workspaceHasNoProjects()) {
@@ -66687,6 +70955,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
           remedy: `Install ${executable} and add it to PATH`
         });
       }
+      if (run.iacTool === "bicep")
+        checks.push(await this.azdPrerequisiteCheck());
       const auth = await this.azureAuthStatus(live);
       checks.push({
         id: "azure-auth",
@@ -66708,7 +70978,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
           remedy: status2.action
         })));
       }
-      const providerConfigured = await this.exists(join18(this.root, ".apex", "provider-config.json"));
+      const providerConfigured = await this.exists(join19(this.root, ".apex", "provider-config.json"));
       checks.push({
         id: "provider-config",
         ok: providerConfigured,
@@ -66753,7 +71023,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return result;
   }
   async cacheStatus() {
-    const directory = join18(this.root, ".apex", "cache", "content");
+    const directory = join19(this.root, ".apex", "cache", "content");
     if (!await this.exists(directory))
       return { entries: 0 };
     return { entries: (await readdir9(directory)).filter((name) => /^[0-9a-f]{64}\.json$/.test(name)).length };
@@ -66829,7 +71099,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     if (input2.value === void 0 === (input2.file === void 0))
       throw new ApexError("APEX_USAGE", "Evidence requires exactly one value or file", EXIT_CODES.usage);
     const store = await this.evidenceStore(input2.kind, input2.contentType);
-    let value = input2.file === void 0 ? input2.value : await readFile14(resolve16(input2.file));
+    let value = input2.file === void 0 ? input2.value : await readFile14(resolve17(input2.file));
     if (input2.kind === "architecture-availability-v1") {
       if (input2.contentType !== "application/json")
         throw new ApexError("APEX_VALIDATION", "Architecture availability evidence must use application/json", EXIT_CODES.validation);
@@ -67050,7 +71320,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }, this.clock, this.idSource);
     await this.acquireRunWriterLease(run);
     const review2 = descriptor.reviewSubject === void 0 ? void 0 : await this.prepareReviewRequest(run, descriptor, task.taskId, inputRefs);
-    await atomicWriteJson(join18(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${task.taskId}.json`), task, { refuseOverwrite: true });
+    await atomicWriteJson(join19(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${task.taskId}.json`), task, { refuseOverwrite: true });
     await this.append(run, "task.issued", {
       taskId: task.taskId,
       taskType: descriptor.id,
@@ -67058,7 +71328,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     });
     const currentHead = await this.journal(run).head();
     const current = { ...task, expectedHead: currentHead };
-    await atomicWriteJson(join18(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${task.taskId}.json`), current);
+    await atomicWriteJson(join19(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${task.taskId}.json`), current);
     return current;
   }
   async openRunGate(run, gateNumber, dependencyHash) {
@@ -67074,6 +71344,36 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       dependencyHash,
       ...reopened ? { previousState: gate.state } : {}
     });
+    if (isReadinessGate(run.purpose, gateNumber))
+      await this.recordGateReadiness(run, gateNumber);
+  }
+  /**
+   * Records the lab Gate 2/3 readiness checkpoint once the gate validators and required reviews pass.
+   * It is a kernel record, not a decision: no actor, no approval evidence and no `gate.decided` event.
+   * A failing validator or open review finding leaves the gate open and unrecorded.
+   */
+  async recordGateReadiness(run, gateNumber) {
+    if (!isReadinessGate(run.purpose, gateNumber))
+      return false;
+    const current = await this.runRepository(run).read();
+    const gate = current.gates.find((item) => item.gate === gateNumber);
+    if (gate === void 0 || gate.state !== "open")
+      return false;
+    const events = await this.journal(current).replay();
+    let validatorIds;
+    try {
+      validatorIds = await this.validateGateValidators(current, gate, events, void 0, void 0);
+    } catch (error62) {
+      if (error62 instanceof ApexError && error62.code === "APEX_VALIDATION")
+        return false;
+      throw error62;
+    }
+    await this.assertCurrentWriterAuthority(current, new WriterTransferStore(this.projects.runDirectory(current.projectId, current.runId), this.clock));
+    await this.mutateRun(current, {
+      ...current,
+      gates: current.gates.map((item) => item.gate === gateNumber ? markGateReady(item, current.purpose, this.clock().toISOString()) : item)
+    }, "gate.readiness-recorded", { gate: gateNumber, dependencyHash: gate.dependencyHash, validatorIds }, events.at(-1)?.hash ?? null);
+    return true;
   }
   async mutateRun(before, after, eventType, payload, expectedJournalHead) {
     this.assertNotSnapshotRead();
@@ -67305,10 +71605,13 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     });
   }
   journal(run) {
-    return new EventJournal(join18(this.projects.runDirectory(run.projectId, run.runId), "journal"));
+    return new EventJournal(join19(this.projects.runDirectory(run.projectId, run.runId), "journal"), {
+      projectId: run.projectId,
+      runId: run.runId
+    });
   }
   runPath(run) {
-    return join18(this.projects.runDirectory(run.projectId, run.runId), "run.json");
+    return join19(this.projects.runDirectory(run.projectId, run.runId), "run.json");
   }
   async currentRun() {
     await this.recoverCustomizationTransaction();
@@ -67318,7 +71621,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     const directory = this.projects.runDirectory(selection2.projectId, selection2.runId);
     const readOnly = options.readOnly === true || this.snapshotRead.getStore() === true;
     if (readOnly) {
-      const pending = await readFile14(join18(directory, ".run-transaction.json")).catch((error62) => {
+      const pending = await readFile14(join19(directory, ".run-transaction.json")).catch((error62) => {
         if (error62.code === "ENOENT")
           return void 0;
         throw error62;
@@ -67328,8 +71631,15 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         throw new ApexError("APEX_CONFLICT", "Run transaction recovery is required", EXIT_CODES.conflict);
       }
     }
-    const run = readOnly ? JSON.parse(await readFile14(join18(directory, "run.json"), "utf8")) : await this.runRepository(selection2).read();
-    const events = await this.journal(run).replay();
+    const run = readOnly ? parseRunConfig(await readFile14(join19(directory, "run.json"), "utf8")) : await this.runRepository(selection2).read();
+    let events;
+    try {
+      events = await this.journal(run).replay();
+    } catch (error62) {
+      if (error62 instanceof JournalIdentityError)
+        throw new ApexError("APEX_CONFLICT", "The run journal belongs to a different project or run; restore the run state from its own backup", EXIT_CODES.conflict, void 0, { cause: error62 });
+      throw error62;
+    }
     this.assertRequirementsIntakeAdmitted(events, run.ownerEpoch);
     const retired = events.some((event) => {
       if (event.type !== "task.completed")
@@ -67388,7 +71698,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async refreshWorkspacePath() {
     try {
-      this.workspacePath = await realpath7(this.workspacePath);
+      this.workspacePath = await realpath8(this.workspacePath);
     } catch (error62) {
       if (error62.code !== "ENOENT")
         throw error62;
@@ -67398,11 +71708,11 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return { workspacePath: this.workspacePath, sessionId: `${process.pid}` };
   }
   async selection() {
-    return JSON.parse(await readFile14(join18(this.root, ".apex", "config.json"), "utf8"));
+    return JSON.parse(await readFile14(join19(this.root, ".apex", "config.json"), "utf8"));
   }
   async writeSelection(selection2) {
     this.assertNotSnapshotRead();
-    await atomicWriteJson(join18(this.root, ".apex", "config.json"), selection2);
+    await atomicWriteJson(join19(this.root, ".apex", "config.json"), selection2);
   }
   latestPayloadHash(events, type, field, predicate) {
     for (const event of [...events].reverse()) {
@@ -67828,14 +72138,14 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       { id: "workload-profile", label: "Workload profile", priority: "must" }
     ];
     const answered = fields.flatMap((field) => {
-      const text5 = this.renderInputValue(input2?.[field.id]);
-      return typeof text5 === "string" && text5.length > 0 ? [{ ...field, text: text5 }] : [];
+      const text6 = this.renderInputValue(input2?.[field.id]);
+      return typeof text6 === "string" && text6.length > 0 ? [{ ...field, text: text6 }] : [];
     });
-    const requirements = answered.map(({ id, label, priority, text: text5 }, index) => {
-      const status2 = /^deferred:/iu.test(text5.trim()) ? "deferred" : /^unknown$/iu.test(text5.trim()) ? "unknown" : "confirmed";
+    const requirements = answered.map(({ id, label, priority, text: text6 }, index) => {
+      const status2 = /^deferred:/iu.test(text6.trim()) ? "deferred" : /^unknown$/iu.test(text6.trim()) ? "unknown" : "confirmed";
       return {
         id: `REQ-${String(index + 1).padStart(3, "0")}`,
-        statement: `${label}: ${text5}`,
+        statement: `${label}: ${text6}`,
         priority,
         status: status2,
         source: `intake:${id}`
@@ -67843,30 +72153,30 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     });
     const assumptions = ["industry", "target-environments"].flatMap((id) => {
       const value = input2?.[id];
-      const text5 = this.renderInputValue(value);
-      return typeof text5 === "string" && text5.length > 0 ? [`${id}: ${text5}`] : [];
+      const text6 = this.renderInputValue(value);
+      return typeof text6 === "string" && text6.length > 0 ? [`${id}: ${text6}`] : [];
     });
     const unknowns = requirements.filter(({ status: status2 }) => status2 !== "confirmed").map(({ statement }) => statement);
-    const text4 = (id) => {
+    const text5 = (id) => {
       const value = this.renderInputValue(input2?.[id]);
       return typeof value === "string" && value.length > 0 ? value : void 0;
     };
     const joinValues2 = (...ids) => {
-      const values = ids.map(text4).filter((value) => value !== void 0);
+      const values = ids.map(text5).filter((value) => value !== void 0);
       return values.length === 0 ? void 0 : values.join("; ");
     };
     const recommend = (value, recommendation) => [value, `Recommendation (proposed, not confirmed): ${recommendation}`].filter(Boolean).join("\n\n");
     const compliance = input2?.compliance;
     const gdpr = typeof compliance === "object" && compliance !== null && !Array.isArray(compliance) && compliance.kind === "compliance" && compliance.scopes.includes("gdpr");
-    const performanceScale = text4("scale") === void 0 ? "Performance and scale: check later (validated at a later stage)" : `Performance and scale goals: ${text4("scale")} (validated at a later stage)`;
+    const performanceScale = text5("scale") === void 0 ? "Performance and scale: check later (validated at a later stage)" : `Performance and scale goals: ${text5("scale")} (validated at a later stage)`;
     const reviewFields = {
       businessContext: joinValues2("industry", "delivery-scenario", "workload-pattern"),
-      successCriteria: recommend(text4("scale") ?? "Performance and scale goals are intentionally deferred for later validation.", "Validate performance and scale later with defined measurement boundaries, normal and peak load, percentiles, error rate, and test duration. Treat stated numbers as goals, not acceptance gates."),
-      nonFunctionalRequirements: [text4("availability-recovery") ?? text4("recovery"), performanceScale].filter((value) => value !== void 0).join("\n\n"),
+      successCriteria: recommend(text5("scale") ?? "Performance and scale goals are intentionally deferred for later validation.", "Validate performance and scale later with defined measurement boundaries, normal and peak load, percentiles, error rate, and test duration. Treat stated numbers as goals, not acceptance gates."),
+      nonFunctionalRequirements: [text5("availability-recovery") ?? text5("recovery"), performanceScale].filter((value) => value !== void 0).join("\n\n"),
       securityAndCompliance: gdpr ? recommend(joinValues2("security-controls", "compliance", "authentication", "data-sensitivity"), "Inventory personal data, minimize collection and telemetry, and document retention/deletion and data-subject handling before production use. Suggested role: privacy/data owner; no assignment, retention period or GDPR compliance is asserted.") : joinValues2("security-controls", "compliance", "authentication", "data-sensitivity"),
       budgetAndOperations: joinValues2("budget", "operations"),
-      regionalConstraints: text4("region"),
-      architectureHandoff: recommend(text4("service-preferences"), "Have Architecture define authorized client access, identity, ingress and DNS using the confirmed security requirements and target Azure Policy. Prefer least privilege; do not infer public access. Suggested role: platform/application team; no assignment is implied.")
+      regionalConstraints: text5("region"),
+      architectureHandoff: recommend(text5("service-preferences"), "Have Architecture define authorized client access, identity, ingress and DNS using the confirmed security requirements and target Azure Policy. Prefer least privilege; do not infer public access. Suggested role: platform/application team; no assignment is implied.")
     };
     return {
       requirements: requirements.length > 0 ? requirements : [
@@ -67927,8 +72237,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async lockedWorkflowEngine(run) {
     const runtimeRoot = await this.runtimeRootForRun(run);
-    const workflowBytes = await readFile14(join18(runtimeRoot, "workflow.v1.json"));
-    const lock = JSON.parse(await readFile14(join18(runtimeRoot, "apex.lock.json"), "utf8"));
+    const workflowBytes = await readFile14(join19(runtimeRoot, "workflow.v1.json"));
+    const lock = JSON.parse(await readFile14(join19(runtimeRoot, "apex.lock.json"), "utf8"));
     this.assertValid("runtime-lock", lock);
     if (sha256Json(lock) !== run.runtimeLockHash || sha256Bytes(workflowBytes) !== lock.workflowHash) {
       throw new ApexError("APEX_STALE", "Runtime workflow lock is not current", EXIT_CODES.stale);
@@ -67937,8 +72247,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async taskLimits(run) {
     const runtimeRoot = await this.runtimeRootForRun(run);
-    const bytes = await readFile14(join18(runtimeRoot, "defaults.v1.json"));
-    const lock = JSON.parse(await readFile14(join18(runtimeRoot, "apex.lock.json"), "utf8"));
+    const bytes = await readFile14(join19(runtimeRoot, "defaults.v1.json"));
+    const lock = JSON.parse(await readFile14(join19(runtimeRoot, "apex.lock.json"), "utf8"));
     this.assertValid("runtime-lock", lock);
     if (sha256Json(lock) !== run.runtimeLockHash || sha256Bytes(bytes) !== lock.defaultsHash)
       throw new ApexError("APEX_STALE", "Runtime defaults lock is not current", EXIT_CODES.stale);
@@ -67968,8 +72278,12 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
             blockers: reviewBlockers,
             ...descriptor.gate === void 0 && descriptor.id !== "architecture-review" ? {} : { reviewGate: descriptor.gate ?? 2 }
           };
-        if (descriptor.gate !== void 0 && !this.gateApproved(run, descriptor.gate)) {
-          return { blockers: [`Gate ${descriptor.gate} approval is required`] };
+        if (descriptor.gate !== void 0 && !this.gateSatisfied(run, descriptor.gate, events)) {
+          return {
+            blockers: [
+              isReadinessGate(run.purpose, descriptor.gate) ? `Gate ${descriptor.gate} readiness checkpoint is not recorded${await this.readinessBlockedReason(run, descriptor.gate, events)}` : `Gate ${descriptor.gate} approval is required`
+            ]
+          };
         }
         continue;
       }
@@ -67980,7 +72294,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         const preview = this.latestPayloadHash(events, "preview.created", "previewHash");
         if (preview === void 0)
           return { blockers: ["Deployment preview is required"] };
-        if (!this.gateApproved(run, 4))
+        if (!this.gateSatisfied(run, 4, events))
           return { blockers: ["Gate 4 approval is required"] };
         return { blockers: ["Deployment and inventory are required"] };
       }
@@ -67988,9 +72302,69 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
     return { blockers: [] };
   }
-  gateApproved(run, gateNumber) {
-    const state = run.gates.find(({ gate }) => gate === gateNumber)?.state;
-    return state === "approved" || state === "inherited";
+  async retryLabReadiness(run) {
+    let recorded = false;
+    for (const gateNumber of [2, 3]) {
+      if (run.gates.find(({ gate }) => gate === gateNumber)?.state !== "open")
+        continue;
+      recorded = await this.recordGateReadiness(run, gateNumber) || recorded;
+    }
+    return recorded;
+  }
+  async readinessBlockedReason(run, gateNumber, events) {
+    const gate = run.gates.find((item) => item.gate === gateNumber);
+    if (gate?.state !== "open")
+      return "";
+    try {
+      await this.validateGateValidators(run, gate, events, void 0, void 0);
+      return "";
+    } catch (error62) {
+      if (!(error62 instanceof ApexError) || !Array.isArray(error62.details))
+        return "";
+      const messages = error62.details.map(({ message }) => message).slice(0, 5);
+      return messages.length === 0 ? "" : `: ${messages.join("; ")}`;
+    }
+  }
+  /**
+   * Human approval, inheritance, or (lab Gates 2 and 3 only) a kernel readiness checkpoint.
+   *
+   * An approved gate is trusted from the run file, which sits inside the local state directory this process owns, so
+   * raw tampering with that directory is outside the threat model. Readiness is held to a stronger standard because
+   * no human vouches for it: it must be proven by the journal (see {@link readinessProven}).
+   */
+  gateSatisfied(run, gateNumber, events) {
+    const gate = run.gates.find((candidate) => candidate.gate === gateNumber);
+    if (gate?.state === "approved" || gate?.state === "inherited")
+      return true;
+    if (gate?.state !== "ready" || !isReadinessGate(run.purpose, gateNumber))
+      return false;
+    return this.readinessProven(run, gate, events);
+  }
+  /**
+   * A `ready` gate counts only when the latest journal event touching that gate is the kernel's own readiness record
+   * for this run, the record's committed post-state contains exactly this gate record, and the gate is still bound to
+   * the current review dependency. A later invalidation, open, reopen or decision therefore revokes it, and a copied
+   * older record or a foreign journal cannot restore it.
+   */
+  readinessProven(run, gate, events) {
+    const reviewNode = { 2: "architecture-review", 3: "plan-review" }[gate.gate];
+    if (reviewNode === void 0)
+      return false;
+    const latest = events.findLast((event) => {
+      const payload2 = event.payload;
+      return event.type === "workflow.invalidated" ? Array.isArray(payload2.nodeIds) && payload2.nodeIds.includes(`gate-${gate.gate}`) : event.type.startsWith("gate.") && payload2.gate === gate.gate;
+    });
+    if (latest?.type !== "gate.readiness-recorded")
+      return false;
+    if (latest.projectId !== run.projectId || latest.runId !== run.runId)
+      return false;
+    const payload = latest.payload;
+    if (payload.dependencyHash !== gate.dependencyHash)
+      return false;
+    const committed = Array.isArray(payload.transaction?.after?.gates) ? payload.transaction.after.gates.find((candidate) => candidate.gate === gate.gate) : void 0;
+    if (committed === void 0 || sha256Json(committed) !== sha256Json(gate))
+      return false;
+    return this.latestPayloadHash(events, "task.completed", "dependencyHash", (item) => item.nodeId === reviewNode) === gate.dependencyHash;
   }
   reviewBlockers(events, nodeId) {
     const event = [...events].reverse().find((candidate) => candidate.type === "task.completed" && candidate.payload.nodeId === nodeId);
@@ -68012,10 +72386,11 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return dependencyRevision(run, events);
   }
   async assertPreviewReady(run, events) {
+    assertDeploymentPurposeUsable(run.purpose);
     events = this.governanceWorkflowEvents(events);
     await this.assertImportedGovernanceCurrent(run, events);
-    if (!this.gateApproved(run, 3))
-      throw new ApexError("APEX_AUTHORIZATION", "Gate 3 approval is required before preview", EXIT_CODES.authorization);
+    if (!this.gateSatisfied(run, 3, events))
+      throw new ApexError("APEX_AUTHORIZATION", isReadinessGate(run.purpose, 3) ? "Gate 3 readiness checkpoint must be recorded before preview" : "Gate 3 approval is required before preview", EXIT_CODES.authorization);
     const engine = await this.lockedWorkflowEngine(run);
     const aliases = {
       requirements: "requirements-v1",
@@ -68059,11 +72434,12 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
     const completedNodes = [
       ...this.completedNodeIds(events),
-      ...run.gates.flatMap((gate) => gate.state === "approved" || gate.state === "inherited" ? [`gate-${gate.gate}`] : [])
+      ...run.gates.flatMap((gate) => this.gateSatisfied(run, gate.gate, events) ? [`gate-${gate.gate}`] : [])
     ];
     const route = engine.route({
       run: {
         iacTool: run.iacTool,
+        purpose: run.purpose,
         targetScope: run.targetScope,
         governanceRefreshRequired: await this.referenceGovernanceNeedsRefresh(run, events),
         policyRefreshRequired: await this.policyMapNeedsRefresh(events)
@@ -68467,7 +72843,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         const policyHash = artifactHashes2["policy-property-map"];
         if (handoff2 === void 0 || sourceHash === void 0 || inputHash === void 0 || policyHash === void 0)
           throw new ApexError("APEX_VALIDATION", "Native validation requires accepted source, intent and policy inputs", EXIT_CODES.validation);
-        const rootPath = resolve16(this.root, handoff2.rootPath);
+        const rootPath = resolve17(this.root, handoff2.rootPath);
         await this.assertSafeDestination(this.root, rootPath);
         const binding = {
           projectId: run.projectId,
@@ -68548,7 +72924,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   async qualityValidatorContext(run) {
     let qualityMeasurements;
     try {
-      qualityMeasurements = JSON.parse(await readFile14(join18(this.root, ".apex", "quality", "measurements.json"), "utf8"));
+      qualityMeasurements = JSON.parse(await readFile14(join19(this.root, ".apex", "quality", "measurements.json"), "utf8"));
     } catch (error62) {
       if (error62.code === "ENOENT") {
         throw new ApexError("APEX_VALIDATION", "Quality measurements are unavailable; run quality evaluate first", EXIT_CODES.validation);
@@ -68558,7 +72934,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     this.assertValid("quality-measurements", qualityMeasurements);
     const runtimeRoot = await this.runtimeRootForRun(run);
     return {
-      scorecard: JSON.parse(await readFile14(join18(runtimeRoot, "quality-scorecard.v1.json"), "utf8")),
+      scorecard: JSON.parse(await readFile14(join19(runtimeRoot, "quality-scorecard.v1.json"), "utf8")),
       qualityMeasurements
     };
   }
@@ -68604,12 +72980,12 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       now: this.clock().toISOString(),
       run,
       gate,
-      approval,
+      ...approval === void 0 ? {} : { approval },
       artifactHashes: artifactHashes2,
       completedNodes,
       reviewBlockers: reviewNodes.flatMap((reviewNode) => this.reviewBlockers(events, reviewNode)),
       currentDependencyRevision: this.dependencyRevision(run, events),
-      expectedApprovalRecipientIdentity,
+      ...expectedApprovalRecipientIdentity === void 0 ? {} : { expectedApprovalRecipientIdentity },
       ...provedPreviewTransferClaimHash === void 0 ? {} : { provedPreviewTransferClaimHash },
       ...expectedDependencyHash === void 0 ? {} : { expectedDependencyHash },
       ...preview === void 0 ? {} : { preview }
@@ -68618,7 +72994,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       this.assertValid(id, context);
     return validatorIds;
   }
-  async nativeBicepManagedResources(run, events) {
+  async nativeBicepOwnership(run, events) {
     const artifacts = this.acceptedArtifactHashes(events);
     if (!artifacts["implementation-intent"] || !artifacts["iac-binding"] || !artifacts["logical-resource-manifest"])
       throw new ApexError("APEX_VALIDATION", "preview:coverage requires accepted Bicep ownership inputs", EXIT_CODES.validation);
@@ -68628,6 +73004,15 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     const ownership = resolveNativeBicepResourceOwnership({ intent, binding, manifest: manifest2, targetScope: run.targetScope });
     if (ownership.issues.length > 0)
       throw new ApexError("APEX_VALIDATION", "preview:coverage cannot resolve accepted Bicep ownership", EXIT_CODES.validation);
+    return { intent, binding, ownership };
+  }
+  /** Resources the accepted manifest only references; the azd environment's group may hold them but does not own them. */
+  async nativeBicepProtectedResourceIds(run, events) {
+    const { ownership } = await this.nativeBicepOwnership(run, events);
+    return new Set(ownership.protectedResourceIds.map((id) => id.toLowerCase()));
+  }
+  async nativeBicepManagedResources(run, events) {
+    const { intent, binding, ownership } = await this.nativeBicepOwnership(run, events);
     return intent.resources.flatMap((resource) => {
       const primaryId = ownership.resourceIdsByLogicalId[resource.id];
       if (primaryId === void 0)
@@ -68799,7 +73184,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       }
     }
     const activeValidatorIds = workflow.activeValidatorIds({
-      run: { iacTool: run.iacTool, targetScope: run.targetScope },
+      run: { iacTool: run.iacTool, purpose: run.purpose, targetScope: run.targetScope },
       artifacts
     });
     const executedValidatorIds = /* @__PURE__ */ new Set();
@@ -68854,7 +73239,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       throw new ApexError("APEX_VALIDATION", "Task ID is invalid", EXIT_CODES.validation);
     }
     try {
-      return JSON.parse(await readFile14(join18(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${taskId}.json`), "utf8"));
+      return JSON.parse(await readFile14(join19(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${taskId}.json`), "utf8"));
     } catch (error62) {
       if (error62.code === "ENOENT") {
         throw new ApexError("APEX_NOT_FOUND", "Task was not found", EXIT_CODES.notFound, void 0, { cause: error62 });
@@ -68867,22 +73252,22 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     const expectedHead = await this.journal(run).head();
     if (expectedHead === null)
       throw new ApexError("APEX_STALE", "Task journal is empty", EXIT_CODES.stale);
-    await atomicWriteJson(join18(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${task.taskId}.json`), {
+    await atomicWriteJson(join19(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${task.taskId}.json`), {
       ...task,
       expectedHead
     });
   }
   async assertNoSymlinkPath(root, destination) {
     await mkdir11(root, { recursive: true });
-    const rootStat = await lstat13(root);
+    const rootStat = await lstat14(root);
     if (rootStat.isSymbolicLink() || !rootStat.isDirectory())
       throw new ApexError("APEX_VALIDATION", "Code staging root must be a real directory", EXIT_CODES.validation);
     let current = root;
-    for (const segment of relative7(root, destination).split(sep5).slice(0, -1)) {
-      current = join18(current, segment);
+    for (const segment of relative8(root, destination).split(sep6).slice(0, -1)) {
+      current = join19(current, segment);
       if (!await this.exists(current))
         continue;
-      const entry = await lstat13(current);
+      const entry = await lstat14(current);
       if (entry.isSymbolicLink() || !entry.isDirectory())
         throw new ApexError("APEX_VALIDATION", "Code staging path contains a non-directory or symlink", EXIT_CODES.validation);
     }
@@ -68892,7 +73277,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       return 0;
     let total = 0;
     for (const entry of await readdir9(directory, { withFileTypes: true })) {
-      const path2 = join18(directory, entry.name);
+      const path2 = join19(directory, entry.name);
       if (entry.isSymbolicLink())
         throw new ApexError("APEX_VALIDATION", "Code staging tree contains a symlink", EXIT_CODES.validation);
       total += entry.isDirectory() ? await this.directoryBytes(path2) : (await stat2(path2)).size;
@@ -68946,8 +73331,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
     const runtimeRoot = await this.runtimeRootForRun(run);
     const [policyBytes, lockBytes] = await Promise.all([
-      readFile14(join18(runtimeRoot, "improvement-policy.v1.json")),
-      readFile14(join18(runtimeRoot, "apex.lock.json"))
+      readFile14(join19(runtimeRoot, "improvement-policy.v1.json")),
+      readFile14(join19(runtimeRoot, "apex.lock.json"))
     ]);
     const lock = JSON.parse(lockBytes.toString("utf8"));
     this.assertValid("runtime-lock", lock);
@@ -68958,7 +73343,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return this.improvementRuntime;
   }
   async latestRun(projectId) {
-    const names = await readdir9(join18(this.projects.projectDirectory(projectId), "runs"));
+    const names = await readdir9(join19(this.projects.projectDirectory(projectId), "runs"));
     const runs = await Promise.all(names.map((name) => this.projects.getRun(projectId, name)));
     const latest = runs.sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0];
     if (latest === void 0)
@@ -68967,7 +73352,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async customizationSelection() {
     try {
-      const value = JSON.parse(await readFile14(join18(this.root, ".apex", "customizations.selection.json"), "utf8"));
+      const value = JSON.parse(await readFile14(join19(this.root, ".apex", "customizations.selection.json"), "utf8"));
       if (value.clientId === "github-copilot-vscode")
         throw retiredProjectionError();
       if (value.version !== 1 || value.clientId !== "github-copilot-cli" || !["bundled-projection", "custom-source"].includes(value.sourceMode) || value.sourceMode === "custom-source" && typeof value.customSource !== "string") {
@@ -68981,28 +73366,28 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
   }
   async assertCleanInitialization() {
-    if (await this.exists(join18(this.root, ".apex")))
+    if (await this.exists(join19(this.root, ".apex")))
       throw new ApexError("APEX_CONFLICT", "Workspace is already initialized", EXIT_CODES.conflict);
   }
   async createRuntimeLock(assets) {
-    const runtimeRoot = join18(this.root, ".apex", "runtime");
-    const packs = JSON.parse(await readFile14(join18(runtimeRoot, "capability-packs.registry.json"), "utf8"));
+    const runtimeRoot = join19(this.root, ".apex", "runtime");
+    const packs = JSON.parse(await readFile14(join19(runtimeRoot, "capability-packs.registry.json"), "utf8"));
     const requiredCapabilityPacks = (packs.packs ?? []).map((pack) => {
       const id = typeof pack.id === "string" ? pack.id : pack.name;
       if (typeof id !== "string" || id.length === 0)
         throw new ApexError("APEX_VALIDATION", "Capability pack has no identifier", EXIT_CODES.validation);
       return id;
     });
-    const validatorPath = await this.exists(join18(runtimeRoot, "runtime-bundle.v1.json")) ? join18(runtimeRoot, "runtime-bundle.v1.json") : join18(runtimeRoot, "toolchain.v1.json");
+    const validatorPath = await this.exists(join19(runtimeRoot, "runtime-bundle.v1.json")) ? join19(runtimeRoot, "runtime-bundle.v1.json") : join19(runtimeRoot, "toolchain.v1.json");
     const lock = {
       schemaVersion: CONTRACT_VERSION,
       cliVersion: APEX_VERSION,
       customizationVersion: assets.manifest.sources.customizations,
-      workflowHash: sha256Bytes(await readFile14(join18(runtimeRoot, "workflow.v1.json"))),
-      defaultsHash: sha256Bytes(await readFile14(join18(runtimeRoot, "defaults.v1.json"))),
+      workflowHash: sha256Bytes(await readFile14(join19(runtimeRoot, "workflow.v1.json"))),
+      defaultsHash: sha256Bytes(await readFile14(join19(runtimeRoot, "defaults.v1.json"))),
       validatorHash: sha256Bytes(await readFile14(validatorPath)),
-      qualityScorecardHash: sha256Bytes(await readFile14(join18(runtimeRoot, "quality-scorecard.v1.json"))),
-      improvementPolicyHash: sha256Bytes(await readFile14(join18(runtimeRoot, "improvement-policy.v1.json"))),
+      qualityScorecardHash: sha256Bytes(await readFile14(join19(runtimeRoot, "quality-scorecard.v1.json"))),
+      improvementPolicyHash: sha256Bytes(await readFile14(join19(runtimeRoot, "improvement-policy.v1.json"))),
       requiredCapabilityPacks: [...new Set(requiredCapabilityPacks)].sort()
     };
     this.assertValid("runtime-lock", lock);
@@ -69010,18 +73395,18 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async installRuntimeGeneration(lock) {
     const hash2 = sha256Json(lock);
-    const generationsRoot = join18(this.root, ".apex", "runtime-generations");
-    const destination = join18(generationsRoot, hash2);
+    const generationsRoot = join19(this.root, ".apex", "runtime-generations");
+    const destination = join19(generationsRoot, hash2);
     if (!await this.exists(destination)) {
       await mkdir11(generationsRoot, { recursive: true });
-      const staging = join18(generationsRoot, `.incoming-${this.idSource()}`);
-      await cp2(join18(this.root, ".apex", "runtime"), staging, {
+      const staging = join19(generationsRoot, `.incoming-${this.idSource()}`);
+      await cp2(join19(this.root, ".apex", "runtime"), staging, {
         recursive: true,
         dereference: false,
         errorOnExist: true,
         force: false
       });
-      await atomicWriteJson(join18(staging, "apex.lock.json"), lock);
+      await atomicWriteJson(join19(staging, "apex.lock.json"), lock);
       await renameWithRetry(staging, destination);
     }
     return destination;
@@ -69035,26 +73420,23 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return bytes;
   }
   async bundledToolchainMinimums() {
-    try {
-      const assets = await resolveBundledAssets();
-      const entry = assets.manifest.files.find(({ path: path2 }) => path2 === "config/toolchain.v1.json");
-      const bytes = entry === void 0 ? void 0 : await readBundledFile(assets.root, entry.path);
-      if (entry === void 0 || bytes === void 0 || sha256Bytes(bytes) !== entry.sha256)
-        return {};
-      const set2 = JSON.parse(bytes.toString("utf8")).compatibilitySet;
-      const release2 = (value) => typeof value === "string" && RELEASE_VERSION2.test(value) ? value : void 0;
-      return { vscode: release2(set2?.minimumVscode), copilotCli: release2(set2?.copilotCli) };
-    } catch {
-      return {};
-    }
+    return await bundledToolchainMinimums();
   }
-  async hostToolVersion(executable, args) {
+  // Bicep runs execute through azd and bind its exact version, so unlike the client minimums only the pin passes.
+  async azdPrerequisiteCheck() {
+    const pinnedVersion = (await this.bundledToolchainMinimums()).azd;
+    const found = await this.executableChecker("azd");
+    const installedVersion = found ? await this.hostToolVersion("azd", ["version"], { AZD_SKIP_UPDATE_CHECK: "true" }) : void 0;
+    const { ok, value, remedy } = evaluateAzdPrerequisite({ pinnedVersion, found, installedVersion });
+    return { id: "executable:azd", ok, value, ...remedy === void 0 ? {} : { remedy } };
+  }
+  async hostToolVersion(executable, args, env = {}) {
     try {
       const result = await this.processRunner.run({
         executable,
         args,
         cwd: this.root,
-        env: this.host.env,
+        env: { ...this.host.env, ...env },
         timeoutMs: 15e3,
         maxOutputBytes: 4096
       });
@@ -69092,7 +73474,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       return { id: "plugin-settings", ok: false, value: "bundled plugin declaration unavailable", remedy };
     }
     const qualified = `${plugin.name}@${plugin.marketplace}`;
-    const path2 = join18(this.root, ".github", "copilot", "settings.json");
+    const path2 = join19(this.root, ".github", "copilot", "settings.json");
     try {
       await this.assertSafeDestination(this.root, path2);
       const settings = JSON.parse(await readFile14(path2, "utf8"));
@@ -69108,37 +73490,37 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
   }
   async runtimeRootForRun(run) {
-    const generation = join18(this.root, ".apex", "runtime-generations", run.runtimeLockHash);
-    return await this.exists(join18(generation, "apex.lock.json")) ? generation : join18(this.root, ".apex", "runtime");
+    const generation = join19(this.root, ".apex", "runtime-generations", run.runtimeLockHash);
+    return await this.exists(join19(generation, "apex.lock.json")) ? generation : join19(this.root, ".apex", "runtime");
   }
   capabilityPacks(manifestPath) {
     return new CapabilityPackManager({
       root: this.root,
-      manifestPath: manifestPath ?? join18(this.root, ".apex", "runtime", "capability-packs.registry.json"),
+      manifestPath: manifestPath ?? join19(this.root, ".apex", "runtime", "capability-packs.registry.json"),
       processRunner: this.processRunner
     });
   }
   async runtimeLockChecks(run) {
     try {
-      const runtimeRoot = run === void 0 ? join18(this.root, ".apex", "runtime") : await this.runtimeRootForRun(run);
-      await this.assertSafeDestination(this.root, join18(runtimeRoot, "apex.lock.json"));
-      const lockPath = join18(runtimeRoot, "apex.lock.json");
+      const runtimeRoot = run === void 0 ? join19(this.root, ".apex", "runtime") : await this.runtimeRootForRun(run);
+      await this.assertSafeDestination(this.root, join19(runtimeRoot, "apex.lock.json"));
+      const lockPath = join19(runtimeRoot, "apex.lock.json");
       const lock = JSON.parse(await readFile14(lockPath, "utf8"));
       this.assertValid("runtime-lock", lock);
-      const validatorPath = await this.exists(join18(runtimeRoot, "runtime-bundle.v1.json")) ? join18(runtimeRoot, "runtime-bundle.v1.json") : join18(runtimeRoot, "toolchain.v1.json");
+      const validatorPath = await this.exists(join19(runtimeRoot, "runtime-bundle.v1.json")) ? join19(runtimeRoot, "runtime-bundle.v1.json") : join19(runtimeRoot, "toolchain.v1.json");
       const hashes = [
-        { id: "runtime-lock:workflow", expected: lock.workflowHash, path: join18(runtimeRoot, "workflow.v1.json") },
-        { id: "runtime-lock:defaults", expected: lock.defaultsHash, path: join18(runtimeRoot, "defaults.v1.json") },
+        { id: "runtime-lock:workflow", expected: lock.workflowHash, path: join19(runtimeRoot, "workflow.v1.json") },
+        { id: "runtime-lock:defaults", expected: lock.defaultsHash, path: join19(runtimeRoot, "defaults.v1.json") },
         { id: "runtime-lock:validators", expected: lock.validatorHash, path: validatorPath },
         {
           id: "runtime-lock:quality-scorecard",
           expected: lock.qualityScorecardHash,
-          path: join18(runtimeRoot, "quality-scorecard.v1.json")
+          path: join19(runtimeRoot, "quality-scorecard.v1.json")
         },
         {
           id: "runtime-lock:improvement-policy",
           expected: lock.improvementPolicyHash,
-          path: join18(runtimeRoot, "improvement-policy.v1.json")
+          path: join19(runtimeRoot, "improvement-policy.v1.json")
         }
       ];
       const checks = await Promise.all(hashes.map(async (item) => {
@@ -69152,11 +73534,11 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       }));
       checks.unshift({
         id: "runtime-lock:run-binding",
-        ok: sha256Json(lock) === (run?.runtimeLockHash ?? sha256Json(JSON.parse(await readFile14(join18(this.root, ".apex/apex.lock.json"), "utf8")))),
+        ok: sha256Json(lock) === (run?.runtimeLockHash ?? sha256Json(JSON.parse(await readFile14(join19(this.root, ".apex/apex.lock.json"), "utf8")))),
         value: sha256Json(lock),
         remedy: "Reinitialize the run against the installed runtime lock"
       });
-      const packs = JSON.parse(await readFile14(join18(runtimeRoot, "capability-packs.registry.json"), "utf8"));
+      const packs = JSON.parse(await readFile14(join19(runtimeRoot, "capability-packs.registry.json"), "utf8"));
       const available = new Set((packs.packs ?? []).flatMap(({ id }) => id === void 0 ? [] : [id]));
       checks.push({
         id: "capability-packs",
@@ -69177,8 +73559,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
   }
   async ensureLocalGitBoundary(repair = false) {
-    const apexRoot = join18(this.root, ".apex");
-    const path2 = join18(apexRoot, ".gitignore");
+    const apexRoot = join19(this.root, ".apex");
+    const path2 = join19(apexRoot, ".gitignore");
     await this.assertSafeDestination(apexRoot, path2);
     const current = await this.readOptional(path2);
     if (current?.toString("utf8") === APEX_GITIGNORE)
@@ -69188,7 +73570,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     await atomicWriteBytes(path2, Buffer.from(APEX_GITIGNORE));
   }
   async ensureWorkspaceRuntime() {
-    const packagePath = join18(this.root, "node_modules", "@apexops", "cli", "package.json");
+    const packagePath = join19(this.root, "node_modules", "@apexops", "cli", "package.json");
     try {
       const installed = JSON.parse(await readFile14(packagePath, "utf8"));
       if (installed.version === APEX_VERSION)
@@ -69224,7 +73606,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return true;
   }
   async ensureWorkspaceGitRepository(createRepository) {
-    const gitPath = join18(this.root, ".git");
+    const gitPath = join19(this.root, ".git");
     if (await this.pathExistsLstat(gitPath))
       return;
     if (!createRepository) {
@@ -69243,7 +73625,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
   }
   async localGitBoundaryCheck() {
-    const path2 = join18(this.root, ".apex", ".gitignore");
+    const path2 = join19(this.root, ".apex", ".gitignore");
     try {
       if (!await this.pathExistsLstat(path2)) {
         return {
@@ -69253,7 +73635,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
           remedy: "Run doctor --fix --yes to restore the APEX local Git boundary"
         };
       }
-      await this.assertSafeExistingPath(join18(this.root, ".apex"), path2);
+      await this.assertSafeExistingPath(join19(this.root, ".apex"), path2);
       const actual = await readFile14(path2);
       const actualHash = sha256Bytes(actual);
       return {
@@ -69272,12 +73654,12 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
   }
   async managedFileChecks() {
-    const path2 = join18(this.root, ".apex", "customizations.lock.json");
+    const path2 = join19(this.root, ".apex", "customizations.lock.json");
     try {
       const lock = JSON.parse(await readFile14(path2, "utf8"));
       const plugin = await readBundledPluginDeclaration();
       const workspaceFiles = lock.files.map((file2) => ({ ...file2, root: this.root }));
-      const runtimeRoot = join18(this.root, ".apex", "runtime");
+      const runtimeRoot = join19(this.root, ".apex", "runtime");
       const runtimeFiles = lock.runtime.map((file2) => ({ ...file2, root: runtimeRoot }));
       const pluginChecks = [];
       for (const file2 of lock.files.filter(({ path: filePath }) => pluginOwnsPath(plugin, filePath)))
@@ -69291,7 +73673,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         if (!this.safeManagedRelativePath(file2.path)) {
           throw new ApexError("APEX_VALIDATION", "Managed customization path is unsafe", EXIT_CODES.validation);
         }
-        const destination = join18(this.root, file2.path);
+        const destination = join19(this.root, file2.path);
         await this.assertSafeDestination(this.root, destination);
         if (!await this.pathExistsLstat(destination))
           continue;
@@ -69306,7 +73688,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         if (!this.safeManagedRelativePath(file2.path)) {
           throw new ApexError("APEX_VALIDATION", "Managed customization path is unsafe", EXIT_CODES.validation);
         }
-        const destination = resolve16(file2.root, file2.path);
+        const destination = resolve17(file2.root, file2.path);
         await this.assertSafeDestination(file2.root, destination);
         const actual = await this.exists(destination) ? sha256Bytes(await readFile14(destination)) : "missing";
         const hashesValid = [file2.sourceHash, file2.baseHash, file2.currentHash].every((hash2) => /^[0-9a-f]{64}$/.test(hash2));
@@ -69331,7 +73713,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async evidenceStore(kind, contentType) {
     const runtimeRoot = await this.runtimeRootForRun(await this.currentRun());
-    const defaults = JSON.parse(await readFile14(join18(runtimeRoot, "defaults.v1.json"), "utf8"));
+    const defaults = JSON.parse(await readFile14(join19(runtimeRoot, "defaults.v1.json"), "utf8"));
     const maxBytes = defaults.evidence?.budgets?.perEntryBytes;
     if (!Number.isInteger(maxBytes) || maxBytes === void 0 || maxBytes < 1)
       throw new ApexError("APEX_VALIDATION", "Runtime evidence byte budget is invalid", EXIT_CODES.validation);
@@ -69349,23 +73731,23 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async installCustomizations(sourcePath, update, runtimeSource, repair, clientId2, plugin) {
     await this.recoverCustomizationTransaction();
-    const source2 = resolve16(sourcePath);
-    const sourceStat = await lstat13(source2);
+    const source2 = resolve17(sourcePath);
+    const sourceStat = await lstat14(source2);
     if (!sourceStat.isDirectory() || sourceStat.isSymbolicLink())
       throw new ApexError("APEX_VALIDATION", "Customizations source must be a real directory", EXIT_CODES.validation);
     await this.assertSafeExistingPath(source2, source2);
-    const lockPath = join18(this.root, ".apex", "customizations.lock.json");
+    const lockPath = join19(this.root, ".apex", "customizations.lock.json");
     let previous;
     if (update)
       previous = JSON.parse(await readFile14(lockPath, "utf8"));
-    const transactionRoot = join18(this.root, ".apex", "local", `update-${this.idSource()}`);
+    const transactionRoot = join19(this.root, ".apex", "local", `update-${this.idSource()}`);
     const entries = [];
     const retired = [];
     const retained = /* @__PURE__ */ new Map();
     for (const file2 of previous?.externallyManaged?.retained ?? []) {
       if (!this.safeManagedRelativePath(file2.path))
         throw new ApexError("APEX_VALIDATION", "Managed customization path is unsafe", EXIT_CODES.validation);
-      const destination = join18(this.root, file2.path);
+      const destination = join19(this.root, file2.path);
       await this.assertSafeDestination(this.root, destination);
       if (await this.pathExistsLstat(destination))
         retained.set(file2.path, sha256Bytes(await readFile14(destination)));
@@ -69375,12 +73757,12 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       const managed2 = [];
       const incomingPaths = /* @__PURE__ */ new Set();
       for (const absoluteSource of sourceFiles) {
-        const path2 = relative7(sourceRoot, absoluteSource).split(sep5).join("/");
+        const path2 = relative8(sourceRoot, absoluteSource).split(sep6).join("/");
         if (label === "customization" && pluginOwnsPath(plugin, path2))
           throw new ApexError("APEX_VALIDATION", `Customization source must not copy ${path2}; the ${plugin.name} plugin provides it`, EXIT_CODES.validation);
         incomingPaths.add(path2);
-        const destination = resolve16(destinationRoot, path2);
-        if (destination !== destinationRoot && !destination.startsWith(`${destinationRoot}${sep5}`))
+        const destination = resolve17(destinationRoot, path2);
+        if (destination !== destinationRoot && !destination.startsWith(`${destinationRoot}${sep6}`))
           throw new ApexError("APEX_VALIDATION", `${label} destination escapes its root`, EXIT_CODES.validation);
         await this.assertSafeDestination(destinationRoot, destination);
         const incoming = await readFile14(absoluteSource);
@@ -69401,25 +73783,25 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
             output2 = Buffer.from(merged);
           }
         }
-        const staged = join18(transactionRoot, "incoming", label, path2);
+        const staged = join19(transactionRoot, "incoming", label, path2);
         await atomicWriteBytes(staged, output2);
-        const backup = existed ? join18(transactionRoot, "backup", label, path2) : void 0;
+        const backup = existed ? join19(transactionRoot, "backup", label, path2) : void 0;
         if (backup !== void 0)
           await atomicWriteBytes(backup, await readFile14(destination));
         entries.push({ destination, staged, ...backup === void 0 ? {} : { backup }, existed });
-        const baseRef = join18(".apex", "customization-bases", sourceHash, label, path2).split(sep5).join("/");
-        const baseDestination = join18(this.root, baseRef);
+        const baseRef = join19(".apex", "customization-bases", sourceHash, label, path2).split(sep6).join("/");
+        const baseDestination = join19(this.root, baseRef);
         await this.assertSafeDestination(this.root, baseDestination);
         entries.push({
           destination: baseDestination,
-          staged: join18(transactionRoot, "bases", sourceHash, label, path2),
+          staged: join19(transactionRoot, "bases", sourceHash, label, path2),
           existed: await this.pathExistsLstat(baseDestination)
         });
         await atomicWriteBytes(entries.at(-1).staged, incoming);
         managed2.push({ path: path2, sourceHash, baseHash: sourceHash, currentHash: sha256Bytes(output2), baseRef });
       }
       for (const old of oldFiles.filter((file2) => !incomingPaths.has(file2.path))) {
-        const destination = resolve16(destinationRoot, old.path);
+        const destination = resolve17(destinationRoot, old.path);
         await this.assertSafeDestination(destinationRoot, destination);
         const pluginOwned = label === "customization" && pluginOwnsPath(plugin, old.path);
         if (!await this.pathExistsLstat(destination)) {
@@ -69436,14 +73818,14 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
           retired.push(old.path);
         if (currentHash !== old.currentHash && currentHash !== old.baseHash)
           throw new ApexError("APEX_CONFLICT", `Removed managed ${label} was locally modified: ${old.path}`, EXIT_CODES.conflict);
-        const backup = join18(transactionRoot, "backup", label, old.path);
+        const backup = join19(transactionRoot, "backup", label, old.path);
         await atomicWriteBytes(backup, await readFile14(destination));
         entries.push({ destination, backup, existed: true, remove: true });
       }
       return managed2;
     };
     const managed = await prepare(source2, this.root, previous?.files ?? [], "customization");
-    const runtime = runtimeSource === void 0 ? previous?.runtime ?? [] : await prepare(resolve16(runtimeSource), join18(this.root, ".apex", "runtime"), previous?.runtime ?? [], "runtime");
+    const runtime = runtimeSource === void 0 ? previous?.runtime ?? [] : await prepare(resolve17(runtimeSource), join19(this.root, ".apex", "runtime"), previous?.runtime ?? [], "runtime");
     let previousLockRef;
     const lockContent = {
       version: 1,
@@ -69464,10 +73846,10 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       previousLockRef = priorLockRef;
     } else if (previous !== void 0) {
       const previousHash = sha256Json(previous);
-      previousLockRef = join18(".apex", "customization-bases", "locks", `${previousHash}.json`).split(sep5).join("/");
-      const previousLockDestination = join18(this.root, previousLockRef);
+      previousLockRef = join19(".apex", "customization-bases", "locks", `${previousHash}.json`).split(sep6).join("/");
+      const previousLockDestination = join19(this.root, previousLockRef);
       if (!await this.pathExistsLstat(previousLockDestination)) {
-        const stagedPreviousLock = join18(transactionRoot, "previous-lock.json");
+        const stagedPreviousLock = join19(transactionRoot, "previous-lock.json");
         await atomicWriteJson(stagedPreviousLock, previous);
         entries.push({ destination: previousLockDestination, staged: stagedPreviousLock, existed: false });
       }
@@ -69476,10 +73858,10 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       ...lockContent,
       ...previousLockRef === void 0 ? {} : { previousLockRef }
     };
-    const stagedLock = join18(transactionRoot, "customizations.lock.json");
+    const stagedLock = join19(transactionRoot, "customizations.lock.json");
     await atomicWriteJson(stagedLock, nextLock);
     const lockExisted = await this.pathExistsLstat(lockPath);
-    const lockBackup = lockExisted ? join18(transactionRoot, "backup", "customizations.lock.json") : void 0;
+    const lockBackup = lockExisted ? join19(transactionRoot, "backup", "customizations.lock.json") : void 0;
     if (lockBackup !== void 0)
       await atomicWriteBytes(lockBackup, await readFile14(lockPath));
     entries.push({
@@ -69488,24 +73870,24 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       ...lockBackup === void 0 ? {} : { backup: lockBackup },
       existed: lockExisted
     });
-    const transactionPath = join18(transactionRoot, "transaction.json");
+    const transactionPath = join19(transactionRoot, "transaction.json");
     await atomicWriteJson(transactionPath, {
       version: 1,
       status: "applying",
       entries
     });
-    await atomicWriteJson(join18(this.root, ".apex", "local", "customization-transaction.json"), { transactionPath });
+    await atomicWriteJson(join19(this.root, ".apex", "local", "customization-transaction.json"), { transactionPath });
     try {
       for (const [index, entry] of entries.entries()) {
         await this.customizationFailureInjector?.(index, entry.destination);
         if (entry.remove)
           await rm12(entry.destination, { force: true });
         else {
-          await mkdir11(resolve16(entry.destination, ".."), { recursive: true });
+          await mkdir11(resolve17(entry.destination, ".."), { recursive: true });
           await renameWithRetry(entry.staged, entry.destination);
         }
       }
-      await rm12(join18(this.root, ".apex", "local", "customization-transaction.json"), { force: true });
+      await rm12(join19(this.root, ".apex", "local", "customization-transaction.json"), { force: true });
       await rm12(transactionRoot, { recursive: true, force: true });
       return {
         installed: managed.map(({ path: path2 }) => path2),
@@ -69514,14 +73896,14 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       };
     } catch (error62) {
       await this.rollbackCustomizationTransaction({ version: 1, status: "applying", entries });
-      await rm12(join18(this.root, ".apex", "local", "customization-transaction.json"), { force: true });
+      await rm12(join19(this.root, ".apex", "local", "customization-transaction.json"), { force: true });
       await rm12(transactionRoot, { recursive: true, force: true });
       throw error62;
     }
   }
   async installCapabilityAssets(assets) {
-    const runtimeRoot = join18(this.root, ".apex", "runtime");
-    const destination = join18(runtimeRoot, "capability-packs");
+    const runtimeRoot = join19(this.root, ".apex", "runtime");
+    const destination = join19(runtimeRoot, "capability-packs");
     await this.assertSafeExistingPath(assets.capabilityPacks, assets.capabilityPacks);
     await rm12(destination, { recursive: true, force: true });
     await cp2(assets.capabilityPacks, destination, {
@@ -69530,10 +73912,10 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       errorOnExist: true,
       force: false
     });
-    await renameWithRetry(join18(destination, "registry.v1.json"), join18(runtimeRoot, "capability-packs.registry.json"));
+    await renameWithRetry(join19(destination, "registry.v1.json"), join19(runtimeRoot, "capability-packs.registry.json"));
   }
   async recoverCustomizationTransaction() {
-    const pointer = join18(this.root, ".apex", "local", "customization-transaction.json");
+    const pointer = join19(this.root, ".apex", "local", "customization-transaction.json");
     if (this.snapshotRead.getStore() === true) {
       if (await this.pathExistsLstat(pointer))
         this.assertNotSnapshotRead();
@@ -69541,12 +73923,12 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
     try {
       const { transactionPath } = JSON.parse(await readFile14(pointer, "utf8"));
-      const localRoot = join18(this.root, ".apex", "local");
-      const resolvedTransaction = resolve16(transactionPath);
+      const localRoot = join19(this.root, ".apex", "local");
+      const resolvedTransaction = resolve17(transactionPath);
       await this.assertSafeExistingPath(localRoot, resolvedTransaction);
       const transaction = JSON.parse(await readFile14(resolvedTransaction, "utf8"));
       await this.rollbackCustomizationTransaction(transaction);
-      await rm12(resolve16(resolvedTransaction, ".."), { recursive: true, force: true });
+      await rm12(resolve17(resolvedTransaction, ".."), { recursive: true, force: true });
       await rm12(pointer, { force: true });
     } catch (error62) {
       if (error62.code !== "ENOENT")
@@ -69555,9 +73937,9 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async rollbackCustomizationTransaction(transaction) {
     for (const entry of [...transaction.entries].reverse()) {
-      await this.assertSafeDestination(this.root, resolve16(entry.destination));
+      await this.assertSafeDestination(this.root, resolve17(entry.destination));
       if (entry.backup !== void 0 && await this.pathExistsLstat(entry.backup)) {
-        await this.assertSafeExistingPath(join18(this.root, ".apex", "local"), resolve16(entry.backup));
+        await this.assertSafeExistingPath(join19(this.root, ".apex", "local"), resolve17(entry.backup));
       }
       if (entry.existed && entry.backup !== void 0 && await this.pathExistsLstat(entry.backup))
         await atomicWriteBytes(entry.destination, await readFile14(entry.backup));
@@ -69566,7 +73948,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
   }
   safeManagedRelativePath(path2) {
-    return path2.length > 0 && !path2.includes("\\") && !path2.includes("\0") && !isAbsolute7(path2) && path2.split("/").every((segment) => segment.length > 0 && segment !== "." && segment !== "..");
+    return path2.length > 0 && !path2.includes("\\") && !path2.includes("\0") && !isAbsolute9(path2) && path2.split("/").every((segment) => segment.length > 0 && segment !== "." && segment !== "..");
   }
   async readManagedBase(baseRef) {
     if (baseRef === void 0)
@@ -69574,7 +73956,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     if (!this.safeManagedRelativePath(baseRef)) {
       throw new ApexError("APEX_VALIDATION", "Managed customization base path is unsafe", EXIT_CODES.validation);
     }
-    const path2 = resolve16(this.root, baseRef);
+    const path2 = resolve17(this.root, baseRef);
     if (!await this.pathExistsLstat(path2))
       return void 0;
     await this.assertSafeExistingPath(this.root, path2);
@@ -69605,33 +73987,33 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return merged.includes(void 0) ? void 0 : Buffer.from(merged.join("\n"));
   }
   async assertSafeDestination(root, destination) {
-    const resolvedRoot = resolve16(root);
-    const resolvedDestination = resolve16(destination);
+    const resolvedRoot = resolve17(root);
+    const resolvedDestination = resolve17(destination);
     if (!isContainedPath(resolvedRoot, resolvedDestination))
       throw new ApexError("APEX_VALIDATION", "Managed destination escapes its root", EXIT_CODES.validation);
     let current = resolvedRoot;
     if (await this.pathExistsLstat(current))
       await this.assertSafeExistingPath(resolvedRoot, current);
-    for (const segment of relative7(resolvedRoot, resolvedDestination).split(sep5)) {
+    for (const segment of relative8(resolvedRoot, resolvedDestination).split(sep6)) {
       if (!segment)
         continue;
-      current = join18(current, segment);
+      current = join19(current, segment);
       if (await this.pathExistsLstat(current))
         await this.assertSafeExistingPath(resolvedRoot, current);
     }
   }
   async assertSafeExistingPath(root, path2) {
-    const entry = await lstat13(path2);
+    const entry = await lstat14(path2);
     if (entry.isSymbolicLink())
       throw new ApexError("APEX_VALIDATION", `Managed path contains a symlink: ${path2}`, EXIT_CODES.validation);
-    const actual = await realpath7(path2);
-    const actualRoot = await realpath7(root);
+    const actual = await realpath8(path2);
+    const actualRoot = await realpath8(root);
     if (!isContainedPath(actualRoot, actual))
       throw new ApexError("APEX_VALIDATION", `Managed path escapes its root: ${path2}`, EXIT_CODES.validation);
   }
   async pathExistsLstat(path2) {
     try {
-      await lstat13(path2);
+      await lstat14(path2);
       return true;
     } catch (error62) {
       if (error62.code === "ENOENT")
@@ -69652,7 +74034,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     const entries = await readdir9(directory, { withFileTypes: true });
     const files2 = [];
     for (const entry of entries.sort((left, right) => left.name < right.name ? -1 : left.name > right.name ? 1 : 0)) {
-      const path2 = join18(directory, entry.name);
+      const path2 = join19(directory, entry.name);
       if (entry.isSymbolicLink())
         throw new ApexError("APEX_VALIDATION", `Customization source contains a symlink: ${path2}`, EXIT_CODES.validation);
       if (entry.isDirectory())
@@ -69741,7 +74123,8 @@ var status = object5({
   head: Type.Union([Sha256Schema, Type.Null()]),
   events: count2,
   task: Type.Union([NonEmptyStringSchema, Type.Null()]),
-  blockers: strings3
+  blockers: strings3,
+  satisfiedGates: Type.Array(Type.Integer({ minimum: 1, maximum: 4 }), { uniqueItems: true, maxItems: 4 })
 });
 var MCP_DOCTOR_CHECK_LIMIT = 32;
 var doctorCheck = object5({
@@ -69941,15 +74324,15 @@ var MCP_OUTPUT_SCHEMAS = {
 };
 
 // packages/cli/dist/workspace-root.js
-import { lstat as lstat14, readFile as readFile15, realpath as realpath8 } from "node:fs/promises";
-import { basename as basename5, dirname as dirname12, isAbsolute as isAbsolute8, join as join19, resolve as resolve17 } from "node:path";
+import { lstat as lstat15, readFile as readFile15, realpath as realpath9 } from "node:fs/promises";
+import { basename as basename5, dirname as dirname12, isAbsolute as isAbsolute10, join as join20, resolve as resolve18 } from "node:path";
 function resolveGitPath(base, value) {
-  return isAbsolute8(value) ? resolve17(value) : resolve17(base, value);
+  return isAbsolute10(value) ? resolve18(value) : resolve18(base, value);
 }
 async function findGitDirectory(start) {
-  for (let directory = resolve17(start); ; directory = dirname12(directory)) {
-    const gitPath = join19(directory, ".git");
-    const stat3 = await lstat14(gitPath).catch((error62) => {
+  for (let directory = resolve18(start); ; directory = dirname12(directory)) {
+    const gitPath = join20(directory, ".git");
+    const stat3 = await lstat15(gitPath).catch((error62) => {
       if (error62.code === "ENOENT")
         return void 0;
       throw error62;
@@ -69972,33 +74355,33 @@ async function findGitDirectory(start) {
   }
 }
 async function gitCommonDirectory(gitDirectory) {
-  const commonPath = join19(gitDirectory, "commondir");
+  const commonPath = join20(gitDirectory, "commondir");
   const content = await readFile15(commonPath, "utf8").catch((error62) => {
     if (error62.code === "ENOENT")
       return void 0;
     throw error62;
   });
-  return realpath8(resolveGitPath(gitDirectory, content?.trim() || gitDirectory));
+  return realpath9(resolveGitPath(gitDirectory, content?.trim() || gitDirectory));
 }
 async function mcpWorkspaceRoot(start) {
-  for (let directory = resolve17(start); ; directory = dirname12(directory)) {
-    const apex = await lstat14(join19(directory, ".apex")).catch(() => void 0);
+  for (let directory = resolve18(start); ; directory = dirname12(directory)) {
+    const apex = await lstat15(join20(directory, ".apex")).catch(() => void 0);
     if (apex?.isDirectory() === true)
       return directory;
-    const repository = await lstat14(join19(directory, ".git")).catch(() => void 0);
+    const repository = await lstat15(join20(directory, ".git")).catch(() => void 0);
     if (repository !== void 0 || dirname12(directory) === directory)
       return start;
   }
 }
 async function resolveMcpWorkspace(start) {
-  const workspace = await realpath8(start);
-  const stat3 = await lstat14(workspace);
+  const workspace = await realpath9(start);
+  const stat3 = await lstat15(workspace);
   if (!stat3.isDirectory()) {
     throw new ApexError("APEX_VALIDATION", "workspace must be an existing directory", EXIT_CODES.validation);
   }
   const git = await findGitDirectory(workspace);
   if (git === void 0)
-    return { workspace, root: await realpath8(await mcpWorkspaceRoot(workspace)) };
+    return { workspace, root: await realpath9(await mcpWorkspaceRoot(workspace)) };
   const commonDirectory = await gitCommonDirectory(git.gitDirectory);
   if (basename5(commonDirectory).toLocaleLowerCase() !== ".git") {
     throw new ApexError("APEX_WORKSPACE_UNSUPPORTED", `Unsupported git common directory ${commonDirectory}; pass a non-bare checkout or worktree with a standard .git common directory`, EXIT_CODES.validation);
@@ -70007,8 +74390,8 @@ async function resolveMcpWorkspace(start) {
 }
 
 // packages/cli/dist/runtime-binding.js
-import { lstat as lstat15, readFile as readFile16 } from "node:fs/promises";
-import { join as join20 } from "node:path";
+import { lstat as lstat16, readFile as readFile16 } from "node:fs/promises";
+import { join as join21 } from "node:path";
 var WORKSPACE_RUNTIME_LOCK = ".apex/apex.lock.json";
 var MAX_LOCK_BYTES = 64 * 1024;
 var MAX_VERSION_LENGTH = 128;
@@ -70064,7 +74447,7 @@ function compareRuntimeVersions(left, right) {
 async function lockedRuntimeVersion(path2) {
   let stats;
   try {
-    stats = await lstat15(path2);
+    stats = await lstat16(path2);
   } catch (error62) {
     if (error62.code === "ENOENT")
       return void 0;
@@ -70083,7 +74466,7 @@ async function lockedRuntimeVersion(path2) {
   }
 }
 async function workspaceRuntimeBinding(root, runtimeVersion = APEX_VERSION) {
-  const workspaceRuntimeVersion = await lockedRuntimeVersion(join20(root, WORKSPACE_RUNTIME_LOCK));
+  const workspaceRuntimeVersion = await lockedRuntimeVersion(join21(root, WORKSPACE_RUNTIME_LOCK));
   if (workspaceRuntimeVersion === void 0)
     return { state: "uninitialized" };
   if (workspaceRuntimeVersion === runtimeVersion)
@@ -70140,6 +74523,7 @@ var MCP_SERVER_INSTRUCTIONS = [
   "Call status first, then use returned task, run, expected head, and owner epoch values exactly.",
   "Do not retry mutations blindly after timeout, cancellation, or conflict; refresh status and confirm intent first.",
   "Use ask_user for human approvals, risk decisions, missing inputs, and any choice the kernel requires.",
+  "Never ask the user to approve a kernel-recorded readiness checkpoint (Gates 2 and 3 in a lab run); report the blocking review or validation finding instead.",
   "Large read results may include nextCursor; call the same tool with the same workspace and cursor until it is absent."
 ].join(" ");
 var MCP_MAX_SERIALIZED_RESULT_BYTES = 64 * 1024;
@@ -70164,9 +74548,9 @@ function serviceResolver(serviceOrResolver) {
     defaultService: service,
     resolve: async (workspace) => {
       const resolved = await resolveMcpWorkspace(workspace);
-      const serviceRoot = await realpath9(service.root);
-      const requestedRoot = resolve18(resolved.root);
-      const boundRoot = resolve18(serviceRoot);
+      const serviceRoot = await realpath10(service.root);
+      const requestedRoot = resolve19(resolved.root);
+      const boundRoot = resolve19(serviceRoot);
       const matches = process.platform === "win32" ? requestedRoot.toLocaleLowerCase() === boundRoot.toLocaleLowerCase() : requestedRoot === boundRoot;
       if (!matches) {
         throw new ApexError("APEX_WORKSPACE_UNSUPPORTED", `Workspace ${resolved.workspace} resolves to ${requestedRoot}, but this MCP server is bound to ${boundRoot}; start the server with a workspace-aware service resolver for multi-worktree use`, EXIT_CODES.validation);
@@ -70176,7 +74560,7 @@ function serviceResolver(serviceOrResolver) {
   };
 }
 var workspaceInput = external_exports.string().superRefine((workspace, context) => {
-  if (!isAbsolute9(workspace)) {
+  if (!isAbsolute11(workspace)) {
     context.addIssue({ code: "custom", message: "workspace must be an absolute path" });
     return;
   }
@@ -70243,9 +74627,9 @@ function assertBoundedInput(value) {
     throw new ApexError("APEX_VALIDATION", "Input budget exceeded", EXIT_CODES.validation);
 }
 var resultEnvelopeBytes = (structuredContent) => {
-  const text4 = JSON.stringify(structuredContent);
+  const text5 = JSON.stringify(structuredContent);
   return Buffer.byteLength(JSON.stringify({
-    content: [{ type: "text", text: text4 }],
+    content: [{ type: "text", text: text5 }],
     structuredContent
   }), "utf8");
 };
@@ -70284,7 +74668,7 @@ function summarizeDoctorReport(report) {
   }
   return summary();
 }
-var resultHash = (value) => createHash13("sha256").update(JSON.stringify(value)).digest("hex");
+var resultHash = (value) => createHash14("sha256").update(JSON.stringify(value)).digest("hex");
 function cursorError(message) {
   return new ApexError("APEX_CURSOR_INVALID", message, EXIT_CODES.validation);
 }
@@ -70449,6 +74833,7 @@ var projectCreateInput = external_exports.object({
   projectId: external_exports.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   displayName: external_exports.string().min(1).max(256),
   environment: external_exports.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
+  purpose: external_exports.enum(["lab", "production"]).optional(),
   targetScope: external_exports.string().max(1024).regex(TARGET_SCOPE_PATTERN, `Use ${TARGET_SCOPE_HINT}`),
   iacTool: external_exports.enum(["bicep", "terraform"]),
   riskOwner: external_exports.enum(["partner", "customer"])
@@ -70530,7 +74915,7 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     }
     if (waiting.length >= 31)
       return Promise.reject(new ApexError("APEX_CONFLICT", "Queue full", EXIT_CODES.conflict));
-    return new Promise((resolve22, reject) => {
+    return new Promise((resolve23, reject) => {
       const cleanup = () => {
         clearTimeout(timer);
         signal?.removeEventListener("abort", cancel);
@@ -70546,7 +74931,7 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
       const waiter = {
         start: () => {
           cleanup();
-          resolve22(release2);
+          resolve23(release2);
         }
       };
       const timer = setTimeout(cancel, queueTimeoutMs);
@@ -70719,7 +75104,7 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     inputSchema: { path: external_exports.string().min(1), reopen: external_exports.boolean().optional() }
   }, async ({ path: path2, reopen }) => result(await service.selectGovernanceBaseline(path2, ...reopen === void 0 ? [] : [{ reopen }])));
   registerTool("projectCreate", {
-    description: "Create and select a new project with its initial environment run. targetScope is the user's explicit choice: local, or a full /subscriptions/<id>/resourceGroups/<name> path.",
+    description: "Create and select a new project with its initial environment run. targetScope is the user's explicit choice: local, or a full /subscriptions/<id>/resourceGroups/<name> path. purpose is lab (default) or production; production is unavailable until CP-28/CP-29 ship and is rejected.",
     inputSchema: projectCreateInput
   }, async (input2) => result(await service.createProject(input2)));
   registerTool("projectList", { description: "List projects in the current workspace", inputSchema: { cursor: cursorInput } }, async () => result({ projects: await service.listProjects() }));
@@ -70729,7 +75114,7 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     inputSchema: projectDeleteInput
   }, async ({ projectId, confirm }) => result(await service.deleteProject(projectId, confirm)));
   registerTool("gateDecide", {
-    description: "Record an explicitly confirmed human decision for Gate 1, 2, or 3 using the local OS username as actor. Gate 4 remains CLI-only.",
+    description: "Record the explicitly confirmed human Gate 1 intent confirmation (purpose, target and requirements) using the local OS username as actor. In a lab run Gates 2 and 3 are kernel-recorded readiness checkpoints, not human decisions, and are refused here with reason GATE_READINESS_AUTOMATIC: resolve the reported review or validation blocker instead. Gate 4, the final preview approval, remains CLI-only.",
     inputSchema: gateDecisionInput
   }, async ({ gate, decision }) => result(await service.decideInteractiveGate(gate, decision)));
   registerTool("reviewDecide", {
@@ -70890,9 +75275,9 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     }
   }, async ({ kind }) => result({ markdown: await service.render(kind) }));
   registerTool("promote", {
-    description: "Promote the selected run to a target environment through kernel checks; does not approve or execute deployment.",
-    inputSchema: { environment: external_exports.string(), target: external_exports.string() }
-  }, async ({ environment, target }) => result(await service.promote(environment, target)));
+    description: "Promote the selected run to a target environment through kernel checks; does not approve or execute deployment. The run's purpose is kept; a different purpose needs a new project.",
+    inputSchema: { environment: external_exports.string(), target: external_exports.string(), purpose: external_exports.enum(["lab", "production"]).optional() }
+  }, async ({ environment, target, purpose }) => result(await service.promote(environment, target, purpose)));
   registerTool("doctor", {
     description: "Inspect local APEX installation health; request repairs with fix and explicit confirmation with yes. Returns counts, remedies, and a bounded check list with failing checks first; when truncated, read every check with doctorChecks.",
     inputSchema: { fix: external_exports.boolean().optional(), yes: external_exports.boolean().optional() }
@@ -70941,13 +75326,13 @@ async function serveMcp(serviceOrResolver, streams = {}) {
   const factory = createMcpServerFactory(serviceOrResolver);
   const stdin2 = streams.stdin ?? process.stdin;
   const stdout2 = streams.stdout ?? process.stdout;
-  await new Promise((resolve22, reject) => {
+  await new Promise((resolve23, reject) => {
     let settled = false;
     let failure2;
     let handle;
     const signals = ["SIGINT", "SIGTERM"];
     const cleanup = () => {
-      stdin2.off("error", fail2);
+      stdin2.off("error", fail3);
       for (const signal of signals)
         process.off(signal, shutdown);
     };
@@ -70957,7 +75342,7 @@ async function serveMcp(serviceOrResolver, streams = {}) {
       settled = true;
       cleanup();
       if (failure2 === void 0)
-        resolve22();
+        resolve23();
       else
         reject(failure2);
     };
@@ -70967,7 +75352,7 @@ async function serveMcp(serviceOrResolver, streams = {}) {
         finish();
       });
     };
-    function fail2(error62) {
+    function fail3(error62) {
       failure2 ??= error62;
       shutdown();
     }
@@ -70977,7 +75362,7 @@ async function serveMcp(serviceOrResolver, streams = {}) {
         finish();
       }
     }
-    stdin2.once("error", fail2);
+    stdin2.once("error", fail3);
     for (const signal of signals)
       process.once(signal, shutdown);
     handle = serveStdio(factory, { legacy: "serve", transport: new ApexStdioTransport(stdin2, stdout2) });
@@ -70986,12 +75371,12 @@ async function serveMcp(serviceOrResolver, streams = {}) {
 
 // packages/cli/dist/provider-runtime.js
 import { randomBytes as randomBytes4 } from "node:crypto";
-import { chmod as chmod2, lstat as lstat16, mkdir as mkdir12, readFile as readFile17, readdir as readdir10 } from "node:fs/promises";
-import { join as join21, relative as relative8 } from "node:path";
+import { chmod as chmod2, lstat as lstat17, mkdir as mkdir12, readFile as readFile17, readdir as readdir10 } from "node:fs/promises";
+import { join as join22, relative as relative9 } from "node:path";
 var HASH_PATTERN2 = /^[0-9a-f]{64}$/;
 async function ensureDirectory(path2, mode) {
   try {
-    const existing = await lstat16(path2);
+    const existing = await lstat17(path2);
     if (existing.isSymbolicLink() || !existing.isDirectory()) {
       throw new Error(`Provider runtime directory is not a regular directory: ${path2}`);
     }
@@ -71004,16 +75389,16 @@ async function ensureDirectory(path2, mode) {
     await chmod2(path2, mode);
 }
 async function createRuntimeRoot(workspaceRoot) {
-  const apexRoot = join21(workspaceRoot, ".apex");
-  const localRoot = join21(apexRoot, "local");
-  const runtimeRoot = join21(localRoot, "provider-runtime");
+  const apexRoot = join22(workspaceRoot, ".apex");
+  const localRoot = join22(apexRoot, "local");
+  const runtimeRoot = join22(localRoot, "provider-runtime");
   await ensureDirectory(apexRoot);
   await ensureDirectory(localRoot, 448);
   await ensureDirectory(runtimeRoot, 448);
   return runtimeRoot;
 }
 async function createRuntimeDirectory(runtimeRoot, name) {
-  const path2 = join21(runtimeRoot, name);
+  const path2 = join22(runtimeRoot, name);
   await ensureDirectory(path2, 448);
   return path2;
 }
@@ -71027,7 +75412,7 @@ function storageKey(value) {
 }
 async function readJsonFile(path2) {
   try {
-    const info = await lstat16(path2);
+    const info = await lstat17(path2);
     if (info.isSymbolicLink() || !info.isFile())
       throw new Error(`Provider runtime file is not a regular file: ${path2}`);
     return JSON.parse(await readFile17(path2, "utf8"));
@@ -71038,7 +75423,7 @@ async function readJsonFile(path2) {
   }
 }
 async function readRegularFile2(path2, label) {
-  const info = await lstat16(path2);
+  const info = await lstat17(path2);
   if (info.isSymbolicLink() || !info.isFile())
     throw new Error(`${label} is not a regular file: ${path2}`);
   return await readFile17(path2);
@@ -71049,7 +75434,7 @@ function isTerraformInputFile(name) {
 async function terraformInputFiles(root, directory = root) {
   const files2 = [];
   for (const entry of await readdir10(directory, { withFileTypes: true })) {
-    const path2 = join21(directory, entry.name);
+    const path2 = join22(directory, entry.name);
     if (entry.isSymbolicLink())
       throw new Error(`Terraform configuration contains a symlink: ${path2}`);
     if (entry.isDirectory()) {
@@ -71060,17 +75445,17 @@ async function terraformInputFiles(root, directory = root) {
     if (entry.isFile() && isTerraformInputFile(entry.name))
       files2.push(path2);
   }
-  return files2.sort((left, right) => relative8(root, left).localeCompare(relative8(root, right)));
+  return files2.sort((left, right) => relative9(root, left).localeCompare(relative9(root, right)));
 }
 async function hashTerraformLockFile(terraformRoot) {
-  return sha256Bytes(await readRegularFile2(join21(terraformRoot, ".terraform.lock.hcl"), "Terraform lock file"));
+  return sha256Bytes(await readRegularFile2(join22(terraformRoot, ".terraform.lock.hcl"), "Terraform lock file"));
 }
 async function hashTerraformConfiguration(terraformRoot) {
   const files2 = await terraformInputFiles(terraformRoot);
   if (files2.length === 0)
     throw new Error(`Terraform configuration has no input files: ${terraformRoot}`);
   return sha256Json(await Promise.all(files2.map(async (path2) => ({
-    path: relative8(terraformRoot, path2).replaceAll("\\", "/"),
+    path: relative9(terraformRoot, path2).replaceAll("\\", "/"),
     hash: sha256Bytes(await readRegularFile2(path2, "Terraform input"))
   }))));
 }
@@ -71109,14 +75494,14 @@ var FilePreviewBindingStore = class {
     requireBinding(binding, previewHash);
     if (binding.kind !== this.kind)
       throw new Error(`Expected a ${this.kind} preview binding`);
-    await atomicWriteJson(join21(this.bindingsRoot, `${previewHash}.json`), binding);
+    await atomicWriteJson(join22(this.bindingsRoot, `${previewHash}.json`), binding);
     const preview = binding.preview;
     const latestKey = storageKey(JSON.stringify([this.kind, preview.projectId, preview.runId, preview.operation]));
-    await atomicWriteJson(join21(this.latestRoot, `${latestKey}.json`), { previewHash });
+    await atomicWriteJson(join22(this.latestRoot, `${latestKey}.json`), { previewHash });
   }
   async load(previewHash) {
     requireHash(previewHash, "Preview hash");
-    const value = await readJsonFile(join21(this.bindingsRoot, `${previewHash}.json`));
+    const value = await readJsonFile(join22(this.bindingsRoot, `${previewHash}.json`));
     if (value === void 0)
       return void 0;
     const binding = requireBinding(value, previewHash);
@@ -71126,7 +75511,7 @@ var FilePreviewBindingStore = class {
   }
   async loadLatest(projectId, runId, operation) {
     const latestKey = storageKey(JSON.stringify([this.kind, projectId, runId, operation]));
-    const value = await readJsonFile(join21(this.latestRoot, `${latestKey}.json`));
+    const value = await readJsonFile(join22(this.latestRoot, `${latestKey}.json`));
     if (value === void 0)
       return void 0;
     if (value === null || typeof value !== "object" || Array.isArray(value) || typeof value.previewHash !== "string") {
@@ -71143,7 +75528,7 @@ var FileEncryptedPlanArtifactStore = class {
   async put(reference, artifact) {
     if (reference.trim().length === 0)
       throw new Error("Encrypted plan reference is required");
-    await atomicWriteJson(join21(this.artifactsRoot, `${storageKey(reference)}.json`), {
+    await atomicWriteJson(join22(this.artifactsRoot, `${storageKey(reference)}.json`), {
       reference,
       artifact
     });
@@ -71151,12 +75536,12 @@ var FileEncryptedPlanArtifactStore = class {
   async get(reference) {
     if (reference.trim().length === 0)
       throw new Error("Encrypted plan reference is required");
-    const value = await readJsonFile(join21(this.artifactsRoot, `${storageKey(reference)}.json`));
+    const value = await readJsonFile(join22(this.artifactsRoot, `${storageKey(reference)}.json`));
     return value === void 0 ? void 0 : requireArtifact(value, reference);
   }
 };
 async function readLocalKey(path2) {
-  const info = await lstat16(path2);
+  const info = await lstat17(path2);
   if (info.isSymbolicLink() || !info.isFile())
     throw new Error("Local plan transport key is not a regular file");
   if (process.platform !== "win32" && (info.mode & 63) !== 0) {
@@ -71168,7 +75553,7 @@ async function readLocalKey(path2) {
   return key;
 }
 async function localKeyProvider(runtimeRoot) {
-  const path2 = join21(runtimeRoot, "plan-transport.key");
+  const path2 = join22(runtimeRoot, "plan-transport.key");
   try {
     return await readLocalKey(path2);
   } catch (error62) {
@@ -71199,13 +75584,13 @@ async function createFileProviderRuntime(workspaceRoot) {
 }
 
 // packages/cli/dist/provider-transfer.js
-import { chmod as chmod3, lstat as lstat17, mkdir as mkdir13, readFile as readFile18 } from "node:fs/promises";
-import { join as join22, relative as relative9, resolve as resolve19, sep as sep6 } from "node:path";
+import { chmod as chmod3, lstat as lstat18, mkdir as mkdir13, readFile as readFile18 } from "node:fs/promises";
+import { join as join23, relative as relative10, resolve as resolve20, sep as sep7 } from "node:path";
 var PROVIDER_TRANSFER_KIND = "apex-provider-authority";
 var PROVIDER_TRANSFER_MAX_BUNDLE_BYTES = 8 * 1024 * 1024;
 var PROVIDER_TRANSFER_MAX_FILE_BYTES = 4 * 1024 * 1024;
 var HASH_PATTERN3 = /^[0-9a-f]{64}$/;
-var BASE64_PATTERN = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
+var BASE64_PATTERN2 = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$/;
 var BINDING_PATH_PATTERN = /^bindings\/[0-9a-f]{64}\.json$/;
 var ARTIFACT_PATH_PATTERN = /^artifacts\/[0-9a-f]{64}\.json$/;
 var PLAN_KEY_PATH = "plan-transport.key";
@@ -71228,7 +75613,7 @@ function requireHash2(value, label) {
   return value;
 }
 function requireBase64(value, bytes, label) {
-  if (typeof value !== "string" || !BASE64_PATTERN.test(value))
+  if (typeof value !== "string" || !BASE64_PATTERN2.test(value))
     throw new Error(`${label} is invalid`);
   const decoded = Buffer.from(value, "base64");
   if (decoded.byteLength !== bytes || decoded.toString("base64") !== value)
@@ -71243,7 +75628,7 @@ function parseJson(bytes, label) {
   }
 }
 async function readRegular(path2, label) {
-  const info = await lstat17(path2);
+  const info = await lstat18(path2);
   if (info.isSymbolicLink() || !info.isFile())
     throw new Error(`${label} is not a regular file`);
   if (info.size > PROVIDER_TRANSFER_MAX_FILE_BYTES)
@@ -71325,7 +75710,12 @@ function parseBinding2(value, previewHash, provider, recipient) {
     throw new Error("Provider binding kind is invalid");
   if (provider !== void 0 && binding.kind !== provider)
     throw new Error("Provider binding does not match requested provider");
-  exactKeys2(binding, binding.kind === "bicep" ? ["kind", "parametersHash", "preview", "providerBindingHash", "stackStateHash", "templateHash"] : ["attestation", "kind", "preview"], "Provider binding");
+  const policyKeys = ["policyValidation", "policyValidationBinding"].filter((key) => key in binding);
+  exactKeys2(binding, binding.kind === "bicep" ? ["azdBinding", "kind", "ownedStateHash", "preview", "providerBindingHash", ...policyKeys] : ["attestation", "kind", "preview"], "Provider binding");
+  if (binding.kind === "bicep" && policyKeys.length > 0) {
+    if (policyKeys.length !== 2 || !hasValidPolicyValidation(binding.policyValidation, binding.policyValidationBinding))
+      throw new Error("Provider binding policy validation is invalid");
+  }
   const preview = requireRecord(binding.preview, "Provider binding preview");
   validatePreview(preview);
   const previewExpiresAt = preview.expiresAt;
@@ -71342,9 +75732,10 @@ function parseBinding2(value, previewHash, provider, recipient) {
   if (preview.track !== binding.kind)
     throw new Error("Provider binding track is invalid");
   if (binding.kind === "bicep") {
-    for (const key of ["parametersHash", "providerBindingHash", "stackStateHash", "templateHash"]) {
+    for (const key of ["ownedStateHash", "providerBindingHash"])
       requireHash2(binding[key], `Bicep ${key}`);
-    }
+    if (!hasValidAzdBinding(binding.azdBinding))
+      throw new Error("Bicep azdBinding is invalid");
   }
   const common = {
     provider: binding.kind,
@@ -71451,7 +75842,7 @@ function parseStoredArtifact(value, authority) {
   requireTimestamp(metadata2.createdAt, "Terraform artifact createdAt");
   const expiresAt = requireTimestamp(metadata2.expiresAt, "Terraform artifact expiresAt");
   const ciphertext = requireNonempty(artifact.ciphertext, "Terraform artifact ciphertext");
-  if (!BASE64_PATTERN.test(ciphertext) || Buffer.from(ciphertext, "base64").toString("base64") !== ciphertext) {
+  if (!BASE64_PATTERN2.test(ciphertext) || Buffer.from(ciphertext, "base64").toString("base64") !== ciphertext) {
     throw new Error("Terraform artifact ciphertext is invalid");
   }
   return { reference: stored.reference, artifact, expiresAt };
@@ -71466,15 +75857,15 @@ async function createProviderTransferBundle(root, options, now = /* @__PURE__ */
   requireNonempty(options.recipient, "Provider transfer recipient");
   if (!Number.isFinite(options.ttlMs) || options.ttlMs <= 0)
     throw new Error("Provider transfer TTL must be positive");
-  const runtimeRoot = resolve19(root, ".apex", "local", "provider-runtime");
+  const runtimeRoot = resolve20(root, ".apex", "local", "provider-runtime");
   const bindingPath = `bindings/${options.previewHash}.json`;
-  const bindingBytes = await readRegular(join22(runtimeRoot, ...bindingPath.split("/")), "Provider binding");
+  const bindingBytes = await readRegular(join23(runtimeRoot, ...bindingPath.split("/")), "Provider binding");
   const authority = parseBinding2(parseJson(bindingBytes, "Provider binding"), options.previewHash, options.provider, options.recipient);
   let bindings = authority.bindings;
   const selected = [{ path: bindingPath, bytes: bindingBytes }];
   if (options.provider === "terraform") {
     const artifactPath = `artifacts/${sha256Bytes(Buffer.from(authority.artifactRef, "utf8"))}.json`;
-    const artifactBytes = await readRegular(join22(runtimeRoot, ...artifactPath.split("/")), "Terraform artifact");
+    const artifactBytes = await readRegular(join23(runtimeRoot, ...artifactPath.split("/")), "Terraform artifact");
     const artifact = parseStoredArtifact(parseJson(artifactBytes, "Terraform artifact"), authority);
     bindings = {
       ...bindings,
@@ -71483,7 +75874,7 @@ async function createProviderTransferBundle(root, options, now = /* @__PURE__ */
     selected.push({ path: artifactPath, bytes: artifactBytes });
     selected.push({
       path: PLAN_KEY_PATH,
-      bytes: await readRegular(join22(runtimeRoot, PLAN_KEY_PATH), "Terraform plan key")
+      bytes: await readRegular(join23(runtimeRoot, PLAN_KEY_PATH), "Terraform plan key")
     });
   }
   if (Date.parse(bindings.authorityExpiresAt) <= now.getTime()) {
@@ -71515,9 +75906,9 @@ async function exportProviderTransfer(root, outputPath, options, dependencies = 
     bindings: bundle.bindings
   });
   const bytes = canonicalJsonBytes(envelope);
-  await atomicWriteBytes(resolve19(outputPath), bytes);
+  await atomicWriteBytes(resolve20(outputPath), bytes);
   return {
-    path: resolve19(outputPath),
+    path: resolve20(outputPath),
     sha256: sha256Bytes(bytes),
     files: bundle.files.length,
     expiresAt: envelope.metadata.expiresAt
@@ -71564,7 +75955,7 @@ function decodeFile(entry) {
     throw new Error(`Provider transfer file size is invalid: ${file2.path}`);
   }
   requireHash2(file2.sha256, "Provider transfer file hash");
-  if (!BASE64_PATTERN.test(file2.content))
+  if (!BASE64_PATTERN2.test(file2.content))
     throw new Error(`Provider transfer file encoding is invalid: ${file2.path}`);
   const bytes = Buffer.from(file2.content, "base64");
   if (bytes.toString("base64") !== file2.content || bytes.byteLength !== file2.bytes || sha256Bytes(bytes) !== file2.sha256) {
@@ -71619,7 +76010,7 @@ function validateBundle(value, envelopeBindings) {
 }
 async function assertSafeDirectory(path2, label) {
   try {
-    const info = await lstat17(path2);
+    const info = await lstat18(path2);
     if (info.isSymbolicLink() || !info.isDirectory())
       throw new Error(`${label} is unsafe`);
     return true;
@@ -71635,15 +76026,15 @@ async function ensureDirectory2(path2) {
   await chmod3(path2, 448);
 }
 async function assertDestinationAncestors(root) {
-  const apexRoot = join22(root, ".apex");
-  const localRoot = join22(apexRoot, "local");
-  const runtimeRoot = join22(localRoot, "provider-runtime");
+  const apexRoot = join23(root, ".apex");
+  const localRoot = join23(apexRoot, "local");
+  const runtimeRoot = join23(localRoot, "provider-runtime");
   await assertSafeDirectory(root, "Provider transfer workspace root");
   if (await assertSafeDirectory(apexRoot, "Provider transfer .apex directory")) {
     if (await assertSafeDirectory(localRoot, "Provider transfer local directory")) {
       if (await assertSafeDirectory(runtimeRoot, "Provider transfer runtime directory")) {
-        await assertSafeDirectory(join22(runtimeRoot, "bindings"), "Provider transfer bindings directory");
-        await assertSafeDirectory(join22(runtimeRoot, "artifacts"), "Provider transfer artifacts directory");
+        await assertSafeDirectory(join23(runtimeRoot, "bindings"), "Provider transfer bindings directory");
+        await assertSafeDirectory(join23(runtimeRoot, "artifacts"), "Provider transfer artifacts directory");
       }
     }
   }
@@ -71670,17 +76061,17 @@ async function importProviderTransfer(root, envelopeValue, recipient, now = () =
   if (Date.parse(envelope.metadata.expiresAt) > Date.parse(bundle.bindings.authorityExpiresAt)) {
     throw new Error("Provider transfer envelope expiry exceeds its preview authority");
   }
-  const workspaceRoot = resolve19(root);
+  const workspaceRoot = resolve20(root);
   await assertDestinationAncestors(workspaceRoot);
-  const runtimeRoot = join22(workspaceRoot, ".apex", "local", "provider-runtime");
+  const runtimeRoot = join23(workspaceRoot, ".apex", "local", "provider-runtime");
   const preflight = [];
   for (const entry of entries) {
-    const destination = resolve19(runtimeRoot, ...entry.path.split("/"));
-    if (!destination.startsWith(`${runtimeRoot}${sep6}`) || relative9(runtimeRoot, destination).startsWith("..")) {
+    const destination = resolve20(runtimeRoot, ...entry.path.split("/"));
+    if (!destination.startsWith(`${runtimeRoot}${sep7}`) || relative10(runtimeRoot, destination).startsWith("..")) {
       throw new Error("Provider transfer path escapes provider runtime");
     }
     try {
-      const info = await lstat17(destination);
+      const info = await lstat18(destination);
       if (info.isSymbolicLink() || !info.isFile())
         throw new Error(`Provider transfer destination is unsafe: ${entry.path}`);
       const existing = await readFile18(destination);
@@ -71693,11 +76084,11 @@ async function importProviderTransfer(root, envelopeValue, recipient, now = () =
       preflight.push({ destination, bytes: entry.bytes, exists: false });
     }
   }
-  await ensureDirectory2(join22(workspaceRoot, ".apex"));
-  await ensureDirectory2(join22(workspaceRoot, ".apex", "local"));
+  await ensureDirectory2(join23(workspaceRoot, ".apex"));
+  await ensureDirectory2(join23(workspaceRoot, ".apex", "local"));
   await ensureDirectory2(runtimeRoot);
-  await ensureDirectory2(join22(runtimeRoot, "bindings"));
-  await ensureDirectory2(join22(runtimeRoot, "artifacts"));
+  await ensureDirectory2(join23(runtimeRoot, "bindings"));
+  await ensureDirectory2(join23(runtimeRoot, "artifacts"));
   for (const entry of preflight) {
     if (!entry.exists)
       await atomicWriteBytes(entry.destination, entry.bytes, { refuseOverwrite: true });
@@ -71712,8 +76103,8 @@ async function importProviderTransfer(root, envelopeValue, recipient, now = () =
 }
 
 // packages/cli/dist/state-transfer.js
-import { lstat as lstat18, readFile as readFile19, readdir as readdir11 } from "node:fs/promises";
-import { isAbsolute as isAbsolute10, join as join23, posix as posix2, relative as relative10, resolve as resolve20, sep as sep7 } from "node:path";
+import { lstat as lstat19, readFile as readFile19, readdir as readdir11 } from "node:fs/promises";
+import { isAbsolute as isAbsolute12, join as join24, posix as posix2, relative as relative11, resolve as resolve21, sep as sep8 } from "node:path";
 var STATE_TRANSFER_KIND = "apex-repository-state";
 var STATE_TRANSFER_MAX_BUNDLE_BYTES = 16 * 1024 * 1024;
 var STATE_TRANSFER_MAX_FILE_BYTES = 4 * 1024 * 1024;
@@ -71726,7 +76117,7 @@ var SAFE_POLICY_ASSERTIONS = /* @__PURE__ */ new Map([
   ["runtime/defaults.v1.json/telemetry/authorizationEvidenceSeparable", true]
 ]);
 function safeRelativePath2(path2) {
-  return path2.length > 0 && !isAbsolute10(path2) && !path2.includes("\\") && path2 !== "." && path2 !== ".." && !path2.startsWith("../") && posix2.normalize(path2) === path2;
+  return path2.length > 0 && !isAbsolute12(path2) && !path2.includes("\\") && path2 !== "." && path2 !== ".." && !path2.startsWith("../") && posix2.normalize(path2) === path2;
 }
 function prohibitedStatePath(path2) {
   if (path2.split("/").some((part) => part.startsWith(".run-mutation.") || part === ".run-transaction.json" || part === ".run-writer-lease.json" || part === REPEAT_GUARD_FILE)) {
@@ -71781,7 +76172,7 @@ function validateJsonSafety(bytes, path2) {
   return value;
 }
 async function readRegular2(path2, label) {
-  const info = await lstat18(path2);
+  const info = await lstat19(path2);
   if (info.isSymbolicLink() || !info.isFile())
     throw new Error(`${label} is not a regular file: ${path2}`);
   if (info.size > STATE_TRANSFER_MAX_FILE_BYTES)
@@ -71800,7 +76191,7 @@ async function readOptionalRegular(path2, label) {
 async function walkRegularFiles(root, directory = root) {
   const files2 = [];
   for (const entry of await readdir11(directory, { withFileTypes: true })) {
-    const path2 = join23(directory, entry.name);
+    const path2 = join24(directory, entry.name);
     if (entry.isSymbolicLink())
       throw new Error(`State transfer source contains a symlink: ${path2}`);
     if (directory === root) {
@@ -71816,7 +76207,7 @@ async function walkRegularFiles(root, directory = root) {
     if (entry.isDirectory())
       files2.push(...await walkRegularFiles(root, path2));
     else if (entry.isFile())
-      files2.push(relative10(root, path2).split(sep7).join("/"));
+      files2.push(relative11(root, path2).split(sep8).join("/"));
     else
       throw new Error(`State transfer source is not a regular file: ${path2}`);
   }
@@ -71832,7 +76223,7 @@ async function collectObjectClosure(apexRoot, seedFiles) {
     const hash2 = pending.shift();
     if (objects.has(hash2))
       continue;
-    const objectPath = join23(apexRoot, "objects", "sha256", hash2.slice(0, 2), hash2.slice(2));
+    const objectPath = join24(apexRoot, "objects", "sha256", hash2.slice(0, 2), hash2.slice(2));
     const bytes = await readOptionalRegular(objectPath, "State transfer object");
     if (bytes === void 0)
       continue;
@@ -71860,18 +76251,18 @@ async function currentState(root, claimHash, recipient, now) {
   requireHash3(claimHash, "Transfer claim hash");
   if (recipient.trim().length === 0)
     throw new Error("State transfer recipient is required");
-  const apexRoot = resolve20(root, ".apex");
-  const selection2 = parseJson2(await readRegular2(join23(apexRoot, "config.json"), "APEX selection"), "config.json");
+  const apexRoot = resolve21(root, ".apex");
+  const selection2 = parseJson2(await readRegular2(join24(apexRoot, "config.json"), "APEX selection"), "config.json");
   const projectId = requireIdentifier(selection2.projectId, "Selected project");
   const runId = requireIdentifier(selection2.runId, "Selected run");
-  const runRoot = join23(apexRoot, "projects", projectId, "runs", runId);
-  const run = parseJson2(await readRegular2(join23(runRoot, "run.json"), "Selected run"), "run.json");
+  const runRoot = join24(apexRoot, "projects", projectId, "runs", runId);
+  const run = parseJson2(await readRegular2(join24(runRoot, "run.json"), "Selected run"), "run.json");
   if (run.projectId !== projectId || run.runId !== runId || !Number.isInteger(run.ownerEpoch) || run.ownerEpoch < 1) {
     throw new Error("Selected run does not match APEX config");
   }
-  const claimPath = join23(runRoot, "transfers", `${claimHash}.json`);
+  const claimPath = join24(runRoot, "transfers", `${claimHash}.json`);
   const claimBytes = await readRegular2(claimPath, "Transfer claim");
-  const claim2 = validateJsonSafety(claimBytes, relative10(apexRoot, claimPath).split(sep7).join("/"));
+  const claim2 = validateJsonSafety(claimBytes, relative11(apexRoot, claimPath).split(sep8).join("/"));
   if (sha256Json(claim2) !== claimHash)
     throw new Error("Transfer claim hash/path mismatch");
   if (claim2.projectId !== projectId || claim2.runId !== runId)
@@ -71883,7 +76274,7 @@ async function currentState(root, claimHash, recipient, now) {
   if (!Number.isFinite(Date.parse(claim2.expiresAt)) || Date.parse(claim2.expiresAt) <= now.getTime()) {
     throw new Error("Transfer claim has expired");
   }
-  const journal = new EventJournal(join23(runRoot, "journal"));
+  const journal = new EventJournal(join24(runRoot, "journal"));
   const events = await journal.replay();
   if (!events.some((event) => event.type === "transfer-requested" && event.ownerEpoch === run.ownerEpoch && event.payload.claimHash === claimHash)) {
     throw new Error("Transfer claim is not recorded at the current owner epoch");
@@ -71898,20 +76289,20 @@ async function createStateTransferBundle(root, options, now = /* @__PURE__ */ ne
   if (now.getTime() + options.ttlMs > Date.parse(state.claim.expiresAt)) {
     throw new Error("State transfer envelope cannot outlive its writer-transfer claim");
   }
-  const runRoot = join23(state.apexRoot, "projects", state.selection.projectId, "runs", state.selection.runId);
-  const generationRoot = join23(state.apexRoot, "runtime-generations", state.run.runtimeLockHash);
-  const generationAvailable = await readOptionalRegular(join23(generationRoot, "apex.lock.json"), "runtime generation lock") !== void 0;
-  const runtimeRoot = generationAvailable ? generationRoot : join23(state.apexRoot, "runtime");
+  const runRoot = join24(state.apexRoot, "projects", state.selection.projectId, "runs", state.selection.runId);
+  const generationRoot = join24(state.apexRoot, "runtime-generations", state.run.runtimeLockHash);
+  const generationAvailable = await readOptionalRegular(join24(generationRoot, "apex.lock.json"), "runtime generation lock") !== void 0;
+  const runtimeRoot = generationAvailable ? generationRoot : join24(state.apexRoot, "runtime");
   const paths = /* @__PURE__ */ new Set([
     "config.json",
     "apex.lock.json",
     `projects/${state.selection.projectId}/project.json`
   ]);
-  if (await readOptionalRegular(join23(state.apexRoot, ".gitignore"), "APEX gitignore") !== void 0) {
+  if (await readOptionalRegular(join24(state.apexRoot, ".gitignore"), "APEX gitignore") !== void 0) {
     paths.add(".gitignore");
   }
   try {
-    for (const sourceRoot of [.../* @__PURE__ */ new Set([runtimeRoot, join23(state.apexRoot, "runtime")])]) {
+    for (const sourceRoot of [.../* @__PURE__ */ new Set([runtimeRoot, join24(state.apexRoot, "runtime")])]) {
       for (const entry of await readdir11(sourceRoot, { withFileTypes: true })) {
         if (entry.isSymbolicLink())
           throw new Error(`State transfer runtime contains a symlink: ${entry.name}`);
@@ -71928,14 +76319,14 @@ async function createStateTransferBundle(root, options, now = /* @__PURE__ */ ne
   }
   const sourceFiles = [];
   for (const path2 of [...paths].sort()) {
-    let sourcePath = join23(state.apexRoot, ...path2.split("/"));
+    let sourcePath = join24(state.apexRoot, ...path2.split("/"));
     if (path2 === "apex.lock.json") {
-      sourcePath = generationAvailable ? join23(runtimeRoot, "apex.lock.json") : join23(state.apexRoot, "apex.lock.json");
+      sourcePath = generationAvailable ? join24(runtimeRoot, "apex.lock.json") : join24(state.apexRoot, "apex.lock.json");
     }
     if (path2.startsWith("runtime/")) {
       const relativeRuntimePath = path2.slice("runtime/".length);
-      const generationPath = join23(runtimeRoot, relativeRuntimePath);
-      sourcePath = await readOptionalRegular(generationPath, "runtime generation file") === void 0 ? join23(state.apexRoot, "runtime", relativeRuntimePath) : generationPath;
+      const generationPath = join24(runtimeRoot, relativeRuntimePath);
+      sourcePath = await readOptionalRegular(generationPath, "runtime generation file") === void 0 ? join24(state.apexRoot, "runtime", relativeRuntimePath) : generationPath;
     }
     sourceFiles.push({
       path: path2,
@@ -71980,9 +76371,9 @@ async function exportStateTransfer(root, outputPath, options, dependencies = {})
     bindings: bundle.bindings
   });
   const bytes = canonicalJsonBytes(envelope);
-  await atomicWriteBytes(resolve20(outputPath), bytes);
+  await atomicWriteBytes(resolve21(outputPath), bytes);
   return {
-    path: resolve20(outputPath),
+    path: resolve21(outputPath),
     sha256: sha256Bytes(bytes),
     files: bundle.files.length,
     expiresAt: envelope.metadata.expiresAt
@@ -72132,12 +76523,12 @@ function validateBundle2(value, envelopeBindings) {
   return { bundle, entries };
 }
 async function assertNoSymlinkAncestors(apexRoot, destination) {
-  const relativePath = relative10(apexRoot, destination);
+  const relativePath2 = relative11(apexRoot, destination);
   let current = apexRoot;
-  for (const segment of relativePath.split(sep7).slice(0, -1)) {
-    current = join23(current, segment);
+  for (const segment of relativePath2.split(sep8).slice(0, -1)) {
+    current = join24(current, segment);
     try {
-      const info = await lstat18(current);
+      const info = await lstat19(current);
       if (info.isSymbolicLink() || !info.isDirectory())
         throw new Error(`State transfer destination ancestor is unsafe: ${current}`);
     } catch (error62) {
@@ -72149,7 +76540,7 @@ async function assertNoSymlinkAncestors(apexRoot, destination) {
 }
 async function assertApexRootSafe(apexRoot) {
   try {
-    const info = await lstat18(apexRoot);
+    const info = await lstat19(apexRoot);
     if (info.isSymbolicLink() || !info.isDirectory()) {
       throw new Error(`State transfer APEX root is unsafe: ${apexRoot}`);
     }
@@ -72195,10 +76586,10 @@ async function importStateTransfer(root, envelopeValue, recipient, now = () => /
   if (config2.projectId !== bindings.projectId || config2.runId !== bindings.runId) {
     throw new Error("State transfer config does not match its bindings");
   }
-  const projectPath = `projects/${bindings.projectId}/project.json`;
+  const projectPath2 = `projects/${bindings.projectId}/project.json`;
   const runPath = `projects/${bindings.projectId}/runs/${bindings.runId}/run.json`;
   const claimPath = `projects/${bindings.projectId}/runs/${bindings.runId}/transfers/${bindings.claimHash}.json`;
-  const project = parseJson2(requiredEntry(files2, projectPath), projectPath);
+  const project = parseJson2(requiredEntry(files2, projectPath2), projectPath2);
   const run = parseJson2(requiredEntry(files2, runPath), runPath);
   const claim2 = parseJson2(requiredEntry(files2, claimPath), claimPath);
   if (project.projectId !== bindings.projectId || run.projectId !== bindings.projectId || run.runId !== bindings.runId) {
@@ -72218,18 +76609,18 @@ async function importStateTransfer(root, envelopeValue, recipient, now = () => /
   const lock = parseJson2(requiredEntry(files2, "apex.lock.json"), "apex.lock.json");
   if (sha256Json(lock) !== run.runtimeLockHash)
     throw new Error("State transfer runtime lock hash mismatch");
-  const apexRoot = resolve20(root, ".apex");
+  const apexRoot = resolve21(root, ".apex");
   await assertApexRootSafe(apexRoot);
   const preflight = [];
   for (const entry of entries) {
-    const destination = resolve20(apexRoot, ...entry.path.split("/"));
-    if (destination !== apexRoot && !destination.startsWith(`${apexRoot}${sep7}`))
+    const destination = resolve21(apexRoot, ...entry.path.split("/"));
+    if (destination !== apexRoot && !destination.startsWith(`${apexRoot}${sep8}`))
       throw new Error(`State transfer path escapes .apex: ${entry.path}`);
     if (entry.path.startsWith("local/") || entry.path === "local")
       throw new Error("State transfer cannot overwrite .apex/local");
     await assertNoSymlinkAncestors(apexRoot, destination);
     try {
-      const info = await lstat18(destination);
+      const info = await lstat19(destination);
       if (info.isSymbolicLink() || !info.isFile())
         throw new Error(`State transfer destination is unsafe: ${entry.path}`);
       const existing = await readFile19(destination);
@@ -72255,7 +76646,7 @@ async function importStateTransfer(root, envelopeValue, recipient, now = () => /
 
 // packages/cli/dist/bootstrap-wizard.js
 import { createInterface } from "node:readline/promises";
-import { join as join24 } from "node:path";
+import { join as join25 } from "node:path";
 import { stdin, stdout } from "node:process";
 import { isDeepStrictEqual } from "node:util";
 var InterruptedWait = class extends Error {
@@ -72320,7 +76711,7 @@ async function runBootstrapWizard(root, interaction, serviceAt = (directory) => 
       progress.push({ directory: root, step: "coe-copy", outcome: copied });
       if (copied.status === "blocked")
         return { status: "blocked", progress, nextAction: copied.nextAction };
-      directories = selections.map(({ destination }) => join24(root, destination));
+      directories = selections.map(({ destination }) => join25(root, destination));
     }
     for (const directory of directories) {
       const stopped = await scope2(directory, async () => {
@@ -72543,6 +76934,13 @@ function riskOwner(flags) {
     throw new ApexError("APEX_USAGE", "--risk-owner must be partner or customer", EXIT_CODES.usage);
   return value;
 }
+function purposeFlag(flags) {
+  if (flags.purpose === void 0)
+    return {};
+  if (!isDeploymentPurpose(flags.purpose))
+    throw new ApexError("APEX_USAGE", "--purpose must be lab or production", EXIT_CODES.usage);
+  return { purpose: flags.purpose };
+}
 async function inputJson(flags) {
   return JSON.parse(await readFile20(required2(flags, "file"), "utf8"));
 }
@@ -72553,6 +76951,7 @@ async function onboardingConfig(flags, _root) {
     ...typeof flags.name === "string" ? { displayName: flags.name } : {},
     ...typeof flags.client === "string" ? { client: flags.client } : {},
     ...typeof flags.environment === "string" ? { environment: flags.environment } : {},
+    ...purposeFlag(flags),
     ...typeof flags.target === "string" ? { targetScope: flags.target } : {},
     ...flags.iac === "terraform" ? { iacTool: "terraform" } : {},
     ...typeof flags["risk-owner"] === "string" ? { riskOwner: flags["risk-owner"] } : {},
@@ -72578,8 +76977,8 @@ async function onboardingConfig(flags, _root) {
   return config2;
 }
 async function configuredProviders(root, flags) {
-  const persistedPath = join25(root, ".apex", "provider-config.json");
-  const explicitPath = typeof flags["provider-config"] === "string" ? resolve21(flags["provider-config"]) : void 0;
+  const persistedPath = join26(root, ".apex", "provider-config.json");
+  const explicitPath = typeof flags["provider-config"] === "string" ? resolve22(flags["provider-config"]) : void 0;
   let config2;
   try {
     config2 = JSON.parse(await readFile20(explicitPath ?? persistedPath, "utf8"));
@@ -72590,17 +76989,17 @@ async function configuredProviders(root, flags) {
   }
   assertSecretFreeConfig(config2);
   if (explicitPath !== void 0) {
-    await mkdir14(join25(root, ".apex"), { recursive: true });
+    await mkdir14(join26(root, ".apex"), { recursive: true });
     await atomicWriteJson(persistedPath, config2);
   }
   const runner = new ProcessRunner();
   let providerRuntime;
   const runtime = async () => providerRuntime ??= await createFileProviderRuntime(root);
   const currentAuthority = async () => {
-    const selection2 = JSON.parse(await readFile20(join25(root, ".apex", "config.json"), "utf8"));
-    const runDirectory = join25(root, ".apex", "projects", selection2.projectId, "runs", selection2.runId);
-    const run = JSON.parse(await readFile20(join25(runDirectory, "run.json"), "utf8"));
-    const journal = new EventJournal(join25(runDirectory, "journal"));
+    const selection2 = JSON.parse(await readFile20(join26(root, ".apex", "config.json"), "utf8"));
+    const runDirectory = join26(root, ".apex", "projects", selection2.projectId, "runs", selection2.runId);
+    const run = parseRunConfig(await readFile20(join26(runDirectory, "run.json"), "utf8"));
+    const journal = new EventJournal(join26(runDirectory, "journal"));
     const events = await journal.replay();
     const dependencyRevision2 = dependencyRevision(run, events);
     let recipientIdentity = "local";
@@ -72632,27 +77031,26 @@ async function configuredProviders(root, flags) {
   const providers = {};
   if (config2.bicep !== void 0) {
     const value = config2.bicep;
-    for (const key of ["resourceGroup", "deploymentName", "stackName", "templateFile"]) {
+    for (const key of Object.keys(value)) {
+      if (!["cwd", "environmentName", "tenantId", "location", "cloud"].includes(key))
+        throw new ApexError("APEX_USAGE", `Bicep provider config does not support '${key}'; azd is the only Bicep executor and Deployment Stacks are not supported`, EXIT_CODES.usage);
+    }
+    for (const key of ["cwd", "environmentName", "tenantId", "location"]) {
       if (typeof value[key] !== "string" || value[key].length === 0)
         throw new ApexError("APEX_USAGE", `Bicep provider config requires ${key}`, EXIT_CODES.usage);
     }
     const localRuntime = await runtime();
-    providers.bicep = new NativeBicepProvider({
+    providers.bicep = new AzdBicepProvider({
       runner,
       currentAuthority,
       bindingStore: localRuntime.bindingStores.bicep,
       target: {
-        resourceGroup: value.resourceGroup,
-        deploymentName: value.deploymentName,
-        stackName: value.stackName,
-        templateFile: value.templateFile,
-        actionOnUnmanage: value.actionOnUnmanage ?? "detachAll",
-        denySettingsMode: value.denySettingsMode ?? "denyDelete",
-        ...value.ownershipAuthorizesDeleteResources === void 0 ? {} : { ownershipAuthorizesDeleteResources: value.ownershipAuthorizesDeleteResources },
-        ...value.dedicatedSandboxResourceGroup === void 0 ? {} : { dedicatedSandboxResourceGroup: value.dedicatedSandboxResourceGroup },
-        ...value.allowDeleteAll === void 0 ? {} : { allowDeleteAll: value.allowDeleteAll },
-        ...value.parametersFile === void 0 ? {} : { parametersFile: value.parametersFile },
-        ...value.cwd === void 0 ? {} : { cwd: value.cwd }
+        projectRoot: resolve22(root, value.cwd),
+        environmentName: value.environmentName,
+        tenantId: value.tenantId,
+        location: value.location,
+        azdVersion: (await bundledToolchainMinimums()).azd,
+        ...value.cloud === void 0 ? {} : { cloud: value.cloud }
       }
     });
   }
@@ -72663,7 +77061,7 @@ async function configuredProviders(root, flags) {
         throw new ApexError("APEX_USAGE", `Terraform provider config requires ${key}`, EXIT_CODES.usage);
     }
     const localRuntime = await runtime();
-    const terraformRoot = resolve21(root, value.cwd);
+    const terraformRoot = resolve22(root, value.cwd);
     const actualLockfileHash = await hashTerraformLockFile(terraformRoot);
     if (actualLockfileHash !== value.lockfileHash) {
       throw new ApexError("APEX_STALE", `Terraform lockfileHash is stale: expected ${value.lockfileHash}, found ${actualLockfileHash}`, EXIT_CODES.stale);
@@ -72686,7 +77084,7 @@ async function configuredProviders(root, flags) {
         target: value.target,
         lockfileHash: actualLockfileHash,
         configHash,
-        planPath: (request, operation) => join25(value.planDirectory, `${request.runId}-${operation}.tfplan`)
+        planPath: (request, operation) => join26(value.planDirectory, `${request.runId}-${operation}.tfplan`)
       }
     });
   }
@@ -72716,8 +77114,8 @@ function files(flags) {
 }
 async function evaluateQuality(root, flags) {
   const assets = await resolveBundledAssets();
-  const scorecardPath = typeof flags.scorecard === "string" ? resolve21(flags.scorecard) : join25(assets.config, "quality-scorecard.v1.json");
-  const measurementPath = resolve21(required2(flags, "measurements"));
+  const scorecardPath = typeof flags.scorecard === "string" ? resolve22(flags.scorecard) : join26(assets.config, "quality-scorecard.v1.json");
+  const measurementPath = resolve22(required2(flags, "measurements"));
   const scorecard = JSON.parse(await readFile20(scorecardPath, "utf8"));
   const measurementInput = JSON.parse(await readFile20(measurementPath, "utf8"));
   const inputMeasurements = Array.isArray(measurementInput) ? measurementInput : measurementInput !== null && typeof measurementInput === "object" ? measurementInput.measurements : void 0;
@@ -72749,11 +77147,11 @@ async function evaluateQuality(root, flags) {
     status: evaluations.some(({ decision }) => decision === "fail") || !evaluations.some(({ decision }) => decision === "pass") ? "fail" : "pass",
     evaluations
   };
-  const outputDirectory = join25(root, ".apex", "quality");
+  const outputDirectory = join26(root, ".apex", "quality");
   await mkdir14(outputDirectory, { recursive: true });
-  await atomicWriteJson(join25(outputDirectory, "measurements.json"), measurementSet);
-  await atomicWriteJson(join25(outputDirectory, "evaluation.json"), artifact);
-  await writeFile4(join25(outputDirectory, "evaluation.md"), `${renderQualityScorecardEvaluation(scorecard, measurements)}
+  await atomicWriteJson(join26(outputDirectory, "measurements.json"), measurementSet);
+  await atomicWriteJson(join26(outputDirectory, "evaluation.json"), artifact);
+  await writeFile4(join26(outputDirectory, "evaluation.md"), `${renderQualityScorecardEvaluation(scorecard, measurements)}
 `, "utf8");
   if (artifact.status === "fail")
     throw new ApexError("APEX_VALIDATION", "Quality scorecard evaluation failed", EXIT_CODES.validation, artifact);
@@ -72761,7 +77159,7 @@ async function evaluateQuality(root, flags) {
 }
 async function qualityStatus(root) {
   try {
-    return JSON.parse(await readFile20(join25(root, ".apex", "quality", "evaluation.json"), "utf8"));
+    return JSON.parse(await readFile20(join26(root, ".apex", "quality", "evaluation.json"), "utf8"));
   } catch (error62) {
     if (error62.code === "ENOENT")
       throw new ApexError("APEX_VALIDATION", "No quality evaluation is available", EXIT_CODES.validation);
@@ -72816,7 +77214,7 @@ async function execute2(argv, root = process.cwd(), options = {}, interaction = 
   const { words, flags } = parse3(argv);
   const command = words.join(" ");
   if (command === "mcp serve")
-    root = await realpath10(await mcpWorkspaceRoot(root));
+    root = await realpath11(await mcpWorkspaceRoot(root));
   const service = await createApexService(root, flags, command, options);
   const run = () => dispatch(service, command, flags, root, options, interaction);
   if (UNSERIALIZED_COMMANDS.has(command))
@@ -72843,6 +77241,7 @@ async function dispatch(service, command, flags, root, options, interaction) {
         projectId: required2(flags, "project"),
         ...typeof flags.name === "string" ? { displayName: flags.name } : {},
         ...typeof flags.environment === "string" ? { environment: flags.environment } : {},
+        ...purposeFlag(flags),
         targetScope: assertTargetScope(required2(flags, "target")),
         iacTool: flags.iac === "terraform" ? "terraform" : "bicep",
         riskOwner: riskOwner(flags),
@@ -72883,6 +77282,7 @@ async function dispatch(service, command, flags, root, options, interaction) {
         ...config2.projectId === void 0 ? {} : { projectId: config2.projectId },
         ...config2.displayName === void 0 ? {} : { displayName: config2.displayName },
         ...config2.environment === void 0 ? {} : { environment: config2.environment },
+        ...config2.purpose === void 0 ? {} : { purpose: config2.purpose },
         ...config2.targetScope === void 0 ? {} : { targetScope: config2.targetScope },
         ...config2.iacTool === void 0 ? {} : { iacTool: config2.iacTool },
         ...config2.riskOwner === void 0 ? {} : { riskOwner: config2.riskOwner },
@@ -72921,6 +77321,7 @@ async function dispatch(service, command, flags, root, options, interaction) {
         projectId: required2(flags, "project"),
         ...typeof flags.name === "string" ? { displayName: flags.name } : {},
         ...typeof flags.environment === "string" ? { environment: flags.environment } : {},
+        ...purposeFlag(flags),
         targetScope: assertTargetScope(required2(flags, "target")),
         iacTool: flags.iac === "terraform" ? "terraform" : "bicep",
         riskOwner: riskOwner(flags)
@@ -72937,7 +77338,7 @@ async function dispatch(service, command, flags, root, options, interaction) {
     case "project history":
       return service.history(typeof flags.limit === "string" ? Number(flags.limit) : void 0);
     case "project promote":
-      return service.promote(required2(flags, "environment"), required2(flags, "target"));
+      return service.promote(required2(flags, "environment"), required2(flags, "target"), purposeFlag(flags).purpose);
     case "state transfer-export": {
       confirmed(flags, "state transfer-export");
       const ttlSeconds = Number(required2(flags, "ttl-seconds"));
@@ -73175,6 +77576,9 @@ try {
   process.exitCode = normalized.exitCode;
 }
 /*! Bundled license information:
+
+js-yaml/dist/js-yaml.mjs:
+  (*! js-yaml 5.4.3 https://github.com/nodeca/js-yaml @license MIT *)
 
 @modelcontextprotocol/server/dist/src-Cqbh3MYc.mjs:
   (*!

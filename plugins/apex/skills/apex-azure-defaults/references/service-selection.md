@@ -41,6 +41,8 @@ requirement, policy, lifecycle limitation, or WAF consequence.
 
 - Use accepted current evidence for service availability, runtime support, SKU features, quotas, and retirement status.
 - Prefer supported GA/LTS versions for durable workloads and avoid deprecated or classic services for greenfield use.
+- Before recommending a reservation, savings plan, or other multi-year commitment, confirm from current evidence that
+  the service's retirement horizon extends beyond the commitment term.
 - Treat access tier, redundancy, orchestration mode, hosting plan, and commitment as separate decisions when applicable.
 - Do not convert an advisory workload matrix into a locked SKU or price.
 - Return a blocker when no candidate satisfies a mandatory requirement or evidence is missing.
