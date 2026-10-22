@@ -18,6 +18,10 @@ This repository only hosts released plugin trees. Change APEX itself in
    plugin, creates `release/apex-<version>` from `main` here, replaces `plugins/apex/`, updates `marketplace.json` and
    `provenance.json`, pushes only that branch and opens a pull request. It never merges, pushes to `main` or creates
    tags.
+   The SBOM is not part of that script. On the release branch, copy apex-vnext's `package-lock.json` at the release
+   commit somewhere, then run `node tools/generate-sbom.mjs --from-lockfile <lockfile>` (refreshes
+   `tools/sbom-bundled-deps.json`) and `node tools/generate-sbom.mjs`, and commit `.github/plugin/sbom.cdx.json`,
+   `tools/sbom-bundled-deps.json` and `README.md`. The `validate` check fails until you do.
 4. Review the pull request. The `validate` check recomputes the tree hash of every hosted plugin, compares it with
    `provenance.json`, and confirms the recorded source commit is on apex-vnext `main`.
 5. Merge after review. Clients pick up the release on `copilot plugin update apex` or the next marketplace refresh.
@@ -28,5 +32,6 @@ release commit here, but nothing installs or verifies by tag.
 ## Changes to this repository
 
 Changes to the marketplace tooling, workflow or documentation use a branch, a conventional commit and a pull request
-into `main`. Run `node --test tools/validate-marketplace.test.mjs` and `node tools/validate-marketplace.mjs` before you
+into `main`. Run `node --test tools/validate-marketplace.test.mjs tools/generate-sbom.test.mjs`,
+`node tools/validate-marketplace.mjs` and `node tools/generate-sbom.mjs --check` before you
 push. Pin GitHub Actions to full commit SHAs.

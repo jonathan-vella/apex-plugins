@@ -31,9 +31,12 @@ jobs:
           node-version: "24"
 
       - name: Test the validator
-        run: node --test tools/validate-marketplace.test.mjs
+        run: node --test tools/validate-marketplace.test.mjs tools/generate-sbom.test.mjs
 
       - name: Validate marketplace, provenance and plugin tree hashes
         env:
           GITHUB_TOKEN: ${{ github.token }}
         run: node tools/validate-marketplace.mjs --verify-source
+
+      - name: Check the SBOM and README diagram are current
+        run: node tools/generate-sbom.mjs --check
