@@ -3,7 +3,6 @@
 
 <!-- ref:resources-limits-quotas-v1 -->
 
-> Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../references/kernel-boundary.md) before using this reference.
 > Examples are design material for accepted task inputs, not permission to write, execute or advance state.
 > Runtime defaults, effective policy tags, security invariants and exact AVM locks override sample values.
@@ -28,7 +27,7 @@
 - Example: Complete Check Workflow
 
 Check Azure quota evidence during apex-azure-prepare workflow after the customer selects a region.
-Read the canonical [quota evidence and fallback contract](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-quotas/references/commands.md#quota-evidence-and-fallback).
+Read the canonical [quota evidence and fallback contract](../../apex-azure-quotas/references/quota-cli-commands.md).
 Quota headroom, SKU restrictions and physical regional capacity are separate checks.
 Static catalogs and unrestricted SKU listings do not prove regional capacity or guarantee allocation.
 

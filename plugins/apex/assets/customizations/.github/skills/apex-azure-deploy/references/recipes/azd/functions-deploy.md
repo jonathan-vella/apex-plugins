@@ -18,7 +18,6 @@
 - CI/CD Integration
 - Data Loss Warning
 - Next Steps
-- Port Source
 
 Deployment workflows for Azure Functions using AZD.
 
@@ -159,9 +158,3 @@ After deployment:
 2. Test endpoints
 3. Monitor Application Insights
 4. Request separately authorized alerts/monitoring configuration if not covered by the accepted operation
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/recipes/azd/functions-deploy.md).
-Load only the reference needed for the active task.

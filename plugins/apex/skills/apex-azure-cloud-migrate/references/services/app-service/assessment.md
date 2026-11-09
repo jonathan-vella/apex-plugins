@@ -14,7 +14,6 @@
 - Code Preview
 - Architecture Diagrams
 - Assessment Report Format
-- Port Source
 
 Assess accepted source evidence before any code changes; submit through the active task's artifact contract.
 
@@ -163,9 +162,3 @@ Use the active task's allowed artifact and acceptance contract; do not write an 
 
 > Use `apex-azure/get_azure_bestpractices` with a bounded intent, `get_azure_bestpractices_get` and
 > `{resource: "general", action: "all"}` parameters; use `apex-azure/documentation` for App Service-specific guidance.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/app-service/assessment.md).
-Load only the reference needed for the active task.

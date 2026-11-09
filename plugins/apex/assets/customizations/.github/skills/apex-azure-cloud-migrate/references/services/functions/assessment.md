@@ -14,7 +14,6 @@
 - Code Preview
 - Architecture Diagrams
 - Assessment Report Format
-- Port Source
 
 Assess accepted source evidence before any code changes; submission uses the active task's artifact contract.
 
@@ -175,9 +174,3 @@ The following upstream headings preserve useful assessment fields. They are not 
 
 > Use `apex-azure/get_azure_bestpractices` with a bounded intent, command `get_azure_bestpractices_get` and
 > parameters `{resource: "azurefunctions", action: "all"}` for the comparison.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/functions/assessment.md).
-Load only the reference needed for the active task.

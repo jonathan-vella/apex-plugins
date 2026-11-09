@@ -82,4 +82,3 @@ even if the infrastructure plan is approved.
 - [Functions assessment](./references/services/functions/assessment.md) — complete assessment dimensions/output.
 - [Consumption to Flex](./references/services/functions/consumption-to-flex.md) — configuration, triggers and rollback.
 - [Redis to AMR](./references/services/redis/redis-to-amr.md) — product disambiguation, client/data/auth risks.
-- [Upstream coverage](./references/upstream-coverage.md) — exact pinned inventory, adaptations and exclusions.

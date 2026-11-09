@@ -22,7 +22,6 @@
 - SignalR
 - SendGrid
 - Multiple Outputs
-- Port Source
 
 > **Model**: Java annotation-based model. Uses `@FunctionName` and trigger/binding annotations.
 > Import: `com.microsoft.azure.functions.*` and `com.microsoft.azure.functions.annotation.*`
@@ -236,9 +235,3 @@ public HttpResponseMessage run(
 > **Note**: Java uses `function.json` generated at build time by the Maven plugin — you don't write them manually.
 
 > Full reference: [Azure Functions Java developer guide](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-java)
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/java.md).
-Load only the reference needed for the active task.

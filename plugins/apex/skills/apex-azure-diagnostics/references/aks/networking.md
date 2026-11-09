@@ -12,7 +12,6 @@
 - Service Unreachable / Connection Refused
 - DNS Resolution Failures
 - Detailed Networking Guides
-- Port Source
 
 For CNI-specific issues, check CNI pod health and review [AKS networking concepts](https://learn.microsoft.com/azure/aks/concepts-network).
 
@@ -116,9 +115,3 @@ See [references/inspektor-gadget.md](references/inspektor-gadget.md).
   state, backend routing, and TLS failures.
 - [Network Policy Troubleshooting](network-policy.md) for default-deny checks, Azure NPM or Calico validation, and
   ingress or egress rule audits.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/aks/networking.md).
-Load only the reference needed for the active task.

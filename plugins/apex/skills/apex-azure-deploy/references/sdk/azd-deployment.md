@@ -48,7 +48,3 @@ preview. azd is planned for Bicep only (CP-26); none of this is implemented runt
   through accepted IaC; “already exists” requires a checked idempotent result, not ignored errors.
 - Preserve diagnostics visibly without exposing secrets; long-running provision/delivery may be partial or
   indeterminate. Follow kernel reconciliation rather than automatic retry.
-
-## Port Source
-
-Adapted from [the upstream azd SDK reference](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/sdk/azd-deployment.md).

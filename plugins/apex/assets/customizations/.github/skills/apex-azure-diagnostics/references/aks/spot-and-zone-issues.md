@@ -69,9 +69,3 @@ kubectl get nodes -L topology.kubernetes.io/zone
 | Upgrade causing zone imbalance                   | Surge nodes in one zone                              | Configure `maxSurge` in node pool upgrade settings           |
 
 Use `Premium_ZRS` or `StandardSSD_ZRS` in custom StorageClasses to reduce zonal PVC conflicts. See [AKS storage best practices](https://learn.microsoft.com/azure/aks/operator-best-practices-storage).
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/aks/spot-and-zone-issues.md).
-Load only the reference needed for the active task.

@@ -9,8 +9,6 @@
 
 ## Navigation
 
-- Port Source
-
 This is a non-executable source example, not an installed helper or a qualified deployment workflow. Do not copy
 it into an active pipeline or run it. Native credentials, privileged diagnostics, remote mutations and local writes
 need their owning task and capability. Script approval switches and CI environment approvals do not replace current Gate
@@ -218,9 +216,3 @@ else
     "${FULL_CMD[@]}"
 fi
 ```
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/scripts/run-ig.sh).
-Load only the reference needed for the active task.

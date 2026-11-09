@@ -1,6 +1,5 @@
 <!-- ref:private-endpoint-pattern-v1 -->
 
-> Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../references/kernel-boundary.md) before using this reference.
 > Examples are design material for accepted task inputs, not permission to write, execute or advance state.
 > Runtime defaults, effective policy tags, security invariants and exact AVM locks override sample values.
@@ -10,7 +9,7 @@
 
 Standard three-resource pattern using AVM-TF private endpoint module.
 
-Apply the [canonical networking contract](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/instructions/references/iac-security-baseline.md#private-networking-and-dns)
+Apply the [canonical networking contract](../../apex-azure-defaults/references/security-baseline.md)
 before selecting this project-owned DNS pattern. Reuse verified central zones and avoid provisioning
 components owned by effective DINE policy. DNS resolution and private-client reachability remain required.
 

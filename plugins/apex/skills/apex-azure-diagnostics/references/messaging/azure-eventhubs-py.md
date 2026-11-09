@@ -15,7 +15,6 @@
 - Enable Logging
 - Key Issues
 - Checkpointing (BlobCheckpointStore)
-- Port Source
 
 Package: `azure-eventhub` |
 [README](https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/eventhub/azure-eventhub) | [Full Troubleshooting
@@ -33,7 +32,7 @@ Guide](https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/eventhub/azur
 ## Retry Configuration
 
 > **Auth:** `DefaultAzureCredential` is for local development. See [auth best
-> practices](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-entra-app-registration/references/auth-best-practices.md)
+> practices](../../../apex-entra-app-registration/references/permissions-and-credentials.md)
 > for production patterns.
 
 ```python
@@ -54,7 +53,7 @@ client = EventHubProducerClient(
 ## Consumer Client Retry Configuration
 
 > **Auth:** `DefaultAzureCredential` is for local development. See [auth best
-> practices](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-entra-app-registration/references/auth-best-practices.md)
+> practices](../../../apex-entra-app-registration/references/permissions-and-credentials.md)
 > for production patterns.
 
 Under heavy load, tune the retry policy on `EventHubConsumerClient` to reduce timeouts:
@@ -128,9 +127,3 @@ See the [Consumer Client Retry Configuration](#consumer-client-retry-configurati
 - **Soft delete / blob versioning**: Disable both on the storage account — they cause large delays during load balancing.
 - **HTTP 412/409 from storage**: Normal during partition ownership negotiation; not an error.
 - **Checkpoint frequency**: Checkpoint after processing each batch, not each event, to avoid storage throttling.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/messaging/azure-eventhubs-py.md).
-Load only the reference needed for the active task.

@@ -6,6 +6,7 @@ upstream Python `Diagram`/`Cluster` snippets or infer network/data-flow semantic
 
 | Pattern | Relationships to verify | Common misleading shortcut |
 | --- | --- | --- |
+| End-to-end overview | Actors outside the workload boundary → ingress → application/compute → data → security/operations, with explicit trust/subnet boundaries, labelled flows and legend | Inventing actors, subnets or protocols absent from the accepted `ArchitectureV1` contract |
 | Three-tier web | External entry → frontend/API → accepted data dependencies; separate identity/secret references | Adding CDN, gateway, cache or public storage merely because a reference uses them |
 | AKS microservices | Ingress, cluster, registry, messaging/data and monitoring boundaries | Treating registry pull or telemetry edges as workload-to-workload traffic |
 | Serverless/event-driven | Event source → trigger/processing → output; queue/topic versus event notification | Drawing synchronous success for asynchronous delivery or assuming exactly-once behavior |

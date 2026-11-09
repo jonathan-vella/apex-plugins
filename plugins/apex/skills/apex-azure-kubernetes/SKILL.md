@@ -57,7 +57,6 @@ an available `apex/*` tool, supply the current checkout's absolute `workspace`.
 | OIDC, service accounts and per-service authorization | [Workload identity](./references/workload-identity.md) |
 | Workload admission design checklist | [Deployment safeguards](./references/safeguards.md) |
 | Observation commands and unavailable access | [CLI boundary](./references/cli-reference.md) |
-| Exact source inventory and adaptations | [Upstream coverage](./references/upstream-coverage.md) |
 
 ## Boundaries
 

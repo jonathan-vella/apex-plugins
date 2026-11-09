@@ -44,9 +44,3 @@ Diagnose and resolve issues with Azure Event Hubs and Service Bus SDKs.
 
 Namespace schema discovery uses exactly `{intent: "", learn: true}` with no command/parameters. Then call the actual
 command with its required parameters and a bounded intent; absent or denied operations remain coverage gaps.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/messaging/README.md).
-Load only the reference needed for the active task.

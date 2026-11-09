@@ -20,7 +20,6 @@
 - Safe Fallback Checks
 - Guardrails
 - Output Checklist
-- Port Source
 
 Primary AKS troubleshooting guide for incidents routed from [../../SKILL.md](../../SKILL.md).
 
@@ -135,9 +134,3 @@ Keep these read-only unless the user explicitly asks for remediation.
 ## Output Checklist
 
 Return scope and impact, evidence, failure domain, root cause, confidence, next checks, remediation, and escalation.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/aks/aks-troubleshooting.md).
-Load only the reference needed for the active task.

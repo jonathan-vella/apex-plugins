@@ -99,8 +99,7 @@ service discovery and DNS differences, identity, data consistency and rollback/c
 - [Lambda to Functions assessment](references/lambda-to-functions-assessment.md) - workload mapping, runtime review,
   and blocked-operation boundary.
 - [Workflow details](references/workflow-details.md) - reporting, stage ownership and conversion errors.
-- [Functions security rules](references/services/functions/global-rules.md) and
-  [upstream coverage](references/upstream-coverage.md).
+- [Functions security rules](references/services/functions/global-rules.md).
 
 ## Output
 

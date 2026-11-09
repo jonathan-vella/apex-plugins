@@ -15,7 +15,6 @@
 - Missing Container Registry Variables
 - Retry
 - Cleanup (DESTRUCTIVE)
-- Port Source
 
 ## Deployment Runtime Errors
 
@@ -50,7 +49,7 @@ CI/CD the deploying identity is a service principal, so provisioning fails.
 
 Report it to the IaC owner: parameterize `principalType` (see
 [SQL
-auth](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-prepare/references/services/sql-database/auth.md))
+auth](../../../../apex-azure-prepare/references/services/sql-database/auth.md))
 or set the template's `allowUserIdentityPrincipal` flag to `false` for service principal deployments. Clearing
 `AZURE_PRINCIPAL_ID` with `azd env set` has no effect, because azd repopulates it from the current sign-in.
 
@@ -165,9 +164,3 @@ azd down --force --purge
 ```
 
 ⚠️ Permanently deletes ALL resources including databases and Key Vaults.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/recipes/azd/errors.md).
-Load only the reference needed for the active task.

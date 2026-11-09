@@ -2,7 +2,6 @@
 
 # Environment-Neutral Bicep Parameters
 
-Adapted from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 Read [the authority boundary](kernel-boundary.md). The accepted binding and CodeGen capability determine supported
 parameter materialization; this reference does not introduce an environment-manifest file or deploy worker.
 

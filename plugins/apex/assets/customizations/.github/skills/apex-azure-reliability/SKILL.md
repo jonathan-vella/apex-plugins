@@ -87,7 +87,6 @@ Return bounded findings and the exact gap, not a successful assessment or an inv
 - [Health probes](./references/health-probe-checks.md) — global routing and observability signals.
 - [App Service reliability](./references/services/app-service/reliability.md) — plans, health, backups and networks.
 - [Functions reliability](./references/services/functions/reliability.md) — hosting, triggers, health and recovery.
-- [Upstream coverage](./references/upstream-coverage.md) — exact source inventory, corrections and exclusions.
 
 Frozen source is not current lifecycle evidence. Verify changing claims against
 [Azure reliability guidance](https://learn.microsoft.com/azure/reliability/overview) and

@@ -3,20 +3,20 @@
   "plugins": [
     {
       "name": "apex",
-      "version": "0.11.0-next.6",
+      "version": "0.11.0-next.7",
       "source": {
         "repository": "jonathan-vella/apex-vnext",
-        "commit": "4c838a25ff03e9414cdf561267df38b9c367bf27"
+        "commit": "83da6513eada38897907dbe2483ddc509454a2a2"
       },
       "cli": {
         "package": "@apexops/cli",
-        "version": "0.11.0-next.6",
-        "gitHead": "4c838a25ff03e9414cdf561267df38b9c367bf27"
+        "version": "0.11.0-next.7",
+        "gitHead": "83da6513eada38897907dbe2483ddc509454a2a2"
       },
       "tree": {
         "algorithm": "apex-plugin-tree-sha256-v1",
-        "sha256": "01f4f22c3a97ff9cc9ff6d9cc3d1f3116fca0d1ae52142373e10d73a1188b161",
-        "files": 1245
+        "sha256": "4329b30955dc0d582d7d0c7c7c93f91364ecf46d04017d232fd4544e0da58b88",
+        "files": 1173
       }
     }
   ]

@@ -14,7 +14,6 @@
 - Assessment Checklist
 - Complexity Assessment Guidelines
 - Assessment Report Structure
-- Port Source
 
 ## Compatibility Matrix
 
@@ -165,9 +164,3 @@ Generate `k8s-migration-assessment.md` with:
    - Deployment sequence (dependencies first, then consumers)
 6. **Risk Assessment**: Blockers, feature gaps, performance considerations, downtime estimate
 7. **Validation Tests**: Smoke tests, integration tests, performance benchmarks
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/container-apps/assessment-guide.md).
-Load only the reference needed for the active task.

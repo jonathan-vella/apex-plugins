@@ -17,7 +17,6 @@
 - ALB → App Service Load Balancing
 - Environment Variables Migration
 - Reference Links
-- Port Source
 
 Detailed guidance for migrating AWS Elastic Beanstalk applications to Azure App Service.
 
@@ -185,9 +184,3 @@ resource autoscale 'Microsoft.Insights/autoscalesettings@2022-10-01' = {
 - [App Service overview](https://learn.microsoft.com/en-us/azure/app-service/overview)
 - [App Service autoscale](https://learn.microsoft.com/en-us/azure/azure-monitor/autoscale/autoscale-get-started)
 - [Azure Database Migration Service](https://learn.microsoft.com/en-us/azure/dms/dms-overview)
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/app-service/beanstalk-to-app-service.md).
-Load only the reference needed for the active task.

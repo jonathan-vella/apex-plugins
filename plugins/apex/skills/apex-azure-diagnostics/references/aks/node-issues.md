@@ -13,7 +13,6 @@
 - Node Pool Not Scaling
 - Resource Pressure & Capacity Planning
 - Detailed Node And Cluster Guides
-- Port Source
 
 ## Node NotReady
 
@@ -146,9 +145,3 @@ processes on the node (node-wide scope, no pod filters). See
   PDB-related drain blockers.
 - [Spot And Zone Issues](spot-and-zone-issues.md) for spot evictions, tolerations, zone skew, and zonal storage or
   service behavior.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/aks/node-issues.md).
-Load only the reference needed for the active task.

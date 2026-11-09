@@ -2,7 +2,6 @@
 
 # Deployment Script Requirements Mapped to APEX
 
-Adapted from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 Read [the authority boundary](kernel-boundary.md). Upstream shell/PowerShell apply loops are not retained as executable
 templates: there is no compatibility requirement for scripts that bypass kernel approval.
 

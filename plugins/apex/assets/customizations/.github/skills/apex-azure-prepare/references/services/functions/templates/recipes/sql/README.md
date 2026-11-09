@@ -1,4 +1,3 @@
-> Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../../../../../../references/kernel-boundary.md) before using this reference.
 > Examples are design material for accepted task inputs, not permission to write, execute or advance state.
 > Runtime defaults, effective policy tags, security invariants and exact AVM locks override sample values.
@@ -52,7 +51,7 @@ Supply approved subnet/VNet IDs to Bicep,
 or VNet integration/private endpoint/DNS in Terraform; missing reachability blocks readiness, not permission
 to enable public access. These templates show project-owned DNS. Before copying them, reconcile each DNS component
 with verified central/DINE ownership under the
-[canonical networking contract](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/instructions/references/iac-security-baseline.md#private-networking-and-dns).
+[canonical networking contract](../../../../../../../apex-azure-defaults/references/security-baseline.md).
 Adapt only the components whose ownership is verified; never duplicate policy-managed DNS or omit resolution.
 Retain approved policy tags and resolve AVM interfaces or a raw-resource exception before generation.
 

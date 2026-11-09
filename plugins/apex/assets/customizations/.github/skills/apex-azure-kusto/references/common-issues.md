@@ -21,9 +21,3 @@ Adapted from the upstream `azure-kusto` skill. Keep every retry bounded, as in
 | Cluster not found | Cluster name includes the `.kusto.windows.net` suffix    | Pass the short cluster name, or the full URI where the tool expects one                                   |
 | High CPU usage    | Broad aggregations over long windows                     | Filter before `summarize`, shorten the window and limit aggregations                                     |
 | Ingestion lag     | Streaming or queued ingestion has not landed yet         | Allow for delays of seconds to minutes depending on the ingestion method before concluding data is missing |
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-kusto/references/common-issues.md).
-Load only the reference needed for the active task.

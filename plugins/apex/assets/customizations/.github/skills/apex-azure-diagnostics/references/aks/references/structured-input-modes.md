@@ -60,9 +60,3 @@ If the first troubleshooting pass is incomplete, search Microsoft Learn using:
 - the AKS troubleshooting context
 
 Use Learn grounding to refine or validate the root-cause hypothesis, not to replace observed evidence.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/aks/references/structured-input-modes.md).
-Load only the reference needed for the active task.

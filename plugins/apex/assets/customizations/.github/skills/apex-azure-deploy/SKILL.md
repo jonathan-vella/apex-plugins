@@ -95,7 +95,6 @@ approval exceptions.
 - [azd reference](references/sdk/azd-deployment.md) - environment, hooks, packaging and planned lifecycle.
 - Azure Identity SDKs: [Python](references/sdk/azure-identity-py.md), [.NET](references/sdk/azure-identity-dotnet.md),
   [TypeScript](references/sdk/azure-identity-ts.md), [Java](references/sdk/azure-identity-java.md).
-- [Upstream coverage](references/upstream-coverage.md) - pinned file inventory, examples and adaptations.
 
 ## Output
 

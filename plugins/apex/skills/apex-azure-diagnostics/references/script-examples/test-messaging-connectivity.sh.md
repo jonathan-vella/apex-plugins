@@ -9,8 +9,6 @@
 
 ## Navigation
 
-- Port Source
-
 This is a non-executable source example, not an installed helper or a qualified deployment workflow. Do not copy
 it into an active pipeline or run it. Native credentials, privileged diagnostics, remote mutations and local writes
 need their owning task and capability. Script approval switches and CI environment approvals do not replace current Gate
@@ -208,9 +206,3 @@ else
     echo "Summary: DNS resolved to $RESOLVED_IP. 'reachable' ports accept TCP connections; any 'BLOCKED' port points to an IP firewall, NSG, corporate proxy, or private-endpoint restriction to investigate. Port 443 (WebSockets) can be used as a fallback when AMQP ports 5671/5672 are blocked."
 fi
 ```
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/scripts/test-messaging-connectivity.sh).
-Load only the reference needed for the active task.

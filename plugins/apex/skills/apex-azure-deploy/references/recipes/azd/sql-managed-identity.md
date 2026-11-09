@@ -16,7 +16,6 @@
 - Verification
 - Troubleshooting
 - References
-- Port Source
 
 Grant Azure managed identities database permissions on Azure SQL with Entra authentication.
 
@@ -121,9 +120,3 @@ IF NOT EXISTS (
 - [SQL Entra Authentication](sql-entra-auth.md)
 - [EF Core Migrations](ef-migrations.md)
 - [Post-Deployment Guide](post-deployment.md)
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/recipes/azd/sql-managed-identity.md).
-Load only the reference needed for the active task.

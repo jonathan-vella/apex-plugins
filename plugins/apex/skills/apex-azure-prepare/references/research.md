@@ -1,6 +1,5 @@
 <!-- ref:research-v1 -->
 
-> Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../references/kernel-boundary.md) before using this reference.
 > Examples are design material for accepted task inputs, not permission to write, execute or advance state.
 > Runtime defaults, effective policy tags, security invariants and exact AVM locks override sample values.
@@ -119,7 +118,7 @@ Invoke related skills for specialized scenarios:
 | Need detailed security hardening                | `azure-security-hardening`                                                                                                                                                          |
 | Setting up App Insights instrumentation         | `appinsights-instrumentation`                                                                                                                                                       |
 | Building AI applications                        | `microsoft-foundry`                                                                                                                                                                 |
-| Greenfield or proposed-resource pricing         | `cost-estimate-subagent` via the [pricing parent contract](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-defaults/references/cost-estimate-parent-contract.md); no deployed scope required |
+| Greenfield or proposed-resource pricing         | `cost-estimate-subagent` via the [pricing parent contract](../../apex-azure-defaults/references/retail-pricing.md); no deployed scope required |
 | Existing deployment optimization                | `apex-azure-cost-optimization` with returned Advisor/optimization recommendations and verified utilization observations, when available; actual billed spend is unavailable |
 
 **Skill/Reference Invocation Pattern:**

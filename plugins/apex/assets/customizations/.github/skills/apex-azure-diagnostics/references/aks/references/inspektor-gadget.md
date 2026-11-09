@@ -15,7 +15,6 @@
 - Symptom-to-Gadget Map
 - Gadget Type Reference
 - Guardrails
-- Port Source
 
 Use Inspektor Gadget for low-level node/pod diagnostics when `kubectl` is insufficient.
 
@@ -151,9 +150,3 @@ filters, and never store or log payload content as evidence.
   behavior over time. Override with `--timeout` when needed.
 - For reproduction: launch a trace gadget first, then reproduce the problem. The debug pod persists after the gadget
   exits, so run `kubectl logs <debug-pod>` to retrieve the captured output afterward.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/aks/references/inspektor-gadget.md).
-Load only the reference needed for the active task.

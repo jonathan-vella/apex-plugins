@@ -3,7 +3,6 @@
 
 <!-- ref:avm-pitfalls-v1 -->
 
-> Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../references/kernel-boundary.md) before using this reference.
 > Examples are design material for accepted task inputs, not permission to write, execute or advance state.
 > Runtime defaults, effective policy tags, security invariants and exact AVM locks override sample values.
@@ -136,6 +135,7 @@ version (`key-vault/vault` 0.14.2, `web/site` 0.24.0, `sql/server` 0.22.1,
 | `avm/res/consumption/budget` | `0.3.8` | Called from an RG-scoped module without `scope:` | Requires `scope: subscription()` on the module call |
 | `avm/res/db-for-my-sql/flexible-server` | `0.10.3` | `delegatedSubnetResourceId` into a shared PE subnet; `aad_auth_only` via `configurations[]` | Use `privateEndpoints[]` (`service: 'mysqlServer'`) — mutually exclusive with delegated subnet; `aad_auth_only` is read-only (enforce post-deploy). See [MySQL section](#mysql-flexible-server-apply-time-gotchas) |
 | `avm/res/automation/automation-account` | `0.19.1` | runbook `runbookType` + inline `content`/`publishContentLink`; `jobSchedules` to a draft runbook | runbook `type` (no inline content; `uri` only); create `jobSchedules` post-deploy after publishing. See [Automation section](#automation-account-runbook-and-jobschedule) |
+| `avm/res/storage/storage-account` | `0.33.1` | `blobServices: { restorePolicyEnabled: true, restorePolicyDays: 7, deleteRetentionPolicyDays: 7 }` (`restorePolicyDays == deleteRetentionPolicyDays`) | `restorePolicyDays` must be strictly less than `deleteRetentionPolicyDays` (e.g. `restorePolicyDays: 6` when `deleteRetentionPolicyDays: 7`). Passes `bicep build` and `az deployment ... validate` but fails at apply time with `InvalidValuesForRequestParameters`. |
 
 ### Why what-if and lint don't catch this
 
@@ -390,7 +390,7 @@ module registry 'br/public:avm/res/container-registry/registry:0.12.1' = {
 
 Alternate fixes: upgrade to **Premium**, or replace the AVM wrapper with a
 minimal raw `Microsoft.ContainerRegistry/registries` resource (document the
-AVM exception per [AGENTS.md](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/infra/bicep/AGENTS.md)).
+AVM exception per [AGENTS.md](../../apex-azure-defaults/SKILL.md)).
 
 ### Generic detection rule
 
@@ -502,7 +502,7 @@ KQL body for:
 | `_LogOperation` | Workspace meta (`Operation`, `Category`, `Detail`)          | Allowed columns only — see Microsoft docs  |
 
 The deploy-side preflight is captured in
-[`deploy-validation-checklist.md` § KQL alert queries](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-iac-common/references/deploy-validation-checklist.md#kql-alert-queries-reference-valid-columns).
+[`deploy-validation-checklist.md` § KQL alert queries](../../apex-azure-validate/references/infraops-preflight.md).
 
 ---
 
@@ -558,7 +558,7 @@ The deploy preflight (07b Phase 1.5) MUST call `az ad ... show` for
 every param flagged as `entra-object-id` in
 `04-environment-manifest.json` and fail-closed on empty / non-GUID
 responses. See
-[`deploy-validation-checklist.md` § Entra principal object IDs](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-iac-common/references/deploy-validation-checklist.md#entra-principal-object-ids-are-real).
+[`deploy-validation-checklist.md` § Entra principal object IDs](../../apex-azure-validate/references/infraops-preflight.md).
 
 ---
 

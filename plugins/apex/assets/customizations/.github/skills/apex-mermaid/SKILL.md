@@ -31,7 +31,6 @@ appropriate for the renderer. Prefer readable vertical or horizontal flow over g
 
 Syntax and styling references are guidance targets, not active renderer slots. They do not make Mermaid output
 available until a typed source, renderer registration, and receipt exist.
-The [coverage record](references/upstream-coverage.md) pins the upstream syntax and styling source.
 
 ## Boundaries
 

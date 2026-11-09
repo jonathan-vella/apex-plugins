@@ -77,9 +77,3 @@ apex-azure/documentation
 | Serial Console unavailable | Enable Boot Diagnostics first |
 | Password reset fails | Check VMAccess alternatives in the credential and VM agent references |
 | Extension stuck updating | Do not add extensions; use Portal/Serial Console/offline repair |
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/compute/vm-troubleshooting.md).
-Load only the reference needed for the active task.

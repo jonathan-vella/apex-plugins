@@ -22,7 +22,6 @@
 - SignalR
 - SendGrid
 - Multiple Outputs
-- Port Source
 
 > **Model**: .NET isolated worker model (recommended). Uses attributes on methods/parameters.
 > Import: `using Microsoft.Azure.Functions.Worker;`
@@ -247,9 +246,3 @@ public static MultiOutput Run(
 ```
 
 > Full reference: [Azure Functions C# isolated worker guide](https://learn.microsoft.com/en-us/azure/azure-functions/dotnet-isolated-process-guide)
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/csharp.md).
-Load only the reference needed for the active task.

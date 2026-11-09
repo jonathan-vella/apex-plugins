@@ -27,9 +27,3 @@ az resource list --resource-group <rg-name> --output table
 set -o pipefail
 curl --fail-with-body -sS --connect-timeout 5 --max-time 15 https://<endpoint>/health | jq .
 ```
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/recipes/cicd/verify.md).
-Load only the reference needed for the active task.

@@ -86,9 +86,3 @@ Apply these only inside a registered, supported inline Markdown slot.
   - `-->` for data flow or dependencies
   - `-.->` for optional/conditional connections
   - `==>` for critical/primary paths
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-mermaid/references/syntax-cheatsheet.md).
-Load only the reference needed for the active task.

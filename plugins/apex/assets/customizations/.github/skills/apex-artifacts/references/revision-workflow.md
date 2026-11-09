@@ -2,7 +2,6 @@
 
 # Artifact Revision Boundaries
 
-Adapted from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 Read [the authority boundary](kernel-boundary.md). Typed accepted artifacts, not Markdown/recall/sidecar files,
 own current decisions and review state.
 

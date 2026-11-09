@@ -1,6 +1,5 @@
 # Azure Developer CLI Quick Reference
 
-Adapted from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 Read [the authority boundary](../kernel-boundary.md). azd provision/preview/down is the implemented Bicep-only
 executor (CP-26, #443), subject to kernel approval and separate live qualification. Application-package/pipeline
 operations remain unsupported, and azd is never the Terraform executor.

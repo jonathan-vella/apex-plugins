@@ -1,5 +1,5 @@
 {
-  "version": "0.11.0-next.6",
+  "version": "0.11.0-next.7",
   "bundle": {
     "id": "apex-managed-workspace",
     "authority": "npm:@apexops/cli",
@@ -41,20 +41,29 @@
     "tools/scripts/collect-governance-baseline.ps1",
     "tools/schemas/governance-baseline.schema.json"
   ],
-  "sharedDirectories": [".github/instructions"],
+  "sharedDirectories": [
+    ".github/instructions"
+  ],
   "clientProjections": [
     {
       "id": "github-copilot-cli",
       "generatedRoot": "client-projections/github-copilot-cli",
-      "files": [".github/copilot/settings.json"]
+      "files": [
+        ".github/copilot/settings.json"
+      ]
     }
   ],
   "plugin": {
     "name": "apex",
     "marketplace": "apex-plugins",
     "marketplaceRepository": "jonathan-vella/apex-plugins",
-    "ownedFiles": [".mcp.json"],
-    "ownedDirectories": [".github/agents", ".github/skills"],
+    "ownedFiles": [
+      ".mcp.json"
+    ],
+    "ownedDirectories": [
+      ".github/agents",
+      ".github/skills"
+    ],
     "files": [
       ".github/agents/apex.agent.md",
       ".github/agents/apex-codegen.agent.md",
@@ -67,38 +76,11 @@
       ".github/skills/apex-codegen/SKILL.md",
       ".github/skills/apex-operations/SKILL.md",
       ".github/skills/apex-artifacts/SKILL.md",
-      ".github/skills/apex-artifacts/references/01-requirements-template.md",
-      ".github/skills/apex-artifacts/references/02-architecture-template.md",
-      ".github/skills/apex-artifacts/references/04-plan-template.md",
-      ".github/skills/apex-artifacts/references/05-code-template.md",
-      ".github/skills/apex-artifacts/references/06-deploy-template.md",
-      ".github/skills/apex-artifacts/references/07-docs-template.md",
-      ".github/skills/apex-artifacts/references/content-index.md",
       ".github/skills/apex-artifacts/references/cost-estimate-sections.md",
       ".github/skills/apex-artifacts/references/kernel-boundary.md",
       ".github/skills/apex-artifacts/references/presentation-conventions.md",
-      ".github/skills/apex-artifacts/references/reference-only-outlines.md",
       ".github/skills/apex-artifacts/references/revision-workflow.md",
-      ".github/skills/apex-artifacts/references/sku-manifest-details.md",
       ".github/skills/apex-artifacts/references/styling-standards.md",
-      ".github/skills/apex-artifacts/templates/01-requirements.template.md",
-      ".github/skills/apex-artifacts/templates/02-architecture-assessment.template.md",
-      ".github/skills/apex-artifacts/templates/03-des-cost-estimate.template.md",
-      ".github/skills/apex-artifacts/templates/04-governance-constraints.template.md",
-      ".github/skills/apex-artifacts/templates/04-implementation-plan.template.md",
-      ".github/skills/apex-artifacts/templates/04-preflight-check.template.md",
-      ".github/skills/apex-artifacts/templates/05-implementation-reference.template.md",
-      ".github/skills/apex-artifacts/templates/06-deployment-summary.template.md",
-      ".github/skills/apex-artifacts/templates/07-ab-cost-estimate.template.md",
-      ".github/skills/apex-artifacts/templates/07-backup-dr-plan.template.md",
-      ".github/skills/apex-artifacts/templates/07-compliance-matrix.template.md",
-      ".github/skills/apex-artifacts/templates/07-design-document.template.md",
-      ".github/skills/apex-artifacts/templates/07-documentation-index.template.md",
-      ".github/skills/apex-artifacts/templates/07-operations-runbook.template.md",
-      ".github/skills/apex-artifacts/templates/07-resource-inventory.template.md",
-      ".github/skills/apex-artifacts/templates/09-lessons-learned.template.md",
-      ".github/skills/apex-artifacts/templates/PROJECT-README.template.md",
-      ".github/skills/apex-artifacts/templates/README.md",
       ".github/skills/apex-artifacts/templates/architecture-assessment.md",
       ".github/skills/apex-artifacts/templates/cost-estimate.md",
       ".github/skills/apex-artifacts/templates/deployment-summary.md",
@@ -107,7 +89,6 @@
       ".github/skills/apex-artifacts/templates/operations-runbook.md",
       ".github/skills/apex-artifacts/templates/requirements.md",
       ".github/skills/apex-artifacts/templates/resource-inventory.md",
-      ".github/skills/apex-artifacts/templates/sku-manifest.template.md",
       ".github/skills/apex-azure-defaults/SKILL.md",
       ".github/skills/apex-azure-defaults/references/baseline-fallbacks.md",
       ".github/skills/apex-azure-defaults/references/naming.md",
@@ -145,6 +126,7 @@
       ".github/skills/apex-azure-storage/references/service-auth-and-sdk-boundary.md",
       ".github/skills/apex-azure-storage/references/storage-cli-commands.md",
       ".github/skills/apex-bicep-patterns/SKILL.md",
+      ".github/skills/apex-bicep-patterns/references/app-service-entra-private-registry-pattern.md",
       ".github/skills/apex-bicep-patterns/references/avm-and-codegen-acceptance.md",
       ".github/skills/apex-bicep-patterns/references/avm-pitfalls.md",
       ".github/skills/apex-bicep-patterns/references/bicepparam-pattern.md",
@@ -421,7 +403,6 @@
       ".github/skills/apex-azure-deploy/references/sdk/azure-identity-py.md",
       ".github/skills/apex-azure-deploy/references/sdk/azure-identity-ts.md",
       ".github/skills/apex-azure-deploy/references/troubleshooting.md",
-      ".github/skills/apex-azure-deploy/references/upstream-coverage.md",
       ".github/skills/apex-azure-governance/SKILL.md",
       ".github/skills/apex-azure-governance/references/evidence-interpretation.md",
       ".github/skills/apex-azure-governance/references/operational-checklist.md",
@@ -504,7 +485,6 @@
       ".github/skills/apex-azure-diagnostics/references/script-examples/run-ig.sh.md",
       ".github/skills/apex-azure-diagnostics/references/script-examples/test-messaging-connectivity.ps1.md",
       ".github/skills/apex-azure-diagnostics/references/script-examples/test-messaging-connectivity.sh.md",
-      ".github/skills/apex-azure-diagnostics/references/upstream-coverage.md",
       ".github/skills/apex-azure-kusto/SKILL.md",
       ".github/skills/apex-azure-kusto/references/common-issues.md",
       ".github/skills/apex-azure-kusto/references/execution-boundaries.md",
@@ -512,7 +492,6 @@
       ".github/skills/apex-azure-kusto/references/kql-evidence-interpretation.md",
       ".github/skills/apex-azure-kusto/references/operational-checklist.md",
       ".github/skills/apex-azure-kusto/references/query-patterns.md",
-      ".github/skills/apex-azure-kusto/references/upstream-coverage.md",
       ".github/skills/apex-entra-app-registration/SKILL.md",
       ".github/skills/apex-entra-app-registration/references/oauth-registration-model.md",
       ".github/skills/apex-entra-app-registration/references/permissions-and-credentials.md",
@@ -550,7 +529,6 @@
       ".github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/python.md",
       ".github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/typescript.md",
       ".github/skills/apex-azure-cloud-migrate/references/staged-validation-handoff.md",
-      ".github/skills/apex-azure-cloud-migrate/references/upstream-coverage.md",
       ".github/skills/apex-azure-cloud-migrate/references/workflow-details.md",
       ".github/skills/apex-azure-cloud-migrate/references/workload-mapping.md",
       ".github/skills/apex-terraform-patterns/SKILL.md",
@@ -598,7 +576,6 @@
       ".github/skills/apex-mermaid/references/styling.md",
       ".github/skills/apex-mermaid/references/syntax-cheatsheet.md",
       ".github/skills/apex-mermaid/references/syntax.md",
-      ".github/skills/apex-mermaid/references/upstream-coverage.md",
       ".github/skills/apex-unslop/SKILL.md",
       ".github/skills/apex-unslop/LICENSE.txt",
       ".github/skills/apex-azure-kubernetes/SKILL.md",
@@ -608,7 +585,6 @@
       ".github/skills/apex-azure-kubernetes/references/azure-aks-vpa.md",
       ".github/skills/apex-azure-kubernetes/references/cli-reference.md",
       ".github/skills/apex-azure-kubernetes/references/safeguards.md",
-      ".github/skills/apex-azure-kubernetes/references/upstream-coverage.md",
       ".github/skills/apex-azure-kubernetes/references/workload-identity.md",
       ".github/skills/apex-azure-reliability/SKILL.md",
       ".github/skills/apex-azure-reliability/references/health-probe-checks.md",
@@ -616,14 +592,12 @@
       ".github/skills/apex-azure-reliability/references/services/app-service/reliability.md",
       ".github/skills/apex-azure-reliability/references/services/functions/reliability.md",
       ".github/skills/apex-azure-reliability/references/storage-redundancy-checks.md",
-      ".github/skills/apex-azure-reliability/references/upstream-coverage.md",
       ".github/skills/apex-azure-reliability/references/zone-redundancy-checks.md",
       ".github/skills/apex-azure-upgrade/SKILL.md",
       ".github/skills/apex-azure-upgrade/references/global-rules.md",
       ".github/skills/apex-azure-upgrade/references/services/functions/assessment.md",
       ".github/skills/apex-azure-upgrade/references/services/functions/consumption-to-flex.md",
       ".github/skills/apex-azure-upgrade/references/services/redis/redis-to-amr.md",
-      ".github/skills/apex-azure-upgrade/references/upstream-coverage.md",
       ".github/skills/apex-python-diagrams/SKILL.md",
       ".github/skills/apex-python-diagrams/references/azure-components.md",
       ".github/skills/apex-python-diagrams/references/business-process-flows.md",
@@ -636,7 +610,6 @@
       ".github/skills/apex-python-diagrams/references/sequence-auth-flows.md",
       ".github/skills/apex-python-diagrams/references/timeline-gantt-diagrams.md",
       ".github/skills/apex-python-diagrams/references/ui-wireframe-diagrams.md",
-      ".github/skills/apex-python-diagrams/references/upstream-coverage.md",
       ".github/skills/apex-python-diagrams/references/waf-cost-charts.md"
     ]
   },
@@ -646,7 +619,9 @@
       "source": ".github/agents/apex.agent.md",
       "agent": "APEX",
       "role": "coordinator",
-      "supportedTargets": ["github-copilot"],
+      "supportedTargets": [
+        "github-copilot"
+      ],
       "interactionType": "interactive-handoff"
     },
     {
@@ -654,7 +629,9 @@
       "source": ".github/agents/apex-codegen.agent.md",
       "agent": "APEX CodeGen",
       "role": "code-generation",
-      "supportedTargets": ["github-copilot"],
+      "supportedTargets": [
+        "github-copilot"
+      ],
       "interactionType": "autonomous-subagent"
     },
     {
@@ -662,12 +639,22 @@
       "source": ".github/agents/apex-validator.agent.md",
       "agent": "APEX Validator",
       "role": "validation",
-      "supportedTargets": ["github-copilot"],
+      "supportedTargets": [
+        "github-copilot"
+      ],
       "interactionType": "autonomous-subagent"
     }
   ],
   "invocationEdges": [
-    { "from": "APEX", "to": "APEX CodeGen", "type": "subagent" },
-    { "from": "APEX", "to": "APEX Validator", "type": "subagent" }
+    {
+      "from": "APEX",
+      "to": "APEX CodeGen",
+      "type": "subagent"
+    },
+    {
+      "from": "APEX",
+      "to": "APEX Validator",
+      "type": "subagent"
+    }
   ]
 }

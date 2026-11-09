@@ -79,16 +79,8 @@ timeline, wireframe or other unregistered renderers, execute Python or make refe
     accepted operational handoff data and does not infer missing ownership, procedures or test outcomes.
 - [Deployment summary](templates/deployment-summary.md) remains an advisory outline; the direct renderer derives its
     supported sections from completed operation evidence instead of claiming every outline slot is available.
-- [Additional document outlines](references/reference-only-outlines.md) preserve useful source-document semantics.
-- [Upstream outline index](references/content-index.md) preserves full requirements, architecture, planning, CodeGen,
-  deployment, design, inventory, operations, backup/DR, compliance, cost, lessons and README presentation examples.
-  They are advisory design references, not new renderer registrations or artifact/state formats.
-- Outline navigation: [requirements](references/01-requirements-template.md),
-  [architecture](references/02-architecture-template.md), [planning](references/04-plan-template.md),
-  [CodeGen](references/05-code-template.md), [deployment](references/06-deploy-template.md) and
-  [documentation](references/07-docs-template.md).
-- [Cost sections](references/cost-estimate-sections.md), [workload-manifest presentation](references/sku-manifest-details.md)
-  and [revision boundaries](references/revision-workflow.md) - preserve accepted facts, provenance and exact hashes.
+- [Cost sections](references/cost-estimate-sections.md) and [revision boundaries](references/revision-workflow.md) -
+  preserve accepted facts, provenance and exact hashes.
 
 Reference-only outlines never authorize rendering, file creation, cloud queries, repository reads, or state changes.
 If a caller needs one, require a supported custom-document capability or clearly report that the capability is absent.

@@ -67,9 +67,3 @@ apex-azure/applens
 3. **Use systematic isolation** - Pod -> Node -> Cluster -> Network
 4. **Document changes** - Note what you tried and what worked
 5. **Escalate when needed** - For control plane issues, contact Azure support
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/aks/general-diagnostics.md).
-Load only the reference needed for the active task.

@@ -23,9 +23,3 @@ Calico: `kubectl get pods -n calico-system`.
 
 Policy audit: source labels, destination labels, destination ingress rules, and source egress rules must all line up.
 With default-deny, explicitly allow UDP/TCP 53 to kube-dns.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/aks/network-policy.md).
-Load only the reference needed for the active task.

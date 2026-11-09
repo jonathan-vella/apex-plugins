@@ -15,7 +15,6 @@
 - Migration Workflow
 - Unsupported Features
 - Best Practices
-- Port Source
 
 Detailed guidance for migrating containerized workloads from Kubernetes (GKE, EKS, self-hosted) to Azure Container Apps.
 
@@ -128,9 +127,3 @@ For unsupported Kubernetes platform features, consider **Azure Kubernetes Servic
 5. **Configure health probes** to ensure reliability
 6. **Use scaling rules** based on HTTP concurrency or custom metrics
 7. **Never modify source Kubernetes cluster** during migration
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/container-apps/k8s-to-container-apps.md).
-Load only the reference needed for the active task.

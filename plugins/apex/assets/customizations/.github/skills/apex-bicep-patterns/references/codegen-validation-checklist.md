@@ -3,7 +3,6 @@
 
 <!-- ref:codegen-validation-checklist-bicep-v1 -->
 
-> Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../references/kernel-boundary.md) before using this reference.
 > Examples are design material for accepted task inputs, not permission to write, execute or advance state.
 > Runtime defaults, effective policy tags, security invariants and exact AVM locks override sample values.
@@ -44,7 +43,7 @@ Verify ALL items before marking Step 5 complete.
 - [ ] All `existing` resource references have explicit `dependsOn` to the creating module
 - [ ] AKS service CIDR does not overlap VNet/subnet CIDRs; node RG name ≤80 chars
 - [ ] PE DNS components have verified project, central or DINE ownership per the
-  [canonical contract](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/instructions/references/iac-security-baseline.md#private-networking-and-dns);
+  [canonical contract](../../apex-azure-defaults/references/security-baseline.md);
   no duplicate provisioning or bare references to nonexistent zones
 - [ ] Subscription-scope entrypoints use
       `resourceId(subscription().subscriptionId, resourceGroupName, 'Microsoft.Foo/bars', name)` for cross-RG references

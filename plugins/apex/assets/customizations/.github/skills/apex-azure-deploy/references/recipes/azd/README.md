@@ -75,7 +75,3 @@ manually invent parameters to make preview succeed. See [errors](errors.md).
 - [Post-deployment](post-deployment.md), [EF migrations](ef-migrations.md), [SQL identity](sql-managed-identity.md)
   and [SQL Entra auth](sql-entra-auth.md): separate operations, never implicit hook authority.
 - [Functions deployment](functions-deploy.md), [verification](verify.md), [errors](errors.md).
-
-## Port Source
-
-Adapted from [the upstream azd recipe](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/recipes/azd/README.md).

@@ -91,4 +91,3 @@ boundary, and kernel-provided next action.
   symptom framing, signal correlation, and escalation boundaries.
 - [Health checks](references/infraops-health-checks.md), [KQL templates](references/infraops-kql-templates.md),
   [KQL query library](references/kql-queries.md), [Resource Graph](references/azure-resource-graph.md).
-- [Upstream coverage](references/upstream-coverage.md) - service guides, SDK references and script inventory.

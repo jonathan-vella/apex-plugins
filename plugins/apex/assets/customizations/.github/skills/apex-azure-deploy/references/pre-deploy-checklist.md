@@ -10,7 +10,6 @@
 - 5\. Verify Location and Service Support
 - 6\. Service-Specific Checks
 - 7\. Non-azd Parameters and Handoff
-- Port Source
 
 Read [execution boundaries](execution-boundaries.md). Run readiness checks only for the recipe, target and action
 provided by the active task. Preparation-only, validation-only and preview-only never authorize apply. This checklist
@@ -120,7 +119,3 @@ only the trusted lifecycle creates the approvable preview and executes the exact
 
 Common mistakes: combining provision and delivery; choosing a default subscription; setting location without checking
 an existing group; ignoring service-tag conflicts; treating local outputs or endpoint reachability as accepted evidence.
-
-## Port Source
-
-Adapted from [the upstream pre-deploy checklist](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/pre-deploy-checklist.md).

@@ -22,7 +22,8 @@ Read [the authority boundary](references/kernel-boundary.md); canonical
 - Reuse platform-owned hub, identity, DNS and monitoring resources. Do not create an ALZ in a workload task.
 - Resolve private endpoint, zone, link and zone-group ownership separately, including DINE-owned components.
 - Use deterministic role-assignment names, explicit principal type and the narrowest accepted scope.
-- Pin accepted AVM versions exactly from authoritative registry evidence; a sample version is not a lock.
+- Pin accepted AVM versions exactly from authoritative registry evidence (`mcr.microsoft.com/v2/bicep/{module}/tags/list`
+  when metadata helpers omit published modules such as `avm/res/consumption/budget`); a sample version is not a lock.
 - Diagnostics and cost monitoring follow the accepted contracts; budget amounts and contacts are inputs, not constants.
 - Preserve parameter/secret-reference boundaries and environment-neutral implementation intent.
 - Build, lint and what-if receipts must bind the exact generated tree. Red flags include deletion, SKU downgrade,
@@ -55,7 +56,9 @@ Read [the authority boundary](references/kernel-boundary.md); canonical
 
 - [Module interface](references/module-interface.md) and [bicepparam](references/bicepparam-pattern.md) - full syntax.
 - [Hub-spoke](references/hub-spoke-pattern.md), [private endpoints](references/private-endpoint-pattern.md),
-  [common patterns](references/common-patterns.md) and [budget](references/budget-pattern.md) - composable examples.
+  [common patterns](references/common-patterns.md), [budget](references/budget-pattern.md), and
+  [App Service private registry and Entra sign-in](references/app-service-entra-private-registry-pattern.md) -
+  composable examples.
 - [AVM pitfalls](references/avm-pitfalls.md) - resource-ID split indexes, metric-alert criteria, AKS egress,
   database networking, module-output shapes and provider-time failures. Verify service versions rather than copying them.
 - [Upstream CodeGen checklist](references/codegen-validation-checklist.md) - syntax guidance, subordinate to receipts.

@@ -78,9 +78,3 @@ Request missing user-owned choices through the kernel input contract before:
 
 Use only the output path authorized by the task. `<source-folder>-azure/` is an example separate project-local layout,
 not permission to create files. Never modify the source directory.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/app-service/global-rules.md).
-Load only the reference needed for the active task.
