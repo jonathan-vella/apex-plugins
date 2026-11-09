@@ -21,9 +21,3 @@
 
 Destroy is its own operation through `azd down` (see the [deploy recipe](README.md)); never delete the group directly.
 It needs a fresh destroy preview and approval and permanently deletes ALL resources in the approved group.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/recipes/bicep/errors.md).
-Load only the reference needed for the active task.

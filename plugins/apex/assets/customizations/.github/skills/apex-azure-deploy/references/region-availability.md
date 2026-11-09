@@ -16,7 +16,6 @@
 - Services with LIMITED Region Availability
 - Services Available in Most Regions
 - Common Architecture Patterns
-- Port Source
 
 > **Historical upstream reference, dated 2026-03-03 — not current availability evidence or region defaults.**
 > Keep the tables as research examples only. Use accepted fresh capacity evidence, current official documentation
@@ -120,9 +119,3 @@ The upstream list groups broadly available services. Every target still needs cu
 ---
 
 **Last updated:** 2026-03-03
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/region-availability.md).
-Load only the reference needed for the active task.

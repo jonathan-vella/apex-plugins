@@ -18,7 +18,6 @@
 - Heroku Pipelines → GitHub Actions
 - Review Apps → Deployment Slots
 - Reference Links
-- Port Source
 
 Detailed guidance for migrating Heroku applications to Azure App Service.
 
@@ -180,9 +179,3 @@ jobs:
 - [App Service deployment slots](https://learn.microsoft.com/en-us/azure/app-service/deploy-staging-slots)
 - [GitHub Actions for App Service](https://learn.microsoft.com/en-us/azure/app-service/deploy-github-actions)
 - [App Service managed identity](https://learn.microsoft.com/en-us/azure/app-service/overview-managed-identity)
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/app-service/heroku-to-app-service.md).
-Load only the reference needed for the active task.

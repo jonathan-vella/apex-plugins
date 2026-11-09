@@ -90,9 +90,3 @@ in bytes; endpoint URLs are not capacity and no universal 80% quota is assumed.
 | Deployment status | `az staticwebapp show --name {name} --query defaultHostname` | Resolves correctly     |
 | Custom domain     | `az staticwebapp hostname list --name {name}`                | SSL valid, not expired |
 | Function health   | Check managed function app logs in Log Analytics             | No 5xx in API routes   |
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/infraops-health-checks.md).
-Load only the reference needed for the active task.

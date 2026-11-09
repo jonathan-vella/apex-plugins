@@ -59,9 +59,3 @@ with receiver:
 - **Mixing sync/async**: Don't use `time.sleep()` in async code; use `await asyncio.sleep()`.
 - **Dead letter debugging**: Use `sub_queue=ServiceBusSubQueue.DEAD_LETTER` to inspect `dead_letter_reason` and `dead_letter_error_description`.
 - **Always close clients**: Use `with` statement or call `close()` to avoid connection leaks.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/messaging/azure-servicebus-py.md).
-Load only the reference needed for the active task.

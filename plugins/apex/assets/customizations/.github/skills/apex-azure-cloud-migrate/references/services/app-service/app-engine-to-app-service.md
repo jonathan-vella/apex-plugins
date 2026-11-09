@@ -19,7 +19,6 @@
 - Environment Variables Migration
 - CI/CD Migration
 - Reference Links
-- Port Source
 
 Detailed guidance for migrating Google App Engine applications to Azure App Service.
 
@@ -203,9 +202,3 @@ resource siteConfig 'Microsoft.Web/sites/config@2025-03-01' = {
 - [App Service overview](https://learn.microsoft.com/en-us/azure/app-service/overview)
 - [Cosmos DB migration options](https://learn.microsoft.com/en-us/azure/cosmos-db/migration-choices)
 - [App Service deployment slots](https://learn.microsoft.com/en-us/azure/app-service/deploy-staging-slots)
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/app-service/app-engine-to-app-service.md).
-Load only the reference needed for the active task.

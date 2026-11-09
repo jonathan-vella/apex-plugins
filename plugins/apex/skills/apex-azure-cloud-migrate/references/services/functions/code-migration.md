@@ -17,7 +17,6 @@
 - Runtime-Specific Trigger & Binding Patterns
 - Scenario-Specific Guidance
 - Handoff to apex-azure-prepare
-- Port Source
 
 Migrate AWS Lambda function code to Azure Functions.
 
@@ -53,7 +52,7 @@ Migrate AWS Lambda function code to Azure Functions.
 5. **Update Dependencies** — Replace AWS SDKs with Azure SDKs in package.json / requirements.txt
 6. **Configure Bindings** — Set up triggers and bindings inline (v4 JS / v2 Python)
 7. **Configure Environment** — Map Lambda env vars using the shared [SQL/Blob composition
-   contract](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/common/uami-bindings.md#composition-contract).
+   contract](../../../../apex-azure-prepare/references/services/functions/templates/recipes/common/uami-bindings.md#composition-contract).
    Preserve existing names only with explicit source-to-IaC alias mapping; verify every selected language/track.
 8. **Add Error Handling** — Ensure proper error handling in all functions
 
@@ -163,9 +162,3 @@ the next preparation/CodeGen/validation task; migration does not skip requiremen
 Preparation may generate `azure.yaml`/IaC only when authorized and must apply current security/governance.
 Deployment has a separate preview/current Gate 4 ceremony. Follow [workflow details](../../workflow-details.md);
 never update a parallel status file or claim unaccepted output complete.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/functions/code-migration.md).
-Load only the reference needed for the active task.

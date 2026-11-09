@@ -52,7 +52,3 @@ protected environments and identity provisioning are remote configuration, not s
 
 - [Verification](verify.md) - resource and endpoint observations, not approval.
 - [Errors](errors.md) - logs, federation, permissions and pipeline diagnosis.
-
-## Port Source
-
-Adapted from [the upstream CI/CD recipe](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/recipes/cicd/README.md).

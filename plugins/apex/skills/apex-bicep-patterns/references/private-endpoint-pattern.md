@@ -1,6 +1,5 @@
 <!-- ref:private-endpoint-pattern-v1 -->
 
-> Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../references/kernel-boundary.md) before using this reference.
 > Examples are design material for accepted task inputs, not permission to write, execute or advance state.
 > Runtime defaults, effective policy tags, security invariants and exact AVM locks override sample values.
@@ -53,7 +52,7 @@ resource privateDnsZoneGroup 'Microsoft.Network/privateEndpoints/privateDnsZoneG
 ## DNS Zone Provisioning Rule
 
 Resolve ownership under the
-[canonical networking contract](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/instructions/references/iac-security-baseline.md#private-networking-and-dns)
+[canonical networking contract](../../apex-azure-defaults/references/security-baseline.md)
 first. Do not duplicate verified central or DINE-owned DNS components.
 For project-owned DNS, if the project does NOT provision shared zones centrally, the module MUST:
 

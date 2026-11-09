@@ -17,7 +17,6 @@
 - Custom Domain / TLS Certificate Issues
 - AZ CLI or MCP Tools for App Service Diagnostics
 - Combined Diagnostic Script (Source Example)
-- Port Source
 
 ## Common Issues Matrix
 
@@ -212,9 +211,3 @@ The [`appservice-diagnostics`](../script-examples/appservice-diagnostics.sh.md) 
 deployments, app settings and custom domains in one call. It is a non-executable example and is not installed: use
 the individual read commands in this guide within the accepted task scope, redact app setting values, and submit the
 observations through the task's evidence contract. Interpreting the output remains your job.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/app-service/README.md).
-Load only the reference needed for the active task.

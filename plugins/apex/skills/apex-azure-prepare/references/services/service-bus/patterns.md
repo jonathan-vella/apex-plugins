@@ -1,4 +1,3 @@
-> Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../../../references/kernel-boundary.md) before using this reference.
 > Examples are design material for accepted task inputs, not permission to write, execute or advance state.
 > Runtime defaults, effective policy tags, security invariants and exact AVM locks override sample values.
@@ -37,7 +36,7 @@ Use for: Event broadcasting, multiple consumers
 #### Node.js
 
 > **Auth:** `DefaultAzureCredential` is for local development. See
-> [auth-best-practices.md](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-entra-app-registration/references/auth-best-practices.md)
+> [auth-best-practices.md](../../../../apex-entra-app-registration/references/permissions-and-credentials.md)
 > for production patterns.
 
 ```javascript
@@ -63,7 +62,7 @@ for (const message of messages) {
 #### Python
 
 > **Auth:** `DefaultAzureCredential` is for local development. See
-> [auth-best-practices.md](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-entra-app-registration/references/auth-best-practices.md)
+> [auth-best-practices.md](../../../../apex-entra-app-registration/references/permissions-and-credentials.md)
 > for production patterns.
 
 ```python
@@ -91,7 +90,7 @@ with receiver:
 #### .NET
 
 > **Auth:** `DefaultAzureCredential` is for local development. See
-> [auth-best-practices.md](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-entra-app-registration/references/auth-best-practices.md)
+> [auth-best-practices.md](../../../../apex-entra-app-registration/references/permissions-and-credentials.md)
 > for production patterns.
 
 ```csharp

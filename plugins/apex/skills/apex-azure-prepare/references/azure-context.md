@@ -2,7 +2,6 @@
 
 # Azure Context, Confirmation and Diagnostics
 
-Adapted from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 Read [the authority boundary](kernel-boundary.md).
 
 ## Confirmation Reuse

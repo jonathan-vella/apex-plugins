@@ -43,9 +43,3 @@ For detector-style workflows, use the cluster resource ID, keep the time window 
 
 If the managed namespace does not expose the required read, report the missing capability. Separately produced
 Azure/Kubernetes observations need their own authorization and evidence acceptance; they are not an automatic fallback.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/aks/references/aks-mcp.md).
-Load only the reference needed for the active task.

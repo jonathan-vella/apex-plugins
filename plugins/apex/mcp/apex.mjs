@@ -14697,8 +14697,21 @@ var ArchitectureV1Schema = Type.Object({
     resourceTypes: Type.Array(Type.String({ pattern: "^[A-Za-z][A-Za-z0-9]*\\.[A-Za-z][A-Za-z0-9.]*(?:/[A-Za-z][A-Za-z0-9]*)+$" }), { minItems: 1, uniqueItems: true }),
     purpose: NonEmptyStringSchema,
     requirementIds: Type.Array(NonEmptyStringSchema, { uniqueItems: true }),
-    dependsOn: Type.Array(NonEmptyStringSchema, { uniqueItems: true })
+    dependsOn: Type.Array(NonEmptyStringSchema, { uniqueItems: true }),
+    subnet: Type.Optional(NonEmptyStringSchema),
+    edgeLabels: Type.Optional(Type.Record(NonEmptyStringSchema, NonEmptyStringSchema))
   }, { additionalProperties: false }), { minItems: 1 }),
+  actors: Type.Optional(Type.Array(Type.Object({
+    id: NonEmptyStringSchema,
+    label: NonEmptyStringSchema,
+    targetIds: Type.Array(NonEmptyStringSchema, { minItems: 1, uniqueItems: true }),
+    edgeLabel: Type.Optional(NonEmptyStringSchema)
+  }, { additionalProperties: false }), { maxItems: 16 })),
+  flows: Type.Optional(Type.Array(Type.Object({
+    from: NonEmptyStringSchema,
+    to: NonEmptyStringSchema,
+    label: NonEmptyStringSchema
+  }, { additionalProperties: false }), { maxItems: 128 })),
   decisions: Type.Array(NonEmptyStringSchema),
   decisionRecords: Type.Optional(Type.Array(Type.Object({
     id: Type.String({ pattern: "^ADR-[0-9]{4}$" }),
@@ -17830,7 +17843,9 @@ var ProjectStore = class {
   }
   async createRun(projectId, input2) {
     const project = await this.getProject(projectId);
-    const runId = this.idSource();
+    const rawId = this.idSource();
+    const dateSlug = this.clock().toISOString().slice(0, 10).replaceAll("-", "");
+    const runId = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/iu.test(rawId) ? `${input2.environment}-${dateSlug}-${rawId.slice(0, 8).toLowerCase()}` : rawId;
     const run = {
       schemaVersion: CONTRACT_VERSION,
       projectId,
@@ -19743,12 +19758,15 @@ function validateInputAnswers(questions, submitted) {
     if (explicitNone !== void 0 && typeof value === "string" && /^none$/iu.test(value.trim())) {
       return { questionId: question.id, value: explicitNone };
     }
-    if (selected.some((item) => item.trim().length === 0 || /^(?:none|n\/a)$/iu.test(item.trim()))) {
+    if (selected.some((item) => item.trim().length === 0 || /^(?:none|n\/a)$/iu.test(item.trim()) && !(question.options ?? []).includes(item.trim()))) {
       throw new Error(`Answer must be explicitly provided or deferred: ${question.id}`);
     }
     if (question.options !== void 0) {
       if (selected.some((item) => !question.options.includes(item))) {
         throw new Error(`Answer is not a declared option: ${question.id}`);
+      }
+      if (selected.includes("none") && selected.length > 1) {
+        throw new Error(`Answer cannot combine none with other options: ${question.id}`);
       }
     }
     return {
@@ -30460,46 +30478,181 @@ function shape(tier, text5) {
 }
 function renderArchitectureMermaid(architecture) {
   const components = [...architecture.components].sort((left, right) => compare3(left.id, right.id));
-  const used = /* @__PURE__ */ new Set();
+  const actors = [...architecture.actors ?? []].sort((left, right) => compare3(left.id, right.id));
+  const used = /* @__PURE__ */ new Set(["legend", "legend_key", "lane_actors"]);
   const nodeIds = /* @__PURE__ */ new Map();
-  for (const { id } of components) {
-    const base = `n_${id.replace(/[^A-Za-z0-9_]/gu, "_")}`;
+  const allocateId = (prefix, rawId) => {
+    const base = `${prefix}_${rawId.replace(/[^A-Za-z0-9_]/gu, "_")}`;
     let candidate = base;
     for (let suffix = 2; used.has(candidate); suffix += 1)
       candidate = `${base}_${suffix}`;
     used.add(candidate);
-    nodeIds.set(id, candidate);
+    return candidate;
+  };
+  for (const { id } of components) {
+    nodeIds.set(id, allocateId("n", id));
+  }
+  const actorIds = /* @__PURE__ */ new Map();
+  for (const { id } of actors) {
+    actorIds.set(id, allocateId("actor", id));
+  }
+  const flowLabels = /* @__PURE__ */ new Map();
+  for (const flow of architecture.flows ?? []) {
+    if (flow.label.trim() !== "")
+      flowLabels.set(`${flow.from}->${flow.to}`, flow.label);
+  }
+  for (const component of components) {
+    for (const [targetId, edgeText] of Object.entries(component.edgeLabels ?? {})) {
+      if (edgeText.trim() !== "" && !flowLabels.has(`${component.id}->${targetId}`)) {
+        flowLabels.set(`${component.id}->${targetId}`, edgeText);
+      }
+    }
   }
   const lines = [
     `%% ${label(architecture.title)}`,
     "flowchart TB",
     `  accTitle: ${plain2(architecture.title)}`,
-    `  accDescr: ${plain2(`Architecture diagram with ${components.length} components grouped by Azure resource family. ${architecture.summary}`)}`
+    `  accDescr: ${plain2(`Architecture diagram with ${components.length} components grouped by Azure resource family. ${architecture.summary}`)}`,
+    "  classDef actor_node fill:#f3f2f1,stroke:#323130,color:#172033,stroke-width:1.5px",
+    "  classDef lane_actors fill:#faf9f8,stroke:#605e5c,color:#323130,stroke-width:1px",
+    "  classDef subnet_box fill:#ffffff,stroke:#605e5c,color:#323130,stroke-width:1px,stroke-dasharray: 4 3",
+    "  classDef legend_box fill:#faf9f8,stroke:#8a8886,color:#323130,stroke-width:1px"
   ];
   for (const tier of TIERS) {
     lines.push(`  classDef tier_${tier.id} fill:${tier.fill},stroke:${tier.stroke},color:#172033,stroke-width:1.5px`, `  classDef lane_${tier.id} fill:${tier.fill},stroke:${tier.stroke},color:${tier.stroke},stroke-width:1px`);
   }
+  if (actors.length > 0) {
+    lines.push(`  subgraph lane_actors["Actors #amp; callers"]`, "    direction LR");
+    for (const actor of actors) {
+      const [first = "", ...rest] = wrap(actor.label, 26).map(label);
+      const text5 = [`\u{1F464} <b>${first}</b>`, ...rest.map((line) => `<b>${line}</b>`), `<i>${label(actor.id)}</i>`].join("<br/>");
+      lines.push(`    ${actorIds.get(actor.id)}(["${text5}"])`);
+    }
+    lines.push("  end");
+  }
   const members2 = /* @__PURE__ */ new Map();
+  for (const component of components) {
+    const tierId = architectureTierOf(component.resourceTypes);
+    const list = members2.get(tierId) ?? [];
+    list.push(nodeIds.get(component.id));
+    members2.set(tierId, list);
+  }
+  const tierById = new Map(TIERS.map((tier) => [tier.id, tier]));
+  const subnetGroups = /* @__PURE__ */ new Map();
+  for (const component of components) {
+    const subnet = component.subnet?.trim();
+    if (!subnet)
+      continue;
+    const list = subnetGroups.get(subnet) ?? [];
+    list.push(component);
+    subnetGroups.set(subnet, list);
+  }
+  const crossTierSubnets = /* @__PURE__ */ new Set();
+  for (const [subnetName, group] of subnetGroups.entries()) {
+    const tiersInSubnet = new Set(group.map(({ resourceTypes }) => architectureTierOf(resourceTypes)));
+    if (tiersInSubnet.size > 1)
+      crossTierSubnets.add(subnetName);
+  }
+  const subnetIds = [];
   for (const tier of TIERS) {
-    const inTier = components.filter(({ resourceTypes }) => architectureTierOf(resourceTypes) === tier.id);
+    const inTier = components.filter(({ resourceTypes, subnet }) => architectureTierOf(resourceTypes) === tier.id && !crossTierSubnets.has(subnet?.trim() ?? ""));
     if (inTier.length === 0)
       continue;
     lines.push(`  subgraph lane_${tier.id}["${label(tier.title)}"]`, "    direction LR");
+    const bySubnet = /* @__PURE__ */ new Map();
+    const ungrouped = [];
     for (const component of inTier) {
+      const subnet = component.subnet?.trim();
+      if (subnet) {
+        const list = bySubnet.get(subnet) ?? [];
+        list.push(component);
+        bySubnet.set(subnet, list);
+      } else {
+        ungrouped.push(component);
+      }
+    }
+    for (const [subnetName, group] of [...bySubnet.entries()].sort(([a], [b]) => compare3(a, b))) {
+      const subnetNodeId = allocateId(`subnet_${tier.id}`, subnetName);
+      subnetIds.push(subnetNodeId);
+      lines.push(`    subgraph ${subnetNodeId}["Boundary: ${label(subnetName)}"]`, "      direction LR");
+      for (const component of group) {
+        lines.push(`      ${nodeIds.get(component.id)}${shape(tier.id, nodeText(tier, component.service, component.id))}`);
+      }
+      lines.push("    end");
+    }
+    for (const component of ungrouped) {
       lines.push(`    ${nodeIds.get(component.id)}${shape(tier.id, nodeText(tier, component.service, component.id))}`);
     }
     lines.push("  end");
-    members2.set(tier.id, inTier.map(({ id }) => nodeIds.get(id)));
   }
-  const edges = components.flatMap((component) => [...new Set(component.dependsOn)].filter((dependency) => nodeIds.has(dependency) && dependency !== component.id).sort(compare3).map((dependency) => `  ${nodeIds.get(component.id)} --> ${nodeIds.get(dependency)}`)).sort(compare3);
-  lines.push(...edges);
+  for (const subnetName of [...crossTierSubnets].sort(compare3)) {
+    const group = subnetGroups.get(subnetName);
+    const subnetNodeId = allocateId("subnet_shared", subnetName);
+    subnetIds.push(subnetNodeId);
+    lines.push(`  subgraph ${subnetNodeId}["Boundary: ${label(subnetName)}"]`, "    direction LR");
+    for (const component of group) {
+      const tierId = architectureTierOf(component.resourceTypes);
+      const tier = tierById.get(tierId);
+      lines.push(`    ${nodeIds.get(component.id)}${shape(tierId, nodeText(tier, component.service, component.id))}`);
+    }
+    lines.push("  end");
+  }
+  const formatEdge = (fromNode, toNode, edgeText) => edgeText !== void 0 && edgeText.trim() !== "" ? `  ${fromNode} -->|"${label(edgeText)}"| ${toNode}` : `  ${fromNode} --> ${toNode}`;
+  const resolveEndpoint = (id) => nodeIds.get(id) ?? actorIds.get(id);
+  const edgePairs = /* @__PURE__ */ new Map();
+  for (const actor of actors) {
+    const fromNode = actorIds.get(actor.id);
+    for (const targetId of [...new Set(actor.targetIds)].sort(compare3)) {
+      const toNode = nodeIds.get(targetId);
+      if (toNode === void 0 || fromNode === toNode)
+        continue;
+      edgePairs.set(`${fromNode}->${toNode}`, [fromNode, toNode, `${actor.id}->${targetId}`]);
+    }
+  }
+  for (const component of components) {
+    const fromNode = nodeIds.get(component.id);
+    for (const dependency of [...new Set(component.dependsOn)].sort(compare3)) {
+      const toNode = nodeIds.get(dependency);
+      if (toNode === void 0 || fromNode === toNode)
+        continue;
+      edgePairs.set(`${fromNode}->${toNode}`, [fromNode, toNode, `${component.id}->${dependency}`]);
+    }
+  }
+  for (const flow of architecture.flows ?? []) {
+    const fromNode = resolveEndpoint(flow.from);
+    const toNode = nodeIds.get(flow.to);
+    if (fromNode === void 0 || toNode === void 0 || fromNode === toNode)
+      continue;
+    const key = `${fromNode}->${toNode}`;
+    if (!edgePairs.has(key))
+      edgePairs.set(key, [fromNode, toNode, `${flow.from}->${flow.to}`]);
+  }
+  const actorLabelFallback = /* @__PURE__ */ new Map();
+  for (const actor of actors) {
+    if (actor.edgeLabel !== void 0 && actor.edgeLabel.trim() !== "") {
+      for (const targetId of actor.targetIds)
+        actorLabelFallback.set(`${actor.id}->${targetId}`, actor.edgeLabel);
+    }
+  }
+  const allEdges = [...edgePairs.values()].map(([fromNode, toNode, lookupKey]) => formatEdge(fromNode, toNode, flowLabels.get(lookupKey) ?? actorLabelFallback.get(lookupKey))).sort(compare3);
+  lines.push(...allEdges);
+  lines.push(`  subgraph legend["Legend"]`, "    direction LR", `    legend_key["([Ingress / Actor]) \u2022 [Compute / Network] \u2022 [(Data)] \u2022 {{Security}}"]`, "  end");
+  if (actors.length > 0) {
+    lines.push(`  class ${actors.map(({ id }) => actorIds.get(id)).join(",")} actor_node`, "  class lane_actors lane_actors");
+  }
   for (const tier of TIERS) {
     const ids = members2.get(tier.id);
     if (ids === void 0)
       continue;
-    lines.push(`  class ${ids.join(",")} tier_${tier.id}`, `  class lane_${tier.id} lane_${tier.id}`);
+    lines.push(`  class ${ids.join(",")} tier_${tier.id}`);
+    if (lines.some((line) => line.startsWith(`  subgraph lane_${tier.id}[`))) {
+      lines.push(`  class lane_${tier.id} lane_${tier.id}`);
+    }
   }
-  if (edges.length > 0)
+  if (subnetIds.length > 0)
+    lines.push(`  class ${subnetIds.join(",")} subnet_box`);
+  lines.push("  class legend,legend_key legend_box");
+  if (allEdges.length > 0)
     lines.push(`  linkStyle default stroke:#6b7f94,stroke-width:1.5px`);
   return `${lines.join("\n")}
 `;
@@ -30509,7 +30662,7 @@ function renderArchitectureMermaid(architecture) {
 import { join as join26, resolve as resolve22 } from "node:path";
 
 // packages/cli/dist/version.js
-var APEX_VERSION = "0.11.0-next.6";
+var APEX_VERSION = "0.11.0-next.7";
 var MINIMUM_NODE_VERSION = "24.21.0";
 function meetsMinimumVersion(current, minimum) {
   const currentParts = current.split(".").map(Number);
@@ -67455,7 +67608,8 @@ var REQUIREMENTS_INTAKE = [
           "event-hubs",
           "api-management",
           "azure-monitor",
-          "application-insights"
+          "application-insights",
+          "none"
         ],
         multiSelect: true
       },
@@ -67523,7 +67677,8 @@ var REQUIREMENTS_INTAKE = [
           "automated-backups",
           "point-in-time-restore",
           "immutable-backups",
-          "cross-region-disaster-recovery"
+          "cross-region-disaster-recovery",
+          "none"
         ],
         multiSelect: true
       },
@@ -67535,7 +67690,7 @@ var REQUIREMENTS_INTAKE = [
       {
         id: "operations",
         prompt: "Select operational capabilities required for the workload.",
-        options: ["azure-monitor", "application-insights", "log-analytics", "managed-alerts", "24x7-support"],
+        options: ["azure-monitor", "application-insights", "log-analytics", "managed-alerts", "24x7-support", "none"],
         multiSelect: true
       }
     ]

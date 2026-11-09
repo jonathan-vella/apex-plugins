@@ -13,7 +13,6 @@
 
 - Diagnostic Workflow (Six Phases)
 - Common Remediation Playbooks
-- Port Source
 
 Step-by-step resolution procedures for common Azure resource issues,
 plus the standard six-phase diagnostic workflow and report template.
@@ -121,9 +120,3 @@ Discovery of related resources does not authorize expanding diagnosis scope.
 2. Add missing indexes suggested by Azure SQL advisor
 3. Scale up DTU tier or switch to vCore for more granular control
 4. Review connection pooling settings in application
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/infraops-remediation-playbooks.md).
-Load only the reference needed for the active task.

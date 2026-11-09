@@ -18,7 +18,6 @@
 - Deployment Architecture
 - Assessment Checklist
 - Complexity Guidelines
-- Port Source
 
 ## Local State Assessment
 
@@ -163,9 +162,3 @@ configuration examples (databases, message brokers, caches).
 - Complex scheduled jobs with coordination requirements
 - Multi-region deployment with traffic distribution
 - Custom identity provider federation
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/container-apps/spring-assessment-guide.md).
-Load only the reference needed for the active task.

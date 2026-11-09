@@ -15,7 +15,6 @@
 - Pending Pods
 - Readiness & Liveness Probe Failures
 - Resource Constraints (CPU/Memory)
-- Port Source
 
 ## Evidence Bundle Script
 
@@ -144,9 +143,3 @@ against live `top` usage. To rank a namespace by memory: `kubectl top pod -n <na
 
 > ⚠️ **Warning:** Setting CPU limits can cause unnecessary throttling even when the node has spare capacity. Many teams
 > set CPU requests but not limits. Memory limits should always be set.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/aks/pod-failures.md).
-Load only the reference needed for the active task.

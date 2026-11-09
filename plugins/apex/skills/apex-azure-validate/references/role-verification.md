@@ -1,6 +1,5 @@
 <!-- ref:role-verification-v1 -->
 
-> Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../references/kernel-boundary.md) before using this reference.
 > Examples are design material for accepted task inputs, not permission to write, execute or advance state.
 > Runtime defaults, effective policy tags, security invariants and exact AVM locks override sample values.
@@ -11,7 +10,7 @@
 Adapted from upstream `azure-validate`. This is a static, report-only review of
 the role assignments in the generated IaC. It never edits IaC, grants roles or
 queries live Azure state. Live checks after deployment belong to
-[apex-azure-deploy](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/live-role-verification.md).
+[apex-azure-deploy](../../apex-azure-deploy/references/live-role-verification.md).
 
 ## When to Verify
 

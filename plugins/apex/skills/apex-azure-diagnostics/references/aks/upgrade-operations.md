@@ -80,9 +80,3 @@ kubectl describe pdb <pdb-name> -n <ns>
 ```
 
 If `DisruptionsAllowed: 0`, scale up the workload or temporarily relax `minAvailable`.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/aks/upgrade-operations.md).
-Load only the reference needed for the active task.

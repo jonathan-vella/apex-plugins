@@ -18,7 +18,6 @@
 - Location Not Available for Resource Type
 - Missing Infrastructure Parameters
 - .NET Aspire Limited Mode - Missing Environment Variables
-- Port Source
 
 This reference covers reported `azd` errors. Bicep provision/preview/down uses the bounded runtime executor
 (DECISION-036, CP-26); application-package/pipeline operations remain unsupported. Treat commands as provider
@@ -206,9 +205,3 @@ Then retry deployment:
 # Changes remote state — context only; fresh preview + current Gate 4 + trusted execution required.
 azd deploy --no-prompt
 ```
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/troubleshooting.md).
-Load only the reference needed for the active task.

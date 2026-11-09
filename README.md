@@ -49,8 +49,8 @@ section below is stale. Every merge to `main` also signs a GitHub attestation fo
 <!-- sbom:start -->
 ```mermaid
 flowchart LR
-    n0(["apex 0.11.0-next.6<br/>1245 files · MIT"])
-    n1["@apexops/cli 0.11.0-next.6"]
+    n0(["apex 0.11.0-next.7<br/>1173 files · MIT"])
+    n1["@apexops/cli 0.11.0-next.7"]
     subgraph g0["Bundled in mcp/apex.mjs"]
       n2["@modelcontextprotocol/core 2.4.0<br/>Apache-2.0"]
       n3["@modelcontextprotocol/server 2.4.0<br/>Apache-2.0"]
@@ -89,11 +89,11 @@ flowchart LR
     class  service
 ```
 
-Version `0.11.0-next.6` · source commit [`4c838a25ff03`](https://github.com/jonathan-vella/apex-vnext/commit/4c838a25ff03e9414cdf561267df38b9c367bf27) · tree hash `01f4f22c3a97ff9c…` · 1245 files. The full inventory with a SHA-256 for every file is [`.github/plugin/sbom.cdx.json`](.github/plugin/sbom.cdx.json) (CycloneDX 1.6).
+Version `0.11.0-next.7` · source commit [`83da6513eada`](https://github.com/jonathan-vella/apex-vnext/commit/83da6513eada38897907dbe2483ddc509454a2a2) · tree hash `4329b30955dc0d58…` · 1173 files. The full inventory with a SHA-256 for every file is [`.github/plugin/sbom.cdx.json`](.github/plugin/sbom.cdx.json) (CycloneDX 1.6).
 
 | Component | Version | Kind | Licence | Digest |
 | --- | --- | --- | --- | --- |
-| @apexops/cli | 0.11.0-next.6 | CLI the plugin is built from | n/a | n/a |
+| @apexops/cli | 0.11.0-next.7 | CLI the plugin is built from | n/a | n/a |
 | @modelcontextprotocol/core | 2.4.0 | Bundled library | Apache-2.0 | sha-512:cfc4012aa75f… |
 | @modelcontextprotocol/server | 2.4.0 | Bundled library | Apache-2.0 | sha-512:ae047dcb149a… |
 | @sinclair/typebox | 0.34.52 | Bundled library | MIT | sha-512:5e231087baaa… |

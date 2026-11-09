@@ -78,9 +78,3 @@ ECS-to-Container-Apps resource mapping table.
 - [AWS to Azure services comparison](https://learn.microsoft.com/azure/architecture/aws-professional/services)
 - [Container Apps scaling](https://learn.microsoft.com/azure/container-apps/scale-app)
 - [Container Apps managed identity](https://learn.microsoft.com/azure/container-apps/managed-identity)
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/container-apps/fargate-to-container-apps.md).
-Load only the reference needed for the active task.

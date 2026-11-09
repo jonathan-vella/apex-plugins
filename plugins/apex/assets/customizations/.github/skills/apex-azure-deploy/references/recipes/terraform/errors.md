@@ -26,9 +26,3 @@ terraform apply <approved-plan-file>
 ```
 
 ⚠️ Permanently deletes resources.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/recipes/terraform/errors.md).
-Load only the reference needed for the active task.

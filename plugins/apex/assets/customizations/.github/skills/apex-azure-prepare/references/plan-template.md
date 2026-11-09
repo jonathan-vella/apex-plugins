@@ -2,7 +2,6 @@
 
 # Preparation Binding Fields
 
-Adapted from the upstream plan template at `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 Read [the authority boundary](kernel-boundary.md). Preserve the useful information model, not its Markdown lifecycle.
 Do not create a generic plan file or set Planning/Approved/Validated/Deployed status.
 

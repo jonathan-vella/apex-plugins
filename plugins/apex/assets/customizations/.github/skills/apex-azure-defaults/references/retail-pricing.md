@@ -79,12 +79,16 @@ leave the line unresolved with the attempted parameters and timestamp. Never sub
 | Key Vault | `Key Vault` |
 | Container Registry | `Container Registry` |
 | Log Analytics | `Log Analytics` |
-| Front Door | `Azure Front Door` |
+| Azure Monitor | `Azure Monitor` |
+| Azure Bastion | `Azure Bastion` |
+| Azure OpenAI / Microsoft Foundry Models | `Foundry Models` |
+| Front Door | `Azure Front Door Service` |
 | Private Endpoint | `Virtual Network` |
 | Azure DNS, including private zones | `Azure DNS` |
 
-Some services bill from a global or empty region. Query Azure DNS, Front Door, Traffic Manager, Microsoft Entra ID and
-Microsoft Defender for Cloud without `region` first. Private endpoints bill in the `Global` region under
+Some services bill from a global or zone region. Query Azure DNS, Traffic Manager, Microsoft Entra ID and
+Microsoft Defender for Cloud without `region` first; query `Azure Front Door Service` in `Zone 1` (covers Europe and
+North America). Private endpoints bill in the `Global` region under
 `Virtual Network`, with separate inbound and outbound data-processing meters. These billing regions never change the
 deployment region. A regional comparison uses identical queries that differ only in `region`.
 
@@ -98,6 +102,16 @@ never a wildcard. Fail the line when several plausible rows remain and no explic
 - Sum component meters when a service bills compute, storage, requests, transactions, and transfer separately.
 - Record product, meter, unit, price type, currency, and any returned tier bands in the line notes. Do not assume the
   MCP mapping contains every raw Retail Prices API field; unresolved tier details require explicit uncertainty.
+
+| Service pattern | `service` / region / `sku` | Meter selection rules |
+| --- | --- | --- |
+| App Service Basic/Standard/Premium Linux | `Azure App Service`, deployment region | `productName` `Azure App Service <Tier> Plan - Linux`; Basic Linux uses `meterName` `B1`/`B2`/`B3` (no `App` suffix), Standard uses `S1 App`/`S2 App`/`S3 App`, Premium v3 uses `P1 v3 App` (space, not `P1v3`) |
+| Blob Storage Hot LRS | `Storage`, deployment region, `Hot LRS` | `productName` `Blob Storage`; select `Hot LRS Data Stored` plus exact operation meters `Hot LRS Write Operations`, `Hot Read Operations`, `LRS List and Create Container Operations`, and `All Other Operations` (`10K`, never Hierarchical Namespace) |
+| Standard SSD Managed Disks | `Storage`, deployment region, `E<n> LRS` (e.g. `E6 LRS` for 64 GiB) | `productName` `Standard SSD Managed Disks`; select `E<n> LRS Disk` (`1/Month`) and `E<n> LRS Disk Operations` (`10K`), excluding `E<n> LRS Disk Mount` unless shared multi-attach (`maxShares > 1`) is configured |
+| Azure Front Door Standard / Premium | `Azure Front Door Service`, `Zone 1`, `Standard` or `Premium` | `productName` `Azure Front Door`; select `<Tier> Base Fees` (`1/Month`, `$35` Standard / `$330` Premium), `<Tier> Requests` (`10K`), `<Tier> Data Transfer Out` (`1 GB`), and `<Tier> Data Transfer In` (`1 GB`) |
+| Azure Bastion Standard / Basic | `Azure Bastion`, deployment region, `Standard` or `Basic` | Select `<Tier> Gateway` (`1 Hour`, includes the mandatory 2 base scale units — add `<Tier> Additional Gateway` only when `scale_units > 2`) and `<Tier> Data Transfer Out` (`1 GB`) |
+| Azure Monitor metric alerts | `Azure Monitor`, deployment region, `Alerts` | Resource-scoped metric alert rules bill on `Alerts Resource Monitored` (`1/Month`) matched to evaluation frequency (`1/5/10/15 Minute Frequency`) times monitored-resource count |
+| Microsoft Foundry / Azure OpenAI models | `Foundry Models`, deployment region | On `@azure/mcp@3.0.0`, `pricing_get` can return status 400 `ArgumentOutOfRangeException: Unknown ServiceFamily value` on `AI + Machine Learning`; do not retry `pricing_get` on that parser exception, and record the affected model in `unpricedItems` with the parser error if no authorized fallback is active |
 
 ## Priced-Line Provenance
 

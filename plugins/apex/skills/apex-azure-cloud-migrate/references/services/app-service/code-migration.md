@@ -17,7 +17,6 @@
 - Static Assets & CDN
 - Background Workers
 - Handoff to apex-azure-prepare
-- Port Source
 
 Migrate source platform web application code to Azure App Service.
 
@@ -156,9 +155,3 @@ Return accepted conversion evidence, source/output traces and unresolved require
 Authorized preparation/CodeGen owns `azure.yaml`, IaC and security; validation and deployment keep their separate
 receipts, preview and current Gate 4. See [workflow details](../../workflow-details.md).
 Never update a parallel migration-status file or mark code complete without acceptance.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/app-service/code-migration.md).
-Load only the reference needed for the active task.

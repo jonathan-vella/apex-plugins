@@ -17,7 +17,6 @@
 - Pattern 4: Join and Correlation
 - Pattern 5: Schema Discovery
 - KQL Best Practices
-- Port Source
 
 Detailed KQL query patterns with examples for common data analysis scenarios.
 
@@ -129,9 +128,3 @@ Explore table structure before querying.
 - `startswith()`, `contains()`, `matches regex`: String filtering
 - `parse`, `extract`: Extract values from strings
 - `percentiles()`, `avg()`, `sum()`, `max()`, `min()`: Aggregations
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-kusto/references/query-patterns.md).
-Load only the reference needed for the active task.

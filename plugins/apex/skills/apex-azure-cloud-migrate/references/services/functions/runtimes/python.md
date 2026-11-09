@@ -23,7 +23,6 @@
 - SignalR
 - SendGrid
 - Combining Decorators
-- Port Source
 
 > **Model**: Python v2 programming model. **NO** `function.json` files.
 > Entry point: `function_app.py`
@@ -223,9 +222,3 @@ def process_item(req: func.HttpRequest, doc: func.DocumentList,
 ```
 
 > Full reference: [Azure Functions Python developer guide](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-python)
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/python.md).
-Load only the reference needed for the active task.

@@ -2,7 +2,6 @@
 
 # Preparation Safety Rules
 
-Adapted from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 Read [the authority boundary](kernel-boundary.md); this skill does not establish global workflow authority.
 
 Preserve the upstream destructive-action taxonomy: deletion, overwrites, irreversible purge/database operations,

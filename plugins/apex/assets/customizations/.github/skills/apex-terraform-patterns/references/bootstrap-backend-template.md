@@ -2,7 +2,6 @@
 
 # Terraform Backend Bootstrap Requirements
 
-Adapted from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 Read [the authority boundary](kernel-boundary.md). Preserve backend security and ownership requirements;
 an environment authorization flag is not an APEX decision. Do not run an upstream bootstrap script.
 

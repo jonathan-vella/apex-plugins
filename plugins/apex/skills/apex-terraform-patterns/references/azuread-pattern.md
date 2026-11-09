@@ -2,7 +2,6 @@
 
 # Entra Provider Ownership and Application Lifecycle
 
-Adapted from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 Read [the authority boundary](kernel-boundary.md). Entra changes require a supported bounded operation and Gate 4;
 an opt-in flag or permission grant is not approval.
 

@@ -44,9 +44,3 @@ az vm repair create --name <vm-name> -g <resource-group> --verbose
 # Restore after offline fix
 az vm repair restore --name <vm-name> -g <resource-group>
 ```
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/compute/references/vm-agent-not-responding.md).
-Load only the reference needed for the active task.

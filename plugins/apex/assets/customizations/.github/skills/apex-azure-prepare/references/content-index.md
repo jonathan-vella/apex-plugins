@@ -25,8 +25,6 @@
 - references/services/static-web-apps
 - references/services/storage
 
-Pinned source: `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
-
 Read [the authority boundary](kernel-boundary.md), then load only the topic required by accepted task inputs.
 The index preserves progressive disclosure; these are design references, not capability registrations.
 Native Terraform CLI with exact saved plans is the Terraform path; azd provision/preview/down is the implemented

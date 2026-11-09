@@ -62,9 +62,3 @@ kubectl get endpoints <backend-svc> -n <ns>
 | 503 Service Unavailable          | All backend pods down                          | Check pod restarts and readiness probe                       |
 | TLS handshake fail               | cert-manager not issuing                       | Check certificate status and ACME challenge                  |
 | Works for host-a, 404 for host-b | DNS not pointing to ingress IP                 | Verify `nslookup <host>` resolves to the ingress address     |
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/aks/load-balancer-and-ingress.md).
-Load only the reference needed for the active task.

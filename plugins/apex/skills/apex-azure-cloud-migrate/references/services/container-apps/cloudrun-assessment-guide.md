@@ -72,9 +72,3 @@
 - **Low**: Single container, public ingress, standard env vars, no VPC
 - **Medium**: Internal ingress, Pub/Sub triggers, custom service account, Cloud Scheduler
 - **High**: Complex traffic management, VPC networking, multiple Eventarc triggers, long-running requests (>30 min)
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/container-apps/cloudrun-assessment-guide.md).
-Load only the reference needed for the active task.

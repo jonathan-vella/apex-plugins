@@ -70,4 +70,3 @@ kernel-provided next action. Use `indeterminate` for incomplete support.
 - [Operational checklist](references/operational-checklist.md) -
   schema, query-shape, result-limit, and redaction checks.
 - [Common issues](references/common-issues.md) - access, syntax, timeout, ingestion lag and empty-result diagnosis.
-- [Upstream coverage](references/upstream-coverage.md) - query and fallback inventory.

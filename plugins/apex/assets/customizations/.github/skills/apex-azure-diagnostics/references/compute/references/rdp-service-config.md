@@ -42,9 +42,3 @@ az vm restart --name <vm-name> -g <resource-group>
 # Redeploy VM (moves to new host — last resort, requires user approval)
 az vm redeploy --name <vm-name> -g <resource-group>
 ```
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/compute/references/rdp-service-config.md).
-Load only the reference needed for the active task.

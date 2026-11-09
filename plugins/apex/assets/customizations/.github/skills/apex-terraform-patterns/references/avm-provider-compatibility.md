@@ -1,6 +1,5 @@
 <!-- ref:avm-provider-compatibility-v1 -->
 
-> Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../references/kernel-boundary.md) before using this reference.
 > Examples are design material for accepted task inputs, not permission to write, execute or advance state.
 > Runtime defaults, effective policy tags, security invariants and exact AVM locks override sample values.
@@ -16,7 +15,7 @@ records whether that release accepts the current 5.x provider.
 Snapshot: 2026-10-05 against `registry.terraform.io` (azurerm 4.81.0,
 azurerm 5.8.0, azapi 2.13.0). Versions are examples, not pins — resolve
 exact versions at plan time per
-[`terraform-conventions.md`](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-defaults/references/terraform-conventions.md).
+[`terraform-conventions.md`](../../apex-azure-defaults/SKILL.md).
 
 | Module                                                       | Version | Terraform Core   | azurerm              | azapi             | azurerm 5.x  |
 | ------------------------------------------------------------ | ------- | ---------------- | -------------------- | ----------------- | ------------ |

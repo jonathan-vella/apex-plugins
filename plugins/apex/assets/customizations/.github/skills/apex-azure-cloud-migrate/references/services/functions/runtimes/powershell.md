@@ -21,7 +21,6 @@
 - Table Storage
 - SQL
 - SendGrid
-- Port Source
 
 > **Model**: PowerShell uses `function.json` for binding definitions + `run.ps1` for handler code.
 > Each function lives in its own directory: `<FunctionName>/function.json` + `run.ps1`
@@ -327,9 +326,3 @@ Push-OutputBinding -Name OutputMessage -Value "Processed: $Message"
 > **Note**: PowerShell always requires `function.json` — it does not support inline binding definitions.
 
 > Full reference: [Azure Functions PowerShell developer guide](https://learn.microsoft.com/en-us/azure/azure-functions/functions-reference-powershell)
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/powershell.md).
-Load only the reference needed for the active task.

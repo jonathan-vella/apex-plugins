@@ -19,7 +19,6 @@
 - Flex Consumption + Blob Trigger with EventGrid Source
 - User Assigned Managed Identity (UAMI) Auth Patterns
 - AWS Rekognition → Azure AI Computer Vision
-- Port Source
 
 Detailed guidance for migrating AWS Lambda functions to Azure Functions.
 
@@ -334,9 +333,3 @@ resource computerVision 'Microsoft.CognitiveServices/accounts@2026-07-01' = {
   }
 }
 ```
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/functions/lambda-to-functions.md).
-Load only the reference needed for the active task.

@@ -42,9 +42,3 @@ Switch to Azure CLI when:
 - MCP tool returns "service unavailable" or connection errors
 - Authentication differences only when the fallback identity is already authorized for the same scope
 - Empty tool response requiring a bounded verification query; never infer empty data from an empty response
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-kusto/references/fallback-strategy.md).
-Load only the reference needed for the active task.

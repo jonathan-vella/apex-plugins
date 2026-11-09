@@ -18,7 +18,7 @@ dotnet add package Azure.Identity
 ## Quick Start
 
 > **Auth:** `DefaultAzureCredential` is for local development. See
-> [auth-best-practices.md](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-entra-app-registration/references/auth-best-practices.md)
+> [auth-best-practices.md](../../../apex-entra-app-registration/references/permissions-and-credentials.md)
 > for production patterns.
 
 ```csharp
@@ -30,13 +30,7 @@ var credential = new DefaultAzureCredential();
 
 - Use DefaultAzureCredential for **local development only**. In production, use deterministic credentials
   (ManagedIdentityCredential) — see
-  [auth-best-practices.md](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-entra-app-registration/references/auth-best-practices.md)
+  [auth-best-practices.md](../../../apex-entra-app-registration/references/permissions-and-credentials.md)
 - Reuse credential instances — single instance shared across clients
 - Configure retry policies for credential operations
 - Enable logging with AzureEventSourceListener for debugging auth issues
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/sdk/azure-identity-dotnet.md).
-Load only the reference needed for the active task.

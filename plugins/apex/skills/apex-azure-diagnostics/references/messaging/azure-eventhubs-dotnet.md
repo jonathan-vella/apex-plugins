@@ -56,7 +56,7 @@ Configure via `EventHubsRetryOptions` when creating the client. See [Configuring
 Package: `Azure.Messaging.EventHubs.Processor` (includes `EventProcessorClient` + blob checkpoint store)
 
 > **Auth:** `DefaultAzureCredential` is for local development. See [auth best
-> practices](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-entra-app-registration/references/auth-best-practices.md)
+> practices](../../../apex-entra-app-registration/references/permissions-and-credentials.md)
 > for production patterns.
 
 ```csharp
@@ -85,9 +85,3 @@ processor.ProcessEventAsync += async (args) =>
 - **Soft delete / blob versioning**: Disable both on the storage account — they cause delays during load balancing.
 - **HTTP 412/409 from storage**: Normal during partition ownership negotiation; not an error.
 - **Checkpoint frequency**: Call `UpdateCheckpointAsync()` per batch, not per event, to reduce storage calls.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/messaging/azure-eventhubs-dotnet.md).
-Load only the reference needed for the active task.

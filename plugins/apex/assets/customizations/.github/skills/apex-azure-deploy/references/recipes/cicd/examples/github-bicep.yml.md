@@ -54,9 +54,3 @@ jobs:
           template: infra/bicep/${{ vars.PROJECT_NAME }}/main.bicep
           parameters: environmentName=${{ vars.ENVIRONMENT }}
 ```
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/recipes/cicd/examples/github-bicep.yml).
-Load only the reference needed for the active task.

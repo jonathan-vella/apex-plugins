@@ -2,7 +2,6 @@
 
 # Preparation Phases Mapped to Kernel Tasks
 
-Adapted from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 Read [the authority boundary](kernel-boundary.md). These are content dependencies, not a skill-owned state machine.
 
 | Upstream preparation activity | vNext owner/input | Technical reference |

@@ -52,7 +52,7 @@ docs](https://learn.microsoft.com/azure/developer/java/sdk/troubleshooting-messa
 Package: `azure-messaging-eventhubs-checkpointstore-blob`
 
 > **Auth:** `DefaultAzureCredential` is for local development. See [auth best
-> practices](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-entra-app-registration/references/auth-best-practices.md)
+> practices](../../../apex-entra-app-registration/references/permissions-and-credentials.md)
 > for production patterns.
 
 ```java
@@ -84,9 +84,3 @@ EventProcessorClient processor = new EventProcessorClientBuilder()
 
 Include: partition count, machine specs, instance count, max heap (`-Xmx`), average `EventData` size, traffic pattern,
 and DEBUG-level logs (±10 min from issue).
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/messaging/azure-eventhubs-java.md).
-Load only the reference needed for the active task.

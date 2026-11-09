@@ -17,7 +17,6 @@
 - Scheduling Flow
 - Deep Diagnostics Flow (Inspektor Gadget)
 - Safety Boundary
-- Port Source
 
 ## Cluster Baseline Flow
 
@@ -120,9 +119,3 @@ Treat the following as change operations and avoid them unless the user explicit
 - scaling workloads or node pools
 - cluster upgrade operations
 - DNS, route, NSG, or firewall changes
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/aks/references/command-flows.md).
-Load only the reference needed for the active task.

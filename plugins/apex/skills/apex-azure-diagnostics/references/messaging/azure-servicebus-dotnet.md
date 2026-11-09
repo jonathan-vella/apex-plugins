@@ -46,9 +46,3 @@ catch (ServiceBusException ex) when (ex.Reason == ServiceBusFailureReason.Servic
   `ServiceBusClientOptions.EnableCrossEntityTransactions` to `true` and use the same `ServiceBusClient` for every sender
   and receiver in the transaction.
 - **WebSockets**: Use `ServiceBusTransportType.AmqpWebSockets` when AMQP ports (5671, 5672) are blocked.
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/messaging/azure-servicebus-dotnet.md).
-Load only the reference needed for the active task.

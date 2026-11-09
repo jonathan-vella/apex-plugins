@@ -10,7 +10,7 @@
 # Azure Resource Graph Queries for Diagnostics
 
 > **Read first**:
-> [`.github/skills/apex-iac-common/references/azure-resource-graph-primer.md`](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-iac-common/references/azure-resource-graph-primer.md)
+> [`.github/skills/apex-iac-common/references/azure-resource-graph-primer.md`](../../apex-azure-compliance/references/azure-resource-graph.md)
 > — shared "How to Query", "Key Tables", and KQL essentials. This file contains only the workload-specific query
 > patterns below.
 
@@ -76,9 +76,3 @@ Resources
 - Use `--subscriptions` to scope to specific subscriptions
 - Combine ARG health data with Azure Monitor metrics for full picture
 - Check `HealthResources` before deep-diving into application logs
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-diagnostics/references/azure-resource-graph.md).
-Load only the reference needed for the active task.

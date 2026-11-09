@@ -24,7 +24,7 @@
 ## Quick Start
 
 > **Auth:** `DefaultAzureCredential` is for local development. See
-> [auth-best-practices.md](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-entra-app-registration/references/auth-best-practices.md)
+> [auth-best-practices.md](../../../apex-entra-app-registration/references/permissions-and-credentials.md)
 > for production patterns.
 
 ```java
@@ -36,15 +36,9 @@ var credential = new DefaultAzureCredentialBuilder().build();
 
 - Use DefaultAzureCredential for **local development only** (CLI, PowerShell, VS Code). In production, use
   ManagedIdentityCredential — see
-  [auth-best-practices.md](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-entra-app-registration/references/auth-best-practices.md)
+  [auth-best-practices.md](../../../apex-entra-app-registration/references/permissions-and-credentials.md)
 - Managed identity in production — no secrets to manage, automatic rotation
 - Azure CLI for local dev — run `az login` before running your app
 - Least privilege — grant only required permissions to service principals
 - Token caching — enabled by default, reduces auth round-trips
 - Environment variables — use for CI/CD, not hardcoded secrets
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/sdk/azure-identity-java.md).
-Load only the reference needed for the active task.

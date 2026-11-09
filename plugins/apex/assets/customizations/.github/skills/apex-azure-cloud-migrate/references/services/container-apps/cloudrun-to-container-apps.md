@@ -53,9 +53,3 @@ Detailed guidance for migrating Cloud Run serverless containers to Azure Contain
 | Secret Manager | Azure Key Vault | Managed identity integration |
 | Cloud Logging | Azure Monitor Logs | Auto-configured |
 | Cloud Scheduler | Azure Logic Apps / Functions Timer | HTTP trigger to Container Apps |
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/container-apps/cloudrun-to-container-apps.md).
-Load only the reference needed for the active task.

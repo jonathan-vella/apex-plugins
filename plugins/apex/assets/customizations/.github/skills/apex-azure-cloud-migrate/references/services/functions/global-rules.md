@@ -82,9 +82,3 @@ Request missing user-owned choices through the kernel input contract before:
   outputs, logs and reports; prefer a keyless queue hand-off or Event Grid trigger design when the workload allows)
 - **azd init on non-empty directories**: `azd init --template` refuses non-empty directories. Authorized preparation may
   stage reviewed files in an approved empty project-local directory; preserve source and existing IaC
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-cloud-migrate/references/services/functions/global-rules.md).
-Load only the reference needed for the active task.

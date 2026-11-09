@@ -25,7 +25,3 @@ preview. A changed target or service set requires validation and a new preview; 
 Missing manifests, infrastructure, package digests or validation evidence return to their owning task. Do not create
 a generic plan, set a `Validated` status, select a new target, regenerate IaC or initialize azd from a deployment task.
 Apply the [pre-deploy checklist](pre-deploy-checklist.md); it collects readiness, never provisions.
-
-## Port Source
-
-Adapted from [upstream global rules](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/global-rules.md).

@@ -12,7 +12,7 @@
 Adapted from upstream `azure-deploy`. After deployment, confirm with read-only
 queries that the provisioned role assignments match what the app needs. This
 complements the static review in
-[apex-azure-validate](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-validate/references/role-verification.md).
+[apex-azure-validate](../../apex-azure-validate/references/role-verification.md).
 It never creates, changes or deletes role assignments.
 
 | Check      | Skill               | What it verifies                                        |
@@ -53,7 +53,7 @@ az role assignment list --scope <resourceId> --assignee-object-id <principalId> 
 ### 3. Compare With Requirements
 
 Use the service-to-role mapping in
-[role verification](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-validate/references/role-verification.md#common-service-to-role-mapping).
+[role verification](../../apex-azure-validate/references/role-verification.md#common-service-to-role-mapping).
 
 | Issue                                | How to detect                                            |
 | ------------------------------------ | -------------------------------------------------------- |
@@ -79,9 +79,3 @@ and a new approved deployment:
   - <identity> → missing <expected-role> on <resource> ❌
 - Status: Pass / Fail
 ```
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/live-role-verification.md).
-Load only the reference needed for the active task.

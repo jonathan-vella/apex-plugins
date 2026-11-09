@@ -14,7 +14,6 @@
 - Common Issues
 - Best Practices
 - References
-- Port Source
 
 Assess required post-provisioning configuration. Uncovered SQL grants, migrations and settings are separately
 previewed/Gate 4-approved operations, not automatic post-deployment actions.
@@ -118,9 +117,3 @@ test "$failed" -eq 0
 - [SQL Managed Identity Access](sql-managed-identity.md)
 - [EF Core Migrations](ef-migrations.md)
 - [Verification Steps](verify.md)
-
-## Port Source
-
-Adapted from [the pinned upstream
-file](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-deploy/references/recipes/azd/post-deployment.md).
-Load only the reference needed for the active task.
