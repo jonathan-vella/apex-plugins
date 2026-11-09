@@ -6,6 +6,16 @@
 
 # Health Check Endpoint
 
+## Navigation
+
+- Python
+- TypeScript
+- JavaScript
+- C# (.NET)
+- Java
+- PowerShell
+- Usage Notes
+
 > **RECOMMENDED**: Add a health endpoint for monitoring and load balancer probes.
 
 ## Python

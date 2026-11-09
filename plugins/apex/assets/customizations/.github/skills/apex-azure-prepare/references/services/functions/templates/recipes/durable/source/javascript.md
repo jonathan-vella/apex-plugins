@@ -7,6 +7,15 @@
 
 # JavaScript Durable Functions
 
+## Navigation
+
+- src/functions/httpStart.js
+- src/functions/helloOrchestrator.js
+- src/functions/sayHello.js
+- src/functions/healthCheck.js
+- package.json additions
+- Local Testing
+
 Replace the contents of `src/functions/` with these files.
 
 > ⚠️ **IMPORTANT**: Do NOT delete `src/index.js` — it's required for function discovery. See [nodejs-entry-point.md](../../common/nodejs-entry-point.md).

@@ -1,21 +1,21 @@
 {
   "source": {
     "repository": "jonathan-vella/apex-vnext",
-    "commit": "bc781afc03a18a9b5c3007813dfa8756bcf62af9",
+    "commit": "4c838a25ff03e9414cdf561267df38b9c367bf27",
     "lockfile": "package-lock.json"
   },
   "components": [
     {
       "name": "@modelcontextprotocol/core",
-      "version": "2.3.1",
+      "version": "2.4.0",
       "license": "Apache-2.0",
-      "integrity": "sha512-laVmIhPGpWi7rG9q+0UigblRN0Hws/Yjlb6qLFtVqryXVLkc4h+yN8z731POD2LnAGQlFe7/tXhUm7Bi0YB91g=="
+      "integrity": "sha512-z8QBKqdfXLPzkLQuG4xp8hrVEMm1PZ1IgxMN2sMbJiFiAKOWXnAzogXn2W4aqIBlP1ea6U5yiqVquvUNM1Cj6Q=="
     },
     {
       "name": "@modelcontextprotocol/server",
-      "version": "2.3.1",
+      "version": "2.4.0",
       "license": "Apache-2.0",
-      "integrity": "sha512-e59MfWuSssj6DoQ96JCTqdW1AXT5/XtnTl0WWd6MU1Ka434fFUGGosCLJbGNySDhHGvxQWoRWK137FXYFkYNWw=="
+      "integrity": "sha512-rgR9yxSaAJ+bcsi/XroT/S2AfPiIWloXAnrdfYSCms9ivVju0ishu/wW0J21Ho6+ZOR1r7RyeRbjiRuF87ix5Q=="
     },
     {
       "name": "@sinclair/typebox",
@@ -37,15 +37,15 @@
     },
     {
       "name": "fast-uri",
-      "version": "4.2.1",
+      "version": "4.2.3",
       "license": "BSD-3-Clause",
-      "integrity": "sha512-TmHQgewjHtMq1E5QKA0tOE0yeYGQs25KZC/ziJpubRtWI15W92e6vPFydWOeZBVROSHBYw/QhD9d5OefdD6LDg=="
+      "integrity": "sha512-I1PXwP5eAhlNlcdpjt9CgB59op2ZvZfxw+BkqGFVIUOgNpCVTcTqp3HhTX7brxj5vsip+nSY4nTvff+eIA76hg=="
     },
     {
       "name": "js-yaml",
-      "version": "5.4.3",
+      "version": "5.5.0",
       "license": "MIT",
-      "integrity": "sha512-yzzNtgczwgoVHNigCyKTXcQJU4Y8t/ikU4UxXW0BvrLfHTGWZhsNcOT2s/a7vn81/4KqVnNmHjaUEPlvWnNwVw=="
+      "integrity": "sha512-paNr4LFIFPjeeSmwNYdrb8FafLLG/Cr2Af3GjbsHJ5CxIjH4r0c2emlmRdAtpPAieP1gRVzk6buBbVP5gBMGAg=="
     },
     {
       "name": "json-schema-traverse",
@@ -55,9 +55,9 @@
     },
     {
       "name": "zod",
-      "version": "4.6.5",
+      "version": "4.6.7",
       "license": "MIT",
-      "integrity": "sha512-v5l/aFXZQeai4awLbOpSoHecE9UiMrnfx75tEXLjNonXVARxQ5mOeipTjROUchszUNCqnE+hqAMujRsRHsut2Q=="
+      "integrity": "sha512-g8W2D2kU6a8untc053fX1uVBKzM7yqAxW/3zwk83+6RyF2+SKOuV+c0wBDhUwzV1PaGapmZH+rmcUzPf+3CGwg=="
     }
   ]
 }

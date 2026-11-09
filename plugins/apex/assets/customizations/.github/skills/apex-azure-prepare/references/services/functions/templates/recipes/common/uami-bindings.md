@@ -6,6 +6,17 @@
 
 # UAMI Binding Configuration
 
+## Navigation
+
+- The Problem
+- The Solution: Three Required Settings
+- Per-Service Configuration
+- Composition Contract
+- Recipe Module Pattern
+- Validation Checklist
+- Common Mistakes
+- Why UAMI Instead of System MI?
+
 > ⛔ **MANDATORY FOR ALL SERVICE BINDINGS**
 >
 > This document defines the required app settings pattern for User Assigned Managed Identity (UAMI)

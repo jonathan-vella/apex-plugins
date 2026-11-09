@@ -7,6 +7,10 @@
 
 # Container Apps Troubleshooting
 
+## Navigation
+
+- Port Source
+
 ### Common Issues Matrix
 
 | Symptom              | Likely Cause                  | Quick Fix                                        |

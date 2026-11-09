@@ -6,6 +6,12 @@
 
 # Event Grid - Subscriptions
 
+## Navigation
+
+- Event Subscription
+- Destination Types
+- Filtering
+
 ## Event Subscription
 
 ```bicep

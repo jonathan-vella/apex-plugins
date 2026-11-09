@@ -7,6 +7,16 @@
 
 # Pod Failures & Application Issues
 
+## Navigation
+
+- Evidence Bundle Script
+- CrashLoopBackOff
+- ImagePullBackOff
+- Pending Pods
+- Readiness & Liveness Probe Failures
+- Resource Constraints (CPU/Memory)
+- Port Source
+
 ## Evidence Bundle Script
 
 For **any** pod symptom below, collect the same read-only evidence bundle with individual scoped reads. Per pod it

@@ -7,6 +7,12 @@
 
 # sql syntax reference
 
+## Navigation
+
+- Reference content
+
+## Reference content
+
 ```bicep
 // recipes/sql/bicep/sql.bicep
 // Azure SQL Database recipe module — adds SQL Server, database, and RBAC

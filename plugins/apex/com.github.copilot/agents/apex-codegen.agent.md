@@ -6,6 +6,7 @@ user-invocable: false
 disable-model-invocation: false
 tools:
   - apex/taskContext
+  - apex/readTaskInput
   - apex/stageFile
   - apex/generateIac
 ---
@@ -21,6 +22,9 @@ Generate only the assigned IaC batch and return a traceable handoff that validat
 # Success criteria
 
 1. Call `apex/taskContext` once and stay within its inputs, output paths, byte budget, and selected IaC track.
+  Its result is intentionally small, and most or all `inputs` are empty. Read every input listed in `inputReferences`,
+  in order, through `apex/readTaskInput` with its `inputHash`, in bounded chunks following `nextOffset` until it is
+  absent, before generating. Return `needs_input` if one cannot be read in full.
 2. Read `.github/skills/apex-codegen/SKILL.md` when track-specific generation guidance is needed.
   Read `.github/skills/apex-azure-defaults/SKILL.md` only for projected security, naming, tag, or AVM/module rules.
   Read `.github/skills/apex-bicep-patterns/SKILL.md` only for an assigned Bicep binding.

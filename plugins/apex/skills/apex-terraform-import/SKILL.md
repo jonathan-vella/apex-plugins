@@ -1,6 +1,6 @@
 ---
 name: apex-terraform-import
-description: '**WORKFLOW SKILL** — Assess adoption of existing Azure resources into Terraform. WHEN: "terraform import", "import Azure resources", "adopt existing infrastructure", "generate import blocks", "resource discovery". DO NOT USE FOR: Bicep (use apex-bicep-patterns), new resources (use apex-terraform-patterns), decisions (use apex-azure-adr).'
+description: '**WORKFLOW SKILL** — Assesses adoption of existing Azure resources into Terraform. WHEN: "terraform import", "import Azure resources", "adopt existing infrastructure", "generate import blocks", "resource discovery". DO NOT USE FOR: Bicep (use apex-bicep-patterns), new resources (use apex-terraform-patterns), decisions (use apex-azure-adr).'
 user-invocable: false
 disable-model-invocation: false
 ---

@@ -7,13 +7,25 @@
 
 # Code Migration Phase
 
+## Navigation
+
+- Prerequisites
+- Rules
+- Steps
+- Key Configuration Files
+- Critical Infrastructure Dependencies
+- Runtime-Specific Trigger & Binding Patterns
+- Scenario-Specific Guidance
+- Handoff to apex-azure-prepare
+- Port Source
+
 Migrate AWS Lambda function code to Azure Functions.
 
 ## Prerequisites
 
 - Assessment accepted; the active task authorizes an available conversion capability and exact source/output paths
 - Azure Functions tooling supported by the actual host; the VS Code extension is required only for extension-driven actions
-- Best practices loaded via `mcp_azure-mcp_get_azure_bestpractices` tool
+- Best practices loaded via `apex-azure/get_azure_bestpractices`, command `get_azure_bestpractices_get`
 
 ## Rules
 
@@ -33,7 +45,8 @@ Migrate AWS Lambda function code to Azure Functions.
 
 1. **Check Host Capability** — Use available Functions tooling. Require the VS Code extension only for local editor
    actions; missing compiler/runtime capability is a verification gap, not invented Host support.
-2. **Load Best Practices** — Use `mcp_azure-mcp_get_azure_bestpractices` tool for code generation guidance
+2. **Load Best Practices** — Use `apex-azure/get_azure_bestpractices` with a bounded intent,
+   `get_azure_bestpractices_get` and parameters `{resource: "azurefunctions", action: "code-generation"}`.
 3. **Create Project Structure** — Set up the Azure Functions project inside the output directory
    (`<aws-folder>-azure/`). Do NOT create files inside the original AWS directory
 4. **Migrate Functions** — Convert each Lambda function to Azure Functions equivalent

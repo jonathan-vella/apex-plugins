@@ -7,6 +7,14 @@
 
 # C# (.NET) SQL Trigger + Output
 
+## Navigation
+
+- Dependencies
+- Source Code
+- Files to Remove
+- Test
+- Common Patterns
+
 ## Dependencies
 
 **.csproj:**

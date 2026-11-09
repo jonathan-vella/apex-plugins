@@ -6,6 +6,14 @@
 
 # Bicep Validation
 
+## Navigation
+
+- Prerequisites
+- Validation Steps
+- Checklist
+- References
+- Next
+
 Validation steps for standalone Bicep deployments.
 
 ## Prerequisites

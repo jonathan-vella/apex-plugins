@@ -1,5 +1,5 @@
-> MCP names in this reference are upstream pseudo-interfaces, not current vNext tool registrations.
-> Use only capabilities projected by the active task; unavailable tools are blockers, never substitutes.
+> Managed Azure reads use verified `apex-azure` namespaces and actual command schemas.
+> Other provider examples are conditional; absent tools never grant mutation or hook-bypass authority.
 
 <!-- ref:avm-pitfalls-v1 -->
 
@@ -10,6 +10,24 @@
 > Raw resources illustrate provider syntax; use AVM first and record any accepted coverage exception.
 
 # AVM Pitfalls & What-If Interpretation
+
+## Navigation
+
+- What-If Interpretation
+- AVM Known Gotchas
+- Schema Drift in Pinned AVM Versions (mandatory pre-author check)
+- Bicep Language Constraints (compiler-level, not AVM)
+- Identity ↔ RBAC Circular Dependency
+- Runtime Managed Identity ≠ Data-Plane Admin
+- SKU-Default Mismatch (Premium-Only Properties on Lower SKUs)
+- Log Analytics Ingestion-Cap Alerts — KQL Column Safety
+- SQL Entra Admin Object ID Resolution
+- AKS Managed Cluster apply-time gotchas
+- Application Gateway backend pool (no loopback)
+- MySQL Flexible Server apply-time gotchas
+- Cost Management InsightAlert viewId scope
+- Automation Account runbook and jobSchedule
+- Learn More
 
 Known gotchas when using Azure Verified Modules and pre-deployment validation.
 
@@ -735,7 +753,10 @@ then `az automation job-schedule create`). Record both as post-deploy tasks.
 
 | Topic                | How to Find                                                                                          |
 | -------------------- | ---------------------------------------------------------------------------------------------------- |
-| AVM module catalog   | `mcp_azure-mcp_documentation` — `command: "microsoft_docs_search"`, `query: "Azure Verified Modules registry Bicep"`    |
-| Resource type schema | `mcp_azure-mcp_documentation` — `command: "microsoft_docs_search"`, `query: "{resource-type} Bicep template reference"` |
-| Networking patterns  | `mcp_azure-mcp_documentation` — `command: "microsoft_docs_search"`, `query: "Azure hub-spoke network topology Bicep"`   |
-| Security baseline    | `mcp_azure-mcp_documentation` — `command: "microsoft_docs_search"`, `query: "{service} security baseline"`              |
+| AVM module catalog   | `apex-azure/documentation` — `command: "microsoft_docs_search"`, `parameters: {query: "Azure Verified Modules registry Bicep"}` |
+| Resource type schema | `apex-azure/documentation` — `command: "microsoft_docs_search"`, `parameters: {query: "{resource-type} Bicep template reference"}` |
+| Networking patterns  | `apex-azure/documentation` — `command: "microsoft_docs_search"`, `parameters: {query: "Azure hub-spoke network topology Bicep"}` |
+| Security baseline    | `apex-azure/documentation` — `command: "microsoft_docs_search"`, `parameters: {query: "{service} security baseline"}` |
+
+Include a bounded `intent` in each call. Schema-only discovery is exactly `{intent: "", learn: true}` with no
+command/parameters; it is not a request to execute sampling.

@@ -1,6 +1,6 @@
 ---
 name: apex-azure-quotas
-description: '**UTILITY SKILL** — Interprets accepted Azure quota and SKU availability evidence for APEX capacity decisions; neither proves allocation capacity. WHEN: "check quotas", "quota exceeded", "vCPU limit", "service limits", "SKU availability", "SKU restrictions", "compare regions for capacity". DO NOT USE FOR: VM size selection (use apex-azure-compute), cost analysis (use apex-azure-cost-optimization).'
+description: '**UTILITY SKILL** — Interprets Azure quota and SKU availability evidence for capacity decisions; not proof of allocation. WHEN: "check quotas", "quota exceeded", "vCPU limit", "service limits", "SKU availability", "SKU restrictions", "compare regions". DO NOT USE FOR: VM size selection (use apex-azure-compute), cost optimization (use apex-azure-cost-optimization).'
 user-invocable: false
 disable-model-invocation: false
 ---

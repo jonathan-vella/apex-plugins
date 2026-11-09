@@ -6,6 +6,17 @@
 
 # Terraform Patterns
 
+## Navigation
+
+- File Structure
+- Provider Configuration
+- Variables
+- Main Configuration
+- Outputs
+- Naming with Azure CAF
+- State Backend Setup
+- Security Requirements
+
 Common patterns for Terraform Azure deployments.
 
 ## File Structure

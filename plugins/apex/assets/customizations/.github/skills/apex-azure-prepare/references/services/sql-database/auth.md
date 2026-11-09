@@ -6,6 +6,14 @@
 
 # SQL Database - Entra ID Authentication
 
+## Navigation
+
+- Entra ID Admin Configuration (User)
+- Entra ID Admin Configuration (Group)
+- Managed Identity Access
+- Common Database Roles
+- Connection Strings
+
 ## Entra ID Admin Configuration (User)
 
 **Recommended for development** — Uses signed-in user as admin.

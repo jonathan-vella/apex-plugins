@@ -7,6 +7,19 @@
 
 # Azure Functions Deployment
 
+## Navigation
+
+- Prerequisites
+- AZD Deployment
+- Environment Configuration
+- Verify Deployment
+- Testing HTTP Endpoints
+- Monitoring
+- CI/CD Integration
+- Data Loss Warning
+- Next Steps
+- Port Source
+
 Deployment workflows for Azure Functions using AZD.
 
 ## Prerequisites

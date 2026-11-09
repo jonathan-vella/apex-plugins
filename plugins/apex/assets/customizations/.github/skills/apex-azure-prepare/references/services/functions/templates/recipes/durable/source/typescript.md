@@ -7,6 +7,15 @@
 
 # TypeScript Durable Functions
 
+## Navigation
+
+- src/functions/httpStart.ts
+- src/functions/helloOrchestrator.ts
+- src/functions/sayHello.ts
+- src/functions/healthCheck.ts
+- package.json additions
+- Local Testing
+
 Replace the contents of `src/functions/` with these files.
 
 > ⚠️ **IMPORTANT**: Do NOT delete `src/index.ts` — it's required for function discovery. See [nodejs-entry-point.md](../../common/nodejs-entry-point.md).

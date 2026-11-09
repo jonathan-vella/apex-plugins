@@ -6,6 +6,19 @@
 
 # Durable Functions Recipe
 
+## Navigation
+
+- Overview
+- Integration Type
+- Composition Steps
+- IaC Module
+- RBAC Roles Required
+- host.json Configuration
+- Extension Packages
+- Files
+- Patterns Included
+- Common Issues
+
 Adds Durable Functions orchestration patterns to an Azure Functions base template with **Durable Task Scheduler** as the
 backend.
 

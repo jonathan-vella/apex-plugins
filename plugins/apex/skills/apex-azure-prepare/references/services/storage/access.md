@@ -6,6 +6,14 @@
 
 # Storage - Access Patterns
 
+## Navigation
+
+- Prerequisites for Granting Storage Access
+- Managed Identity Role Assignment
+- Storage Roles
+- SDK Connection Patterns
+- Managed Identity Access
+
 ## Prerequisites for Granting Storage Access
 
 > ⚠️ **Important**: To assign storage roles to managed identities, you need:

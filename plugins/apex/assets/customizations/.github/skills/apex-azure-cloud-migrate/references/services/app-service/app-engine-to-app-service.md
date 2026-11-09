@@ -7,6 +7,20 @@
 
 # Google App Engine to Azure App Service Migration
 
+## Navigation
+
+- Service Mapping
+- Standard vs Flex → App Service Plan Mapping
+- `app.yaml` → `azure.yaml` + Bicep
+- Datastore / Firestore → Cosmos DB
+- Cloud Tasks → Service Bus / Durable Functions
+- Traffic Splitting → Deployment Slots
+- Memcache → Azure Managed Redis
+- Environment Variables Migration
+- CI/CD Migration
+- Reference Links
+- Port Source
+
 Detailed guidance for migrating Google App Engine applications to Azure App Service.
 
 ## Service Mapping

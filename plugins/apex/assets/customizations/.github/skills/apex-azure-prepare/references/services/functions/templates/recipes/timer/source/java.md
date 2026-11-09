@@ -7,6 +7,13 @@
 
 # Java Timer Trigger
 
+## Navigation
+
+- Function.java
+- pom.xml additions
+- Local Testing
+- Common Patterns
+
 Replace the contents of `src/main/java/com/function/` with this file.
 
 ## Function.java

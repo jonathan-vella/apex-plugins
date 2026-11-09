@@ -6,6 +6,14 @@
 
 # Azure Functions on Azure Container Apps (Aspire)
 
+## Navigation
+
+- Proactive Configuration in AppHost
+- Container Apps Bicep Configuration
+- Why This Is Required
+- Common Error Without This Setting
+- When to Use This Configuration
+
 When .NET Aspire deploys Azure Functions via `azd` , Functions run as containerized workloads on Azure Container Apps.
 **File-based secret storage is required** when using identity-based storage access.
 

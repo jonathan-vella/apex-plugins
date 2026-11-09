@@ -6,6 +6,15 @@
 
 # azure.yaml Generation
 
+## Navigation
+
+- Structure
+- Host Types
+- Examples
+- Hooks (Optional)
+- Valid Values
+- Output
+
 > ⛔ **CRITICAL: Check for .NET Aspire projects FIRST**
 >
 > **DO NOT manually create azure.yaml for .NET Aspire projects.** If you detect:

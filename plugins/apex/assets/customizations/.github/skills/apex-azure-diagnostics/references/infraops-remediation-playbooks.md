@@ -9,6 +9,12 @@
 
 # Remediation Playbooks
 
+## Navigation
+
+- Diagnostic Workflow (Six Phases)
+- Common Remediation Playbooks
+- Port Source
+
 Step-by-step resolution procedures for common Azure resource issues,
 plus the standard six-phase diagnostic workflow and report template.
 

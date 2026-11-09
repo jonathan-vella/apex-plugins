@@ -7,6 +7,12 @@
 
 # PowerShell Durable Functions
 
+## Navigation
+
+- Dependencies
+- Source Code
+- Storage Flags Required
+
 ## Dependencies
 
 **requirements.psd1:**

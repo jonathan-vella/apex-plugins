@@ -7,6 +7,18 @@
 
 # App Service Troubleshooting
 
+## Navigation
+
+- Common Issues Matrix
+- High CPU / Memory Diagnosis
+- Deployment Failure Analysis
+- Application Crash / Restart Diagnosis
+- Slow Response Time Investigation
+- Custom Domain / TLS Certificate Issues
+- AZ CLI or MCP Tools for App Service Diagnostics
+- Combined Diagnostic Script (Source Example)
+- Port Source
+
 ## Common Issues Matrix
 
 | Symptom | Likely Cause | Action |
@@ -183,12 +195,13 @@ az webapp config ssl show --certificate-name CERT -g RG
 | `Azure CLI` | `az webapp show -n APP -g RG` | Get app config, stack, status |
 | `Azure CLI` | `az webapp config appsettings list -n APP -g RG --query "[].name"` | Check which settings exist (names only; never print values) |
 | `Azure CLI` | `az webapp deployment slot list -n APP -g RG` | Compare slot configurations |
-| `mcp_azure-mcp_appservice` | `appservice_webapp_diagnostic_diagnose` | AI-powered root cause analysis |
-| `mcp_azure-mcp_monitor` | `monitor_resource_log_query` | Run KQL against Log Analytics |
-| `mcp_azure-mcp_resourcehealth` | `get` | Check platform-level health status |
+| `apex-azure/appservice` | `appservice_webapp_diagnostic_list`, then `appservice_webapp_diagnostic_diagnose` | Inspect available detectors, then diagnose the chosen detector |
+| `apex-azure/monitor` | `monitor_resource_log_query` | Run bounded resource log queries |
+| `apex-azure/resourcehealth` | `resourcehealth_availability-status_get` | Check platform-level health status |
 
-> 💡 **Tip:** Start with `mcp_azure-mcp_appservice` (`diagnose`) — it automatically runs relevant detectors and surfaces
-> the most likely root cause before you dig into logs manually.
+Discover exact parameters with `{intent: "", learn: true}` and no command/parameters. Diagnosis requires `app`,
+`resource-group` and a returned `detector-id`; log queries require `query`, `table` and `resource-id`. App settings
+are not a managed MCP capability; do not use CLI to retrieve values or bypass that exclusion.
 
 ---
 

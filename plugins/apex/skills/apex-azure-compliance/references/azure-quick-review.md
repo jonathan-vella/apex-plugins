@@ -1,5 +1,18 @@
 # Azure Quick Review Assessment
 
+## Navigation
+
+- Prerequisites
+- Step 1: Determine the Scan Scope
+- Step 2: Run the Scan
+- Step 3: Analyze the Results
+- Step 4: Categorize Findings
+- Step 5: Remediation Guidance
+- Step 6: Summary
+- Supported Services
+- Troubleshooting
+- Documentation
+
 Azure Quick Review (azqr) assessment workflow ported from the upstream `azure-quick-review.md`. An azqr scan only reads
 resource configuration; it may run directly against the approved scope. Its findings are observations until accepted
 as evidence, and every fix it suggests changes Azure and is routed (see
@@ -10,8 +23,8 @@ as evidence, and every fix it suggests changes Azure and is routed (see
 - Azure authentication for the intended tenant: Azure CLI (`az login`), or a service principal or managed identity in
   a pipeline.
 - `Reader` at least on the target subscription or management group.
-- azqr, through the Azure MCP server's azqr tool when the client provides it, or the
-  [azqr CLI](https://azure.github.io/azqr/docs/).
+- Separately authorized observations from the [azqr CLI](https://azure.github.io/azqr/docs/). The managed Azure MCP
+  allowlist excludes the azqr extension because it writes local reports; APEX cannot install or invoke it.
 
 ## Step 1: Determine the Scan Scope
 
@@ -26,16 +39,9 @@ Take the scope from the task context; never widen it.
 
 ## Step 2: Run the Scan
 
-With the Azure MCP server's azqr tool:
-
-```text
-mcp_azure-mcp_extension_azqr
-  subscription: <subscription-id>
-  resource-group: <optional-rg-name>
-```
-
-Or run `azqr scan` with the same subscription and resource group scope; see the azqr documentation for the current scope
-flags. Both forms are read-only.
+Request a separately produced `azqr scan` report for the same subscription and resource-group scope; see the azqr
+documentation for its current scope flags. It reads Azure but writes a local workbook, so it is not a managed MCP
+read. Missing producer capability is a coverage gap, never permission for a shell workaround.
 
 ## Step 3: Analyze the Results
 

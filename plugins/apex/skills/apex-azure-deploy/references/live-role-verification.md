@@ -43,7 +43,7 @@ az functionapp identity show --name <app-name> -g <resource-group> --query princ
 
 ### 2. List Live Role Assignments
 
-Use `mcp_azure-mcp_role` with `command: "role_assignment_list"`, or the CLI, for
+Use `apex-azure/role` with a bounded `intent`, `command: "role_assignment_list"` and `parameters.scope`, or the CLI, for
 each target resource and identity:
 
 ```bash

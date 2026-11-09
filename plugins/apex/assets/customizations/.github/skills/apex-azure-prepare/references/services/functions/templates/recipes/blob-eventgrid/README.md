@@ -6,6 +6,18 @@
 
 # Blob Storage with Event Grid Recipe
 
+## Navigation
+
+- Overview
+- Integration Type
+- AZD Templates (Recommended)
+- Why Event Grid Source?
+- Composition Steps (Alternative)
+- Extension Packages
+- Required App Settings
+- Files
+- Common Issues
+
 Adds Blob Storage triggers using Event Grid as the event source for high-scale, low-latency blob processing.
 
 ## Overview

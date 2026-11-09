@@ -7,12 +7,24 @@
 
 # Code Migration Phase
 
+## Navigation
+
+- Prerequisites
+- Rules
+- Steps
+- Key Configuration Files
+- Database Migration Patterns
+- Static Assets & CDN
+- Background Workers
+- Handoff to apex-azure-prepare
+- Port Source
+
 Migrate source platform web application code to Azure App Service.
 
 ## Prerequisites
 
 - Assessment accepted; an available conversion capability and exact source/output paths are authorized by the active task
-- Best practices loaded via `mcp_azure-mcp_get_azure_bestpractices` tool
+- Best practices loaded via `apex-azure/get_azure_bestpractices`, command `get_azure_bestpractices_get`
 
 ## Rules
 
@@ -24,7 +36,9 @@ Migrate source platform web application code to Azure App Service.
 
 ## Steps
 
-1. **Load Best Practices** — Use `mcp_azure-mcp_get_azure_bestpractices` tool for App Service guidance
+1. **Load Best Practices** — Use `apex-azure/get_azure_bestpractices` with a bounded intent and
+   `get_azure_bestpractices_get`, parameters `{resource: "general", action: "code-generation"}`; use
+   `apex-azure/documentation` for App Service-specific guidance.
 2. **Create Project Structure** — Set up the project inside the output directory
 3. **Migrate Application Code** — Adapt source code for App Service runtime
 4. **Update Dependencies** — Replace platform-specific SDKs with Azure equivalents

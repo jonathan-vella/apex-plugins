@@ -6,6 +6,16 @@
 
 # Container Apps Revision Management
 
+## Navigation
+
+- Revision Modes
+- Setting Revision Mode (Bicep)
+- Traffic Splitting Patterns
+- Rollback
+- Revision Lifecycle
+- Terraform Traffic Config
+- Recommendations
+
 Revisions are immutable snapshots of a Container App version. Use them for blue/green deployments, canary releases, and
 instant rollback.
 

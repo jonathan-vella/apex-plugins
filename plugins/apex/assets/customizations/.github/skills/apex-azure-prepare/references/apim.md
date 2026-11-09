@@ -8,6 +8,17 @@
 
 # APIM Deployment Guide
 
+## Navigation
+
+- When to Deploy APIM
+- Quick Deploy (Azure CLI)
+- Bicep Template
+- Terraform Module
+- Post-Deployment Steps
+- SKU Selection Guide
+- Naming Conventions
+- References
+
 Deploy Azure API Management (APIM) as part of your Azure infrastructure.
 
 > **For AI Gateway configuration** (policies, backends, semantic caching), see the [APIM AI Gateway docs](https://learn.microsoft.com/azure/api-management/genai-gateway-capabilities).

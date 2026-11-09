@@ -6,6 +6,17 @@
 
 # Service Bus Recipe
 
+## Navigation
+
+- Overview
+- Integration Type
+- Composition Steps
+- App Settings to Add
+- RBAC Roles Required
+- Resources Created
+- Files
+- Common Issues
+
 Adds Azure Service Bus trigger and output bindings to an Azure Functions base template.
 
 ## Overview

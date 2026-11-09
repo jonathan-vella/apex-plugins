@@ -7,6 +7,12 @@
 
 # sql syntax reference
 
+## Navigation
+
+- Reference content
+
+## Reference content
+
 ```hcl
 # recipes/sql/terraform/sql.tf
 # Azure SQL Database recipe module for Terraform — adds SQL Server, database,

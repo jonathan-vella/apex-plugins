@@ -7,6 +7,16 @@
 
 # SQL Database Entra Authentication
 
+## Navigation
+
+- Prerequisites
+- Connection Patterns
+- Database Roles
+- Grant Managed Identity Access
+- Verify Current Admin
+- References
+- Port Source
+
 Quick reference for Azure SQL Database Entra authentication in post-deployment scenarios.
 
 ## Prerequisites

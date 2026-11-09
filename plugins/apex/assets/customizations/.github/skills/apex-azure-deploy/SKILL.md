@@ -42,14 +42,14 @@ Gate 4, evidence, recovery and state; the selected native provider owns its life
 7. Treat SQL identity setup, EF migrations, application delivery and pipeline configuration as separate operations
    when not covered by the approved preview. They are not implicit post-deployment permission.
 
-## Purpose-Bound Delivery: Lab Flow Current, Executors And Production Not Available Yet
+## Purpose-Bound Delivery: Current Lab Executor and Deferred Production
 
 The lab gate flow (CP-27 [#456](https://github.com/jonathan-vella/apex-vnext/issues/456)) is current runtime: one Gate 1
 intent confirmation, kernel-recorded Gate 2 and 3 readiness checkpoints and the final Gate 4 preview approval, with
 required reviews, deterministic checks, risk decisions and each apply or destroy preview and approval still blocking.
-`production` is blocked. DECISION-036 and ADR-0007 select the executor and production targets below. They are
-**planned**, not shipped behavior; today's previews and qualification handoff stay enforced until the replacements are
-implemented and qualified.
+`production` is blocked. Bicep provision/preview/destroy uses the implemented azd executor; Terraform retains its native
+CLI. Their live qualification remains separate from implementation. DECISION-036/ADR-0007 production execution/setup
+and application-package/pipeline operations below remain **planned**, not shipped execution paths.
 
 - **Executors (CP-26 [#443](https://github.com/jonathan-vella/apex-vnext/issues/443)):** azd is the executor for
   Bicep only; native Terraform CLI executes Terraform with an exact saved plan and normal backend locking. There is no
@@ -60,12 +60,12 @@ implemented and qualified.
   the kernel verifies a candidate-bound human review receipt before apply. OIDC job identity, a triggering actor or an
   environment pause alone is not human approval.
 - Qualification of the purpose-bound flow is CP-30 [#455](https://github.com/jonathan-vella/apex-vnext/issues/455).
-- `azure.yaml` and workflow generation are static, reviewable CodeGen outputs. `azd pipeline config` is a different
-  operation with Azure, Entra and GitHub setting mutations and needs its own preview and approval, not a private
-  user-run bypass.
+- Current Bicep generation emits an azd project; that does not implement application-package deployment or production
+  pipeline setup. `azd pipeline config` changes Azure, Entra and GitHub settings, needs its own supported preview and
+  approval, and has no current executable APEX path.
 
-Until the required executor and approval path are implemented and qualified, return an unavailable-capability
-blocker; the current Bicep and Terraform tracks keep their existing kernel ceremonies.
+For application packages, pipeline setup or production, return an unavailable-capability blocker; implemented Bicep
+provision/destroy and Terraform keep their exact current kernel ceremonies and live-qualification boundary.
 Current azd Terraform provisioning replans in `Deploy()` before apply; it cannot execute an already approved saved
 Terraform plan, so native Terraform plan/apply remains authoritative. `azd deploy --preview` cannot combine with
 `--from-package`, and `azd pipeline config` has no native preview. Do not invent commands, hash-only workarounds or
@@ -81,6 +81,9 @@ approval exceptions.
 - Do not independently retry, roll back, or reconcile an operation. Provider behavior is not assumed transactional.
 - Transform a direct deployment request into an explanation of the exact approved preview and the kernel-provided
   trusted CLI ceremony. A request never bypasses validation, approval, expiry, writer-epoch, or authorization checks.
+- On candidates containing immutable context binding (#466), explain the exact `approvalContextHash` and full accepted
+  source/risk references returned by the preview. Changed or renewed risk terms need a fresh preview; never edit review
+  material or its generated base to bypass rejection.
 
 ## References
 

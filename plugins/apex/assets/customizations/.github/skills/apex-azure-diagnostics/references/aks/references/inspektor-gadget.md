@@ -7,6 +7,16 @@
 
 # Inspektor Gadget (IG) Reference
 
+## Navigation
+
+- Run Script (Source Example)
+- Common Filters
+- Gadget Catalog
+- Symptom-to-Gadget Map
+- Gadget Type Reference
+- Guardrails
+- Port Source
+
 Use Inspektor Gadget for low-level node/pod diagnostics when `kubectl` is insufficient.
 
 ## Run Script (Source Example)

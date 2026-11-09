@@ -6,6 +6,15 @@
 
 # Cosmos DB Bicep Patterns
 
+## Navigation
+
+- Account
+- Data-Plane Role Assignment
+- Database
+- Container
+- Autoscale Container
+- Global Distribution
+
 ## Account
 
 ```bicep

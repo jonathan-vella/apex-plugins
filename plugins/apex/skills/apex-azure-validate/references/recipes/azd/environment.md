@@ -6,6 +6,14 @@
 
 # AZD Environment Setup
 
+## Navigation
+
+- Step 1: Check Existing Environments
+- Step 2: Create New Environment
+- Step 3: Configure Environment
+- Verify Configuration
+- Only Then Proceed
+
 > **⛔ MANDATORY**: You MUST set up an AZD environment before running any deployment commands.
 
 ## Step 1: Check Existing Environments

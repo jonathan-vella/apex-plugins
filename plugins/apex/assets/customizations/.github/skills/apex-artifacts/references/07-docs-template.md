@@ -8,6 +8,11 @@
 
 # Step 7: Workload Documentation Templates
 
+## Navigation
+
+- Generation Workflow
+- Step 7 Source Artifacts
+
 ### 07-documentation-index.md
 
 ```text
@@ -117,7 +122,7 @@
 1. **Gather Context** — Read project artifacts (01-06)
 2. **Check H2 Structures** — Reference templates above
 3. **Extract Resources** — Parse from `06-deployment-summary.md`
-4. **Query Pricing** — Use Azure Resource Manager MCP through the cost subagent
+4. **Query Pricing** — Use the guarded `apex-azure/pricing` command `pricing_get` for returned retail-price evidence
 5. **Generate Documents** — Follow H2 structure exactly
 6. **Cross-Reference** — Ensure consistency across documents
 7. **Create Index** — Generate `07-documentation-index.md` last

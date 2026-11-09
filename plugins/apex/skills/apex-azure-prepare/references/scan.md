@@ -8,6 +8,11 @@
 
 # Codebase Scan
 
+## Navigation
+
+- Detection Patterns
+- Output
+
 Analyze workspace to identify components, technologies, and dependencies.
 
 ## Detection Patterns

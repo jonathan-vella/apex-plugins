@@ -1,6 +1,6 @@
 ---
 name: apex-azure-compute
-description: '**ANALYSIS SKILL** — Recommends Azure VM families and VM Scale Set designs for APEX architecture and planning decisions, priced read-only. WHEN: "recommend VM size", "choose Azure VM", "GPU VM", "compare VM sizes", "VMSS vs VM", "autoscale VMs". DO NOT USE FOR: quota or SKU availability evidence (use apex-azure-quotas), cost of deployed resources (use apex-azure-cost-optimization).'
+description: '**ANALYSIS SKILL** — Recommends Azure VM families and VM Scale Set designs for APEX architecture and planning decisions, priced read-only. WHEN: "recommend VM size", "choose Azure VM", "GPU VM", "compare VM sizes", "VMSS vs VM", "autoscale VMs". DO NOT USE FOR: quota or SKU availability evidence (use apex-azure-quotas), deployed cost optimization (use apex-azure-cost-optimization).'
 user-invocable: false
 disable-model-invocation: false
 ---
@@ -29,7 +29,8 @@ Ask for a missing user-owned input through the kernel input request rather than 
   unclear, a general-purpose family is the first candidate, not an automatic selection.
 - **Verify specifications.** Bind vCPU, memory, disk, accelerator, and Spot support to current documentation evidence
   for the intended region, never to memory.
-- **Price through the read-only tool.** Use `apex-azure-pricing/get_retail_prices`. A scale set adds no charge of its
+- **Price through the read-only tool.** Use `apex-azure/pricing` with command `pricing_get`. A scale set adds no charge
+  of its
   own: estimate per-instance price times the minimum and maximum instance counts.
 - **Commitments are review options.** Reservations or savings plans suit long-lived production capacity; present them
   next to pay-as-you-go, never as the default.
@@ -47,17 +48,12 @@ Ask for a missing user-owned input through the kernel input request rather than 
    fit, and trade-off, then record the selected option and rejected alternatives in the typed artifact.
 5. Return missing or stale evidence as a blocker; submit no state change except through APEX MCP.
 
-## Azure CLI and azd
+## Pricing Source
 
-[Azure Retail Prices API](references/retail-prices-api.md) keeps the upstream `curl` and PowerShell price queries.
-
-- **Read and diagnostic** calls (Retail Prices API queries, and listings such as `az vm list-skus` or
-  `az vm list-sizes`) may run directly. Their output is an observation; the recommendation still cites accepted
-  evidence, and `apex-azure-pricing/get_retail_prices` stays the price evidence source.
-- **Commands that change Azure** (creating, resizing or scaling VMs and scale sets, autoscale rules) are never run by
-  the agent. They reach Azure only through `apex preview`, the current runtime's Gate 4 decision and `apex deploy`
-  (Bicep or Terraform). A CI-owned production run with human approval verified before apply is a planned target
-  (DECISION-036), not available today.
+Use only the guarded `apex-azure/pricing` command `pricing_get`, following the central
+[retail pricing contract](../apex-azure-defaults/references/retail-pricing.md). Do not query the Retail Prices API
+directly or use a CLI/REST fallback when the guarded command is unavailable. Regional availability and quota remain
+separate evidence, interpreted through `apex-azure-quotas`.
 
 ## Boundaries
 
@@ -72,5 +68,5 @@ Ask for a missing user-owned input through the kernel input request rather than 
 - [Recommendation and scale rules](references/recommendation-and-scale-rules.md) - orchestration, autoscale,
   networking, and the recommendation record.
 - [Pricing evidence](references/pricing-evidence.md) - VM price queries, comparison basis, and uncertainty rules.
-- [Azure Retail Prices API](references/retail-prices-api.md) - direct API endpoint, VM queries, filters, response
-  fields, and pagination.
+- [Azure Retail Prices API](references/retail-prices-api.md) - explains why managed APEX uses guarded MCP pricing
+  instead of direct API queries.

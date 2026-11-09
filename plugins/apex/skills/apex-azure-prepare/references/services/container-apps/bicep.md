@@ -6,6 +6,12 @@
 
 # Container Apps Bicep Patterns
 
+## Navigation
+
+- Basic Resource
+- With Managed Identity (Recommended)
+- Container Apps Environment
+
 > **⚠️ Container Registry Naming:** If using Azure Container Registry, names must be alphanumeric only (5-50
 > characters). Use `replace()` to remove hyphens: `replace('cr${environmentName}${resourceSuffix}', '-', '')`
 

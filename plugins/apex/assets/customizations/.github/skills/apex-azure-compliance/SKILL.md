@@ -1,6 +1,6 @@
 ---
 name: apex-azure-compliance
-description: '**ANALYSIS SKILL** — Assesses accepted Azure compliance and security posture evidence for APEX tasks: finding sources, severity, Key Vault expiration metadata, redacted reporting. WHEN: "compliance scan", "security audit", "posture findings", "Key Vault expiration check", "expired certificates". DO NOT USE FOR: spend (use apex-azure-cost-optimization), policy evidence (use apex-azure-governance).'
+description: '**ANALYSIS SKILL** — Assesses Azure compliance and security evidence: finding sources, severity, Key Vault expiration metadata and redacted reporting. WHEN: "compliance scan", "security audit", "posture findings", "Key Vault expiration", "expired certificates". DO NOT USE FOR: cost optimization (use apex-azure-cost-optimization), policy evidence (use apex-azure-governance).'
 user-invocable: false
 disable-model-invocation: false
 ---

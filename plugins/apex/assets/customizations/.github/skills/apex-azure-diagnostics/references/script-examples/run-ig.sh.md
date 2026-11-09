@@ -7,6 +7,10 @@
 
 # run-ig.sh — Upstream Source Example
 
+## Navigation
+
+- Port Source
+
 This is a non-executable source example, not an installed helper or a qualified deployment workflow. Do not copy
 it into an active pipeline or run it. Native credentials, privileged diagnostics, remote mutations and local writes
 need their owning task and capability. Script approval switches and CI environment approvals do not replace current Gate

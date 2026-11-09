@@ -3,7 +3,7 @@ name: apex-unslop
 user-invocable: true
 disable-model-invocation: true
 argument-hint: "text or document path, audience, and review or edit scope"
-description: '**UTILITY SKILL** — Manually polish authorized prose for clarity and concrete language while preserving technical facts and APEX contracts. WHEN: explicitly invoked as /apex-unslop for prose review or cleanup. DO NOT USE FOR: code changes, technical validation, or automatic workflow finalization.'
+description: '**UTILITY SKILL** — Manually polishes authorized prose for clarity and concrete language while preserving technical facts and APEX contracts. WHEN: explicitly invoked as /apex-unslop for prose review or cleanup. DO NOT USE FOR: code changes, technical validation, or automatic workflow finalization.'
 license: MIT
 metadata:
   author: jonathan-vella

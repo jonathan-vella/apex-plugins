@@ -8,6 +8,20 @@
 
 # Azure Verified Modules (AVM) — Authoring Requirements
 
+## Navigation
+
+- Module Cross-Referencing (TFFR1)
+- Azure Provider Requirements (TFFR3)
+- Code Style Standards
+- Variable Requirements
+- Output Requirements (TFFR2)
+- Local Values (TFNFR31-33)
+- Terraform Configuration (TFNFR25-26)
+- Testing Requirements (TFNFR5)
+- Breaking Changes & Feature Management
+- Documentation (TFNFR2)
+- Compliance Checklist
+
 Mandatory requirements for AVM-certified Azure Terraform modules.
 For runtime issues (set-type diffs, provider pins, 4.x changes) see `avm-pitfalls.md`.
 

@@ -98,11 +98,11 @@ development efforts.
 
 ### 2.1 Architecture Diagram
 
-![System Context Diagram - {project-name}](../references/kernel-boundary.md)
+The kernel-rendered Mermaid architecture diagram is embedded in the architecture assessment.
 
-Source: [03-des-diagram.py](../references/kernel-boundary.md)
+Source: [03-des-diagram.mmd](../references/kernel-boundary.md)
 
-> Replace with the generated Python architecture diagram for the project.
+> Replace with the generated Mermaid architecture diagram for the project.
 
 ### 2.2 Resource Summary
 

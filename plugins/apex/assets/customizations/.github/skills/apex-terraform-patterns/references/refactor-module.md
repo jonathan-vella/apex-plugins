@@ -8,6 +8,16 @@
 
 # Module Refactoring Guide
 
+## Navigation
+
+- Analysis Phase
+- Module Design
+- Code Transformation
+- State Migration
+- Refactoring Patterns
+- Common Pitfalls
+- Success Criteria
+
 Transform monolithic Terraform configurations into reusable, maintainable modules.
 For testing refactored modules, see the `apex-terraform-test` skill.
 

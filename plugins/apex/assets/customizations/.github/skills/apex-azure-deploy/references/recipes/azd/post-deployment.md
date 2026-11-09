@@ -7,6 +7,15 @@
 
 # Post-Deployment Steps
 
+## Navigation
+
+- When to Apply
+- ASP.NET Core + EF Core + Azure SQL
+- Common Issues
+- Best Practices
+- References
+- Port Source
+
 Assess required post-provisioning configuration. Uncovered SQL grants, migrations and settings are separately
 previewed/Gate 4-approved operations, not automatic post-deployment actions.
 

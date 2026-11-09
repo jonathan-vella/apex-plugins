@@ -7,6 +7,15 @@
 
 # Python Blob Trigger with Event Grid
 
+## Navigation
+
+- Dependencies
+- Source Code
+- Files to Remove
+- App Settings Required
+- Test
+- Common Patterns
+
 ## Dependencies
 
 **requirements.txt:**

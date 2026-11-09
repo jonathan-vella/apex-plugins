@@ -6,6 +6,17 @@
 
 # Node.js Entry Point (REQUIRED)
 
+## Navigation
+
+- Project Structure (CRITICAL)
+- JavaScript: src/index.js
+- TypeScript: src/index.ts
+- package.json Configuration
+- azure.yaml Configuration
+- Build Requirements (TypeScript only)
+- Common Mistakes
+- Terraform vs Bicep: Source Code is IDENTICAL
+
 Azure Functions Node.js v4 programming model requires an entry point file that initializes the runtime.
 
 > ⛔ **CRITICAL**: Without this file, functions will deploy but return 404 on all endpoints.

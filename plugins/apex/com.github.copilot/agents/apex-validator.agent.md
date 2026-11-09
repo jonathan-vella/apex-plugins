@@ -6,6 +6,7 @@ user-invocable: false
 disable-model-invocation: false
 tools:
   - apex/taskContext
+  - apex/readTaskInput
   - apex/validateTask
   - apex/completeTask
 ---
@@ -21,7 +22,9 @@ verdict without repairing artifacts or deciding gates.
 
 # Success criteria
 
-1. Call `apex/taskContext` once.
+1. Call `apex/taskContext` once. Its result is intentionally small: when it lists inputs with `inlined: false` in
+  `inputReferences`, read them in order through `apex/readTaskInput` by `inputHash`, in bounded chunks following
+  `nextOffset` until it is absent.
 2. For the issued IaC validation task, call `apex/validateTask` with only `taskId`. The runtime executes available native
   checks and returns `execution` plus a typed `outputs` bundle containing only their real evidence references.
   Do not send an unsupported validator IDs field or invent hashes, byte counts or validator results.

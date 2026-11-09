@@ -6,6 +6,15 @@
 
 # Azure CLI Commands
 
+## Navigation
+
+- Resource Group
+- Container Registry
+- Container Apps
+- App Service
+- Functions
+- Key Vault
+
 Common az commands for deployment workflows.
 
 ## Resource Group

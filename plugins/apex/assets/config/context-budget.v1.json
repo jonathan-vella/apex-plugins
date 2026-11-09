@@ -1,0 +1,9 @@
+{
+  "schemaVersion": "1.0.0",
+  "budgets": {
+    "mcpToolsListMaxBytes": 28000,
+    "apexAgentMaxBytes": 12500,
+    "skillFrontmatterMaxBytes": 17000,
+    "managedInstructionsMaxBytes": 13000
+  }
+}

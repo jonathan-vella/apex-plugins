@@ -1,5 +1,14 @@
 # Governance Evidence Interpretation
 
+## Navigation
+
+- Acceptance Checks
+- Classification Rules
+- Effective Values
+- Exemption Validity
+- Planning Handoff
+- Resume And Reconciliation
+
 Use this reference after accepted governance evidence is available in the
 active task context. The evidence is a point-in-time attestation, not a
 standing authorization.
@@ -41,8 +50,9 @@ and rationale. An expired, missing, or scope-mismatched exemption is not an
 override.
 
 Assignment `enforcementMode` is separate from its effect. `Default` permits Azure request-time enforcement of applicable
-effects; `DoNotEnforce` does not. Neither changes the desired constraint that APEX must plan for. Do not describe a
-`DoNotEnforce` Deny finding as an Azure request-time denial, or interpret it as permission to generate noncompliant IaC.
+effects; `DoNotEnforce` does not. A Deny in a `DoNotEnforce` assignment is informational, not a blocker, and needs
+no Architecture mapping; do not describe it as an Azure request-time denial, and plan toward it where practical. A Deny
+with an unknown or `Default` mode stays a blocker.
 The collector preserves both supported modes and rejects unsupported modes such as `Enroll`. Legacy imported findings
 without a mode remain unknown, not verified `Default`. A mode change is a content change, not timestamp-only renewal.
 

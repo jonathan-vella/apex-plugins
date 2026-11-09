@@ -1,5 +1,13 @@
 # Role CLI Commands And Delivery Shapes
 
+## Navigation
+
+- Command Routing
+- Verify A Role Against The Live Catalog
+- Custom Role Definition
+- Role Assignment
+- Prerequisites For Granting Roles
+
 Azure CLI commands and IaC shapes ported from the upstream `apex-azure-rbac` skill. Read commands help select and verify
 a role; every command that creates a role or an assignment changes Azure and is never run by the agent.
 

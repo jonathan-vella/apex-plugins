@@ -1,6 +1,6 @@
 ---
 name: apex-workflow
-description: "Provides internal APEX workflow routing for status, resume, project selection, and next tasks."
+description: "Orients the foreground APEX agent for status, resume, missing-project selection and kernel-routed continuation. Refreshes stale context and follows apex-next only when work is runnable. Not an independent state machine, repository maintenance or permission to create a project by default."
 user-invocable: false
 ---
 
@@ -44,6 +44,28 @@ interactive agent may use its active client question mechanism before repeating 
 `apex/nextTask` returns `needs_input`, `needs_review`, or `task`. Terminal, blocked, missing-project, authorization,
 and stale conditions are represented by status or stable kernel errors; do not invent additional results or transitions.
 
+## Delegated lab gates
+
+Human approval is the default. Only when the user requested continuation and fresh `apex/status` includes a
+non-revoked, unexpired `delegation` naming the pending Gate 1 or Gate 4, call `apex/gateDelegate` with its exact
+`policyHash` and `consentHash`. For Gate 4 first read the full current `apex/preview`, including all pages, and pass
+its exact preview and immutable approval-context hashes. The kernel evaluates consent, run, target, writer, provider
+observations, blockers and allowed changes; the agent never decides whether to waive a check.
+
+On success report a **delegated agent decision**, not human preview review, refresh status and continue only within
+the user's requested outcome. On any failure report the blocker and stop; do not retry with `gateDecide`, invent
+consent, substitute a hash or repair evidence. Policy confirmation is human interactive CLI-only. Delegated destroy
+is unsupported and requires a separately previewed normal human approval. Intake confirmations, architecture
+questions, governance choices, risk decisions and expired authentication remain human blockers.
+
 ## Output
 
 Report the project, run, environment, current state, blockers, and one kernel-provided next action.
+
+## Examples
+
+| Request or state | Required response |
+| --- | --- |
+| Status in a configured workspace with zero projects | Report the kernel's missing-project state; do not manufacture a workload |
+| Resume after chat restart | Read current kernel status, not conversation history or generated-file appearance |
+| `runtime_mismatch` or stale request | Report remediation/fresh status and stop using old task IDs and ownership data |

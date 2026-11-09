@@ -1,5 +1,5 @@
-> MCP names in this reference are upstream pseudo-interfaces, not current vNext tool registrations.
-> Use only capabilities projected by the active task; unavailable tools are blockers, never substitutes.
+> Managed Azure reads use verified `apex-azure` namespaces and actual command schemas.
+> Other provider examples are conditional; absent tools never grant mutation or hook-bypass authority.
 
 > Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../../../references/kernel-boundary.md) before using this reference.
@@ -12,7 +12,7 @@
 Terraform workflow for Azure deployments.
 
 > **Native Terraform CLI is the Terraform path.** DECISION-036 keeps two IaC languages and adds no azd Terraform
-> adapter; azd is the planned executor for Bicep only (CP-26, #443). Use this recipe for Terraform work, bind one
+> adapter; azd implements Bicep provision/preview/down only (CP-26, #443). Use this recipe for Terraform work, bind one
 > accepted track, and never run `azd up`.
 
 ## When to Use This Recipe
@@ -31,8 +31,8 @@ The [azd with Terraform](../azd/terraform.md) page is upstream context for readi
 
 | Artifact             | Research Action                                  |
 | -------------------- | ------------------------------------------------ |
-| Terraform patterns   | Call `mcp_azure-mcp_azureterraformbestpractices` |
-| Azure best practices | Call `mcp_azure-mcp_get_azure_bestpractices` |
+| Terraform patterns   | `apex-azure/azureterraformbestpractices`, command `azureterraformbestpractices_get` |
+| Azure best practices | `apex-azure/get_azure_bestpractices`, command `get_azure_bestpractices_get` with `parameters.resource` and `parameters.action` |
 
 ## Generation Steps
 

@@ -7,6 +7,12 @@
 
 # cosmos syntax reference
 
+## Navigation
+
+- Reference content
+
+## Reference content
+
 ```bicep
 // recipes/cosmosdb/bicep/cosmos.bicep
 // Cosmos DB recipe module — adds Cosmos DB account, database, containers, and RBAC

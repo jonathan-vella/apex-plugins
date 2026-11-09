@@ -7,6 +7,12 @@
 
 # C# (.NET) Durable Functions - Isolated Worker Model
 
+## Navigation
+
+- DurableFunctions.cs
+- .csproj additions
+- Local Testing
+
 > ⚠️ **IMPORTANT**: Do NOT modify `Program.cs` — the base template's entry point already has the correct configuration
 > (`ConfigureFunctionsWebApplication()` with App Insights). Only add trigger-specific files.
 

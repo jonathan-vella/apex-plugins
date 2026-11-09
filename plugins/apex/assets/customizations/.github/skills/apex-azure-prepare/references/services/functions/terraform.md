@@ -6,6 +6,13 @@
 
 # Functions Terraform Patterns — REFERENCE ONLY
 
+## Navigation
+
+- Flex Consumption (Recommended)
+- Consumption Plan (Legacy)
+- Service Bus Integration (Managed Identity)
+- Premium Plan (No Cold Starts)
+
 > ⛔ **DO NOT COPY THIS CODE DIRECTLY**
 >
 > This file contains **reference patterns** for understanding Azure Functions Terraform structure.

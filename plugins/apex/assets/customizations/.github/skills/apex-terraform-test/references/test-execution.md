@@ -8,6 +8,16 @@
 
 # Terraform Test Execution
 
+## Navigation
+
+- CLI Commands
+- Parallel Execution (TF 1.9+)
+- State Key Management (TF 1.9+)
+- Diagnostics & Debugging
+- Cleanup Behavior
+- Troubleshooting
+- Acceptance Test Patterns
+
 CLI commands, parallel execution, verbose/debug modes, and diagnostics.
 
 ---

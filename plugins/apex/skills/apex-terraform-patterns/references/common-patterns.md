@@ -8,6 +8,13 @@
 
 # Common Terraform Patterns
 
+## Navigation
+
+- Diagnostic Settings
+- Conditional Deployment
+- Module Composition
+- Managed Identity
+
 Diagnostic settings, conditional deployment, module composition, and managed identity patterns.
 
 ---

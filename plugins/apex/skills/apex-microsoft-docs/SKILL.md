@@ -57,7 +57,8 @@ Read [the research method](references/research-method.md) before issuing a docum
 
 - This skill is advisory. It does not configure MCP servers or modify files, and the only command it runs is the
   read-only Learn CLI. It never runs a command that changes Azure.
-- Azure prices come from the read-only `apex-azure-pricing` tools, not from documentation.
+- Azure prices come from `apex-azure/pricing`, command `pricing_get`, under the
+  [central pricing contract](../apex-azure-defaults/references/retail-pricing.md), not from documentation.
 - Documentation does not replace governance, quota, availability, approval, or deployment evidence.
 - Official examples are illustrative inputs to a later implementation decision, not proof that code compiles or deploys.
 

@@ -7,34 +7,32 @@
 
 # AKS MCP Reference
 
-Use this reference when AKS-aware MCP tools are available in the client.
+Use the verified basic Azure MCP AKS namespace for accepted-scope read-only evidence. It does not grant a separate
+AKS-MCP provider, arbitrary Kubernetes commands or a stronger access mode.
 
 ## Preference Order
 
-1. `mcp_azure-mcp_aks`
-2. The AKS-MCP tools that surface after discovery in the client
-3. Supporting Azure tools such as `mcp_azure-mcp_applens`, `mcp_azure-mcp_monitor`, and `mcp_azure-mcp_resourcehealth`
-4. Raw `az aks` and `kubectl` only when required functionality is missing from MCP
+1. `apex-azure/aks` with a verified basic AKS read command.
+2. Supporting `apex-azure/applens`, `apex-azure/monitor`, and `apex-azure/resourcehealth` reads.
+3. Explicit unavailable/coverage-gap result when the managed surface cannot perform the check; no shell bypass.
 
 ## Happy Path
 
-After selecting `mcp_azure-mcp_aks`, let the client enumerate the exact AKS-MCP tools it exposes and choose the smallest
-tool that fits the task.
+Discover a namespace using exactly `{intent: "", learn: true}`, omitting command and parameters. Then choose the
+smallest command in the verified inventory with its actual schema. A nonempty learn intent can execute sampling.
 
 Favor the obvious read paths first:
 
 - cluster and Azure-side inspection
 - detector or diagnostic workflows
 - monitoring, metrics, or control-plane-log checks
-- kubectl-style read operations
+- only Kubernetes observations actually exposed and permitted by the basic namespace inventory
 
 ## Authentication And Access
 
-AKS-MCP is Azure CLI-backed. Expect service principal, workload identity, managed identity, or existing `az login` auth,
-usually keyed by `AZURE_CLIENT_ID`. If `AZURE_SUBSCRIPTION_ID` is set, expect the server to select that subscription
-after login.
-
-Default to `readonly`. Only suggest `readwrite` or `admin` when the current diagnostic step truly requires it.
+Use the already approved identity, tenant and subscription. Basic Azure MCP authentication does not establish that
+a separate AKS provider is installed or authorized. Never suggest switching to `readwrite` or `admin`, acquiring
+credentials or changing identity to make a managed diagnostic pass.
 
 ## Detector Notes
 
@@ -43,10 +41,8 @@ For detector-style workflows, use the cluster resource ID, keep the time window 
 
 ## Fallback Rule
 
-If the client does not expose the AKS-MCP surface needed for a check, then fall back to:
-
-- `az aks` for Azure-side AKS operations
-- raw `kubectl` for Kubernetes-side inspection
+If the managed namespace does not expose the required read, report the missing capability. Separately produced
+Azure/Kubernetes observations need their own authorization and evidence acceptance; they are not an automatic fallback.
 
 ## Port Source
 

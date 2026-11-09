@@ -1,6 +1,6 @@
 ---
 name: apex-azure-validate
-description: '**WORKFLOW SKILL** — Assess Azure preflight and source-validation evidence. WHEN: "validate my app", "check deployment readiness", "run preflight checks", "validate azure.yaml", "validate Bicep", "validate Azure Functions". DO NOT USE FOR: production troubleshooting (use apex-azure-diagnostics), execution (use apex-azure-deploy).'
+description: '**WORKFLOW SKILL** — Assesses Azure preflight and source-validation evidence. WHEN: "validate my app", "check deployment readiness", "run preflight checks", "validate azure.yaml", "validate Bicep", "validate Azure Functions". DO NOT USE FOR: production troubleshooting (use apex-azure-diagnostics), execution (use apex-azure-deploy).'
 user-invocable: false
 disable-model-invocation: false
 ---
@@ -61,7 +61,8 @@ Read [the authority boundary](references/kernel-boundary.md) before using recipe
 - [Preflight](references/infraops-preflight.md), [roles](references/role-verification.md),
   [policy](references/policy-validation.md) and [availability](references/region-availability.md) - diagnostic checks.
 - [Recipe index](references/recipes/README.md) - azd, Azure CLI, Bicep and Terraform command/error guidance;
-  execution remains subject to the kernel boundary; azd is the planned Bicep-only executor (CP-26), not available today.
+  execution remains kernel-owned. azd implements Bicep provision/preview/down (CP-26); live qualification is separate,
+  and arbitrary service-package upgrades/pipeline mutations remain unsupported.
 
 - [Preflight evidence model](references/preflight-evidence.md) - freshness, acceptance outcomes, and remediation
   routing.

@@ -7,6 +7,16 @@
 
 # TypeScript Service Bus Trigger
 
+## Navigation
+
+- src/functions/serviceBusTrigger.ts
+- src/functions/sendMessage.ts
+- src/functions/healthCheck.ts
+- package.json additions
+- Files to Remove
+- Local Testing
+- Common Patterns
+
 Replace the contents of `src/functions/` with these files.
 
 > ⚠️ **IMPORTANT**: Do NOT delete `src/index.ts` — it's required for function discovery. See [nodejs-entry-point.md](../../common/nodejs-entry-point.md).

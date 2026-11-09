@@ -8,6 +8,17 @@
 
 # Analyze Workspace
 
+## Navigation
+
+- ⛔ MANDATORY FIRST — Specialized Technology Delegation
+- Three Modes — Always Choose One
+- Decision Tree
+- Mode: NEW
+- Mode: MODIFY
+- Mode: MODERNIZE
+- Detection Signals
+- ⛔ MANDATORY for Azure Functions: Load Composition Rules BEFORE Execution
+
 ## ⛔ MANDATORY FIRST — Specialized Technology Delegation
 
 **STOP. Before choosing a mode, check the user's prompt for specialized technology keywords.**

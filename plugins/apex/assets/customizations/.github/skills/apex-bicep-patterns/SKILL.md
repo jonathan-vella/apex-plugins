@@ -1,6 +1,6 @@
 ---
 name: apex-bicep-patterns
-description: '**UTILITY SKILL** — Apply Bicep patterns to accepted APEX intent. WHEN: "hub-spoke Bicep", "private endpoint module", "diagnostic settings", "AVM Bicep", "bicepparam". DO NOT USE FOR: Terraform (use apex-terraform-patterns), architecture decisions (use apex-azure-adr), execution (use apex-azure-deploy).'
+description: '**UTILITY SKILL** — Applies Bicep patterns to accepted APEX intent. WHEN: "hub-spoke Bicep", "private endpoint module", "diagnostic settings", "AVM Bicep", "bicepparam". DO NOT USE FOR: Terraform (use apex-terraform-patterns), architecture decisions (use apex-azure-adr), execution (use apex-azure-deploy).'
 user-invocable: false
 disable-model-invocation: false
 ---

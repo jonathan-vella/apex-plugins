@@ -38,17 +38,23 @@ resource customDomain 'Microsoft.Web/staticSites/customDomains@2025-03-01' = {
 
 ## Application Settings
 
-For the integrated API:
+For the managed integrated API, set only non-secret values. Managed Functions do not resolve
+`@Microsoft.KeyVault(...)` references, so a Key Vault reference here would reach the code as a literal string
+([supported API features](https://learn.microsoft.com/azure/static-web-apps/apis-functions)).
 
 ```bicep
 resource staticWebAppSettings 'Microsoft.Web/staticSites/config@2025-03-01' = {
   parent: staticWebApp
   name: 'appsettings'
   properties: {
-    DATABASE_URL: '@Microsoft.KeyVault(VaultName=${keyVault.name};SecretName=db-url)'
+    API_BASE_PATH: '/api'
   }
 }
 ```
+
+When the API needs a secret, link a bring-your-own Azure Functions app as the backend and configure the
+`@Microsoft.KeyVault(VaultName=<vault>;SecretName=<secret>)` reference on that Function App's application settings,
+using its managed identity with a Key Vault secrets-read role.
 
 ## Deployment Token
 

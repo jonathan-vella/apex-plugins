@@ -8,6 +8,17 @@
 
 # Artifact Generation
 
+## Navigation
+
+- ⛔ CRITICAL: Check for .NET Aspire Projects FIRST
+- Check for Other Special Patterns
+- CRITICAL: Research Must Be Complete
+- Research Checklist
+- Generation Order
+- Recipe-Specific Generation
+- Common Standards
+- After Generation
+
 Generate infrastructure and configuration files based on selected recipe.
 
 ## ⛔ CRITICAL: Check for .NET Aspire Projects FIRST

@@ -6,6 +6,17 @@
 
 # App Service Custom Domains and Managed TLS
 
+## Navigation
+
+- Prerequisites
+- DNS Configuration
+- Bind Custom Domain via CLI
+- Bicep — Custom Domain with Managed Certificate
+- Terraform — Custom Domain with Managed Certificate
+- TLS Options
+- Minimum TLS Version
+- Troubleshooting
+
 ## Prerequisites
 
 | Requirement | Details |

@@ -16,7 +16,7 @@
 - [💵 Cost At-a-Glance](#-cost-at-a-glance)
 - [✅ Decision Summary](#-decision-summary)
 - [🔁 Requirements → Cost Mapping](#-requirements--cost-mapping)
-- [📊 Top 5 Cost Drivers](#-top-5-cost-drivers)
+- [📊 Top 5 Estimated Cost Drivers](#-top-5-estimated-cost-drivers)
 - [🏛️ Architecture Overview](#-architecture-overview)
 - [🧾 What We Are Not Paying For (Yet)](#-what-we-are-not-paying-for-yet)
 - [⚠️ Cost Risk Indicators](#-cost-risk-indicators)
@@ -36,7 +36,8 @@
 **Generated**: {YYYY-MM-DD}
 **Region**: {primary-region}
 **Environment**: {Production|Staging|Development}
-**MCP Tools Used**: {get_retail_prices, forecast_costs, get_benefit_recommendations}
+**Azure MCP Tools Used**: {actual guarded commands used, e.g. apex-azure/pricing (pricing_get);
+apex-azure/optimization (optimization_recommendation_list)}
 **Architecture Reference**: {relative link to assessment doc, if available}
 **Pricing Evidence**: {relative link to the actual COMPLETE worker JSON and its referenced evidence}
 
@@ -45,17 +46,20 @@ Finalize this document before review; do not change its status text afterward me
 
 ## 💵 Cost At-a-Glance
 
-> **Monthly Total: ~$X,XXX** | Annual: ~$XX,XXX
+> **Estimated Monthly Total: ~$X,XXX** | Annual: ~$XX,XXX
 >
 > ```text
-> Budget: {No fixed budget|$X/month (soft|hard)} | Utilization: {NN% ($X of $X)|N/A}
+> Cost basis: {proposed-resource retail estimate|as-built configuration estimate} | Actual spend: Not available
 > ```
 >
-> | Status            | Indicator                    |
-> | ----------------- | ---------------------------- |
-> | Cost Trend        | ➡️ Stable                    |
-> | Savings Available | 💰 $X/year with reservations |
+> | Status          | Indicator                         |
+> | --------------- | --------------------------------- |
+> | Cost Estimate   | {price source and retrieval date} |
+> | Recommendations | {Advisor results or Not assessed} |
 > | Compliance        | ✅ {e.g., PCI-DSS aligned}   |
+
+If the customer supplied a budget, show it as an input and compare it only with this estimate. Do not present budget
+utilization, historical spend, or a cost trend; those billing records are not available here.
 
 ## ✅ Decision Summary
 
@@ -73,17 +77,17 @@ Finalize this document before review; do not change its status text afterward me
 | {Compliance}          | {decision}            | {+$X/month 📈} | {Yes / No} |
 | {Latency/Performance} | {decision}            | {+$X/month}    | {Yes / No} |
 
-## 📊 Top 5 Cost Drivers
+## 📊 Top 5 Estimated Cost Drivers
 
-| Rank | Resource        | Monthly Cost | % of Total | Trend | Optimization |
-| ---- | --------------- | ------------ | ---------- | ----- | ------------ |
-| 1️⃣   | {service / SKU} | ${X}         | {Y%}       | ➡️    | {action}     |
-| 2️⃣   | {service / SKU} | ${X}         | {Y%}       | ➡️    | {action}     |
-| 3️⃣   | {service / SKU} | ${X}         | {Y%}       | ➡️    | {action}     |
-| 4️⃣   | {service / SKU} | ${X}         | {Y%}       | ➡️    | {action}     |
-| 5️⃣   | {service / SKU} | ${X}         | {Y%}       | ➡️    | {action}     |
+| Rank | Resource        | Monthly Estimate | % of Estimated Total | Recommendation |
+| ---- | --------------- | ---------------- | -------------------- | -------------- |
+| 1    | {service / SKU} | ${X}             | {Y%}                 | {evidence-backed action or none} |
+| 2    | {service / SKU} | ${X}             | {Y%}                 | {evidence-backed action or none} |
+| 3    | {service / SKU} | ${X}             | {Y%}                 | {evidence-backed action or none} |
+| 4    | {service / SKU} | ${X}             | {Y%}                 | {evidence-backed action or none} |
+| 5    | {service / SKU} | ${X}             | {Y%}                 | {evidence-backed action or none} |
 
-> 💡 **Quick Win**: {one low-effort action that saves meaningful cost}
+> 💡 **Recommendation**: {returned evidence-backed action to investigate, or none}
 
 <details>
 <summary><strong>Cost Driver Details</strong></summary>
@@ -93,19 +97,19 @@ Finalize this document before review; do not change its status text afterward me
 | Aspect            | Detail                                  |
 | ----------------- | --------------------------------------- |
 | Current SKU       | {sku}                                   |
-| Monthly Cost      | ${X}                                    |
+| Monthly Estimate  | ${X}                                    |
 | Cost Breakdown    | {compute: $X, storage: $Y, network: $Z} |
 | Optimization      | {specific action to reduce cost}        |
-| Potential Savings | ${X}/month with {RI/SP/right-sizing}    |
+| Modeled Difference | ${X}/month from {matched price evidence or returned recommendation} |
 
 #### 2️⃣ {Second Driver Name}
 
 | Aspect            | Detail            |
 | ----------------- | ----------------- |
 | Current SKU       | {sku}             |
-| Monthly Cost      | ${X}              |
+| Monthly Estimate  | ${X}              |
 | Optimization      | {specific action} |
-| Potential Savings | ${X}/month        |
+| Modeled Difference | ${X}/month from returned evidence |
 
 </details>
 
@@ -113,21 +117,20 @@ Finalize this document before review; do not change its status text afterward me
 
 ### Cost Distribution
 
-| Category         | Monthly Cost (USD) | Share |
+| Category         | Monthly Estimate (USD) | Share |
 | ---------------- | -----------------: | ----: |
 | 💻 Compute       |                535 |   39% |
 | 💾 Data Services |                466 |   34% |
 | 🌐 Networking    |                376 |   27% |
 
-![Monthly Cost Distribution](../references/kernel-boundary.md)
+![Estimated Monthly Cost Distribution](../references/kernel-boundary.md)
 
-### Month-over-Month Projection
+### Scenario Projection
 
 ![6-Month Cost Projection](../references/kernel-boundary.md)
 
-> Generate `03-des-cost-projection.png` using the pattern in `apex-python-diagrams` skill →
-> `references/waf-cost-charts.md` → **Chart 3 – Monthly Cost Projection**.
-> Replace placeholder costs and months with actual projected values before running.
+> Only include a scenario projection when the workload assumptions are stated. Azure MCP does not provide a spend
+> forecast; do not label a modeled scenario as actual or provider forecast.
 
 ### Key Design Decisions Affecting Cost
 
@@ -169,44 +172,30 @@ _"If you need X, expect to pay Y more"_
 
 <!-- Use ONE of the three states below. Delete the other two. -->
 
-<!-- STATE 1: Quantified — use when RI/SP pricing was queried -->
+<!-- STATE 1: Estimated — use when comparable returned price evidence supports a modeled difference -->
 
-> ### Total Potential Savings: ${X}/year
+> ### Modeled Price Difference: ${X}/year
 >
-> | Strategy                | Commitment | Monthly Savings | Annual Savings | % Reduction |
-> | ----------------------- | ---------- | --------------- | -------------- | ----------- |
-> | Reserved Instances (RI) | 1-year     | ${...}          | ${...}         | {X%}        |
-> | Reserved Instances (RI) | 3-year     | ${...}          | ${...}         | {X%}        |
-> | Savings Plan (SP)       | 1-year     | ${...}          | ${...}         | {X%}        |
-> | Spot Instances          | N/A        | ${...}          | ${...}         | {X%}        |
-> | Right-sizing            | N/A        | ${...}          | ${...}         | {X%}        |
-> | Dev/Test Pricing        | N/A        | ${...}          | ${...}         | {X%}        |
+> | Price Type / Recommendation | Monthly Estimate | Annual Estimate | Modeled Difference |
+> | --------------------------- | ---------------- | --------------- | ------------------ |
+> | {returned alternative}      | ${...}           | ${...}          | ${...}             |
 
 <!-- STATE 2: Not quantified — use when pricing run focused on baseline only -->
 
 > ### Savings: Not Quantified in This Run
 >
-> This estimate covers baseline consumption pricing only. Reservation and
-> commitment strategies should be evaluated once production workload patterns
-> and SKU selections are confirmed.
+> This estimate covers baseline retail consumption pricing only. Commitment utilization and realized savings are not
+> available from the guarded Azure MCP integration.
 >
-> **Eligible strategies to evaluate**:
->
-> | Strategy                | Applicability | Prerequisites                              |
-> | ----------------------- | ------------- | ------------------------------------------ |
-> | Reserved Instances (RI) | {✅ / ❌}     | {Stable baseline compute identified}       |
-> | Savings Plan (SP)       | {✅ / ❌}     | {Committed compute spend confirmed}        |
-> | Spot / Low Priority     | {✅ / ❌}     | {Fault-tolerant workloads identified}      |
-> | Right-sizing            | {✅ / ❌}     | {Production utilization data available}    |
-> | Dev/Test Pricing        | {✅ / ❌}     | {Non-production environments use dev SKUs} |
+> Compare an alternative only when returned meter evidence matches the proposed workload. Actual commitment utilization
+> and realized savings are unavailable.
 
-<!-- STATE 3: Not applicable — use for serverless/consumption-only designs -->
+<!-- STATE 3: Not applicable — use when returned evidence has no applicable alternative -->
 
 > ### Savings: Not Applicable
 >
-> This design uses consumption-based pricing exclusively. Commitment
-> discounts do not apply to the selected service tiers.
-> {Explain why — e.g., "All services are serverless with per-execution billing."}
+> The returned pricing evidence has no applicable alternative for this modeled comparison.
+> {Explain the evaluated price types and workload constraints; do not infer commitment eligibility.}
 
 ## 🧾 Detailed Cost Breakdown
 
@@ -235,8 +224,7 @@ _"If you need X, expect to pay Y more"_
 | Topic                    | Link                                                                                                                   |
 | ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
 | Azure Pricing Calculator | [Calculator](https://azure.microsoft.com/pricing/calculator/)                                                          |
-| Cost Management          | [Overview](https://learn.microsoft.com/azure/cost-management-billing/costs/overview-cost-management)                   |
-| Reserved Instances       | [Reservations](https://learn.microsoft.com/azure/cost-management-billing/reservations/save-compute-costs-reservations) |
+| Azure Advisor            | [Overview](https://learn.microsoft.com/azure/advisor/advisor-cost-recommendations)                                      |
 | WAF Cost Optimization    | [Checklist](https://learn.microsoft.com/azure/well-architected/cost-optimization/checklist)                            |
 
 ---

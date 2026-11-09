@@ -6,6 +6,14 @@
 
 # Container Apps Terraform Patterns
 
+## Navigation
+
+- Phase 1: Container App Resource (No Registry Block)
+- AcrPull Role Assignment
+- Phase 2: Post-Apply Deployment (CLI)
+- Terraform Outputs
+- Container Apps Environment
+
 > **APEX:** these raw `azurerm` examples serve the generic prepare flow. APEX Terraform CodeGen is AVM-first; see
 > [`apex-terraform-patterns`](../../../../apex-terraform-patterns/SKILL.md).
 

@@ -6,6 +6,18 @@
 
 # Event Hubs Recipe
 
+## Navigation
+
+- Overview
+- Integration Type
+- Composition Steps
+- App Settings to Add
+- RBAC Roles Required
+- Resources Created
+- Networking (when VNET_ENABLED=true)
+- Files
+- Common Issues
+
 Adds Azure Event Hubs trigger and output bindings to an Azure Functions base template.
 
 ## Overview

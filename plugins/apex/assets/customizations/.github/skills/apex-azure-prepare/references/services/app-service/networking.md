@@ -6,6 +6,15 @@
 
 # App Service Networking
 
+## Navigation
+
+- Feature Availability by SKU
+- VNet Integration (Outbound)
+- Private Endpoints (Inbound)
+- Access Restrictions
+- Hybrid Connections
+- Troubleshooting
+
 VNet integration, Private Endpoints, Access Restrictions, and Hybrid Connections.
 
 > **APEX baseline:** App Service APIs are private (private endpoint, public access disabled). Public-facing web

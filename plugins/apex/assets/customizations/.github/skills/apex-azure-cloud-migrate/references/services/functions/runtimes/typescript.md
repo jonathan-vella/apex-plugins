@@ -7,6 +7,19 @@
 
 # TypeScript — Azure Functions v4 Triggers & Bindings
 
+## Navigation
+
+- HTTP Trigger
+- Blob Storage Trigger
+- Queue Storage Trigger
+- Timer Trigger
+- Cosmos DB Trigger
+- Service Bus Queue Trigger
+- Event Grid Trigger
+- Event Hubs Trigger
+- Input/Output Bindings
+- Port Source
+
 > **Model**: Node.js v4 programming model (TypeScript). Same as JavaScript v4 with type annotations.
 > **NO** `function.json` files.
 > Import: `import { app, HttpRequest, HttpResponseInit, InvocationContext, input, output } from '@azure/functions';`

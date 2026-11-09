@@ -8,6 +8,15 @@
 
 # Mock Provider Patterns
 
+## Navigation
+
+- Basic Mock Provider
+- Common Azure Resource Mocks
+- Mock Data Sources
+- Aliased Mock Providers
+- When to Use Mocks vs Real Providers
+- Limitations
+
 Mock providers simulate Azure provider behavior without real API calls
 (available since Terraform 1.7.0). Use for fast unit tests and CI without credentials.
 

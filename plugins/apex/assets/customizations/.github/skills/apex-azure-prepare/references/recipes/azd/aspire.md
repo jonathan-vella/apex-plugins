@@ -6,6 +6,18 @@
 
 # .NET Aspire Projects with AZD
 
+## Navigation
+
+- Detection
+- Workflow
+- Command Flags
+- Docker Context (AddDockerfile Services)
+- Troubleshooting
+- Infrastructure Auto-Generation
+- Validation Steps
+- Next Steps
+- References
+
 **⛔ MANDATORY: For .NET Aspire projects, NEVER manually create azure.yaml. Use `azd init --from-code` instead.**
 
 ## Detection

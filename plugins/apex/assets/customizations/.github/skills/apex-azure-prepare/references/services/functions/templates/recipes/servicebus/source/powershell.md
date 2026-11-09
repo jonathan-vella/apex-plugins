@@ -7,6 +7,19 @@
 
 # PowerShell Service Bus Trigger
 
+## Navigation
+
+- ServiceBusTrigger/function.json
+- ServiceBusTrigger/run.ps1
+- SendMessage/function.json
+- SendMessage/run.ps1
+- HealthCheck/function.json
+- HealthCheck/run.ps1
+- host.json
+- Files to Remove
+- Local Testing
+- Common Patterns
+
 Create these files in your function app.
 
 ## ServiceBusTrigger/function.json

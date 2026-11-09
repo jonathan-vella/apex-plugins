@@ -7,6 +7,13 @@
 
 # Python Durable Functions
 
+## Navigation
+
+- function_app.py
+- requirements.txt additions
+- Local Testing
+- Usage
+
 Replace the contents of `function_app.py` with this file and add the durable-functions package.
 
 ## function_app.py

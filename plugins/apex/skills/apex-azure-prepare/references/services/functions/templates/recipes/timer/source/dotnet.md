@@ -7,6 +7,13 @@
 
 # C# (.NET) Timer Trigger - Isolated Worker Model
 
+## Navigation
+
+- TimerFunctions.cs
+- .csproj additions
+- Local Testing
+- Common Patterns
+
 > ⚠️ **IMPORTANT**: Do NOT modify `Program.cs` — the base template's entry point already has the correct configuration
 > (`ConfigureFunctionsWebApplication()` with App Insights). Only add trigger-specific files.
 

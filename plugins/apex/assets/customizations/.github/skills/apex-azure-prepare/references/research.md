@@ -8,6 +8,14 @@
 
 # Research Components
 
+## Navigation
+
+- Process
+- Service-to-Reference Mapping
+- Research Instructions
+- Common Research Patterns
+- After Research
+
 After architecture planning, research each selected component to gather best practices before generating artifacts.
 
 ## Process
@@ -112,7 +120,7 @@ Invoke related skills for specialized scenarios:
 | Setting up App Insights instrumentation         | `appinsights-instrumentation`                                                                                                                                                       |
 | Building AI applications                        | `microsoft-foundry`                                                                                                                                                                 |
 | Greenfield or proposed-resource pricing         | `cost-estimate-subagent` via the [pricing parent contract](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-defaults/references/cost-estimate-parent-contract.md); no deployed scope required |
-| Existing deployment spend or rightsizing        | `apex-azure-cost-optimization` with actual cost/utilization evidence |
+| Existing deployment optimization                | `apex-azure-cost-optimization` with returned Advisor/optimization recommendations and verified utilization observations, when available; actual billed spend is unavailable |
 
 **Skill/Reference Invocation Pattern:**
 

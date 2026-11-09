@@ -8,6 +8,18 @@
 
 # Common Bicep Patterns
 
+## Navigation
+
+- Diagnostic Settings
+- Conditional Deployment
+- Module Composition
+- Managed Identity Binding
+- Existing Resource Dependencies (Race Condition Prevention)
+- Key Vault Network ACLs
+- APIM SKU Compatibility Matrix
+- Front Door + APIM Integration
+- AKS Preflight Constraints
+
 Diagnostic settings, conditional deployment, module composition, and managed identity binding.
 
 ---

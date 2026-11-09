@@ -6,6 +6,12 @@
 
 # Logic Apps - Bicep Patterns
 
+## Navigation
+
+- Consumption (Multi-tenant)
+- Standard (Single-tenant)
+- API Connection
+
 ## Consumption (Multi-tenant)
 
 ```bicep

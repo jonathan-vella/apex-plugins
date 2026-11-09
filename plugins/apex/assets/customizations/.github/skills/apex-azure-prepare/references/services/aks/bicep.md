@@ -6,6 +6,13 @@
 
 # AKS - Bicep Patterns
 
+## Navigation
+
+- Cluster Resource
+- ACR Pull Role Assignment
+- Node Pool Configuration
+- Workload Identity
+
 ## Cluster Resource
 
 ```bicep

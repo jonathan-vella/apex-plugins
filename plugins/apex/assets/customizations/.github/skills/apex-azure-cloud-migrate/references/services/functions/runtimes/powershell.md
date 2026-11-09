@@ -7,6 +7,22 @@
 
 # PowerShell — Azure Functions Triggers & Bindings
 
+## Navigation
+
+- Project Structure
+- HTTP Trigger
+- Blob Storage
+- Queue Storage
+- Timer
+- Event Grid
+- Cosmos DB
+- Service Bus
+- Event Hubs
+- Table Storage
+- SQL
+- SendGrid
+- Port Source
+
 > **Model**: PowerShell uses `function.json` for binding definitions + `run.ps1` for handler code.
 > Each function lives in its own directory: `<FunctionName>/function.json` + `run.ps1`
 

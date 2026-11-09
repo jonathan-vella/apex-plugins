@@ -1,5 +1,5 @@
-> MCP names in this reference are upstream pseudo-interfaces, not current vNext tool registrations.
-> Use only capabilities projected by the active task; unavailable tools are blockers, never substitutes.
+> Managed Azure reads use verified `apex-azure` namespaces and actual command schemas.
+> Other provider examples are conditional; absent tools never grant mutation or hook-bypass authority.
 
 > Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../../../references/kernel-boundary.md) before using this reference.
@@ -8,6 +8,13 @@
 > Raw resources illustrate provider syntax; use AVM first and record any accepted coverage exception.
 
 # Terraform Validation
+
+## Navigation
+
+- Prerequisites
+- Validation Steps
+- References
+- Next
 
 Validation steps for Terraform deployments.
 
@@ -39,9 +46,8 @@ az version
 
 **If not installed:**
 
-```text
-mcp_azure-mcp_extension_cli_install(cli-type: "az")
-```
+Report the missing Azure CLI as a prerequisite gap. Local installers/extensions are excluded from the managed MCP
+allowlist; do not install through a fabricated tool or a shell workaround.
 
 ### 3. Authentication
 

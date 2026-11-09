@@ -1,5 +1,5 @@
-> MCP names in this reference are upstream pseudo-interfaces, not current vNext tool registrations.
-> Use only capabilities projected by the active task; unavailable tools are blockers, never substitutes.
+> Managed Azure reads use verified `apex-azure` namespaces and actual command schemas.
+> Other provider examples are conditional; absent tools never grant mutation or hook-bypass authority.
 
 > Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../../../references/kernel-boundary.md) before using this reference.
@@ -8,10 +8,26 @@
 > Raw resources illustrate provider syntax; use AVM first and record any accepted coverage exception.
 
 > **Not an APEX execution path.** DECISION-036 keeps two IaC languages and adds no azd Terraform adapter: azd is the
-> planned executor for Bicep only (CP-26, #443), and native Terraform CLI with an exact saved plan is the Terraform
-> path. This page is upstream context for reading existing `azure.yaml` files; do not select it for new work.
+> implemented provision/preview/down executor for Bicep only (CP-26, #443). Native Terraform CLI with an exact saved plan
+> is the Terraform path. This page is upstream context for existing `azure.yaml` files; do not select it for new work.
 
 # AZD with Terraform
+
+## Navigation
+
+- When to Use
+- Benefits
+- Configuration
+- Preparation Workflow
+- Generation Steps
+- AVM Terraform Module Priority
+- Migration from Pure Terraform
+- CI/CD Integration
+- Comparison: azd+Terraform vs Pure Terraform
+- When NOT to Use azd+Terraform
+- Azure Policy Compliance
+- Troubleshooting
+- References
 
 Use Azure Developer CLI (azd) with Terraform as the infrastructure provider.
 
@@ -284,7 +300,7 @@ When preparing a new azd+Terraform project:
 3. **Add required tags**:
    - Resource group: `azd-env-name`
    - Hosting resources: `azd-service-name` (matches azure.yaml services)
-4. **Research best practices** - Call `mcp_azure-mcp_azureterraformbestpractices`
+4. **Research best practices** - Call `apex-azure/azureterraformbestpractices` with `azureterraformbestpractices_get`
 
 ## AVM Terraform Module Priority
 
@@ -294,8 +310,8 @@ For Terraform module selection, enforce this order:
 2. AVM Terraform Resource Modules
 3. AVM Terraform Utility Modules
 
-Use `mcp_azure-mcp_documentation` (`azure-documentation`) for current guidance and AVM context first, then use Context7
-only as supplemental examples if required.
+Use `apex-azure/documentation` with a bounded `intent`, `command: "microsoft_docs_search"` and `parameters.query` for
+current guidance and AVM context first. Context7 needs a separate active grant and supplies supplemental examples only.
 
 ## Migration from Pure Terraform
 

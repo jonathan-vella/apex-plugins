@@ -7,6 +7,23 @@
 
 # Java — Azure Functions Triggers & Bindings
 
+## Navigation
+
+- HTTP Trigger
+- Blob Storage
+- Queue Storage
+- Timer
+- Event Grid
+- Cosmos DB
+- Service Bus
+- Event Hubs
+- Table Storage
+- SQL
+- SignalR
+- SendGrid
+- Multiple Outputs
+- Port Source
+
 > **Model**: Java annotation-based model. Uses `@FunctionName` and trigger/binding annotations.
 > Import: `com.microsoft.azure.functions.*` and `com.microsoft.azure.functions.annotation.*`
 

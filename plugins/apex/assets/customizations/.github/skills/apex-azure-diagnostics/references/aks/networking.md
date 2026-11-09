@@ -7,6 +7,13 @@
 
 # Networking Troubleshooting
 
+## Navigation
+
+- Service Unreachable / Connection Refused
+- DNS Resolution Failures
+- Detailed Networking Guides
+- Port Source
+
 For CNI-specific issues, check CNI pod health and review [AKS networking concepts](https://learn.microsoft.com/azure/aks/concepts-network).
 
 ## Service Unreachable / Connection Refused

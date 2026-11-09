@@ -6,6 +6,13 @@
 
 # Logic Apps - Triggers
 
+## Navigation
+
+- HTTP Request
+- Recurrence (Schedule)
+- Service Bus Queue
+- Common Actions
+
 ## HTTP Request
 
 ```json

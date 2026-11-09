@@ -1,5 +1,5 @@
-> MCP names in this reference are upstream pseudo-interfaces, not current vNext tool registrations.
-> Use only capabilities projected by the active task; unavailable tools are blockers, never substitutes.
+> Managed Azure reads use verified `apex-azure` namespaces and actual command schemas.
+> Other provider examples are conditional; absent tools never grant mutation or hook-bypass authority.
 
 > Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../../../references/kernel-boundary.md) before using this reference.
@@ -9,9 +9,24 @@
 
 # AZD IAC Rules
 
-IaC rules for AZD projects. **Additive** — for Bicep, apply `mcp_bicep_get_bicep_best_practices` ,
-`mcp_bicep_list_avm_metadata` , and `mcp_bicep_get_az_resource_type_schema` first; for Terraform, apply
-`mcp_azure-mcp_azureterraformbestpractices` first; then apply these azd-specific rules.
+## Navigation
+
+- AVM Module Selection Order (MANDATORY)
+- Retrieval Strategy (Hybrid: azure-documentation MCP + Context7)
+- Validation Plan
+- File Structure
+- Naming Convention
+- Required Tags
+- Module Parameters
+- Security
+- Recommended Outputs
+- Templates
+
+IaC rules for AZD projects. For Bicep, the managed provider supplies `apex-azure/bicepschema` with `bicepschema_get`;
+pass a bounded intent and `parameters["resource-type"]`. A separate Bicep provider's best-practices/catalog tools are
+conditional and not granted by this namespace. Use verified documentation and the accepted module-version lookup
+boundary for missing guidance. For Terraform, use `apex-azure/azureterraformbestpractices` with
+`azureterraformbestpractices_get` first; then apply these azd-specific rules.
 
 ## AVM Module Selection Order (MANDATORY)
 
@@ -34,11 +49,12 @@ If no pattern module exists for the active provider, default immediately to AVM 
 
 ## Retrieval Strategy (Hybrid: azure-documentation MCP + Context7)
 
-- **Primary (authoritative):** Use `mcp_azure-mcp_documentation` (`azure-documentation`) for current Azure guidance and
+- **Primary (authoritative):** Use `apex-azure/documentation` with `microsoft_docs_search` for current Azure guidance and
   AVM integration documentation.
-- **Primary (module catalog):** Use `mcp_bicep_list_avm_metadata` plus official AVM indexes to select concrete modules.
-- **Secondary (supplemental):** Use Context7 only for implementation examples when `mcp_azure-mcp_documentation` does
-  not provide enough detail.
+- **Module catalog (conditional):** A separate Bicep catalog provider needs its own active grant. Otherwise use the
+  accepted module-version lookup boundary and official documentation; `bicepschema_get` is a schema read, not a catalog.
+- **Secondary (conditional):** Context7 is not part of the managed Azure grant. When `apex-azure/documentation` does
+  not provide enough detail, record the gap; use a separate provider only if the active task explicitly grants it.
 
 ## Validation Plan
 

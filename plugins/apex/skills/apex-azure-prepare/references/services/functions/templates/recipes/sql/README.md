@@ -6,6 +6,18 @@
 
 # Azure SQL Recipe
 
+## Navigation
+
+- Overview
+- Integration Type
+- AZD Templates (Recommended)
+- Composition Steps (Alternative)
+- Extension Packages
+- Required App Settings
+- Files
+- SQL Change Tracking
+- Common Issues
+
 Adds Azure SQL Database trigger and output bindings to an Azure Functions base template.
 
 ## Overview

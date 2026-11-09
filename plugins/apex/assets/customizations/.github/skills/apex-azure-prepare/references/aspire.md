@@ -8,6 +8,17 @@
 
 # .NET Aspire Projects
 
+## Navigation
+
+- What is .NET Aspire?
+- Detection
+- Azure Preparation Workflow
+- Flags Reference
+- Common Aspire Samples
+- Troubleshooting
+- References
+- Next Steps
+
 > ⛔ **CRITICAL - READ THIS FIRST**
 >
 > For .NET Aspire projects, **NEVER manually create azure.yaml or infra/ files.**

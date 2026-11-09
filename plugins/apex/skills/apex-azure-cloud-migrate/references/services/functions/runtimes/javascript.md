@@ -7,6 +7,24 @@
 
 # JavaScript (Node.js) — Azure Functions v4 Triggers & Bindings
 
+## Navigation
+
+- Lambda Migration Rules
+- HTTP Trigger
+- Blob Storage
+- Queue Storage
+- Timer
+- Event Grid
+- Cosmos DB
+- Service Bus
+- Event Hubs
+- Table Storage
+- SQL
+- SignalR
+- SendGrid
+- Using Bindings with Functions
+- Port Source
+
 > **Model**: JavaScript v4 programming model. **NO** `function.json` files.
 > Import: `const { app, input, output } = require('@azure/functions');`
 

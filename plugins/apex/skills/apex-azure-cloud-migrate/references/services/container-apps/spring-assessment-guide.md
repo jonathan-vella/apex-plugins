@@ -7,6 +7,19 @@
 
 # Pre-Migration Assessment for Spring Boot to Azure Container Apps
 
+## Navigation
+
+- Local State Assessment
+- File System Usage
+- Platform Compatibility
+- External Resources Inventory
+- Scheduled Jobs Assessment
+- Configuration & Secrets
+- Deployment Architecture
+- Assessment Checklist
+- Complexity Guidelines
+- Port Source
+
 ## Local State Assessment
 
 | Issue | Impact | Solution |

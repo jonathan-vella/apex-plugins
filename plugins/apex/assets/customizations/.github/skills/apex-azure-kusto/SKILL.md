@@ -1,6 +1,6 @@
 ---
 name: apex-azure-kusto
-description: '**ANALYSIS SKILL** — Guides bounded Azure Data Explorer queries and KQL analytics. WHEN: "Kusto database queries", "ADX cluster", "KQL time series", "IoT telemetry", "anomaly detection", "schema exploration". DO NOT USE FOR: App Insights or Log Analytics incidents (use apex-azure-diagnostics), spending analysis (use apex-azure-cost-optimization).'
+description: '**ANALYSIS SKILL** — Guides bounded Azure Data Explorer queries and KQL analytics. WHEN: "Kusto database queries", "ADX cluster", "KQL time series", "IoT telemetry", "anomaly detection", "schema exploration". DO NOT USE FOR: App Insights or Log Analytics incidents (use apex-azure-diagnostics), cost-saving recommendations (use apex-azure-cost-optimization).'
 user-invocable: false
 disable-model-invocation: false
 ---

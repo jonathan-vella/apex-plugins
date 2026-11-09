@@ -7,6 +7,14 @@
 
 # PowerShell Event Hub Trigger
 
+## Navigation
+
+- Source Code
+- Files to Remove
+- Package Dependencies
+- Configuration Notes
+- Common Patterns
+
 ## Source Code
 
 Create `EventHubTrigger/run.ps1`:

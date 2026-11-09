@@ -1,5 +1,23 @@
 # Azure Quota CLI Commands
 
+## Navigation
+
+- Command Routing
+- Prerequisites
+- Quota Evidence and Fallback
+- Resource Name Mapping
+- Command Summary
+- az quota list
+- az quota show
+- az quota usage list
+- az quota usage show
+- az quota request status list
+- az quota request status show
+- az quota operation list
+- az quota update
+- az quota create
+- Troubleshooting
+
 Reference for the Azure CLI `quota` extension, ported from the upstream `commands.md` and `advanced-commands.md`.
 Every scope below is illustrative: substitute the approved subscription, provider and region, never the CLI default.
 

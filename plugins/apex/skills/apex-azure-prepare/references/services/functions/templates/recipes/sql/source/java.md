@@ -7,6 +7,14 @@
 
 # Java SQL Trigger + Output
 
+## Navigation
+
+- Dependencies
+- Source Code
+- Files to Remove
+- App Settings Required
+- Common Patterns
+
 ## Dependencies
 
 **pom.xml:**

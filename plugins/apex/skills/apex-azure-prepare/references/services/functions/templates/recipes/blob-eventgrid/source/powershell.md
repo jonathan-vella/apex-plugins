@@ -7,6 +7,13 @@
 
 # PowerShell Blob Trigger with Event Grid
 
+## Navigation
+
+- Dependencies
+- Source Code
+- App Settings Required
+- Common Patterns
+
 ## Dependencies
 
 **host.json:**
