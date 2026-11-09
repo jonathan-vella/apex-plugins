@@ -8,6 +8,17 @@
 
 # Security Hardening
 
+## Navigation
+
+- Security Principles
+- Security Services
+- Identity and Access
+- Network Security
+- Data Protection
+- Monitoring and Defender
+- Azure Identity SDK
+- Further Reading
+
 Secure Azure resources following Zero Trust principles.
 
 ## Security Principles

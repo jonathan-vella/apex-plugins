@@ -15,17 +15,17 @@ RDP/SSH failures, NSG/firewall blocks, credential resets, and VM agent/tooling i
 | Property | Details |
 | --- | --- |
 | Best for | RDP/SSH failures, port 3389/22 timeouts, black screen, credential reset, VM agent issues |
-| Primary tools | `mcp_azure-mcp_compute`, `mcp_azure-mcp_resourcehealth`, `mcp_azure-mcp_monitor`, CLI fallback |
+| Primary tools | Verified read commands in `apex-azure/compute`, `apex-azure/resourcehealth`, `apex-azure/monitor` |
 | Router | [references/cannot-connect-to-vm.md](references/cannot-connect-to-vm.md) |
 
 ## MCP Tools
 
 | Tool | Purpose |
 | --- | --- |
-| `mcp_azure-mcp_compute` | VM state, instance view, VM agent, extension, NIC evidence |
-| `mcp_azure-mcp_resourcehealth` | Platform health before deeper diagnosis |
-| `mcp_azure-mcp_monitor` | Logs/metrics when workspace or resource scope is known |
-| `mcp_azure-mcp_documentation` | Current Microsoft Learn guidance for the matched symptom |
+| `apex-azure/compute` | VM state and metadata exposed by verified read commands |
+| `apex-azure/resourcehealth` | Platform health before deeper diagnosis |
+| `apex-azure/monitor` | Logs/metrics when workspace or resource scope is known |
+| `apex-azure/documentation` | Current Microsoft Learn guidance for the matched symptom |
 
 ## When to Use
 
@@ -55,12 +55,14 @@ RDP/SSH failures, NSG/firewall blocks, credential resets, and VM agent/tooling i
 2. Open [references/cannot-connect-to-vm.md](references/cannot-connect-to-vm.md), choose the matching symptom category,
    then open that reference.
 3. If a command uses the VM agent/extensions, run pre-flight checks first and stop on any unsafe result.
-4. Use `mcp_azure-mcp_documentation` to fetch current docs for the selected URL or symptom.
+4. Use `apex-azure/documentation` with `microsoft_docs_search` for the symptom, or `microsoft_docs_fetch` with `url`
+   for a selected documentation URL. Other namespace commands must match the discovered inventory.
 5. Respond with evidence, likely cause, safe diagnostic/fix commands, and escalation path.
 
 ```yaml
-mcp_azure-mcp_documentation
+apex-azure/documentation
   intent: "find current Azure VM RDP SSH troubleshooting docs for <symptom>"
+  command: "microsoft_docs_search"
   parameters:
     query: "<documentation URL or user's symptom>"
 ```

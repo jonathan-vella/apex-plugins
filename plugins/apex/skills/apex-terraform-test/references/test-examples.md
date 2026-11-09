@@ -8,6 +8,11 @@
 
 # Terraform Test Examples
 
+## Navigation
+
+- Canonical Example — Azure Resource Group Test
+- Common Test Patterns
+
 ## Canonical Example — Azure Resource Group Test
 
 The tag map below represents a synthetic discovered policy contract, not the

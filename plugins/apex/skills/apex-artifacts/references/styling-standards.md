@@ -8,6 +8,20 @@
 
 # Documentation Styling Standards
 
+## Navigation
+
+- Callout Styles
+- Status Emoji
+- Category Icons
+- WAF Pillar Icons
+- Badge Row
+- Collapsible Table of Contents
+- Cross-Navigation
+- Metadata Block
+- Status Badge States
+- References Section
+- Common Reference Links
+
 ## Callout Styles
 
 ```markdown

@@ -7,6 +7,14 @@
 
 # C# (.NET) Blob Trigger with Event Grid
 
+## Navigation
+
+- Dependencies
+- Source Code
+- Files to Remove
+- App Settings Required
+- Common Patterns
+
 ## Dependencies
 
 **.csproj:**

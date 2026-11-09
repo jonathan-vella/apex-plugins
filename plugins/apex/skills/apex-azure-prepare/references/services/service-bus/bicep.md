@@ -6,6 +6,14 @@
 
 # Service Bus - Bicep Patterns
 
+## Navigation
+
+- Namespace
+- Queue
+- Topic and Subscription
+- Subscription Filters
+- Managed Identity Access
+
 ## Namespace
 
 ```bicep

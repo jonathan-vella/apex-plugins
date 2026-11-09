@@ -1,5 +1,12 @@
 # Quota Workflows
 
+## Navigation
+
+- Workflow 1: Check Quota for One Resource
+- Workflow 2: Compare Quotas Across Regions
+- Workflow 3: Request a Quota Increase
+- Workflow 4: List All Quotas for Planning
+
 Step-by-step quota workflows ported from the upstream `core-workflows.md`. First apply
 [quota evidence and fallback](quota-cli-commands.md#quota-evidence-and-fallback). All scopes and candidate regions are
 illustrative and must be replaced with approved values. A quota check never implies deployment or change approval.

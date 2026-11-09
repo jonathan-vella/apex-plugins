@@ -1,6 +1,6 @@
 ---
 name: apex-codegen
-description: "Provides hidden-worker guidance for one bounded APEX IaC generation task with approved intent and binding."
+description: "Guides the hidden APEX CodeGen worker for one kernel-issued IaC generation task with accepted intent and selected-track binding. Stops after the generation receipt. Not interactive intake, independent validation, direct repository writes or deployment."
 user-invocable: false
 ---
 
@@ -14,6 +14,9 @@ Use this skill only inside the hidden CodeGen worker.
 ## Prerequisites
 
 - `apex/taskContext` supplies approved intent, one selected-track binding, policy obligations, output paths, and limits.
+  Call it once. It is intentionally small: inputs listed with `inlined: false` in `inputReferences` are not in `inputs`.
+  Read every input listed in `inputReferences`, in order, with `apex/readTaskInput` by `inputHash`, in bounded chunks
+  following `nextOffset` until it is absent, before generating.
 - The task identifies a single dependency-sized generation batch.
 
 ## Workflow
@@ -34,3 +37,11 @@ Do not execute, format, validate, preview, deploy, write directly to repository 
 ## Output
 
 Return the typed completion or `needs_input` result with affected field IDs.
+
+## Examples
+
+| Task outcome | Required response |
+| --- | --- |
+| Current task has accepted intent and Bicep binding | Generate only that bounded Bicep batch through the issued capability |
+| `apex/generateIac` succeeds | Return the accepted manifest/handoff receipt and stop; no duplicate completion or staging |
+| Required binding or field is absent | Return the exact missing field/blocker to the parent; never ask the user or select a substitute |

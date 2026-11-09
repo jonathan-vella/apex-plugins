@@ -1,29 +1,28 @@
 # Pricing Evidence
 
-Price candidates with `apex-azure-pricing/get_retail_prices`. The general query, empty-result, and meter rules are owned
-by the retail pricing guidance in `apex-azure-defaults`; this reference adds the VM-specific rules. Match region,
-operating system, licensing, price type, meter, currency, and quantity before comparing prices.
+Price candidates only with `apex-azure/pricing`, command `pricing_get`. The general query, empty-result, and meter rules
+are owned by the retail pricing guidance in `apex-azure-defaults`; this reference adds VM-specific comparison rules.
+Match region, operating system, licensing, price type, meter, currency, and quantity before comparing prices.
 
 ## VM Queries
 
-| Need | Filters |
+| Need | `pricing_get` parameters |
 | --- | --- |
-| Pay-as-you-go price for one size | `serviceName` `Virtual Machines`, `armRegionName`, `armSkuName` such as `Standard_D4s_v5`, `priceType` `Consumption` |
-| Family comparison | The same filters for each shortlisted size; one query per identical parameter set |
-| Reservation comparison | `priceType` `Reservation`; read the reservation term from each row |
+| Pay-as-you-go price for one size | `service: "Virtual Machines"`, `sku: "<verified SKU>"`, `region: "<billing region>"`, `price-type: "Consumption"`, and one currency |
+| Family comparison | Repeat the bounded query for each shortlisted SKU; reuse identical parameter sets |
+| Reservation comparison | Request a returned `Reservation` price type only when the workload comparison asks for it |
 
-- The operating system is in `productName`: a name without `Windows` is the Linux price; the `Windows` variant includes
-  the Windows license.
-- `meterName` distinguishes Spot and Low Priority variants. Exclude them unless the requirement allows eviction.
-- Use primary-meter-region rows to avoid regional duplicates.
-- Filter values are case-sensitive.
+- Match the returned product, meter, unit, operating-system variant, price type, currency, and region to the candidate.
+- Exclude Spot and Low Priority variants unless the requirement allows eviction.
+- Follow the central contract's row-cap and completeness rules; unresolved or ambiguous meters remain unpriced.
 
 ## Comparison Basis
 
 - An hourly price times 730 gives a monthly estimate for an always-on instance.
 - A scale set adds no separate compute charge. Estimate the per-instance price at the minimum and maximum instance
   counts, and state the expected runtime between them.
-- Show reservation or savings-plan prices beside pay-as-you-go for the baseline instance count only.
+- Show returned alternative prices beside pay-as-you-go only as modeled price differences; this does not establish
+  commitment eligibility, utilization, or realized savings.
 
 ## Recording
 

@@ -1,13 +1,12 @@
 # Cost Assessment Operational Checklist
 
-## Normalize Evidence
+## Check Evidence
 
-- Align cost, utilization, inventory, pricing context, currency, and period
-  before comparing candidates. Do not combine incompatible scopes or windows.
-- Separate observed charges, measured utilization, and calculated savings. A
-  modeled saving is not an invoice prediction or a provider commitment.
-- Preserve allocation uncertainty, free allowances, shared-resource effects,
-  and evidence freshness with every estimate.
+- Confirm each observation is from an approved Azure MCP command and keep its
+  scope, resource, timestamp, currency, and completeness.
+- Separate Advisor recommendations, utilization observations, retail prices,
+  and calculated estimates. None is actual billed spend or a guarantee.
+- Do not infer missing evidence or combine incompatible scopes or windows.
 
 ## Classify Candidates
 
@@ -15,8 +14,8 @@
   not removal or downsizing decisions.
 - Classify each evidence-backed item as safe to investigate, review required,
   or high risk, with dependencies and a traceable estimate method.
-- For Redis-specific observations, retain the service boundary and workload
-  context; no general portfolio conclusion follows from one service signal.
+-   Do not use unsupported billing requests as a reason to block independent
+  recommendations or price comparisons. State the billing-data gap clearly.
 
 ## Handoff
 

@@ -12,5 +12,6 @@ applyTo: "**/*.md"
 - Use accepted APEX templates before adding presentation or diagram content.
 - Use `apex-mermaid` only for supported inline renderer slots; it currently reports no Mermaid-capable slots.
 - Standalone output comes from kernel-rendered `packages/renderers` artifacts bound to accepted typed inputs,
-  including `.py`, `.png`, and `.svg` evidence. Do not generate it independently or invoke archived skills.
+  including `.py`, `.png`, and `.svg` evidence, and the Mermaid `.mmd` architecture diagram. Do not generate it
+  independently or invoke archived skills.
 - Current renderers cover architecture, WAF and cost output. General standalone classes remain deferred.

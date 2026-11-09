@@ -7,6 +7,12 @@
 
 # durable-task-scheduler syntax reference
 
+## Navigation
+
+- Reference content
+
+## Reference content
+
 ```bicep
 // recipes/durable/bicep/durable-task-scheduler.bicep
 // Durable Task Scheduler recipe module — adds DTS scheduler, task hub, and RBAC

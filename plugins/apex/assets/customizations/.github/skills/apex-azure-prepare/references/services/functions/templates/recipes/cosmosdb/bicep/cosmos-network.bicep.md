@@ -7,6 +7,12 @@
 
 # cosmos-network syntax reference
 
+## Navigation
+
+- Reference content
+
+## Reference content
+
 ```bicep
 // recipes/cosmosdb/bicep/cosmos-network.bicep
 // Cosmos DB networking recipe — private endpoint + DNS zone

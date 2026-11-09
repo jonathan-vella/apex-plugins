@@ -1,5 +1,5 @@
-> MCP names in this reference are upstream pseudo-interfaces, not current vNext tool registrations.
-> Use only capabilities projected by the active task; unavailable tools are blockers, never substitutes.
+> Managed Azure reads use verified `apex-azure` namespaces and actual command schemas.
+> Other provider examples are conditional; absent tools never grant mutation or hook-bypass authority.
 
 > Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../../../references/kernel-boundary.md) before using this reference.
@@ -8,6 +8,16 @@
 > Raw resources illustrate provider syntax; use AVM first and record any accepted coverage exception.
 
 # AZD Recipe
+
+## Navigation
+
+- When to Use
+- IaC Provider Options
+- Before Generation
+- Generation Steps
+- Outputs
+- References
+- Next
 
 Azure Developer CLI workflow for preparing Azure deployments.
 
@@ -55,10 +65,10 @@ manual generation.**
 | Terraform with azd        | [Terraform Guide](terraform.md)                                                                       |
 | AZD IAC rules             | [IAC Rules](iac-rules.md)                                                                             |
 | Azure Functions templates | [Templates](../../services/functions/templates/README.md)                                             |
-| Bicep best practices      | `mcp_bicep_get_bicep_best_practices`                                                                  |
-| Bicep resource schema     | `mcp_bicep_get_az_resource_type_schema`                                                               |
-| Azure Verified Modules    | `mcp_bicep_list_avm_metadata` + [AVM module order](iac-rules.md#avm-module-selection-order-mandatory) |
-| Terraform best practices  | `mcp_azure-mcp_azureterraformbestpractices`                                                           |
+| Bicep best practices      | `apex-azure/documentation`, command `microsoft_docs_search`, bounded intent and `parameters.query` |
+| Bicep resource schema     | `apex-azure/bicepschema`, command `bicepschema_get`, bounded intent and `parameters["resource-type"]` |
+| Azure Verified Modules    | [AVM module order](iac-rules.md#avm-module-selection-order-mandatory); a separate Bicep catalog provider is conditional, not granted |
+| Terraform best practices  | `apex-azure/azureterraformbestpractices`, command `azureterraformbestpractices_get` |
 | Dockerfiles               | [Docker Guide](docker.md)                                                                             |
 
 ## Generation Steps

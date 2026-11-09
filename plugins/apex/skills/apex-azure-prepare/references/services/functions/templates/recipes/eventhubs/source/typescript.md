@@ -7,6 +7,14 @@
 
 # TypeScript Event Hub Trigger
 
+## Navigation
+
+- Source Code
+- Files to Remove
+- Package Dependencies
+- Configuration Notes
+- Common Patterns
+
 ## Source Code
 
 Replace `src/functions/*.ts` with:

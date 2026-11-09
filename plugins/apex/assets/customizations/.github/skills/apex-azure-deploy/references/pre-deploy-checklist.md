@@ -1,5 +1,17 @@
 # Pre-Deployment Checklist
 
+## Navigation
+
+- 0\. Resolve Recipe, Inputs and Approval
+- 1\. Inspect and Verify the Subscription
+- 2\. Verify the azd Environment, If Selected
+- 3\. Check the Exact Resource Group
+- 4\. Check azd Service Tags
+- 5\. Verify Location and Service Support
+- 6\. Service-Specific Checks
+- 7\. Non-azd Parameters and Handoff
+- Port Source
+
 Read [execution boundaries](execution-boundaries.md). Run readiness checks only for the recipe, target and action
 provided by the active task. Preparation-only, validation-only and preview-only never authorize apply. This checklist
 neither initializes projects nor deploys resources.

@@ -7,6 +7,24 @@
 
 # Python — Azure Functions v2 Triggers & Bindings
 
+## Navigation
+
+- Lambda Migration Rules
+- HTTP Trigger
+- Blob Storage
+- Queue Storage
+- Timer
+- Event Grid
+- Cosmos DB
+- Service Bus
+- Event Hubs
+- Table Storage
+- SQL
+- SignalR
+- SendGrid
+- Combining Decorators
+- Port Source
+
 > **Model**: Python v2 programming model. **NO** `function.json` files.
 > Entry point: `function_app.py`
 > Import: `import azure.functions as func`

@@ -6,6 +6,12 @@
 
 # Deployment Scripts
 
+## Navigation
+
+- Bash Script
+- PowerShell Script
+- Script Best Practices
+
 Script templates for AZCLI deployments.
 
 ## Bash Script

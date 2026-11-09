@@ -9,6 +9,13 @@
 
 # MCP (Model Context Protocol) Recipe
 
+## Navigation
+
+- Integration Paths
+- Composition
+- Verification Gate
+- Source Evidence
+
 Exposes demonstration tools through the official Azure Functions MCP extension.
 The former HTTP JSON-RPC dispatchers have been replaced, not retained behind a guard.
 Tools implement application logic only; the extension or official SDK owns the protocol.

@@ -1,5 +1,5 @@
-> MCP names in this reference are upstream pseudo-interfaces, not current vNext tool registrations.
-> Use only capabilities projected by the active task; unavailable tools are blockers, never substitutes.
+> Managed Azure reads use verified `apex-azure` namespaces and actual command schemas.
+> Other provider examples are conditional; absent tools never grant mutation or hook-bypass authority.
 
 > Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../../../references/kernel-boundary.md) before using this reference.
@@ -25,10 +25,10 @@ Azure CLI workflow for imperative Azure deployments.
 
 | Artifact             | Research Action                                                                                                            |
 | -------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| Bicep files          | Call `mcp_bicep_get_bicep_best_practices`                                                                                  |
-| Bicep modules        | Call `mcp_bicep_list_avm_metadata` and follow [AVM module order](../azd/iac-rules.md#avm-module-selection-order-mandatory) |
+| Bicep files          | Verified `apex-azure/documentation` guidance; `apex-azure/bicepschema` with `bicepschema_get` for resource schemas |
+| Bicep modules        | Follow [AVM module order](../azd/iac-rules.md#avm-module-selection-order-mandatory); a separate Bicep catalog provider is conditional, not granted |
 | Azure CLI commands   | Call `activate_azure_cli_management_tools`                                                                                 |
-| Azure best practices | Call `mcp_azure-mcp_get_azure_bestpractices`                                                                                     |
+| Azure best practices | `apex-azure/get_azure_bestpractices`, command `get_azure_bestpractices_get`, parameters `{resource: "general", action: "code-generation"}` |
 
 ## Generation Steps
 

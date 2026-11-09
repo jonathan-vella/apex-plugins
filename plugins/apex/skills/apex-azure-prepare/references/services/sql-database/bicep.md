@@ -6,6 +6,13 @@
 
 # SQL Database - Bicep Patterns
 
+## Navigation
+
+- Basic Setup (Entra-Only Authentication)
+- Serverless Configuration
+- Private Endpoint
+- Legacy SQL Authentication (⛔ Prohibited)
+
 ## Basic Setup (Entra-Only Authentication)
 
 **Recommended approach** — Uses Microsoft Entra ID authentication only. Required for subscriptions with policies

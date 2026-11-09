@@ -7,6 +7,14 @@
 
 # Node & Cluster Troubleshooting
 
+## Navigation
+
+- Node NotReady
+- Node Pool Not Scaling
+- Resource Pressure & Capacity Planning
+- Detailed Node And Cluster Guides
+- Port Source
+
 ## Node NotReady
 
 **Diagnostics:**

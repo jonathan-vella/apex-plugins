@@ -8,6 +8,15 @@
 
 # Manual Azure Resource Import Reference
 
+## Navigation
+
+- 1\. Discover Resources Using az CLI
+- 2\. Azure Resource Type ↔ Terraform Mapping
+- 3\. Create Import Blocks
+- 4\. Bulk Import Script
+- 5\. Post-Import Cleanup
+- Troubleshooting
+
 Use this workflow when Terraform Search is not available (TF < 1.14 or
 provider lacks `list_resource_schemas` support). This is the **primary**
 import workflow for Azure.

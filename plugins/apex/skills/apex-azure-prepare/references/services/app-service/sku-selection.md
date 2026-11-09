@@ -6,6 +6,17 @@
 
 # App Service SKU Selection
 
+## Navigation
+
+- SKU Comparison Matrix
+- Pricing Overview
+- Decision Criteria
+- Feature Unlock Summary
+- Bicep — App Service Plan with SKU
+- Terraform — App Service Plan with SKU
+- Scaling Within a Tier
+- Recommendations by Workload
+
 ## SKU Comparison Matrix
 
 | Feature | Free (F1) | Basic (B1-B3) | Standard (S1-S3) | Premium (P0v3-P3v3 and P1Mv3-P5Mv3;P0v4-P3v4 and P1Mv4-P5Mv4) | Isolated (I1v2-I6v2) |

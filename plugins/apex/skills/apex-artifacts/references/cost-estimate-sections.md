@@ -8,6 +8,14 @@
 
 # Cost Estimate — Section Templates
 
+## Navigation
+
+- Required Header Template
+- Cost At-a-Glance Template
+- Decision Summary Template
+- Visual Standards
+- Required Section Templates
+
 Detailed examples complement the canonical templates in `templates/`.
 Rules and enforcement live in the instruction file and templates.
 
@@ -19,7 +27,7 @@ Rules and enforcement live in the instruction file and templates.
 **Generated**: {YYYY-MM-DD}
 **Region**: {primary-region}
 **Environment**: {Production|Staging|Development}
-**MCP Tools Used**: {get_retail_prices, query_costs, forecast_costs}
+**Azure MCP Tools Used**: {actual guarded commands used, e.g. apex-azure/pricing (pricing_get), apex-azure/optimization (optimization_recommendation_list)}
 **Architecture Reference**: {relative link to assessment doc}
 ```
 
@@ -30,20 +38,21 @@ Include immediately after the header:
 ````markdown
 ## 💵 Cost At-a-Glance
 
-> **Monthly Total: ~$X,XXX** | Annual: ~$XX,XXX
+> **Estimated Monthly Total: ~$X,XXX** | Annual: ~$XX,XXX
 >
 > ```
-> Budget: $X/month (soft|hard) | Utilization: NN% ($X of $X)
+> Cost basis: {proposed-resource retail estimate|as-built configuration estimate} | Actual spend: Not available
 > ```
 >
 > | Status            | Indicator                    |
 > | ----------------- | ---------------------------- |
-> | Cost Trend        | ➡️ Stable                    |
-> | Savings Available | 💰 $X/year with reservations |
+> | Cost Estimate     | {price source and retrieval date} |
+> | Recommendations   | {Advisor results or Not assessed} |
 > | Compliance        | ✅ {e.g., PCI-DSS aligned}   |
 ````
 
-If no budget: `Budget: No fixed budget (explain in one sentence)`
+If the customer supplied a budget, show it as an input and compare it only with this estimate. Do not present budget
+utilization, historical spend, or a cost trend; those billing records are not available here.
 
 ## Decision Summary Template
 
@@ -66,9 +75,7 @@ Include a confidence line:
 
 | Status         | Indicator | Usage                                 |
 | -------------- | --------- | ------------------------------------- |
-| Under budget   | ✅        | < 80% utilized                        |
-| Near budget    | ⚠️        | 80-100% utilized                      |
-| Over budget    | ❌        | > 100% utilized                       |
+| Estimate       | 📊        | Modeled from stated quantities and returned price evidence |
 | Recommendation | 💡        | Optimization suggestions              |
 | Savings        | 💰        | Money saved                           |
 | High risk      | 🔴        | Potential to materially increase cost |
@@ -85,12 +92,10 @@ Include a confidence line:
 | Messaging           | 📨    |
 | Security/Management | 🔐    |
 
-### Trend Indicators
+### Scenario Indicators
 
-- ➡️ Stable
-- 📈 Increasing
-- 📉 Decreasing
-- ⚠️ Volatile/unknown
+Use indicators only for explicit workload scenarios or modeled estimates; Azure MCP does not provide a historical spend
+trend or forecast.
 
 ## Required Section Templates
 
@@ -121,16 +126,16 @@ Map business requirements and NFRs to concrete SKU decisions.
 | Compliance  | {WAF/PE/CMK choice}   | +$X/month 📈 | Yes       |
 ```
 
-### 3. 📊 Top 5 Cost Drivers
+### 3. 📊 Top 5 Estimated Cost Drivers
 
 ```markdown
-## 📊 Top 5 Cost Drivers
+## 📊 Top 5 Estimated Cost Drivers
 
-| Rank | Resource | Monthly Cost | % of Total | Trend |
-| ---- | -------- | ------------ | ---------- | ----- |
-| 1️⃣   | ...      | $...         | ...        | ➡️    |
+| Rank | Resource | Monthly Estimate | % of Estimated Total | Notes |
+| ---- | -------- | ---------------- | -------------------- | ----- |
+| 1️⃣   | ...      | $...             | ...                  | ...   |
 
-> 💡 **Quick Win**: One low-effort action that saves cost
+> 💡 **Recommendation**: A returned, evidence-backed action to investigate
 ```
 
 ### 4. Summary
@@ -162,13 +167,13 @@ Include both subsections:
 
 ### Cost Distribution
 
-| Category         | Monthly Cost (USD) | Share |
-| ---------------- | -----------------: | ----: |
+| Category         | Monthly Estimate (USD) | Share |
+| ---------------- | ---------------------: | ----: |
 | 💻 Compute       |                535 |   39% |
 | 💾 Data Services |                466 |   34% |
 | 🌐 Networking    |                376 |   27% |
 
-![Monthly Cost Distribution](../references/kernel-boundary.md)
+![Estimated Monthly Cost Distribution](../references/kernel-boundary.md)
 ```
 
 ### Key Design Decisions Affecting Cost
@@ -230,10 +235,9 @@ Standardize the 3 most likely changes and their delta.
 
 Always include a savings section. Use one of three states:
 
-**State 1 — Quantified**: When RI/SP pricing was queried via MCP tools, show actual dollar savings.
-**State 2 — Not Quantified**: When the pricing run focused on baseline consumption only, say so and list eligible
-strategies with prerequisites.
-**State 3 — Not Applicable**: When all services are consumption/serverless with no commitment discount eligibility.
+**State 1 — Estimated**: When comparable price evidence supports it, show a modeled difference and state its assumptions.
+**State 2 — Not Quantified**: When the pricing run focused on baseline consumption only, say so.
+**State 3 — Not Applicable**: When the evaluated pricing model has no applicable alternative in returned evidence.
 
 > [!CAUTION]
 > **Never show `$0.00` savings rows.** Zero-dollar rows imply the platform found no opportunities when the real state is
@@ -242,25 +246,22 @@ strategies with prerequisites.
 ```markdown
 ## 💰 Savings Opportunities
 
-<!-- STATE 1: Quantified -->
+<!-- STATE 1: Estimated -->
 
-> ### Total Potential Savings: $X/year
+> ### Modeled Price Difference: $X/year
 >
-> | Strategy | Commitment | Monthly Savings | Annual Savings | % Reduction |
-> | -------- | ---------- | --------------- | -------------- | ----------- |
-> | RI       | 1-year     | $...            | $...           | X%          |
+> | Price Type | Monthly Price | Annual Price | Modeled Difference |
+> | ---------- | ------------- | ------------ | ------------------ |
+> | {returned alternative} | $... | $... | $... |
 
 <!-- STATE 2: Not Quantified -->
 
 > ### Savings: Not Quantified in This Run
 >
-> This estimate covers baseline consumption pricing only.
+> This estimate covers baseline retail consumption pricing only; commitment utilization and realized savings are not
+> available from the guarded Azure MCP integration.
 >
-> **Eligible strategies to evaluate**:
->
-> | Strategy | Applicability | Prerequisites |
-> | -------- | ------------- | ------------- |
-> | RI       | ✅ / ❌       | {condition}   |
+> Alternative price types may be compared only when returned meter evidence matches the proposed workload.
 
 <!-- STATE 3: Not Applicable -->
 
@@ -271,9 +272,9 @@ strategies with prerequisites.
 
 ### Additional Optimization Strategies
 
-| Strategy | Potential Savings | Effort | Notes |
-| -------- | ----------------- | ------ | ----- |
-| ...      | ...               | 🟢 Low | ...   |
+| Recommendation | Modeled Difference | Evidence | Notes |
+| -------------- | ------------------ | -------- | ----- |
+| ...            | ...                | ...      | ...   |
 
 ### 11. Detailed Cost Breakdown
 
@@ -372,7 +373,7 @@ Required bullets:
 ## 📊 Pricing Data Accuracy
 
 > **📊 Data Source**: Prices from Azure Retail Prices API via
-> Azure Resource Manager MCP
+> guarded Azure MCP
 >
 > ✅ **Included**: Retail list prices (PAYG)
 >

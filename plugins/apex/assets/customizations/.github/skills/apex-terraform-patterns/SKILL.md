@@ -1,6 +1,6 @@
 ---
 name: apex-terraform-patterns
-description: '**UTILITY SKILL** — Apply Terraform patterns to accepted APEX intent. WHEN: "hub-spoke Terraform", "private endpoint module", "AVM-TF composition", "diagnostic settings", "plan interpretation", "module refactor". DO NOT USE FOR: Bicep (use apex-bicep-patterns), decisions (use apex-azure-adr), execution (use apex-azure-deploy).'
+description: '**UTILITY SKILL** — Applies Terraform patterns to accepted APEX intent. WHEN: "hub-spoke Terraform", "private endpoint module", "AVM-TF composition", "diagnostic settings", "plan interpretation", "module refactor". DO NOT USE FOR: Bicep (use apex-bicep-patterns), decisions (use apex-azure-adr), execution (use apex-azure-deploy).'
 user-invocable: false
 disable-model-invocation: false
 ---

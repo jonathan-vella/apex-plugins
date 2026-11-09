@@ -7,6 +7,20 @@
 
 # AWS Lambda to Azure Functions Migration
 
+## Navigation
+
+- Overview
+- Programming Model Mapping
+- Trigger Mapping
+- Runtime-Specific Migration Patterns
+- Project Structure
+- Environment Variables
+- Reference Links
+- Flex Consumption + Blob Trigger with EventGrid Source
+- User Assigned Managed Identity (UAMI) Auth Patterns
+- AWS Rekognition → Azure AI Computer Vision
+- Port Source
+
 Detailed guidance for migrating AWS Lambda functions to Azure Functions.
 
 ## Overview

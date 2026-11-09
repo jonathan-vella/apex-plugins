@@ -453,9 +453,9 @@ var require_codegen2 = __commonJS({
       }
     };
     var Label = class extends Node {
-      constructor(label) {
+      constructor(label2) {
         super();
-        this.label = label;
+        this.label = label2;
         this.names = {};
       }
       render({ _n }) {
@@ -463,14 +463,14 @@ var require_codegen2 = __commonJS({
       }
     };
     var Break = class extends Node {
-      constructor(label) {
+      constructor(label2) {
         super();
-        this.label = label;
+        this.label = label2;
         this.names = {};
       }
       render({ _n }) {
-        const label = this.label ? ` ${this.label}` : "";
-        return `break${label};` + _n;
+        const label2 = this.label ? ` ${this.label}` : "";
+        return `break${label2};` + _n;
       }
     };
     var Throw2 = class extends Node {
@@ -882,12 +882,12 @@ var require_codegen2 = __commonJS({
         return this._endBlockNode(For);
       }
       // `label` statement
-      label(label) {
-        return this._leafNode(new Label(label));
+      label(label2) {
+        return this._leafNode(new Label(label2));
       }
       // `break` statement
-      break(label) {
-        return this._leafNode(new Break(label));
+      break(label2) {
+        return this._leafNode(new Break(label2));
       }
       // `return` statement
       return(value) {
@@ -3116,6 +3116,8 @@ var require_utils2 = __commonJS({
     var isPathCharacter = RegExp.prototype.test.bind(/^[A-Za-z0-9\-._~!$&'()*+,;=:@/]$/u);
     var isQueryFragmentCharacter = RegExp.prototype.test.bind(/^[A-Za-z0-9\-._~!$&'()*+,;=:@/?]$/u);
     var isUserinfoCharacter = RegExp.prototype.test.bind(/^[A-Za-z0-9\-._~!$&'()*+,;=:]$/u);
+    var isRegNameCharacter = RegExp.prototype.test.bind(/^[A-Za-z0-9\-._~!$&'()*+,;=]$/u);
+    var isLiteralRegName = RegExp.prototype.test.bind(/^[A-Za-z0-9\-._~!$&'()*+,;=]*$/u);
     function stringArrayToHexStripped(input2) {
       let acc = "";
       let code = 0;
@@ -3327,13 +3329,46 @@ var require_utils2 = __commonJS({
       }
       return output2.join("");
     }
-    var HOST_DELIMS = { "@": "%40", "/": "%2F", "?": "%3F", "#": "%23", ":": "%3A" };
-    var HOST_DELIM_RE = /[@/?#:]/g;
-    var HOST_DELIM_NO_COLON_RE = /[@/?#]/g;
-    function reescapeHostDelimiters(host, isIP) {
-      const re = isIP ? HOST_DELIM_NO_COLON_RE : HOST_DELIM_RE;
-      re.lastIndex = 0;
-      return host.replace(re, (ch) => HOST_DELIMS[ch]);
+    function removeDotSegmentsRelative(path2) {
+      if (path2 === "" || path2[0] === "/") {
+        return removeDotSegments(path2);
+      }
+      const segments = path2.split("/");
+      const last = segments.length - 1;
+      const output2 = [];
+      let trailingDirectory = false;
+      for (let i = 0; i <= last; i++) {
+        const segment = segments[i];
+        if (segment === "." || segment === "..") {
+          if (segment === "..") {
+            if (output2.length !== 0 && output2[output2.length - 1] !== "..") {
+              output2.pop();
+            } else {
+              output2.push("..");
+            }
+          }
+          trailingDirectory = i === last;
+        } else {
+          output2.push(segment);
+        }
+      }
+      if (trailingDirectory && output2[output2.length - 1] !== "..") {
+        output2.push("");
+      }
+      if (output2.length === 0 || output2[0] === "" || output2[0].includes(":")) {
+        output2.unshift(".");
+      }
+      return output2.join("/");
+    }
+    var IP_HOST_DELIMS = { "@": "%40", "/": "%2F", "?": "%3F", "#": "%23" };
+    var IP_HOST_DELIM_RE = /[@/?#]/g;
+    function encodeHost(host, isIP, allowNonAscii = false) {
+      if (!isIP) {
+        if (isLiteralRegName(host)) return host;
+        return encodeComponent(host, isRegNameCharacter, allowNonAscii);
+      }
+      IP_HOST_DELIM_RE.lastIndex = 0;
+      return host.replace(IP_HOST_DELIM_RE, (ch) => IP_HOST_DELIMS[ch]);
     }
     function normalizePercentEncoding(input2, decodeUnreserved = false) {
       if (input2.indexOf("%") === -1) {
@@ -3499,7 +3534,7 @@ var require_utils2 = __commonJS({
       }
       return output2;
     }
-    function encodeComponent(input2, isAllowed) {
+    function encodeComponent(input2, isAllowed, allowNonAscii = false) {
       let output2 = "";
       for (let i = 0; i < input2.length; i++) {
         const ch = input2[i];
@@ -3518,17 +3553,17 @@ var require_utils2 = __commonJS({
           if (code < 128) {
             output2 += BYTE_HEX[code];
           } else if (code < 55296 || code > 57343) {
-            output2 += percentEncodeNonAscii(code);
+            output2 += allowNonAscii ? ch : percentEncodeNonAscii(code);
           } else if (code <= 56319 && i + 1 < input2.length) {
             const low = input2.charCodeAt(i + 1);
             if (low >= 56320 && low <= 57343) {
-              output2 += percentEncodeNonAscii(65536 + (code - 55296 << 10) + (low - 56320));
+              output2 += allowNonAscii ? ch + input2[i + 1] : percentEncodeNonAscii(65536 + (code - 55296 << 10) + (low - 56320));
               i++;
             } else {
-              output2 += percentEncodeNonAscii(65533);
+              output2 += allowNonAscii ? "\uFFFD" : percentEncodeNonAscii(65533);
             }
           } else {
-            output2 += percentEncodeNonAscii(65533);
+            output2 += allowNonAscii ? "\uFFFD" : percentEncodeNonAscii(65533);
           }
         }
       }
@@ -3588,7 +3623,7 @@ var require_utils2 = __commonJS({
       }
       return void 0;
     }
-    function recomposeAuthority(component) {
+    function recomposeAuthority(component, allowNonAscii = false) {
       const uriTokens = [];
       if (component.userinfo !== void 0) {
         uriTokens.push(encodeUserinfo(component.userinfo));
@@ -3609,7 +3644,7 @@ var require_utils2 = __commonJS({
             if (ipV6res.isIPV6 === true || ipV6res.isIPVFuture === true) {
               host = `[${ipV6res.escapedHost}]`;
             } else {
-              host = reescapeHostDelimiters(host, false);
+              host = encodeHost(host, false, allowNonAscii);
             }
           }
         }
@@ -3631,7 +3666,7 @@ var require_utils2 = __commonJS({
       nonSimpleDomain,
       nonSimpleMailtoDomain,
       recomposeAuthority,
-      reescapeHostDelimiters,
+      encodeHost,
       normalizePercentEncoding,
       normalizePathEncoding,
       serializePathEncoding,
@@ -3641,6 +3676,7 @@ var require_utils2 = __commonJS({
       encodeFragment,
       escapePreservingEscapes,
       removeDotSegments,
+      removeDotSegmentsRelative,
       isIPv4,
       isUUID,
       normalizeIPv6,
@@ -3819,7 +3855,10 @@ var require_schemes2 = __commonJS({
         scheme: "urn",
         parse: urnParse,
         serialize: urnSerialize,
-        skipNormalize: true
+        skipNormalize: true,
+        // The NSS is opaque to generic URI path processing. In particular, RFC 2141
+        // and RFC 8141 do not treat slash-delimited dot segments as equivalent.
+        absolutePath: true
       }
     );
     var urnuuid = (
@@ -4112,16 +4151,18 @@ var require_schemes2 = __commonJS({
 var require_fast_uri2 = __commonJS({
   "node_modules/fast-uri/index.js"(exports, module) {
     "use strict";
-    var { normalizeIPv6, removeDotSegments, recomposeAuthority, normalizePercentEncoding, normalizePathEncoding, serializePathEncoding, normalizeQueryFragmentEncoding, encodeQuery, encodeFragment, reescapeHostDelimiters, isIPv4, nonSimpleDomain } = require_utils2();
+    var { normalizeIPv6, removeDotSegments, removeDotSegmentsRelative, recomposeAuthority, normalizePercentEncoding, normalizePathEncoding, serializePathEncoding, normalizeQueryFragmentEncoding, encodeQuery, encodeFragment, encodeHost, isIPv4, nonSimpleDomain } = require_utils2();
     var { SCHEMES, getSchemeHandler } = require_schemes2();
     var VALID_SCHEME = /^[A-Za-z][A-Za-z0-9+.-]*$/u;
     var MALFORMED_SCHEME_ERROR = "URI scheme is malformed.";
-    function decodeValidScheme(scheme) {
-      const decodedScheme = unescape(String(scheme));
-      if (!VALID_SCHEME.test(decodedScheme)) {
+    var MALFORMED_HOST_ERROR = "URI host is malformed.";
+    var FORBIDDEN_DOMAIN_HOST_CHARACTER = /[\0-\x20"#/:<>?@[\\\]^`{|}\x7F]/u;
+    function validateScheme(scheme) {
+      const stringScheme = String(scheme);
+      if (!VALID_SCHEME.test(stringScheme)) {
         throw new TypeError(MALFORMED_SCHEME_ERROR);
       }
-      return decodedScheme;
+      return stringScheme;
     }
     function normalize(uri, options) {
       if (typeof uri === "string") {
@@ -4138,6 +4179,7 @@ var require_fast_uri2 = __commonJS({
       const {
         parsed: baseParsed,
         malformedAuthorityOrPort: baseMalformed,
+        malformedReferenceEdge: baseMalformedReferenceEdge,
         malformedPercentEncoding: baseMalformedPercentEncoding,
         malformedSchemeSpecific: baseMalformedSchemeSpecific,
         malformedHost: baseMalformedHost,
@@ -4146,24 +4188,34 @@ var require_fast_uri2 = __commonJS({
       const {
         parsed: relativeParsed,
         malformedAuthorityOrPort: relativeMalformed,
+        malformedReferenceEdge: relativeMalformedReferenceEdge,
         malformedPercentEncoding: relativeMalformedPercentEncoding,
         malformedSchemeSpecific: relativeMalformedSchemeSpecific,
         malformedHost: relativeMalformedHost,
         malformedScheme: relativeMalformedScheme
       } = parseWithStatus(relativeURI, schemelessOptions);
-      if (baseMalformed || relativeMalformed || baseMalformedPercentEncoding || relativeMalformedPercentEncoding || baseMalformedSchemeSpecific || relativeMalformedSchemeSpecific || baseMalformedHost || relativeMalformedHost || baseMalformedScheme || relativeMalformedScheme) {
+      if (baseMalformed || relativeMalformed || baseMalformedReferenceEdge || relativeMalformedReferenceEdge || baseMalformedPercentEncoding || relativeMalformedPercentEncoding || baseMalformedSchemeSpecific || relativeMalformedSchemeSpecific || baseMalformedHost || relativeMalformedHost || baseMalformedScheme || relativeMalformedScheme) {
         throw new Error(baseParsed.error || relativeParsed.error || "URI is malformed.");
       }
       const resolved = resolveComponent(baseParsed, relativeParsed, schemelessOptions, true);
       const resolvedSchemeHandler = getSchemeHandler(options && options.scheme || resolved.scheme);
       const resolvedHost = resolved.host;
+      if ((resolved.scheme === "http" || resolved.scheme === "https") && !resolvedHost) {
+        throw new Error("HTTP URIs must have a host.");
+      }
       const resolvedHostIsIP = resolvedHost !== void 0 && resolvedHost !== "" && (isIPv4(resolvedHost) || normalizeIPv6(resolvedHost).isIPV6);
+      if (hasForbiddenDomainHost(resolved, options || {}, resolvedSchemeHandler, resolvedHostIsIP)) {
+        throw new Error(MALFORMED_HOST_ERROR);
+      }
       canonicalizeHost(resolved, options || {}, resolvedSchemeHandler, resolvedHostIsIP);
       const encodedASCIIHost = resolvedHost && resolvedHost.indexOf("%") !== -1 && !new RegExp("\\P{ASCII}", "u").test(resolvedHost);
       if (resolved.error && !encodedASCIIHost) {
         throw new Error(resolved.error);
       }
       schemelessOptions.skipEscape = true;
+      if (resolvedSchemeHandler && resolvedSchemeHandler.absolutePath) {
+        schemelessOptions.absolutePath = true;
+      }
       return serialize2(resolved, schemelessOptions);
     }
     function copyHost(target, source2) {
@@ -4184,7 +4236,8 @@ var require_fast_uri2 = __commonJS({
         target.userinfo = relative12.userinfo;
         copyHost(target, relative12);
         target.port = relative12.port;
-        target.path = removeDotSegments(relative12.path || "");
+        const relativeSchemeHandler = getSchemeHandler(relative12.scheme);
+        target.path = relativeSchemeHandler && relativeSchemeHandler.absolutePath ? relative12.path || "" : removeDotSegments(relative12.path || "");
         target.query = relative12.query;
       } else {
         if (relative12.userinfo !== void 0 || relative12.host !== void 0 || relative12.port !== void 0) {
@@ -4205,14 +4258,15 @@ var require_fast_uri2 = __commonJS({
             if (relative12.path[0] === "/") {
               target.path = removeDotSegments(relative12.path);
             } else {
-              if ((base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0) && !base.path) {
+              const baseHasAuthority = base.userinfo !== void 0 || base.host !== void 0 || base.port !== void 0;
+              if (baseHasAuthority && !base.path) {
                 target.path = "/" + relative12.path;
               } else if (!base.path) {
                 target.path = relative12.path;
               } else {
                 target.path = base.path.slice(0, base.path.lastIndexOf("/") + 1) + relative12.path;
               }
-              target.path = removeDotSegments(target.path);
+              target.path = base.scheme === void 0 && !baseHasAuthority && target.path[0] !== "/" ? removeDotSegmentsRelative(target.path) : removeDotSegments(target.path);
             }
             target.query = relative12.query;
           }
@@ -4255,12 +4309,13 @@ var require_fast_uri2 = __commonJS({
       const options = Object.assign({}, opts);
       const uriTokens = [];
       if (component.scheme) {
-        component.scheme = decodeValidScheme(component.scheme);
+        component.scheme = validateScheme(component.scheme);
       }
       const schemeHandler = getSchemeHandler(options.scheme || component.scheme);
       if (schemeHandler && schemeHandler.serialize) schemeHandler.serialize(component, options);
       const hasAuthority = component.userinfo !== void 0 || component.host !== void 0 || component.port !== void 0;
-      const pathNoScheme = !options.skipEscape && component.scheme === void 0 && !hasAuthority;
+      const schemelessReference = (component.scheme === void 0 || options.reference === "suffix") && !hasAuthority;
+      const pathNoScheme = !options.skipEscape && schemelessReference;
       if (component.path !== void 0) {
         if (!options.skipEscape) {
           component.path = serializePathEncoding(component.path, pathNoScheme);
@@ -4269,10 +4324,11 @@ var require_fast_uri2 = __commonJS({
         }
       }
       if (options.reference !== "suffix" && component.scheme) {
-        component.scheme = decodeValidScheme(component.scheme);
+        component.scheme = validateScheme(component.scheme);
         uriTokens.push(component.scheme, ":");
       }
-      const authority = recomposeAuthority(component);
+      const allowNonAsciiHost = options.unicodeSupport === true || Boolean(schemeHandler && schemeHandler.unicodeSupport);
+      const authority = recomposeAuthority(component, allowNonAsciiHost);
       if (authority !== void 0) {
         if (options.reference !== "suffix") {
           uriTokens.push("//");
@@ -4285,9 +4341,9 @@ var require_fast_uri2 = __commonJS({
       if (component.path !== void 0) {
         let s = component.path;
         if (!options.absolutePath && (!schemeHandler || !schemeHandler.absolutePath)) {
-          s = removeDotSegments(s);
+          s = schemelessReference && s[0] !== "/" ? removeDotSegmentsRelative(s) : removeDotSegments(s);
         }
-        if (pathNoScheme) {
+        if (schemelessReference) {
           s = serializePathEncoding(s, true);
         }
         if (authority === void 0 && s[0] === "/" && s[1] === "/") {
@@ -4335,15 +4391,33 @@ var require_fast_uri2 = __commonJS({
     }
     function canonicalizeHost(parsed, options, schemeHandler, isIP) {
       const bracketedIPLiteral = parsed.host && parsed.host[0] === "[" && parsed.host[parsed.host.length - 1] === "]";
+      if (hasForbiddenDomainHost(parsed, options, schemeHandler, isIP)) {
+        parsed.error = parsed.error || MALFORMED_HOST_ERROR;
+        return true;
+      }
       if (!options.unicodeSupport && (!schemeHandler || !schemeHandler.unicodeSupport) && parsed.host && !isIPLiteral(parsed.host) && (options.domainHost || schemeHandler && schemeHandler.domainHost) && isIP === false && !bracketedIPLiteral && nonSimpleDomain(parsed.host)) {
+        let url2;
         try {
-          parsed.host = new URL("http://" + parsed.host).hostname;
+          url2 = new URL("http://" + parsed.host);
         } catch (e) {
           parsed.error = parsed.error || "Host's domain name can not be converted to ASCII: " + e;
           return true;
         }
+        if (!isHostOnlyURL(url2)) {
+          parsed.error = parsed.error || MALFORMED_HOST_ERROR;
+          return true;
+        }
+        parsed.host = url2.hostname;
       }
       return false;
+    }
+    function hasForbiddenDomainHost(parsed, options, schemeHandler, isIP) {
+      return Boolean(
+        parsed.host && isIP === false && !isIPLiteral(parsed.host) && (options.domainHost || schemeHandler && schemeHandler.domainHost) && FORBIDDEN_DOMAIN_HOST_CHARACTER.test(parsed.host)
+      );
+    }
+    function isHostOnlyURL(url2) {
+      return url2.username === "" && url2.password === "" && url2.port === "" && url2.pathname === "/" && url2.search === "" && url2.hash === "" && url2.hostname !== "";
     }
     function parseWithStatus(uri, opts) {
       const options = Object.assign({}, opts);
@@ -4357,6 +4431,7 @@ var require_fast_uri2 = __commonJS({
         fragment: void 0
       };
       let malformedAuthorityOrPort = false;
+      const malformedReferenceEdge = uri.length !== 0 && (uri.charCodeAt(0) <= 32 || uri.charCodeAt(uri.length - 1) <= 32);
       let malformedPercentEncoding = false;
       let malformedSchemeSpecific = false;
       let malformedHost = false;
@@ -4389,6 +4464,9 @@ var require_fast_uri2 = __commonJS({
           }
         }
       }
+      if (malformedReferenceEdge) {
+        parsed.error = parsed.error || "URI must not contain leading or trailing C0 controls or spaces.";
+      }
       const matches = uri.match(URI_PARSE);
       if (matches) {
         parsed.scheme = matches[1];
@@ -4399,9 +4477,8 @@ var require_fast_uri2 = __commonJS({
         parsed.query = matches[7];
         parsed.fragment = matches[8];
         if (parsed.scheme !== void 0) {
-          const decodedScheme = unescape(parsed.scheme);
-          if (VALID_SCHEME.test(decodedScheme)) {
-            parsed.scheme = decodedScheme.toLowerCase();
+          if (VALID_SCHEME.test(parsed.scheme)) {
+            parsed.scheme = parsed.scheme.toLowerCase();
           } else {
             parsed.error = parsed.error || MALFORMED_SCHEME_ERROR;
             malformedScheme = true;
@@ -4432,7 +4509,7 @@ var require_fast_uri2 = __commonJS({
               parsed.ipv6Zone = parsed.host.slice(parsed.host.indexOf("%") + 1);
             }
             if (malformedIPLiteral) {
-              parsed.error = parsed.error || "URI host is malformed.";
+              parsed.error = parsed.error || MALFORMED_HOST_ERROR;
               malformedAuthorityOrPort = true;
             }
           } else {
@@ -4455,12 +4532,18 @@ var require_fast_uri2 = __commonJS({
         if (!malformedIPLiteral) {
           malformedHost = canonicalizeHost(parsed, options, schemeHandler, isIP);
         }
-        if (uri.indexOf("%") !== -1 && parsed.host !== void 0 && !malformedIPLiteral) {
-          let host = isIP ? parsed.host : normalizePercentEncoding(parsed.host, true);
-          if (!isIP) {
+        if (parsed.host !== void 0 && !malformedIPLiteral) {
+          let host = parsed.host;
+          if (uri.indexOf("%") !== -1 && !isIP) {
+            host = normalizePercentEncoding(host, true);
             host = normalizePercentEncoding(host.toLowerCase());
           }
-          parsed.host = reescapeHostDelimiters(host, isIP);
+          if (options.scheme !== "null") {
+            const allowNonAsciiHost = options.unicodeSupport === true || Boolean(schemeHandler && schemeHandler.unicodeSupport);
+            parsed.host = encodeHost(host, isIP, allowNonAsciiHost);
+          } else {
+            parsed.host = host;
+          }
         }
         if (!schemeHandler || schemeHandler && !schemeHandler.skipNormalize) {
           if (parsed.path) {
@@ -4482,7 +4565,7 @@ var require_fast_uri2 = __commonJS({
       } else {
         parsed.error = parsed.error || "URI can not be parsed.";
       }
-      return { parsed, malformedAuthorityOrPort, malformedPercentEncoding, malformedSchemeSpecific, malformedHost, malformedScheme };
+      return { parsed, malformedAuthorityOrPort, malformedReferenceEdge, malformedPercentEncoding, malformedSchemeSpecific, malformedHost, malformedScheme };
     }
     function parse4(uri, opts) {
       return parseWithStatus(uri, opts).parsed;
@@ -4491,10 +4574,11 @@ var require_fast_uri2 = __commonJS({
       return normalizeStringWithStatus(uri, opts).normalized;
     }
     function normalizeStringWithStatus(uri, opts) {
-      const { parsed, malformedAuthorityOrPort, malformedPercentEncoding, malformedSchemeSpecific, malformedHost, malformedScheme } = parseWithStatus(uri, opts);
+      const { parsed, malformedAuthorityOrPort, malformedReferenceEdge, malformedPercentEncoding, malformedSchemeSpecific, malformedHost, malformedScheme } = parseWithStatus(uri, opts);
       return {
-        normalized: malformedAuthorityOrPort || malformedPercentEncoding || malformedSchemeSpecific || malformedHost || malformedScheme ? uri : serialize2(parsed, opts),
+        normalized: malformedAuthorityOrPort || malformedReferenceEdge || malformedPercentEncoding || malformedSchemeSpecific || malformedHost || malformedScheme ? uri : serialize2(parsed, opts),
         malformedAuthorityOrPort,
+        malformedReferenceEdge,
         malformedPercentEncoding,
         malformedSchemeSpecific,
         malformedHost,
@@ -4511,8 +4595,8 @@ var require_fast_uri2 = __commonJS({
       } catch {
         return void 0;
       }
-      const { normalized, malformedAuthorityOrPort, malformedPercentEncoding, malformedSchemeSpecific, malformedHost, malformedScheme } = normalizeStringWithStatus(value, opts);
-      return malformedAuthorityOrPort || malformedPercentEncoding || malformedSchemeSpecific || malformedHost || malformedScheme ? void 0 : normalized;
+      const { normalized, malformedAuthorityOrPort, malformedReferenceEdge, malformedPercentEncoding, malformedSchemeSpecific, malformedHost, malformedScheme } = normalizeStringWithStatus(value, opts);
+      return malformedAuthorityOrPort || malformedReferenceEdge || malformedPercentEncoding || malformedSchemeSpecific || malformedHost || malformedScheme ? void 0 : normalized;
     }
     var fastUri = {
       SCHEMES,
@@ -7763,6 +7847,10 @@ var require__ = __commonJS({
     } });
   }
 });
+
+// plugin/mcp/apex.mjs
+import { realpath as realpath12 } from "node:fs/promises";
+import { fileURLToPath as fileURLToPath4 } from "node:url";
 
 // packages/kernel/dist/canonical.js
 import { createHash } from "node:crypto";
@@ -11148,7 +11236,7 @@ var IacBindingV1Schema = Type.Object({
     implementation: NonEmptyStringSchema,
     version: NonEmptyStringSchema,
     parameters: Type.Record(NonEmptyStringSchema, Type.Unknown()),
-    scopeLogicalId: Type.Optional(Type.String({ pattern: "^[A-Za-z_][A-Za-z0-9_]*$", maxLength: 256 })),
+    scopeLogicalId: Type.Optional(Type.String({ pattern: "^[A-Za-z_][A-Za-z0-9_-]*$", maxLength: 256 })),
     physicalResources: Type.Optional(Type.Array(Type.Object({
       resourceId: Type.String({
         minLength: 1,
@@ -14663,7 +14751,12 @@ var CostLineItemV1Schema = Type.Object({
     provider: NonEmptyStringSchema,
     uri: NonEmptyStringSchema,
     retrievedAt: IsoDateTimeSchema,
-    priceId: Type.Optional(NonEmptyStringSchema)
+    priceId: Type.Optional(NonEmptyStringSchema),
+    azureMcp: Type.Optional(Type.Object({
+      toolVersion: Type.String({ pattern: "^3\\.[0-9]+\\.[0-9]+$" }),
+      returnedRowCount: Type.Integer({ minimum: 1, maximum: 5e3 }),
+      paginationStatus: Type.Union([Type.Literal("complete"), Type.Literal("partial")])
+    }, { additionalProperties: false }))
   }, { additionalProperties: false }),
   uncertainty: Type.Object({
     lowerMonthlyCost: Type.Number({ minimum: 0 }),
@@ -15029,6 +15122,16 @@ function hasValidCostArithmetic(estimate) {
   const linesAreValid = estimate.lineItems.every((line) => arithmeticEqual(line.monthlyCost, line.quantity * line.unitPrice * line.unitsPerMonth) && line.uncertainty.lowerMonthlyCost <= line.monthlyCost && line.monthlyCost <= line.uncertainty.upperMonthlyCost);
   const lineTotal = estimate.lineItems.reduce((total, line) => total + line.monthlyCost, 0);
   return linesAreValid && arithmeticEqual(estimate.totalMonthlyCost, lineTotal);
+}
+function hasValidCostPricingSources(estimate) {
+  return estimate.lineItems.every(({ source: source2 }) => {
+    if (/^(?:microsoft )?(?:arm mcp|azure[- ]resource[- ]manager[- ]mcp)$/iu.test(source2.provider))
+      return false;
+    const isAzureMcp = /^azure[- ]mcp(?:[- ]server)?$/iu.test(source2.provider);
+    if (!isAzureMcp)
+      return source2.azureMcp === void 0;
+    return source2.azureMcp !== void 0 && source2.azureMcp.returnedRowCount < 5e3 && source2.azureMcp.paginationStatus === "complete" && source2.priceId !== void 0;
+  });
 }
 function hasOnlyTypedSecretReferences(inputs) {
   return Object.values(inputs.inputs).every((input2) => input2.kind === "value" || input2.kind === "secret-reference" && input2.reference.length > 0);
@@ -15533,6 +15636,8 @@ var approvalEvidenceProperties = {
   actor: NonEmptyStringSchema,
   dependencyHash: Sha256Schema,
   previewHash: Type.Optional(Sha256Schema),
+  // Gate 4 acceptance requires this binding; earlier gates have no deployment context.
+  approvalContextHash: Type.Optional(Sha256Schema),
   writerTransferClaimHash: Type.Optional(Sha256Schema),
   writerEpoch: Type.Integer({ minimum: 1 }),
   decidedAt: Type.String({
@@ -15542,7 +15647,41 @@ var approvalEvidenceProperties = {
     pattern: "^\\d{4}-\\d{2}-\\d{2}T\\d{2}:\\d{2}:\\d{2}(?:\\.\\d+)?(?:Z|[+-]\\d{2}:\\d{2})$"
   }))
 };
+var ApprovalContextV1Schema = Type.Object({
+  schemaVersion: ContractVersionSchema,
+  projectId: ProjectIdSchema,
+  runId: RunIdSchema,
+  previewHash: Sha256Schema,
+  sourceHashes: Type.Record(NonEmptyStringSchema, Sha256Schema),
+  contentType: Type.Literal("text/markdown"),
+  content: NonEmptyStringSchema
+}, { $id: "https://schemas.apexops.dev/approval-context-v1.json", additionalProperties: false });
+var delegatedApprovalProperties = {
+  ...approvalEvidenceProperties,
+  decision: Type.Literal("approved"),
+  mechanism: Type.Literal("lab-delegation"),
+  recipientIdentity: NonEmptyStringSchema,
+  policyHash: Sha256Schema,
+  consentHash: Sha256Schema,
+  evaluator: Type.Literal("kernel-lab-delegation-v1"),
+  writerTransferClaimHash: Type.Optional(Type.Never()),
+  expiresAt: IsoDateTimeSchema
+};
 var ApprovalEvidenceV1Schema = Type.Union([
+  Type.Object({
+    ...delegatedApprovalProperties,
+    gate: Type.Literal(1),
+    previewHash: Type.Optional(Type.Never()),
+    approvalContextHash: Type.Optional(Type.Never()),
+    scopeEvidenceHash: Type.Optional(Type.Never())
+  }, { additionalProperties: false }),
+  Type.Object({
+    ...delegatedApprovalProperties,
+    gate: Type.Literal(4),
+    previewHash: Sha256Schema,
+    approvalContextHash: Sha256Schema,
+    scopeEvidenceHash: Sha256Schema
+  }, { additionalProperties: false }),
   Type.Object({
     ...approvalEvidenceProperties,
     mechanism: Type.Literal("tty"),
@@ -16008,6 +16147,54 @@ var ImprovementPolicyV1Schema = Type.Object({
   contextInjection: Type.Literal(false)
 }, { $id: "https://schemas.apexops.dev/improvement-policy-v1.json", additionalProperties: false });
 
+// packages/contracts/dist/lab-delegation.js
+var uuid = Type.String({ pattern: "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$" });
+var LabDelegationPolicyV1Schema = Type.Object({
+  schemaVersion: ContractVersionSchema,
+  projectId: ProjectIdSchema,
+  runId: RunIdSchema,
+  purpose: Type.Literal("lab"),
+  environment: EnvironmentSchema,
+  track: Type.Literal("bicep"),
+  cloud: Type.Literal("AzureCloud"),
+  tenantId: uuid,
+  subscriptionId: uuid,
+  targetScope: NonEmptyStringSchema,
+  requirementsHash: Sha256Schema,
+  resourceIds: Type.Array(NonEmptyStringSchema, { minItems: 1, maxItems: 256, uniqueItems: true }),
+  gates: Type.Array(Type.Union([Type.Literal(1), Type.Literal(4)]), { minItems: 1, uniqueItems: true }),
+  operation: Type.Literal("apply"),
+  writerEpoch: Type.Integer({ minimum: 1 }),
+  recipientIdentity: NonEmptyStringSchema,
+  expiresAt: IsoDateTimeSchema
+}, { $id: "https://schemas.apexops.dev/lab-delegation-policy-v1.json", additionalProperties: false });
+var LabDelegationConsentV1Schema = Type.Object({
+  schemaVersion: ContractVersionSchema,
+  policyHash: Sha256Schema,
+  actor: NonEmptyStringSchema,
+  mechanism: Type.Literal("terminal-policy-confirmation"),
+  userOwnedScopeConfirmed: Type.Literal(true),
+  syntheticNonSensitiveConfirmed: Type.Literal(true),
+  futurePreviewReviewed: Type.Literal(false),
+  consentedAt: IsoDateTimeSchema,
+  expiresAt: IsoDateTimeSchema
+}, { $id: "https://schemas.apexops.dev/lab-delegation-consent-v1.json", additionalProperties: false });
+var LabApplyScopeV1Schema = Type.Object({
+  schemaVersion: ContractVersionSchema,
+  previewHash: Sha256Schema,
+  cloud: Type.Literal("AzureCloud"),
+  tenantId: uuid,
+  subscriptionId: uuid,
+  targetScope: NonEmptyStringSchema,
+  executor: Type.Literal("azd"),
+  hooksAbsent: Type.Literal(true),
+  extensionsAbsent: Type.Literal(true),
+  resourceStates: Type.Array(Type.Object({
+    resourceId: NonEmptyStringSchema,
+    state: Type.Union([Type.Literal("absent"), Type.Literal("present")])
+  }, { additionalProperties: false }), { maxItems: 256 })
+}, { $id: "https://schemas.apexops.dev/lab-apply-scope-v1.json", additionalProperties: false });
+
 // packages/contracts/dist/native-validation.js
 var NATIVE_VALIDATION_COMMANDS = {
   bicep: [
@@ -16446,10 +16633,10 @@ var PriceRecordSchema = Type.Object({
   }, { additionalProperties: false })
 }, { additionalProperties: false });
 var ProvenanceSchema = Type.Object({
-  provider: Type.Literal("azure-resource-manager-mcp"),
+  provider: Type.Literal("azure-mcp-server"),
   endpointId: IdentifierSchema,
   toolName: IdentifierSchema,
-  toolVersion: Type.String({ pattern: "^[0-9]+(?:\\.[0-9]+){1,3}(?:-[0-9A-Za-z.-]+)?$", maxLength: 32 }),
+  toolVersion: Type.String({ pattern: "^3\\.[0-9]+\\.[0-9]+$", maxLength: 32 }),
   toolchainHash: Sha256Schema,
   toolsListHash: Sha256Schema,
   rawSourceDigest: Sha256Schema,
@@ -16479,8 +16666,8 @@ var PricingEvidenceV1Schema = Type.Object({
       status: Type.Literal("matched"),
       records: Type.Array(PriceRecordSchema, { minItems: 1, maxItems: 256 }),
       totalAmount: Type.Number({ minimum: 0, maximum: 1e12 }),
+      sourceRowCount: Type.Integer({ minimum: 1, maximum: 5e3 }),
       paginationStatus: Type.Union([Type.Literal("complete"), Type.Literal("partial")]),
-      continuationCursorHash: Type.Optional(Sha256Schema),
       bulk: Type.Optional(Type.Object({
         deduplicatedSpecs: Type.Integer({ minimum: 1, maximum: 256 }),
         successful: Type.Integer({ minimum: 0, maximum: 256 }),
@@ -16701,13 +16888,45 @@ var InputAnswerV1Schema = Type.Object({
   questionId: NonEmptyStringSchema,
   value: InputValueV1Schema
 }, { additionalProperties: false });
+var SubmittedInputAnswerV1Schema = Type.Object({ questionId: NonEmptyStringSchema, value: Type.Union([Type.String(), InputValueV1Schema]) }, { additionalProperties: false });
 var InputSubmissionV1Schema = Type.Object({
   schemaVersion: ContractVersionSchema,
   requestId: TaskIdSchema,
   expectedHead: Sha256Schema,
   ownerEpoch: Type.Integer({ minimum: 1 }),
-  answers: Type.Array(InputAnswerV1Schema, { minItems: 1 })
+  answers: Type.Array(SubmittedInputAnswerV1Schema, { minItems: 1 })
 }, { $id: "https://schemas.apexops.dev/input-submission-v1.json", additionalProperties: false });
+var InputAmendmentV1Schema = Type.Object({
+  schemaVersion: ContractVersionSchema,
+  requestId: TaskIdSchema,
+  baseAnswersHash: Sha256Schema,
+  answers: Type.Array(SubmittedInputAnswerV1Schema, { minItems: 1, maxItems: 128 })
+}, { $id: "https://schemas.apexops.dev/input-amendment-v1.json", additionalProperties: false });
+var RecordedInputV1Schema = Type.Object({
+  requestId: TaskIdSchema,
+  kind: Type.Union([Type.Literal("requirements"), Type.Literal("architecture")]),
+  baseAnswersHash: Sha256Schema,
+  questions: Type.Array(QuestionV1Schema, { minItems: 1 }),
+  answers: Type.Array(InputAnswerV1Schema)
+}, { additionalProperties: false });
+var InputAmendmentProposalV1Schema = Type.Object({
+  schemaVersion: ContractVersionSchema,
+  projectId: ProjectIdSchema,
+  runId: RunIdSchema,
+  expectedHead: Sha256Schema,
+  ownerEpoch: Type.Integer({ minimum: 1 }),
+  amendment: Type.Object(InputAmendmentV1Schema.properties, { additionalProperties: false }),
+  kind: Type.Union([Type.Literal("requirements"), Type.Literal("architecture")]),
+  previousAnswers: Type.Array(InputAnswerV1Schema),
+  answers: Type.Array(InputAnswerV1Schema),
+  reason: Type.String({ minLength: 1, maxLength: 2048 }),
+  invalidatedNodes: Type.Array(NonEmptyStringSchema, { uniqueItems: true }),
+  invalidatedGates: Type.Array(Type.Integer({ minimum: 1, maximum: 4 }), { uniqueItems: true }),
+  reapprovalPath: NonEmptyStringSchema,
+  filesModified: Type.Literal(false),
+  deploymentAuthorized: Type.Literal(false),
+  proposalHash: Sha256Schema
+}, { $id: "https://schemas.apexops.dev/input-amendment-proposal-v1.json", additionalProperties: false });
 var TaskResultV1Schema = Type.Union([
   Type.Object({
     schemaVersion: ContractVersionSchema,
@@ -16766,6 +16985,9 @@ function hasValidInputRequestQuestions(questions) {
 
 // packages/contracts/dist/index.js
 var contractSchemas = [
+  LabDelegationPolicyV1Schema,
+  LabDelegationConsentV1Schema,
+  LabApplyScopeV1Schema,
   GovernanceProvisionPlanV1Schema,
   RepositoryPublishConfigV1Schema,
   RepositoryPublishPlanV1Schema,
@@ -16781,6 +17003,8 @@ var contractSchemas = [
   TaskEnvelopeV1Schema,
   InputRequestV1Schema,
   InputSubmissionV1Schema,
+  InputAmendmentV1Schema,
+  InputAmendmentProposalV1Schema,
   EventV1Schema,
   RepeatGuardRecordsV1Schema,
   RequirementsV1Schema,
@@ -16789,6 +17013,7 @@ var contractSchemas = [
   ImplementationIntentV1Schema,
   IacBindingV1Schema,
   AzdBindingV1Schema,
+  ApprovalContextV1Schema,
   ApprovalEvidenceV1Schema,
   DeploymentPreviewV1Schema,
   OperationRecordV1Schema,
@@ -16837,6 +17062,9 @@ var metadata = (maxBytes, sensitivity = "internal") => ({
   compatibility: "strict-v1"
 });
 var contractMetadata = {
+  "https://schemas.apexops.dev/lab-delegation-policy-v1.json": metadata(65536, "confidential"),
+  "https://schemas.apexops.dev/lab-delegation-consent-v1.json": metadata(8192, "confidential"),
+  "https://schemas.apexops.dev/lab-apply-scope-v1.json": metadata(65536, "confidential"),
   "https://schemas.apexops.dev/governance-provision-plan-v1.json": metadata(65536, "confidential"),
   "https://schemas.apexops.dev/repository-publish-config-v1.json": metadata(16384, "confidential"),
   "https://schemas.apexops.dev/repository-publish-plan-v1.json": metadata(262144, "confidential"),
@@ -16854,6 +17082,8 @@ var contractMetadata = {
   "https://schemas.apexops.dev/task-envelope-v1.json": metadata(131072, "confidential"),
   "https://schemas.apexops.dev/input-request-v1.json": metadata(65536, "confidential"),
   "https://schemas.apexops.dev/input-submission-v1.json": metadata(65536, "confidential"),
+  "https://schemas.apexops.dev/input-amendment-v1.json": metadata(262144, "confidential"),
+  "https://schemas.apexops.dev/input-amendment-proposal-v1.json": metadata(1048576, "confidential"),
   "https://schemas.apexops.dev/event-v1.json": metadata(262144, "confidential"),
   "https://schemas.apexops.dev/requirements-v1.json": metadata(524288, "confidential"),
   "https://schemas.apexops.dev/requirements-amendment-v1.json": metadata(262144, "confidential"),
@@ -16862,6 +17092,7 @@ var contractMetadata = {
   "https://schemas.apexops.dev/iac-binding-v1.json": metadata(524288, "confidential"),
   "https://schemas.apexops.dev/azd-binding-v1.json": metadata(524288, "confidential"),
   "https://schemas.apexops.dev/approval-evidence-v1.json": metadata(32768, "confidential"),
+  "https://schemas.apexops.dev/approval-context-v1.json": metadata(4194304, "confidential"),
   "https://schemas.apexops.dev/deployment-preview-v1.json": metadata(2097152, "confidential"),
   "https://schemas.apexops.dev/operation-record-v1.json": metadata(65536, "confidential"),
   "https://schemas.apexops.dev/resource-inventory-v1.json": metadata(4194304, "confidential"),
@@ -17085,6 +17316,96 @@ function inheritGate(gate, fromRunId, dependencyHash, decidedAt) {
     throw new Error(`Gate ${gate.gate} dependencies are not approved for inheritance`);
   }
   return { gate: gate.gate, state: "inherited", dependencyHash, inheritedFromRunId: fromRunId, decidedAt };
+}
+
+// packages/kernel/dist/lab-delegation.js
+registerContractFormats();
+var LAB_DELEGATION_MAX_TTL_MS = 24 * 60 * 60 * 1e3;
+var LabDelegationError = class extends Error {
+  reason;
+  constructor(reason, message) {
+    super(message);
+    this.reason = reason;
+    this.name = "LabDelegationError";
+  }
+};
+function requireFact(valid, reason, message) {
+  if (!valid)
+    throw new LabDelegationError(reason, message);
+}
+function assertLabDelegationPolicy(policy, run, requirements, recipientIdentity, now) {
+  requireFact(value_exports2.Check(LabDelegationPolicyV1Schema, policy), "LAB_DELEGATION_POLICY_INVALID", "Invalid delegation policy");
+  requireFact(value_exports2.Check(RunConfigV1Schema, run) && value_exports2.Check(RequirementsV1Schema, requirements), "LAB_DELEGATION_INPUT_INVALID", "Current validated run and Requirements contracts are required");
+  requireFact(run.purpose === "lab" && !/(?:^|-)(?:prod|production)(?:-|$)/u.test(run.environment), "LAB_DELEGATION_PRODUCTION_BLOCKED", "Delegation is limited to non-production lab runs");
+  requireFact(policy.projectId === run.projectId && policy.runId === run.runId && policy.environment === run.environment && policy.targetScope === run.targetScope && policy.track === run.iacTool && policy.writerEpoch === run.ownerEpoch && policy.recipientIdentity === recipientIdentity, "LAB_DELEGATION_RUN_MISMATCH", "Delegation policy does not name the selected run, target, track and current writer/recipient");
+  const target = /^\/subscriptions\/([0-9a-f-]+)\/resourceGroups\/([A-Za-z0-9_()-][A-Za-z0-9_.()-]*)$/u.exec(policy.targetScope);
+  requireFact(target !== null && target[1] === policy.subscriptionId, "LAB_DELEGATION_TARGET_INVALID", "An exact subscription/resource-group scope is required");
+  const prefix = `${policy.targetScope}/providers/`;
+  requireFact(policy.resourceIds.every((id) => id.startsWith(prefix) && /^Microsoft\.[A-Za-z0-9.]+(?:\/[A-Za-z0-9_().-]+)+$/u.test(id.slice(prefix.length)) && !id.slice(prefix.length).split("/").some((part) => part === "." || part === "..") && id.slice(prefix.length).split("/").length % 2 === 1) && new Set(policy.resourceIds.map((id) => id.toLowerCase())).size === policy.resourceIds.length, "LAB_DELEGATION_SCOPE_INVALID", "The policy must allowlist unique exact ARM resource IDs inside its user-confirmed resource group");
+  requireFact(policy.requirementsHash === sha256Json(requirements) && requirements.projectId === run.projectId && requirements.environment === run.environment && requirements.unknowns.length === 0 && requirements.requirements.every(({ status: status2 }) => status2 === "confirmed"), "LAB_DELEGATION_REQUIREMENTS_UNPROVEN", "Delegation requires exact accepted Requirements with no unknown or deferred requirements");
+  const ttl = Date.parse(policy.expiresAt) - Date.parse(now);
+  requireFact(Number.isFinite(ttl) && ttl > 0 && ttl <= LAB_DELEGATION_MAX_TTL_MS, "LAB_DELEGATION_EXPIRED", "Delegation must expire within 24 hours and must still be current");
+}
+function evaluateLabDelegation(context) {
+  const { policy, consent, run, gate, now, preview, scope: scope2 } = context;
+  assertLabDelegationPolicy(policy, run, context.requirements, context.recipientIdentity, now);
+  const policyHash = sha256Json(policy);
+  requireFact(value_exports2.Check(LabDelegationConsentV1Schema, consent) && consent.policyHash === policyHash && context.activePolicyHash === policyHash && sha256Json(consent) === context.consentHash && context.activeConsentHash === context.consentHash && consent.expiresAt === policy.expiresAt && Date.parse(consent.consentedAt) <= Date.parse(now) && Date.parse(consent.expiresAt) - Date.parse(consent.consentedAt) > 0 && Date.parse(consent.expiresAt) - Date.parse(consent.consentedAt) <= LAB_DELEGATION_MAX_TTL_MS, "LAB_DELEGATION_CONSENT_INVALID", "Current, explicitly recorded human policy consent is required; a policy file or agent prose is not consent");
+  const record6 = run.gates.find((item) => item.gate === gate);
+  requireFact(record6?.state === (context.phase === "execution" ? "approved" : "open") && policy.gates.includes(gate), "LAB_DELEGATION_GATE_INVALID", "The gate is not current or is not delegated");
+  requireFact(context.reviewBlockers.length === 0, "LAB_DELEGATION_BLOCKED", "Unresolved review blockers cannot be delegated away");
+  const authorityExpiry = context.authorityExpiresAt === void 0 ? Number.POSITIVE_INFINITY : Date.parse(context.authorityExpiresAt);
+  requireFact(authorityExpiry > Date.parse(now), "LAB_DELEGATION_WRITER_EXPIRED", "Delegated writer authority has expired");
+  let expiresAt = new Date(Math.min(Date.parse(policy.expiresAt), authorityExpiry)).toISOString();
+  if (gate === 4) {
+    requireFact(preview !== void 0 && value_exports2.Check(DeploymentPreviewV1Schema, preview), "LAB_DELEGATION_PREVIEW_INVALID", "A validated exact preview contract is required");
+    requireFact(preview !== void 0 && preview.operation === "apply", "LAB_DELEGATION_DESTROY_UNSUPPORTED", "Delegated destroy is unsupported; it requires its own current preview and normal human approval");
+    requireFact(preview !== void 0 && preview.projectId === run.projectId && preview.runId === run.runId && preview.environment === run.environment && preview.track === "bicep" && preview.target === policy.targetScope && preview.ownerEpoch === run.ownerEpoch && preview.dependencyRevision === context.dependencyRevision && preview.commit === context.dependencyRevision && record6?.dependencyHash === preview.previewHash && Date.parse(preview.createdAt) <= Date.parse(now) && Date.parse(preview.expiresAt) > Date.parse(now), "LAB_DELEGATION_PREVIEW_STALE", "The exact preview, dependency revision, target and writer must be current");
+    if (preview === void 0)
+      throw new LabDelegationError("LAB_DELEGATION_PREVIEW_STALE", "Preview is missing");
+    const { previewHash, ...body } = preview;
+    requireFact(sha256Json(body) === previewHash && /^[a-f0-9]{64}$/u.test(context.approvalContextHash ?? ""), "LAB_DELEGATION_CONTEXT_INVALID", "Exact immutable preview and approval-context hashes are required");
+    requireFact(preview.blockers.length === 0, "LAB_DELEGATION_BLOCKED", "Preview blockers cannot be delegated away");
+    requireFact(scope2 !== void 0 && value_exports2.Check(LabApplyScopeV1Schema, scope2) && scope2.previewHash === previewHash && scope2.targetScope === policy.targetScope && scope2.cloud === policy.cloud && scope2.tenantId === policy.tenantId && scope2.subscriptionId === policy.subscriptionId, "LAB_DELEGATION_SCOPE_UNPROVEN", "Native provider identity and exact resource-state observations are required; tags or an external ledger are not authorization");
+    const states = new Map(scope2?.resourceStates.map(({ resourceId, state }) => [resourceId, state]));
+    const ids = preview.changes.map(({ resourceId }) => resourceId);
+    requireFact(states.size === scope2?.resourceStates.length && ids.length === new Set(ids).size && states.size === ids.length && ids.every((id) => states.has(id)), "LAB_DELEGATION_SCOPE_UNPROVEN", "Every exact preview resource needs its own unambiguous provider observation");
+    requireFact(preview.changes.every(({ resourceId, action, material }) => policy.resourceIds.includes(resourceId) && (action === "create" && material && states.get(resourceId) === "absent" || action === "no-op" && !material && states.get(resourceId) === "present")), "LAB_DELEGATION_CHANGE_BLOCKED", "Only allowlisted creates of absent resources and non-material no-ops are delegated; updates, deletes, replacements, unknowns and pre-existing creates are blocked");
+    expiresAt = new Date(Math.min(Date.parse(expiresAt), Date.parse(preview.expiresAt))).toISOString();
+  }
+  const base = {
+    schemaVersion: CONTRACT_VERSION,
+    projectId: run.projectId,
+    runId: run.runId,
+    decision: "approved",
+    mechanism: "lab-delegation",
+    actor: `agent:${context.recipientIdentity}`,
+    recipientIdentity: context.recipientIdentity,
+    evaluator: "kernel-lab-delegation-v1",
+    policyHash,
+    consentHash: context.consentHash,
+    dependencyHash: record6.dependencyHash,
+    writerEpoch: run.ownerEpoch,
+    decidedAt: now,
+    expiresAt
+  };
+  if (gate === 1)
+    return { ...base, gate: 1 };
+  if (preview === void 0 || scope2 === void 0 || context.approvalContextHash === void 0)
+    throw new LabDelegationError("LAB_DELEGATION_SCOPE_UNPROVEN", "Gate 4 requires exact scope and context evidence");
+  return {
+    ...base,
+    gate: 4,
+    previewHash: preview.previewHash,
+    approvalContextHash: context.approvalContextHash,
+    scopeEvidenceHash: sha256Json(scope2)
+  };
+}
+function verifyLabDelegationApproval(context, approval) {
+  const expected = evaluateLabDelegation({ ...context, phase: "execution" });
+  const { decidedAt: expectedTime, expiresAt: expectedExpiry, ...expectedBinding } = expected;
+  const { decidedAt, expiresAt, ...binding } = approval;
+  requireFact(sha256Json(binding) === sha256Json(expectedBinding) && Date.parse(decidedAt) >= Date.parse(context.consent.consentedAt) && Date.parse(decidedAt) <= Date.parse(expectedTime) && expiresAt !== void 0 && Date.parse(expiresAt) > Date.parse(expectedTime) && Date.parse(expiresAt) <= Date.parse(expectedExpiry), "LAB_DELEGATION_APPROVAL_INVALID", "Delegated approval does not bind the current consent, preview, context, scope and agent provenance");
 }
 
 // packages/kernel/dist/improvement-store.js
@@ -17765,8 +18086,8 @@ var MAX_SHARE_MARKER_BYTES = 4 * 1024;
 var enclosingShares = new AsyncLocalStorage2();
 var SHARE_MARKER_REMOVE_ATTEMPTS = 8;
 var DirectoryLockShareCloseError = class extends Error {
-  constructor(label, cause) {
-    super(`${label} share window could not be closed`, { cause });
+  constructor(label2, cause) {
+    super(`${label2} share window could not be closed`, { cause });
     this.name = "DirectoryLockShareCloseError";
   }
 };
@@ -18374,6 +18695,7 @@ var RunRepository = class {
         afterHash,
         after: next
       };
+      await input2.validateBeforeCommit?.(structuredClone(current));
       await atomicWriteJson(this.intentPath, intent, { refuseOverwrite: true });
       await this.faultInjector?.("intent");
       const event = await journal.append({
@@ -18926,7 +19248,7 @@ function reviewNonceFromPrompt(prompt) {
 function buildReviewPrompt(request) {
   if (!NONCE_PATTERN.test(request.nonce))
     throw new TypeError("Review nonce must be 32 lowercase hex characters");
-  if (request.files.filter(({ label }) => label === "subject").length !== 1)
+  if (request.files.filter(({ label: label2 }) => label2 === "subject").length !== 1)
     throw new TypeError("Review prompt needs exactly one subject file");
   for (const file2 of request.files) {
     if (!isAbsolute2(file2.path) || /[\r\n]/u.test(file2.path))
@@ -18934,7 +19256,7 @@ function buildReviewPrompt(request) {
     if (!SHA256_PATTERN.test(file2.sha256))
       throw new TypeError("Review file hashes must be SHA-256");
   }
-  const shape = request.wellArchitected ? '{"findings":[{"id":"F-1","severity":"high","title":"...","detail":"..."}],"criteria":[{"criterionId":"security","outcome":"finding","rationale":"...","findingIds":["F-1"]}]}' : '{"findings":[{"id":"F-1","severity":"high","title":"...","detail":"..."}]}';
+  const shape2 = request.wellArchitected ? '{"findings":[{"id":"F-1","severity":"high","title":"...","detail":"..."}],"criteria":[{"criterionId":"security","outcome":"finding","rationale":"...","findingIds":["F-1"]}]}' : '{"findings":[{"id":"F-1","severity":"high","title":"...","detail":"..."}]}';
   return [
     `${REVIEW_REQUEST_HEADER}: nonce=${request.nonce}`,
     "",
@@ -18946,8 +19268,9 @@ function buildReviewPrompt(request) {
     "",
     "Follow the instructions file. Reply with exactly one fenced code block whose info string is",
     `${REVIEW_ANSWER_FENCE} and whose content is one JSON object in this shape:`,
-    shape,
+    shape2,
     `severity is one of ${SEVERITIES.join(", ")}. Use "findings": [] when there are no problems.`,
+    "Each finding uses only id, severity, title and detail; the kernel adds evidence references, and extra fields are discarded.",
     `Report at most ${REVIEW_MAX_FINDINGS} findings and keep all titles and details together under ${Math.floor(REVIEW_MAX_FINDINGS_BYTES / 2048)} KB; merge related problems.`,
     ...request.wellArchitected ? [
       `Give exactly one criteria entry for each pillar: ${PILLARS.join(", ")}.`,
@@ -19034,7 +19357,6 @@ function parseReviewAnswer(response, options) {
   const findings = value.findings.map((finding2, index) => {
     if (!isPlainObject(finding2))
       throw new ReviewCaptureError("unparseable", "Each review finding must be an object");
-    exactKeys(finding2, ["id", "severity", "title", "detail"], `finding ${index + 1}`);
     const id = finding2.id === void 0 ? `F-${index + 1}` : finding2.id;
     if (typeof id !== "string" || !FINDING_ID_PATTERN.test(id))
       throw new ReviewCaptureError("unparseable", `Review finding ${index + 1} has an invalid id`);
@@ -19060,7 +19382,6 @@ function parseReviewAnswer(response, options) {
   const criteria = value.criteria.map((criterion) => {
     if (!isPlainObject(criterion))
       throw new ReviewCaptureError("unparseable", "Each criteria entry must be an object");
-    exactKeys(criterion, ["criterionId", "outcome", "rationale", "findingIds"], "criteria entry");
     if (!PILLARS.includes(criterion.criterionId))
       throw new ReviewCaptureError("unparseable", `Criteria entry pillar must be one of ${PILLARS.join(", ")}`);
     if (!OUTCOMES.includes(criterion.outcome))
@@ -19354,11 +19675,13 @@ function assertTaskCurrent(task, head, ownerEpoch, clock) {
 }
 function validateInputAnswers(questions, submitted) {
   const answers = /* @__PURE__ */ new Map();
+  const submittedIds = /* @__PURE__ */ new Set();
   for (const answer of submitted) {
-    if (answers.has(answer.questionId))
+    if (submittedIds.has(answer.questionId))
       throw new Error(`Duplicate answer: ${answer.questionId}`);
+    submittedIds.add(answer.questionId);
     const question = questions.find(({ id }) => id === answer.questionId);
-    if (question?.optional === true && typeof answer.value === "string" && answer.value.trim().length === 0) {
+    if (question?.optional === true && typeof answer.value === "string" && (answer.value.trim().length === 0 || /^none$/iu.test(answer.value.trim()))) {
       continue;
     }
     answers.set(answer.questionId, answer.value);
@@ -19401,6 +19724,11 @@ function validateInputAnswers(questions, submitted) {
       }
       if (question.valueType === "compliance" && question.options !== void 0 && value.kind === "compliance" && value.scopes.some((scope2) => !question.options.includes(scope2))) {
         throw new Error(`Answer is not a declared option: ${question.id}`);
+      }
+      if (question.valueType === "compliance" && value.kind === "compliance") {
+        if (value.scopes.includes("none") && value.scopes.length > 1) {
+          throw new Error(`Answer cannot combine none with other scopes: ${question.id}`);
+        }
       }
       return {
         questionId: question.id,
@@ -19649,6 +19977,7 @@ function workflowValidatorOwnership(id) {
 
 // packages/kernel/dist/workflow-engine.js
 var OPERATORS = /* @__PURE__ */ new Set(["all", "equals", "in", "exists", "not"]);
+var ALLOWED_EDGE_EVENTS = /* @__PURE__ */ new Set(["completed", "approved", "passed", "succeeded"]);
 var WorkflowEngine = class {
   manifest;
   nodes;
@@ -19670,16 +19999,38 @@ var WorkflowEngine = class {
         terminal: false
       };
     }
+    this.assertNoMultipleEligibleEdges(state);
     const completed = new Set(state.completedNodes ?? []);
     for (const node2 of this.manifest.nodes) {
       if (node2.kind === "terminal" || completed.has(node2.id) || !evaluateCondition(node2.condition, state)) {
         continue;
       }
+      if (node2.kind === "gate" && state.gateStates?.[node2.id] === "rejected" && this.manifest.blockedStates.includes("approval-rejected")) {
+        const blocked = this.nodes.get("blocked");
+        return {
+          currentNode: "approval-rejected",
+          nextTask: null,
+          ownerRole: blocked?.ownerRole ?? null,
+          blockers: ["approval-rejected", `${node2.id}:rejected`],
+          terminal: false
+        };
+      }
       const blockers = node2.sourceDependencies.filter((dependency) => !this.dependencySatisfied(dependency, state, completed));
       if (blockers.length === 0) {
         return { currentNode: node2.id, nextTask: node2.id, ownerRole: node2.ownerRole, blockers: [], terminal: false };
       }
-      const hasActivePredecessor = this.manifest.edges.some((edge) => edge.to === node2.id && completed.has(edge.from));
+      const rejectedDependency = blockers.map((dependency) => dependency.split(".")[0] ?? dependency).find((root) => root.startsWith("gate-") && state.gateStates?.[root] === "rejected");
+      if (rejectedDependency !== void 0 && this.manifest.blockedStates.includes("approval-rejected")) {
+        const blocked = this.nodes.get("blocked");
+        return {
+          currentNode: "approval-rejected",
+          nextTask: null,
+          ownerRole: blocked?.ownerRole ?? null,
+          blockers: ["approval-rejected", `${rejectedDependency}:rejected`],
+          terminal: false
+        };
+      }
+      const hasActivePredecessor = this.manifest.edges.some((edge) => edge.to === node2.id && completed.has(edge.from) && evaluateCondition(edge.condition, state));
       if (hasActivePredecessor || node2 === this.manifest.nodes[0]) {
         return {
           currentNode: node2.id,
@@ -19731,6 +20082,24 @@ var WorkflowEngine = class {
     }
     return getPath({ run: state.run, artifacts: state.artifacts }, `artifacts.${dependency}`) !== void 0 || getPath({ run: state.run, artifacts: state.artifacts }, dependency) !== void 0;
   }
+  assertNoMultipleEligibleEdges(state) {
+    const byFrom = /* @__PURE__ */ new Map();
+    for (const edge of this.manifest.edges) {
+      if (edge.fanout === true)
+        continue;
+      const list = byFrom.get(edge.from) ?? [];
+      list.push(edge);
+      byFrom.set(edge.from, list);
+    }
+    for (const [from, outgoing] of byFrom.entries()) {
+      if (outgoing.length < 2)
+        continue;
+      const eligible = outgoing.filter((edge) => evaluateCondition(edge.condition, state));
+      if (eligible.length > 1) {
+        throw new Error(`Multiple eligible non-fanout workflow edges from ${from}`);
+      }
+    }
+  }
 };
 function validateWorkflowManifest(value) {
   if (!isRecord(value) || !Array.isArray(value.nodes) || !Array.isArray(value.edges)) {
@@ -19758,12 +20127,13 @@ function validateWorkflowManifest(value) {
   if ([1, 2, 3, 4].some((gate) => !gates.has(gate)))
     throw new Error("Workflow requires unique gates 1-4");
   const edges = value.edges.map(parseEdge);
-  const returnRoutes = Array.isArray(value.returnRoutes) ? value.returnRoutes.map(parseEdge) : [];
+  const returnRoutes = Array.isArray(value.returnRoutes) ? value.returnRoutes.map(parseReturnRoute) : [];
   for (const edge of [...edges, ...returnRoutes]) {
     if (!ids.has(edge.from) || !ids.has(edge.to))
       throw new Error(`Workflow edge references unknown node ${edge.from}->${edge.to}`);
   }
   assertAcyclic(ids, edges);
+  assertNonAmbiguousOutgoingEdges(edges);
   const tracks = new Set(nodes.flatMap((node2) => conditionTrack(node2.condition)));
   if (!tracks.has("bicep") || !tracks.has("terraform"))
     throw new Error("Workflow requires bicep and terraform track conditions");
@@ -19802,12 +20172,84 @@ function parseEdge(value) {
   if (!isRecord(value))
     throw new Error("Workflow edge must be an object");
   const condition = value.condition === void 0 ? void 0 : parseCondition(value.condition);
+  let event;
+  if (value.event !== void 0) {
+    const rawEvent = requiredString(value.event, "edge event");
+    if (!ALLOWED_EDGE_EVENTS.has(rawEvent)) {
+      throw new Error(`Unsupported workflow edge event ${rawEvent}`);
+    }
+    event = rawEvent;
+  }
   return {
     from: requiredString(value.from, "edge from"),
     to: requiredString(value.to, "edge to"),
+    ...event === void 0 ? {} : { event },
     ...condition === void 0 ? {} : { condition },
     ...value.fanout === true ? { fanout: true } : {}
   };
+}
+function parseReturnRoute(value) {
+  if (!isRecord(value))
+    throw new Error("Workflow return route must be an object");
+  const condition = value.condition === void 0 ? void 0 : parseCondition(value.condition);
+  const reopensFromGate = requiredInteger(value.reopensFromGate, "reopensFromGate");
+  if (reopensFromGate < 1 || reopensFromGate > 4) {
+    throw new Error(`Invalid reopensFromGate ${reopensFromGate}`);
+  }
+  return {
+    from: requiredString(value.from, "returnRoute from"),
+    to: requiredString(value.to, "returnRoute to"),
+    reasonCode: requiredString(value.reasonCode, "returnRoute reasonCode"),
+    reopensFromGate,
+    ...condition === void 0 ? {} : { condition }
+  };
+}
+function isComplementaryPair(first, second) {
+  if (first === void 0 || second === void 0)
+    return false;
+  if ("not" in first && sha256Json(first.not) === sha256Json(second)) {
+    return true;
+  }
+  if ("not" in second && sha256Json(second.not) === sha256Json(first)) {
+    return true;
+  }
+  return false;
+}
+function isDisjointEqualsPartition(outgoing) {
+  let sharedPath;
+  const seenValues = /* @__PURE__ */ new Set();
+  for (const edge of outgoing) {
+    if (edge.condition === void 0 || !("equals" in edge.condition))
+      return false;
+    const [target, literal2] = edge.condition.equals;
+    if (sharedPath === void 0)
+      sharedPath = target.path;
+    else if (sharedPath !== target.path)
+      return false;
+    const valueDigest = sha256Json(literal2);
+    if (seenValues.has(valueDigest))
+      return false;
+    seenValues.add(valueDigest);
+  }
+  return sharedPath !== void 0;
+}
+function assertNonAmbiguousOutgoingEdges(edges) {
+  const byFrom = /* @__PURE__ */ new Map();
+  for (const edge of edges) {
+    if (edge.fanout === true)
+      continue;
+    const list = byFrom.get(edge.from) ?? [];
+    list.push(edge);
+    byFrom.set(edge.from, list);
+  }
+  for (const [from, outgoing] of byFrom.entries()) {
+    if (outgoing.length < 2)
+      continue;
+    const complementary = outgoing.length === 2 && isComplementaryPair(outgoing[0]?.condition, outgoing[1]?.condition);
+    if (!complementary && !isDisjointEqualsPartition(outgoing)) {
+      throw new Error(`Ambiguous non-fanout workflow edges from ${from}`);
+    }
+  }
 }
 function parseCondition(value) {
   if (!isRecord(value))
@@ -20110,19 +20552,20 @@ var WriterTransferStore = class {
     const claimHash = events[requestedIndex].payload.claimHash;
     return !events.slice(requestedIndex + 1).some((event) => ["transfer-accepted", "transfer-cancelled"].includes(event.type) && event.payload.claimHash === claimHash);
   }
-  async proveOneHopPostPreviewLineage(previewHash, previewOwnerEpoch) {
-    return this.proveOneHopLineage(previewHash, previewOwnerEpoch);
+  /** `lockedRun` is only for callers already holding the run mutation lock with its CAS-checked snapshot. */
+  async proveOneHopPostPreviewLineage(previewHash, previewOwnerEpoch, lockedRun) {
+    return this.proveOneHopLineage(previewHash, previewOwnerEpoch, void 0, lockedRun);
   }
   async proveOneHopPostApprovalLineage(previewHash, previewOwnerEpoch, approvalHash) {
     if (!/^[0-9a-f]{64}$/.test(approvalHash))
       return null;
     return this.proveOneHopLineage(previewHash, previewOwnerEpoch, approvalHash);
   }
-  async proveOneHopLineage(previewHash, previewOwnerEpoch, approvalHash) {
+  async proveOneHopLineage(previewHash, previewOwnerEpoch, approvalHash, lockedRun) {
     try {
       if (!/^[0-9a-f]{64}$/.test(previewHash))
         return null;
-      const run = await this.runs.read();
+      const run = lockedRun ?? await this.runs.read();
       const ownership = await this.currentOwnership();
       const lease = await this.leases.current();
       if (ownership === null || !/^[0-9a-f]{64}$/.test(ownership.claimHash ?? "") || ownership.ownerEpoch !== previewOwnerEpoch + 1 || ownership.ownerEpoch !== run.ownerEpoch || lease?.ownerId !== ownership.ownerId || lease.ownerEpoch !== ownership.ownerEpoch || ownership.previousOwnerEpoch !== previewOwnerEpoch || typeof ownership.previousOwnerId !== "string") {
@@ -20452,6 +20895,8 @@ async function resolveBundledAssets() {
 
 // packages/cli/dist/cli.js
 import { mkdir as mkdir14, readFile as readFile20, realpath as realpath11, writeFile as writeFile4 } from "node:fs/promises";
+import { userInfo as userInfo2 } from "node:os";
+import { createInterface as createInterface2 } from "node:readline/promises";
 
 // packages/capabilities/dist/capability.js
 var CapabilityError = class extends Error {
@@ -21494,7 +21939,6 @@ var Schema = class Schema2 {
         case "mapping":
           if (tag.matchByTagPrefix) prefix.mapping.push(tag);
           else exact.mapping[tag.tagName] = tag;
-          break;
       }
     }
     const implicitScalarAnyFirstChar = implicitScalarTags.filter((tag) => tag.implicitFirstChars === null);
@@ -22004,16 +22448,17 @@ function getBlockValue(input2, start, end, indent, chomping, folded) {
     }
     const content = line.slice(textIndent);
     const first = content.charCodeAt(0);
-    if (folded) if (first === 32 || first === 9) {
-      atMoreIndented = true;
-      result += "\n".repeat(didReadContent ? 1 + emptyLines : emptyLines);
-    } else if (atMoreIndented) {
-      atMoreIndented = false;
-      result += "\n".repeat(emptyLines + 1);
-    } else if (emptyLines === 0) {
-      if (didReadContent) result += " ";
-    } else result += "\n".repeat(emptyLines);
-    else result += "\n".repeat(didReadContent ? 1 + emptyLines : emptyLines);
+    if (folded) {
+      if (first === 32 || first === 9) {
+        atMoreIndented = true;
+        result += "\n".repeat(didReadContent ? 1 + emptyLines : emptyLines);
+      } else if (atMoreIndented) {
+        atMoreIndented = false;
+        result += "\n".repeat(emptyLines + 1);
+      } else if (emptyLines === 0) {
+        if (didReadContent) result += " ";
+      } else result += "\n".repeat(emptyLines);
+    } else result += "\n".repeat(didReadContent ? 1 + emptyLines : emptyLines);
     result += content;
     didReadContent = true;
     emptyLines = 0;
@@ -22045,12 +22490,39 @@ var DEFAULT_TAG_HANDLERS = Object.assign(/* @__PURE__ */ Object.create(null), {
   "!": "!",
   "!!": "tag:yaml.org,2002:"
 });
+var TAG_SUFFIX_CHARS = "-#;/?:@&=+$_.~*'()";
+var TAG_URI_CHARS = TAG_SUFFIX_CHARS + "!,[]";
+function tagPercentDecode(source2) {
+  let result = "";
+  let index = 0;
+  while (index < source2.length) {
+    if (source2.charCodeAt(index) !== 37) {
+      result += source2[index++];
+      continue;
+    }
+    let ch = parseInt(source2.slice(index + 1, index + 3), 16);
+    index += 3;
+    if (ch >= 192) {
+      let remaining = ch < 224 ? 1 : ch < 240 ? 2 : 3;
+      ch &= (1 << 6 - remaining) - 1;
+      while (remaining-- > 0) {
+        ch = ch << 6 | parseInt(source2.slice(index + 1, index + 3), 16) & 63;
+        index += 3;
+      }
+    }
+    if (ch < 65536) result += String.fromCharCode(ch);
+    else {
+      ch -= 65536;
+      result += String.fromCharCode(55296 | ch >> 10, 56320 | ch & 1023);
+    }
+  }
+  return result;
+}
 function tagNameFull(rawTag, tagHandlers) {
-  if (rawTag.startsWith("!<") && rawTag.endsWith(">")) return decodeURIComponent(rawTag.slice(2, -1));
+  if (rawTag.startsWith("!<") && rawTag.endsWith(">")) return tagPercentDecode(rawTag.slice(2, -1));
   const handleEnd = rawTag.indexOf("!", 1);
   const handle = handleEnd === -1 ? "!" : rawTag.slice(0, handleEnd + 1);
-  const prefix = tagHandlers?.[handle] ?? DEFAULT_TAG_HANDLERS[handle] ?? handle;
-  return decodeURIComponent(prefix) + decodeURIComponent(rawTag.slice(handle.length));
+  return tagPercentDecode(tagHandlers?.[handle] ?? DEFAULT_TAG_HANDLERS[handle] ?? handle) + tagPercentDecode(rawTag.slice(handle.length));
 }
 var NO_RANGE$2 = -1;
 var MERGE_TAG_NAME = "tag:yaml.org,2002:merge";
@@ -22513,7 +22985,11 @@ function skipUntilLineEnd(state) {
   while (ch !== 0 && !isEol(ch)) ch = state.input.charCodeAt(++state.position);
 }
 function checkPrintable(state, start, end) {
-  if (PATTERN_NON_PRINTABLE.test(state.input.slice(start, end))) throwError(state, "the stream contains non-printable characters");
+  const match = PATTERN_NON_PRINTABLE.exec(state.input.slice(start, end));
+  if (match !== null) {
+    state.position = start + match.index + match[0].length - 1;
+    throwError(state, "the stream contains non-printable characters");
+  }
 }
 function readTagProperty(state, props, inFlow) {
   if (state.input.charCodeAt(state.position) !== 33) return false;
@@ -22540,12 +23016,14 @@ function readTagProperty(state, props, inFlow) {
     state.position++;
   } else {
     while (ch !== 0 && !isWsOrEol(ch) && !(inFlow && isFlowIndicator(ch))) {
-      if (ch === 33) if (!isNamed) {
-        tagHandle = state.input.slice(suffixStart - 1, state.position + 1);
-        if (!PATTERN_TAG_HANDLE.test(tagHandle)) throwError(state, "named tag handle cannot contain such characters");
-        isNamed = true;
-        suffixStart = state.position + 1;
-      } else throwError(state, "tag suffix cannot contain exclamation marks");
+      if (ch === 33) {
+        if (!isNamed) {
+          tagHandle = state.input.slice(suffixStart - 1, state.position + 1);
+          if (!PATTERN_TAG_HANDLE.test(tagHandle)) throwError(state, "named tag handle cannot contain such characters");
+          isNamed = true;
+          suffixStart = state.position + 1;
+        } else throwError(state, "tag suffix cannot contain exclamation marks");
+      }
       ch = state.input.charCodeAt(++state.position);
     }
     tagName = state.input.slice(suffixStart, state.position);
@@ -22729,7 +23207,7 @@ function readBlockScalar(state, parentIndent, props) {
 function canStartPlainScalar(state, nodeContext) {
   const ch = state.input.charCodeAt(state.position);
   const inFlow = nodeContext === CONTEXT_FLOW_IN;
-  if (ch === 0 || isWsOrEol(ch) || ch === 35 || ch === 38 || ch === 42 || ch === 33 || ch === 124 || ch === 62 || ch === 39 || ch === 34 || ch === 37 || ch === 64 || ch === 96 || inFlow && isFlowIndicator(ch)) return false;
+  if (ch === 0 || isWsOrEol(ch) || ch === 35 || ch === 38 || ch === 42 || ch === 33 || ch === 124 || ch === 62 || ch === 39 || ch === 34 || ch === 37 || ch === 64 || ch === 96 || isFlowIndicator(ch)) return false;
   if (ch === 63 || ch === 45) {
     const following = state.input.charCodeAt(state.position + 1);
     if (isWsOrEolOrEnd(following) || inFlow && isFlowIndicator(following)) return false;
@@ -23001,19 +23479,20 @@ function parseNode2(state, parentIndent, nodeContext, allowToSeek, allowCompact,
   if (indentStatus === 1 || nodeContext === CONTEXT_BLOCK_OUT) {
     const flowIndent = nodeContext === CONTEXT_FLOW_IN || nodeContext === CONTEXT_FLOW_OUT ? parentIndent : parentIndent + 1;
     const blockIndent = state.position - state.lineStart;
-    if (indentStatus === 1) if (allowBlockCollections && (readBlockSequence(state, blockIndent, props) || readBlockMapping(state, blockIndent, flowIndent, props)) || readFlowCollection(state, flowIndent, props)) hasContent = true;
-    else {
-      const ch = state.input.charCodeAt(state.position);
-      if (propertyStart !== null && allowPropertyMapping && allowBlockStyles && !allowBlockCollections && ch !== 124 && ch !== 62) {
-        const fallbackState = snapshotState(state);
-        const propertyIndent = propertyStart.position - propertyStart.lineStart;
-        restoreState(state, propertyStart);
-        if (readBlockMapping(state, propertyIndent, flowIndent, emptyProperties()) && state.events[fallbackState.eventsLength]?.type === EVENT_ID.MAPPING) hasContent = true;
-        else restoreState(state, fallbackState);
+    if (indentStatus === 1) {
+      if (allowBlockCollections && (readBlockSequence(state, blockIndent, props) || readBlockMapping(state, blockIndent, flowIndent, props)) || readFlowCollection(state, flowIndent, props)) hasContent = true;
+      else {
+        const ch = state.input.charCodeAt(state.position);
+        if (propertyStart !== null && allowPropertyMapping && allowBlockStyles && !allowBlockCollections && ch !== 124 && ch !== 62) {
+          const fallbackState = snapshotState(state);
+          const propertyIndent = propertyStart.position - propertyStart.lineStart;
+          restoreState(state, propertyStart);
+          if (readBlockMapping(state, propertyIndent, flowIndent, emptyProperties()) && state.events[fallbackState.eventsLength]?.type === EVENT_ID.MAPPING) hasContent = true;
+          else restoreState(state, fallbackState);
+        }
+        if (!hasContent && (allowBlockScalars && readBlockScalar(state, flowIndent, props) || readSingleQuotedScalar(state, flowIndent, props) || readDoubleQuotedScalar(state, flowIndent, props) || readAlias(state, props) || readPlainScalar(state, flowIndent, nodeContext, props))) hasContent = true;
       }
-      if (!hasContent && (allowBlockScalars && readBlockScalar(state, flowIndent, props) || readSingleQuotedScalar(state, flowIndent, props) || readDoubleQuotedScalar(state, flowIndent, props) || readAlias(state, props) || readPlainScalar(state, flowIndent, nodeContext, props))) hasContent = true;
-    }
-    else if (indentStatus === 0) hasContent = allowBlockCollections && readBlockSequence(state, blockIndent, props);
+    } else if (indentStatus === 0) hasContent = allowBlockCollections && readBlockSequence(state, blockIndent, props);
   }
   allowBlockScalars = allowBlockScalars && !hasContent;
   if (!hasContent && (props.anchorStart !== NO_RANGE$1 || props.tagStart !== NO_RANGE$1 || allowBlockScalars)) {
@@ -23900,12 +24379,12 @@ function parseDotenv(source2) {
     fail("AZD_ENV_INVALID", "The azd environment file has too many lines");
   const values = /* @__PURE__ */ new Map();
   for (const [index, raw] of lines.entries()) {
-    const label = `line ${index + 1}`;
+    const label2 = `line ${index + 1}`;
     if (raw.trim().length === 0 || raw.trim().startsWith("#"))
       continue;
     const match = /^([A-Za-z_][A-Za-z0-9_]{0,127})=(.*)$/u.exec(raw);
     if (match === null)
-      fail("AZD_ENV_INVALID", `The azd environment file has an unsupported ${label}`);
+      fail("AZD_ENV_INVALID", `The azd environment file has an unsupported ${label2}`);
     const key = match[1];
     const rest = match[2];
     let value;
@@ -23923,7 +24402,7 @@ function parseDotenv(source2) {
         if (char === "\\") {
           const next = rest[position + 1];
           if (next !== '"' && next !== "\\")
-            fail("AZD_ENV_INVALID", `The azd environment file has an unsupported escape on ${label}`);
+            fail("AZD_ENV_INVALID", `The azd environment file has an unsupported escape on ${label2}`);
           parsed += next;
           position += 2;
           continue;
@@ -23932,20 +24411,20 @@ function parseDotenv(source2) {
         position += 1;
       }
       if (!closed || rest.slice(position).trim().length > 0)
-        fail("AZD_ENV_INVALID", `The azd environment file has an unterminated or trailing value on ${label}`);
+        fail("AZD_ENV_INVALID", `The azd environment file has an unterminated or trailing value on ${label2}`);
       value = parsed;
     } else if (rest.startsWith("'")) {
       const end = rest.indexOf("'", 1);
       if (end === -1 || rest.slice(end + 1).trim().length > 0)
-        fail("AZD_ENV_INVALID", `The azd environment file has an unterminated or trailing value on ${label}`);
+        fail("AZD_ENV_INVALID", `The azd environment file has an unterminated or trailing value on ${label2}`);
       value = rest.slice(1, end);
     } else {
       if (!/^[^\s"'#$`\\]*$/u.test(rest))
-        fail("AZD_ENV_INVALID", `The azd environment file has an ambiguous unquoted value on ${label}`);
+        fail("AZD_ENV_INVALID", `The azd environment file has an ambiguous unquoted value on ${label2}`);
       value = rest;
     }
     if (value.includes("$") || CONTROL.test(value) || value.length > MAX_ENV_VALUE)
-      fail("AZD_ENV_INVALID", `The azd environment value on ${label} uses expansion, control characters or exceeds its limit`);
+      fail("AZD_ENV_INVALID", `The azd environment value on ${label2} uses expansion, control characters or exceeds its limit`);
     if (values.has(key))
       fail("AZD_ENV_INVALID", `The azd environment file repeats ${key}`);
     values.set(key, value);
@@ -24623,7 +25102,11 @@ var AzureCliReadAdapter = class {
   }
   /** One resource by its exact ID, including child and extension resources that a group listing omits. */
   resourceById(resourceId) {
-    return { executable: "az", args: ["resource", "show", "--ids", resourceId, "--output", "json"] };
+    const apiVersionArgs = /\/providers\/microsoft\.insights\/diagnosticsettings\/[^/]+$/iu.test(resourceId) ? ["--api-version", "2021-05-01-preview"] : [];
+    return {
+      executable: "az",
+      args: ["resource", "show", "--ids", resourceId, ...apiVersionArgs, "--output", "json"]
+    };
   }
   /** The signed-in Azure CLI account: cloud name, tenant and default subscription. */
   account() {
@@ -24852,7 +25335,7 @@ function finding(value, subscriptionId, descendants = false) {
   }
   const exemption = source2.exemption === null ? null : readExemption(source2.exemption);
   const reportedExemptions = descendants ? array2(source2.reported_exemptions).map(readExemption) : void 0;
-  if (descendants && (exemption !== null || classification !== (effect === "deny" ? "blocker" : ["modify", "deployIfNotExists"].includes(effect) ? "auto-remediate" : "informational")))
+  if (descendants && (exemption !== null || classification !== (effect === "deny" ? mode === "DoNotEnforce" ? "informational" : "blocker" : ["modify", "deployIfNotExists"].includes(effect) ? "auto-remediate" : "informational")))
     fail2("incomplete");
   if (reportedExemptions && new Set(reportedExemptions.map((item) => item.id.toLowerCase())).size !== reportedExemptions.length)
     fail2("incomplete");
@@ -25496,6 +25979,10 @@ var IacProviderError = class extends Error {
 };
 function authorizeDeploymentPreview(context) {
   const { operation, track, preview, approval, authority, now, latestPreviewHash } = context;
+  if (approval.mechanism === "lab-delegation" && (operation !== "apply" || track !== "bicep" || approval.scopeEvidenceHash === void 0))
+    throw new IacProviderError("PREVIEW_BLOCKED", "Delegation supports only scope-bound native Bicep apply");
+  if (approval.mechanism === "lab-delegation" && (authority.activeLabDelegation?.policyHash !== approval.policyHash || authority.activeLabDelegation.consentHash !== approval.consentHash || preview.ownerEpoch !== authority.ownerEpoch || approval.writerEpoch !== authority.ownerEpoch))
+    throw new IacProviderError("APPROVAL_REJECTED", "Delegation consent or its exact writer is no longer current");
   if (preview.track !== track) {
     throw new IacProviderError("PREVIEW_TRACK_MISMATCH", `Preview track '${preview.track}' is not '${track}'`);
   }
@@ -25712,12 +26199,20 @@ async function renameWithRetry2(from, to, options = {}) {
 
 // packages/capabilities/dist/iac-generation.js
 var IDENTIFIER = /^[A-Za-z_][A-Za-z0-9_]*$/;
+var LOGICAL_ID = /^[A-Za-z_][A-Za-z0-9_-]*$/;
 var EXACT_VERSION = /^(?:=\s*)?[0-9]+\.[0-9]+\.[0-9]+(?:[-+][0-9A-Za-z.-]+)?$/;
 var NATIVE_IMPLEMENTATION = /^native:([A-Za-z][A-Za-z0-9.]*\.[A-Za-z][A-Za-z0-9]*(?:\/[A-Za-z][A-Za-z0-9]*)+)@([0-9]{4}-[0-9]{2}-[0-9]{2}(?:-preview)?)$/;
 var AVM_IMPLEMENTATION = /^avm:([^@\s]+)@([^@\s]+)$/;
-function assertIdentifier(value, label) {
+function assertIdentifier(value, label2) {
   if (!IDENTIFIER.test(value))
-    throw new TypeError(`${label} '${value}' is not a valid IaC identifier`);
+    throw new TypeError(`${label2} '${value}' is not a valid IaC identifier`);
+}
+function assertLogicalId(value, label2) {
+  if (!LOGICAL_ID.test(value))
+    throw new TypeError(`${label2} '${value}' is not a valid IaC identifier: start with a letter or underscore, then use letters, digits, hyphens or underscores`);
+}
+function symbolicName(logicalId) {
+  return logicalId.replaceAll("-", "_");
 }
 function normalizeRelativePath(value) {
   const normalized = value.replaceAll("\\", "/");
@@ -25759,10 +26254,18 @@ function resourceContexts(intent, binding) {
   if (bindingIds.length !== intentIds.size || bindingIds.some((id) => !intentIds.has(id))) {
     throw new TypeError("Binding must cover every logical resource exactly once");
   }
+  const symbols = /* @__PURE__ */ new Map();
+  for (const { id } of intent.resources) {
+    assertLogicalId(id, "Logical resource id");
+    const previous = symbols.get(symbolicName(id));
+    if (previous !== void 0)
+      throw new TypeError(`Logical resource ids '${previous}' and '${id}' map to the same IaC symbolic name '${symbolicName(id)}'`);
+    symbols.set(symbolicName(id), id);
+  }
   return [...intent.resources].sort((left, right) => left.id.localeCompare(right.id)).map((resource) => {
-    assertIdentifier(resource.id, "Logical resource id");
+    assertLogicalId(resource.id, "Logical resource id");
     for (const dependency of resource.dependsOn) {
-      assertIdentifier(dependency, "Dependency id");
+      assertLogicalId(dependency, "Dependency id");
       if (!intentIds.has(dependency))
         throw new TypeError(`Resource '${resource.id}' has unknown dependency '${dependency}'`);
     }
@@ -25775,7 +26278,7 @@ function resourceContexts(intent, binding) {
     return {
       resource,
       binding: resourceBinding,
-      declaration: resource.id,
+      declaration: symbolicName(resource.id),
       parsed: parseBinding(resourceBinding.implementation, resourceBinding.version)
     };
   });
@@ -25925,11 +26428,10 @@ function generateBicepTree(intent, binding, options = {}) {
   const existing = new Set(options.existingResources ?? []);
   const logicalIds = new Set(contexts.map(({ resource }) => resource.id));
   for (const logicalId of existing) {
-    assertIdentifier(logicalId, "Existing resource id");
+    assertLogicalId(logicalId, "Existing resource id");
     if (!logicalIds.has(logicalId))
       throw new TypeError(`Existing resource '${logicalId}' is not present in the intent`);
   }
-  const parameterNames = /* @__PURE__ */ new Set();
   const blocks = contexts.map((context) => {
     if (context.parsed.kind === "native") {
       const parameters = requiredGenericParameters(context);
@@ -25944,10 +26446,10 @@ function generateBicepTree(intent, binding, options = {}) {
       }
       const dependencies2 = context.resource.dependsOn.length === 0 ? "" : `
   dependsOn: [
-${[...context.resource.dependsOn].sort().map((id) => `    ${id}`).join("\n")}
+${[...context.resource.dependsOn].sort().map((id) => `    ${symbolicName(id)}`).join("\n")}
   ]`;
       const bodyFields = Object.entries(parameters.bodyFields).sort(([left], [right]) => left.localeCompare(right)).map(([name, value]) => `  ${bicepObjectKey(name)}: ${renderBicepValue(value, 2)}`).join("\n");
-      const placement = scope2 === void 0 ? `location: ${bicepString(parameters.location)}` : `scope: ${scope2}`;
+      const placement = scope2 === void 0 ? `location: ${bicepString(parameters.location)}` : `scope: ${symbolicName(scope2)}`;
       return `resource ${context.declaration} '${context.parsed.source}@${context.parsed.version}' = {
   name: ${bicepString(parameters.name)}
   ${placement}${bodyFields.length === 0 ? "" : `
@@ -25962,12 +26464,11 @@ ${bodyFields}`}
     const moduleReference = source2.startsWith("br/") ? source2 : `br/public:${source2}`;
     const renderedParameters = Object.entries(secureBicepParameters(context)).sort(([left], [right]) => left.localeCompare(right)).map(([name, value]) => {
       assertIdentifier(name, "Bicep parameter name");
-      parameterNames.add(name);
       return `    ${name}: ${renderBicepValue(value, 4)}`;
     });
     const dependencies = context.resource.dependsOn.length === 0 ? "" : `
   dependsOn: [
-${[...context.resource.dependsOn].sort().map((id) => `    ${id}`).join("\n")}
+${[...context.resource.dependsOn].sort().map((id) => `    ${symbolicName(id)}`).join("\n")}
   ]`;
     return `module ${context.declaration} '${moduleReference}:${context.parsed.version}' = {
   name: ${bicepString(`${context.resource.id}-deployment`)}
@@ -25976,9 +26477,7 @@ ${renderedParameters.join("\n")}
   }${dependencies}
 }`;
   });
-  const descriptions = [...parameterNames].sort().map((name) => `@description(${bicepString(`Deployment value for ${name}`)})
-param ${name} string`).join("\n\n");
-  const content = ["targetScope = 'resourceGroup'", descriptions, blocks.join("\n\n")].filter((part) => part.length > 0).join("\n\n") + "\n";
+  const content = ["targetScope = 'resourceGroup'", blocks.join("\n\n")].filter((part) => part.length > 0).join("\n\n") + "\n";
   return virtualTree([
     {
       path: "azure.yaml",
@@ -25997,10 +26496,10 @@ infra:
     }
   ], manifest(intent, binding, contexts, AZD_GENERATED_TEMPLATE, existing));
 }
-function exactProviderConstraint(value, fallback, label) {
+function exactProviderConstraint(value, fallback, label2) {
   const constraint = value ?? fallback;
   if (!EXACT_VERSION.test(constraint))
-    throw new TypeError(`${label} must be an exact semantic version constraint`);
+    throw new TypeError(`${label2} must be an exact semantic version constraint`);
   return constraint.startsWith("=") ? constraint : `= ${constraint}`;
 }
 function terraformDependency(context, contexts, existing) {
@@ -26018,7 +26517,7 @@ function generateTerraformTree(intent, binding, options = {}) {
   const existing = new Set(options.existingResources ?? []);
   const logicalIds = new Set(contexts.map(({ resource }) => resource.id));
   for (const logicalId of existing) {
-    assertIdentifier(logicalId, "Existing resource id");
+    assertLogicalId(logicalId, "Existing resource id");
     if (!logicalIds.has(logicalId))
       throw new TypeError(`Existing resource '${logicalId}' is not present in the intent`);
   }
@@ -26047,7 +26546,7 @@ function generateTerraformTree(intent, binding, options = {}) {
   default     = null
 }`;
   }).join("\n\n");
-  const main = contexts.map((context) => {
+  const main2 = contexts.map((context) => {
     if (context.parsed.kind === "native") {
       const parameters = requiredGenericParameters(context);
       if (existing.has(context.resource.id)) {
@@ -26086,7 +26585,7 @@ ${argumentsText}${terraformDependency(context, contexts, existing)}
 }`;
   }).join("\n\n");
   const files2 = [
-    { path: "main.tf", content: main },
+    { path: "main.tf", content: main2 },
     { path: "outputs.tf", content: outputs.length === 0 ? "" : `${outputs}
 ` },
     { path: "provider.tf", content: 'provider "azurerm" {\n  features {}\n}\n\nprovider "azapi" {}\n' },
@@ -26140,6 +26639,9 @@ function azdIdentity(resourceId) {
   }
   return `${types.join("/")}\0${names.join("/")}`.toLowerCase();
 }
+function displayKey(type, name) {
+  return `${type.toLowerCase().replaceAll(/[^a-z]/g, "").replace(/s$/u, "")}\0${name.toLowerCase()}`;
+}
 function azdPreviewEnvelopes(stdout2) {
   const envelopes = [];
   for (const line of stdout2.split(/\r?\n/u)) {
@@ -26166,11 +26668,15 @@ function normalizeAzdPreview(stdout2, accepted) {
   }
   const raw = previews[0] === null ? [] : previews[0];
   const byIdentity = /* @__PURE__ */ new Map();
+  const byDisplay = /* @__PURE__ */ new Map();
   for (const { resourceId } of accepted) {
     const identity = azdIdentity(resourceId);
     if (identity === void 0)
       continue;
     byIdentity.set(identity, byIdentity.has(identity) ? null : resourceId);
+    const [types = "", name = ""] = identity.split("\0");
+    const key = displayKey(types.split("/").at(-1) ?? "", name);
+    byDisplay.set(key, byDisplay.has(key) ? null : resourceId);
   }
   const blockers = [];
   const changes = raw.map((entry, index) => {
@@ -26182,7 +26688,7 @@ function normalizeAzdPreview(stdout2, accepted) {
       blockers.push(`azd preview change ${index} is malformed`);
     }
     const identity = `${type ?? ""}\0${name ?? ""}`.toLowerCase();
-    const resolved = byIdentity.get(identity);
+    const resolved = byIdentity.has(identity) ? byIdentity.get(identity) : type !== void 0 && !type.includes("/") && name !== void 0 ? byDisplay.get(displayKey(type, name)) : void 0;
     const resourceId = resolved ?? `azd-unresolved:${type ?? "unknown"}/${name ?? index}`;
     const normalized = rawType.toLowerCase().replaceAll(/[^a-z]/g, "");
     const action = normalized === "create" ? "create" : normalized === "modify" || normalized === "deploy" ? "update" : normalized === "delete" ? "delete" : normalized === "nochange" || normalized === "ignore" ? "no-op" : "unknown";
@@ -26561,6 +27067,12 @@ var ProcessRunner = class {
     if (!Array.isArray(request.args)) {
       throw new TypeError("Process arguments must be an explicit array");
     }
+    if (!Number.isSafeInteger(request.timeoutMs) || request.timeoutMs <= 0) {
+      throw new TypeError("Process timeoutMs must be a positive safe integer");
+    }
+    if (!Number.isSafeInteger(request.maxOutputBytes) || request.maxOutputBytes <= 0) {
+      throw new TypeError("Process maxOutputBytes must be a positive safe integer");
+    }
     let launch;
     try {
       launch = planLaunch(request.executable, request.args, { env: request.env ?? process.env });
@@ -26613,7 +27125,7 @@ var ProcessRunner = class {
         const result = {
           exitCode,
           signal,
-          stdout: redactProcessOutput(stdout2.toString("utf8")),
+          stdout: request.rawOutput === true ? stdout2.toString("utf8") : redactProcessOutput(stdout2.toString("utf8")),
           stderr: redactProcessOutput(stderr.toString("utf8")),
           timedOut,
           outputTruncated
@@ -26689,7 +27201,7 @@ function resourcesFromJson(json2, track) {
   const resources = [];
   if (track === "bicep") {
     const visit2 = (value, inheritedUnsupported = false, parentSymbols = []) => {
-      const entries = Array.isArray(value) ? value.map((entry) => [void 0, entry]) : object3(value) !== void 0 ? Object.entries(value) : void 0;
+      const entries = Array.isArray(value) ? value.map((entry, index) => [parentSymbols !== null && parentSymbols.length > 0 ? String(index) : void 0, entry]) : object3(value) !== void 0 ? Object.entries(value) : void 0;
       if (entries === void 0)
         throw new Error("POLICY_VALIDATION_INVALID_SOURCE");
       for (const [symbol2, entry] of entries) {
@@ -26932,25 +27444,34 @@ function validateBicepResourceParity(request) {
   });
   const expected = request.manifest.resources;
   const byId = new Map(expected.map((resource) => [resource.logicalId, resource]));
-  if (byId.size !== expected.length || new Set(expected.map(({ executionAddress }) => executionAddress)).size !== expected.length || expected.some((resource) => resource.ownership !== "managed" || resource.implementationKind !== "resource" || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(resource.executionAddress ?? "") || resource.dependsOn.some((id) => !byId.has(id)) || JSON.stringify([...resource.dependsOn].sort()) !== JSON.stringify([...resource.generatedDependencies].sort())))
+  if (byId.size !== expected.length || new Set(expected.map(({ executionAddress }) => executionAddress)).size !== expected.length || expected.some((resource) => resource.ownership !== "managed" || resource.implementationKind !== "resource" && resource.implementationKind !== "module" || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(resource.executionAddress ?? "") || resource.dependsOn.some((id) => !byId.has(id)) || JSON.stringify([...resource.dependsOn].sort()) !== JSON.stringify([...resource.generatedDependencies].sort())))
     return result("unsupported", "unsupported-resource");
-  let observed;
+  let allObserved;
   try {
-    observed = resourcesFromJson(request.json, "bicep");
+    allObserved = resourcesFromJson(request.json, "bicep");
   } catch {
     return result("unsupported", "invalid-source");
   }
-  if (observed.some((resource) => resource.unsupported || resource.codeSymbol === void 0 || resource.codeSymbol.includes("::") || resource.resourceType?.toLowerCase() === "microsoft.resources/deployments" || Object.hasOwn(resource.value, "condition")))
+  const moduleSymbols = new Set(expected.filter((resource) => resource.implementationKind === "module").map((resource) => resource.executionAddress));
+  const nestedObserved = allObserved.filter((resource) => resource.codeSymbol?.includes("::"));
+  if (nestedObserved.some((resource) => !moduleSymbols.has(resource.codeSymbol.split("::")[0])))
+    return result("unsupported", "unsupported-resource");
+  const observed = allObserved.filter((resource) => !resource.codeSymbol?.includes("::"));
+  if (observed.some((resource) => resource.unsupported || resource.codeSymbol === void 0 || resource.resourceType?.toLowerCase() === "microsoft.resources/deployments" && !moduleSymbols.has(resource.codeSymbol) || Object.hasOwn(resource.value, "condition")))
     return result("unsupported", "unsupported-resource");
   if (observed.length !== expected.length || expected.some((resource) => observed.filter(({ codeSymbol }) => codeSymbol === resource.executionAddress).length !== 1))
     return result("fail", "coverage-mismatch");
   for (const resource of expected) {
     const compiled = observed.find(({ codeSymbol }) => codeSymbol === resource.executionAddress);
-    if (compiled.resourceType?.toLowerCase() !== resource.type.toLowerCase())
+    const expectedType = resource.implementationKind === "module" ? "microsoft.resources/deployments" : resource.type.toLowerCase();
+    if (compiled.resourceType?.toLowerCase() !== expectedType)
       return result("fail", "type-mismatch");
     const selected = request.binding?.resourceBindings[resource.logicalId];
     const scopeId = selected?.scopeLogicalId;
-    if (Object.hasOwn(compiled.value, "scope") || scopeId !== void 0) {
+    if (resource.implementationKind === "module") {
+      if (Object.hasOwn(compiled.value, "scope") || scopeId !== void 0)
+        return result("unsupported", "unsupported-resource");
+    } else if (Object.hasOwn(compiled.value, "scope") || scopeId !== void 0) {
       const target = scopeId === void 0 ? void 0 : byId.get(scopeId);
       const targetBinding = scopeId === void 0 ? void 0 : request.binding?.resourceBindings[scopeId];
       const targetCompiled = target === void 0 ? void 0 : observed.find(({ codeSymbol }) => codeSymbol === target.executionAddress);
@@ -26985,22 +27506,36 @@ function validateBicepStorageBaseline(request) {
   });
   if (parity.outcome !== "pass")
     return result(parity.outcome, "resource-parity");
-  const resources = resourcesFromJson(request.json, "bicep");
-  const accounts = resources.filter(({ resourceType }) => resourceType?.toLowerCase() === "microsoft.storage/storageaccounts");
-  const allowed = /* @__PURE__ */ new Set([
-    "microsoft.storage/storageaccounts",
-    "microsoft.insights/diagnosticsettings",
-    ...["blobservices", "fileservices", "queueservices", "tableservices"].map((service) => `microsoft.storage/storageaccounts/${service}`)
-  ]);
-  if (accounts.length === 0 || new Set(accounts.map(({ value }) => value.name)).size !== accounts.length || resources.length !== accounts.length * 9 || resources.some(({ resourceType }) => !allowed.has(resourceType?.toLowerCase() ?? "")))
-    return result("unsupported", "unsupported-resource");
   const parsed = JSON.parse(request.json);
-  const hasCredential = (value) => {
-    if (typeof value === "string")
-      return SECRET_VALUE_PATTERN.test(value);
-    if (Array.isArray(value))
-      return value.some(hasCredential);
-    return object3(value) !== void 0 && Object.entries(value).some(([key, child]) => SECRET_FIELD_PATTERN.test(key) && typeof child === "string" && child.length > 0 || hasCredential(child));
+  const isArmExpression = (value) => value.startsWith("[") && !value.startsWith("[[") && value.endsWith("]");
+  const hasSecretValue = (value, insideModuleTemplate) => {
+    const normalized = insideModuleTemplate && isArmExpression(value) ? value.replace(/AccountKey=\{\d+\}/giu, "") : value;
+    return SECRET_VALUE_PATTERN.test(normalized);
+  };
+  const isSafeModuleFieldExpression = (value) => isArmExpression(value) && !hasSecretValue(value, true) && !/\bconcat\s*\(/iu.test(value) && /^\[(?:parameters|tryGet|if|subscriptionResourceId|resourceId|reference)\(/u.test(value);
+  const hasCredential = (value, insideModuleTemplate = false, inDeploymentProperties = false) => {
+    if (typeof value === "string") {
+      return hasSecretValue(value, insideModuleTemplate);
+    }
+    if (Array.isArray(value)) {
+      return value.some((item) => hasCredential(item, insideModuleTemplate));
+    }
+    const record6 = object3(value);
+    if (record6 === void 0)
+      return false;
+    const isDeployment = text4(record6.type)?.toLowerCase() === "microsoft.resources/deployments";
+    return Object.entries(record6).some(([key, child]) => {
+      const nextInDeploymentProperties = isDeployment && key === "properties";
+      const nextInsideTemplate = insideModuleTemplate || inDeploymentProperties && key === "template";
+      if (SECRET_FIELD_PATTERN.test(key)) {
+        const paramValue = !insideModuleTemplate ? object3(child)?.value : void 0;
+        const candidate = typeof child === "string" ? child : typeof paramValue === "string" ? paramValue : void 0;
+        if (candidate !== void 0 && candidate.length > 0 && !(insideModuleTemplate && isSafeModuleFieldExpression(candidate))) {
+          return true;
+        }
+      }
+      return hasCredential(child, nextInsideTemplate, nextInDeploymentProperties);
+    });
   };
   if (hasCredential(parsed))
     return result("fail", "credential-content");
@@ -27014,8 +27549,14 @@ function validateBicepStorageBaseline(request) {
     "resources",
     "parameters",
     "variables",
-    "outputs"
-  ]) || ["parameters", "variables", "outputs"].some((key) => Object.hasOwn(template, key) && (!onlyKeys2(template[key], []) || Object.keys(template[key]).length !== 0)))
+    "outputs",
+    "definitions",
+    "functions"
+  ]) || ["parameters", "variables", "outputs", "definitions"].some((key) => Object.hasOwn(template, key) && object3(template[key]) === void 0) || Object.hasOwn(template, "functions") && !Array.isArray(template.functions) && object3(template.functions) === void 0)
+    return result("unsupported", "unsupported-resource");
+  const resources = resourcesFromJson(request.json, "bicep").filter((resource) => !resource.codeSymbol?.includes("::"));
+  const accounts = resources.filter(({ resourceType }) => resourceType?.toLowerCase() === "microsoft.storage/storageaccounts");
+  if (accounts.length > 0 && new Set(accounts.map(({ value }) => value.name)).size !== accounts.length)
     return result("unsupported", "unsupported-resource");
   for (const resource of resources) {
     if (!onlyKeys2(resource.value, [
@@ -27029,13 +27570,18 @@ function validateBicepStorageBaseline(request) {
       "identity",
       "properties",
       "dependsOn",
-      "scope"
+      "scope",
+      "plan",
+      "zones",
+      "extendedLocation",
+      "comments",
+      "metadata"
     ]))
       return result("unsupported", "unsupported-resource");
     if (resource.resourceType?.toLowerCase() === "microsoft.insights/diagnosticsettings") {
       if (!onlyKeys2(resource.value.properties, ["workspaceId", "logs", "metrics", "logAnalyticsDestinationType"]))
         return result("unsupported", "unsupported-resource");
-    } else if (resource.resourceType?.toLowerCase() !== "microsoft.storage/storageaccounts" && resource.value.properties !== void 0 && !onlyKeys2(resource.value.properties, []))
+    } else if (resource.resourceType?.toLowerCase().startsWith("microsoft.storage/storageaccounts/") && resource.value.properties !== void 0 && !onlyKeys2(resource.value.properties, []))
       return result("unsupported", "unsupported-resource");
   }
   for (const account of accounts) {
@@ -27061,22 +27607,24 @@ function validateBicepStorageBaseline(request) {
     const manifestAccount = request.manifest.resources.find(({ executionAddress }) => executionAddress === account.codeSymbol);
     const services = request.manifest.resources.filter((resource) => resource.type.toLowerCase().startsWith("microsoft.storage/storageaccounts/") && resource.dependsOn.includes(manifestAccount.logicalId));
     const settings = request.manifest.resources.filter(({ logicalId }) => services.some((service) => request.binding.resourceBindings[logicalId]?.scopeLogicalId === service.logicalId));
-    const workspaceIds = settings.map(({ logicalId }) => own(request.binding.resourceBindings[logicalId]?.parameters.properties, "workspaceId"));
-    if (settings.length !== 4 || workspaceIds.some((id) => typeof id !== "string") || new Set(workspaceIds).size !== 1)
-      return result("unsupported", "diagnostic-routing");
-    let routing;
-    try {
-      routing = validateBicepStorageDiagnostics({
-        sourceHash: request.sourceHash,
-        binding: { codeSymbol: account.codeSymbol },
-        workspaceResourceId: workspaceIds[0],
-        json: request.json
-      });
-    } catch {
-      return result("unsupported", "diagnostic-routing");
+    if (services.length > 0 || settings.length > 0) {
+      const workspaceIds = settings.map(({ logicalId }) => own(request.binding.resourceBindings[logicalId]?.parameters.properties, "workspaceId"));
+      if (services.length !== 4 || settings.length !== 4 || workspaceIds.some((id) => typeof id !== "string") || new Set(workspaceIds).size !== 1)
+        return result("unsupported", "diagnostic-routing");
+      let routing;
+      try {
+        routing = validateBicepStorageDiagnostics({
+          sourceHash: request.sourceHash,
+          binding: { codeSymbol: account.codeSymbol },
+          workspaceResourceId: workspaceIds[0],
+          json: request.json
+        });
+      } catch {
+        return result("unsupported", "diagnostic-routing");
+      }
+      if (routing.outcome !== "pass")
+        return result(routing.outcome, "diagnostic-routing");
     }
-    if (routing.outcome !== "pass")
-      return result(routing.outcome, "diagnostic-routing");
   }
   return result("pass", "matched");
 }
@@ -27155,6 +27703,14 @@ var maxGeneratedSourceBytes = 16 * 1024 * 1024;
 function pathEscapes2(parent, child) {
   const relation = relative6(parent, child);
   return relation === "" || relation === ".." || relation.startsWith(`..${sep4}`) || isAbsolute7(relation);
+}
+function policyFailureSummary(validation) {
+  const bounded = (value) => value.replace(/[\r\n\t]+/g, " ").slice(0, 160);
+  const failing = validation.results.filter(({ outcome }) => outcome !== "pass");
+  const shown = failing.slice(0, 10).map(({ logicalResourceId, propertyPath, effect, reason }) => `${bounded(logicalResourceId)} | ${bounded(propertyPath)} | ${effect} | ${reason}`);
+  if (shown.length === 0)
+    return `outcome ${validation.outcome} with no mapping results`;
+  return `${failing.length} of ${validation.results.length} mappings (logicalResourceId | propertyPath | effect | reason): ${shown.join("; ")}${failing.length > shown.length ? `; and ${failing.length - shown.length} more` : ""}`;
 }
 function sourceBindingError() {
   return new IacProviderError("PREVIEW_HASH_MISMATCH", "Native preview source does not match the accepted generated tree");
@@ -27286,15 +27842,24 @@ var NativeProviderBase = class {
     this.bindingStore = options.bindingStore;
   }
   async run(plan) {
-    const result = await this.runner.run({
+    return (await this.execute(plan)).stdout;
+  }
+  /** azd 1.35 prints its `--output json` console events on stderr, so the preview parser reads both streams. */
+  async runWithStderr(plan) {
+    const result = await this.execute(plan);
+    return `${result.stdout}
+${result.stderr}`;
+  }
+  async execute(plan) {
+    return await this.runner.run({
       executable: plan.executable,
       args: plan.args,
       ...plan.cwd === void 0 ? {} : { cwd: plan.cwd },
       ...plan.env === void 0 ? {} : { env: { ...process.env, ...plan.env } },
+      ...plan.rawOutput === true ? { rawOutput: true } : {},
       timeoutMs: this.#timeoutMs,
       maxOutputBytes: this.#maxOutputBytes
     });
-    return result.stdout;
   }
   async validateBoundSource(request, track, cwd, templateFile) {
     if (request.generatedSource === void 0 || cwd() === void 0)
@@ -27424,20 +27989,27 @@ var NativeProviderBase = class {
       let compiledTemplate;
       for (const command of commands) {
         await verify();
+        let failure2 = `Native validation command failed: ${command.validatorId}`;
         try {
           const result = await this.runner.run({
             executable: command.executable,
             args: [...command.args],
             cwd: scratchRoot,
+            ...command.validatorId === "bicep:build" ? { rawOutput: true } : {},
             timeoutMs: this.#timeoutMs,
             maxOutputBytes: this.#maxOutputBytes
           });
-          if (result.exitCode !== 0 || result.signal !== null || result.timedOut !== false || result.outputTruncated !== false)
+          if (result.exitCode !== 0 || result.signal !== null || result.timedOut !== false || result.outputTruncated !== false) {
+            failure2 += ` (exit ${result.exitCode ?? "none"}${result.signal === null ? "" : `, signal ${result.signal}`}${result.timedOut ? ", timed out" : ""}${result.outputTruncated ? ", output truncated" : ""})`;
             throw new Error();
+          }
           if (command.validatorId === "bicep:build")
             compiledTemplate = result.stdout;
-        } catch {
-          throw new IacProviderError("NATIVE_VALIDATION_FAILED", "Native validation command failed");
+        } catch (error62) {
+          const code = error62.code;
+          if (typeof code === "string" && /^[A-Z_]{1,64}$/.test(code))
+            failure2 += ` (${code})`;
+          throw new IacProviderError("NATIVE_VALIDATION_FAILED", failure2);
         } finally {
           await verify();
         }
@@ -27482,6 +28054,7 @@ var NativeProviderBase = class {
       }
       if (track === "bicep" && policyInput !== void 0 && hasActionablePolicyMappings(policyInput.policyMap)) {
         let policyValidation;
+        let failure2 = "Native policy property validation failed";
         try {
           policyValidation = validatePolicyProperties({
             ...policyInput,
@@ -27491,12 +28064,14 @@ var NativeProviderBase = class {
             json: compiledTemplate ?? ""
           });
           if (policyValidation.outcome !== "pass")
-            throw new Error();
+            failure2 += `: ${policyFailureSummary(policyValidation)}`;
         } catch {
-          throw new IacProviderError("NATIVE_VALIDATION_FAILED", "Native policy property validation failed");
+          policyValidation = void 0;
         } finally {
           await verify();
         }
+        if (policyValidation === void 0 || policyValidation.outcome !== "pass")
+          throw new IacProviderError("NATIVE_VALIDATION_FAILED", failure2);
         receipt.policyValidation = policyValidation;
         const { receiptHash, ...updated } = receipt;
         if (!receiptHash)
@@ -27659,6 +28234,10 @@ var AzdBicepProvider = class extends NativeProviderBase {
       throw new AzdBindingError("AZD_BINDING_INPUT_INVALID", "The azd environment name is invalid");
     this.#target = options.target;
   }
+  /**
+   * Verifies that the configured Bicep template compiles cleanly.
+   * Full source-bound policy and resource-parity validation runs through `validateSource()`.
+   */
   async validate() {
     await this.#compiledTemplate();
     return [];
@@ -27681,6 +28260,43 @@ var AzdBicepProvider = class extends NativeProviderBase {
     }
     return void 0;
   }
+  async labApplyScope(previewHash) {
+    const restored = await this.bindingStore?.load(previewHash);
+    const binding = [...this.#bindings.values()].find((item) => item.preview.previewHash === previewHash) ?? (restored?.kind === "bicep" ? restored : void 0);
+    if (binding === void 0 || binding.preview.operation !== "apply" || binding.azdBinding.hooks.length !== 0 || binding.azdBinding.extensions.length !== 0 || binding.azdBinding.executionEnvelope.identityPreflight.cloud !== "AzureCloud")
+      throw new IacProviderError("PREVIEW_BLOCKED", "Delegation needs a hook-free, extension-free AzureCloud azd apply binding");
+    const preview = binding.preview;
+    if (preview.artifactHash !== binding.providerBindingHash || preview.artifactHash !== this.#providerBindingHash(binding.azdBinding.bindingHash, binding.ownedStateHash, binding))
+      throw new IacProviderError("PREVIEW_HASH_MISMATCH", "Delegated preview binding is invalid");
+    const target = this.#approvedTarget(preview);
+    const azdVersion = await this.#assertAzd();
+    const current = await this.#assertInputsUnchanged(binding.azdBinding, target, azdVersion);
+    await this.#assertIdentity(current);
+    const owned = await this.#ownedState(target);
+    if (owned.hash !== binding.ownedStateHash || this.#ownershipBlockers(target, owned).length > 0)
+      throw new IacProviderError("PREVIEW_HASH_MISMATCH", "Resource-group state changed after the delegated preview");
+    const ids = preview.changes.map(({ resourceId }) => resourceId);
+    if (ids.length > 256 || ids.some((id) => !id.startsWith(`${target.scope}/providers/`)))
+      throw new IacProviderError("PREVIEW_BLOCKED", "Delegated preview contains unresolved or out-of-scope resources");
+    const resources = [...owned.resources, ...await this.#readUnlisted(target, owned.resources, ids)];
+    const existing = new Set(resources.map(({ resourceId }) => resourceId.toLowerCase()));
+    const identity = current.executionEnvelope.identityPreflight;
+    return {
+      schemaVersion: "1.0.0",
+      previewHash,
+      cloud: "AzureCloud",
+      tenantId: identity.tenantId,
+      subscriptionId: identity.subscriptionId,
+      targetScope: target.scope,
+      executor: "azd",
+      hooksAbsent: true,
+      extensionsAbsent: true,
+      resourceStates: ids.map((resourceId) => ({
+        resourceId,
+        state: existing.has(resourceId.toLowerCase()) ? "present" : "absent"
+      }))
+    };
+  }
   async previewApply(request) {
     if (request.policyValidation !== void 0) {
       try {
@@ -27697,7 +28313,7 @@ var AzdBicepProvider = class extends NativeProviderBase {
     const inspected = await this.#inspect(target, azdVersion);
     await this.#assertIdentity(inspected);
     const [stdout2, owned] = await Promise.all([
-      this.run(this.#azdPlan("provision-preview", inspected)),
+      this.runWithStderr(this.#azdPlan("provision-preview", inspected)),
       this.#ownedState(target)
     ]);
     const normalized = normalizeAzdPreview(stdout2, request.resources);
@@ -27753,7 +28369,12 @@ var AzdBicepProvider = class extends NativeProviderBase {
     return await this.#execute("destroy", preview, approval, authority);
   }
   async inventory(projectId, runId) {
-    const target = this.#targets.get(`${projectId}\0${runId}`);
+    let target = this.#targets.get(`${projectId}\0${runId}`);
+    if (target === void 0) {
+      const latest = await this.bindingStore?.loadLatest?.(projectId, runId, "apply");
+      if (latest?.kind === "bicep")
+        target = this.#approvedTarget({ projectId, runId, target: latest.preview.target });
+    }
     if (target === void 0)
       throw new IacProviderError("PREVIEW_HASH_MISMATCH", "No approved azd target is known for this run");
     const owned = await this.#ownedState(target);
@@ -27976,7 +28597,8 @@ var AzdBicepProvider = class extends NativeProviderBase {
     return await this.run({
       executable: "bicep",
       args: ["build", AZD_GENERATED_TEMPLATE, "--stdout"],
-      cwd: this.#target.projectRoot
+      cwd: this.#target.projectRoot,
+      rawOutput: true
     });
   }
   async #execute(operation, preview, approval, suppliedAuthority) {
@@ -28019,6 +28641,14 @@ var AzdBicepProvider = class extends NativeProviderBase {
     const owned = await this.#ownedState(target);
     if (owned.hash !== binding.ownedStateHash) {
       throw new IacProviderError("PREVIEW_HASH_MISMATCH", "The azd environment's resource group or resources changed after preview");
+    }
+    if (approval.mechanism === "lab-delegation") {
+      if (operation !== "apply")
+        throw new IacProviderError("PREVIEW_BLOCKED", "Delegated destroy is unsupported");
+      const scope2 = await this.labApplyScope(preview.previewHash);
+      if (approval.scopeEvidenceHash !== sha2562(scope2))
+        throw new IacProviderError("PREVIEW_HASH_MISMATCH", "Delegated resource observations changed before execution");
+      await this.authorize(this.track, operation, preview, approval, suppliedAuthority, binding.preview.previewHash);
     }
     this.#targets.set(`${target.projectId}\0${target.runId}`, target);
     this.rememberPolicy(preview, binding);
@@ -28944,10 +29574,26 @@ var DOCUMENT_REGISTRY = {
     renderer: "unavailable"
   }
 };
+var UNESCAPED_SLOT_PATTERN = /(?<!\\)\{([a-z][a-z-]*)\}/gu;
 function assertExactSlots(template, expectedSlots) {
-  const slots = [...template.matchAll(/\{([a-z][a-z-]*)\}/gu)].map((match) => match[1]);
-  if (slots.length !== expectedSlots.length || new Set(slots).size !== expectedSlots.length || expectedSlots.some((slot) => !slots.includes(slot))) {
-    throw new Error("Requirements document template has invalid slots");
+  const slots = [...template.matchAll(UNESCAPED_SLOT_PATTERN)].map((match) => match[1]);
+  const expectedSet = new Set(expectedSlots);
+  const seen = /* @__PURE__ */ new Set();
+  const duplicates = /* @__PURE__ */ new Set();
+  for (const slot of slots) {
+    if (seen.has(slot))
+      duplicates.add(slot);
+    seen.add(slot);
+  }
+  const missing2 = expectedSlots.filter((slot) => !seen.has(slot));
+  const unknown2 = [...seen].filter((slot) => !expectedSet.has(slot));
+  if (missing2.length > 0 || duplicates.size > 0 || unknown2.length > 0) {
+    const details = [
+      ...missing2.length > 0 ? [`missing: ${missing2.join(", ")}`] : [],
+      ...duplicates.size > 0 ? [`duplicate: ${[...duplicates].join(", ")}`] : [],
+      ...unknown2.length > 0 ? [`unknown: ${unknown2.join(", ")}`] : []
+    ].join("; ");
+    throw new Error(`Requirements document template has invalid slots (${details})`);
   }
 }
 function unavailable(field) {
@@ -28977,13 +29623,13 @@ function renderRequirementsDocument(requirements, template, artifactHash, templa
     "unknowns-list": list(requirements.unknowns),
     "architecture-handoff": escapeMarkdown(requirements.architectureHandoff ?? "Architecture must validate candidate services against current evidence.")
   };
-  return REQUIREMENTS_TEMPLATE_SLOTS.reduce((document2, slot) => document2.replaceAll(`{${slot}}`, () => replacements[slot]), template);
+  return template.replace(/(?<!\\)\{([a-z][a-z-]*)\}|\\([{}])/gu, (_match, slot, escapedBrace) => escapedBrace ?? replacements[slot]);
 }
 
 // packages/renderers/dist/renderers.js
 var compareText2 = (left, right) => left.localeCompare(right);
 function fieldList(fields) {
-  return fields.map(([label, value]) => `- **${label}:** ${escapeMarkdown(value)}`).join("\n");
+  return fields.map(([label2, value]) => `- **${label2}:** ${escapeMarkdown(value)}`).join("\n");
 }
 function renderImplementationPlan(intent, intentHash) {
   return [
@@ -29042,6 +29688,8 @@ function renderDeploymentGuide(input2) {
     "",
     markdownTable(["Logical ID", "Type", "Purpose", "Implementation", "Version", "Dependencies", "Diagnostic Scope"], resources.map((resource) => {
       const bound = binding.resourceBindings[resource.id];
+      if (bound === void 0)
+        throw new Error(`Missing IaC binding for logical resource '${resource.id}'`);
       return [
         resource.id,
         resource.type,
@@ -29057,12 +29705,17 @@ function renderDeploymentGuide(input2) {
     "",
     "Explicit physical scope below is intended authorization scope, not observed inventory. Undeclared physical IDs remain unresolved in this guide.",
     "",
-    markdownTable(["Logical ID", "Resource ID", "Ownership", "Role"], resources.flatMap(({ id }) => (binding.resourceBindings[id].physicalResources ?? []).map((resource) => [
-      id,
-      resource.resourceId,
-      resource.ownership,
-      resource.role
-    ])).sort((left, right) => compareText2(stableJson(left), stableJson(right)))),
+    markdownTable(["Logical ID", "Resource ID", "Ownership", "Role"], resources.flatMap((resource) => {
+      const bound = binding.resourceBindings[resource.id];
+      if (bound === void 0)
+        throw new Error(`Missing IaC binding for logical resource '${resource.id}'`);
+      return (bound.physicalResources ?? []).map((physical) => [
+        resource.id,
+        physical.resourceId,
+        physical.ownership,
+        physical.role
+      ]);
+    }).sort((left, right) => compareText2(stableJson(left), stableJson(right)))),
     "",
     "## Configuration And Access",
     "",
@@ -29079,11 +29732,11 @@ function renderDeploymentGuide(input2) {
     "",
     "## Deployment Procedure",
     "",
-    "1. Inspect `apex status --json` and `apex doctor --json`; resolve missing prerequisites and stale inputs.",
+    "1. Inspect `node .apex/bin/apex.mjs status --json` and `node .apex/bin/apex.mjs doctor --json`; resolve missing prerequisites and stale inputs.",
     "2. Complete required reviews, the Gate 1 intent confirmation, the Gate 2 and 3 readiness checkpoints, source generation and all native source validators for this accepted plan.",
-    `3. With explicit cloud-operation authorization, request \`apex preview --operation apply --provider ${binding.track} --json\`. Terraform preview may perform authenticated planning.`,
-    "4. Review the exact preview, resource ownership, replacements, deletions, policy results and blockers. A human must approve Gate 4 for that exact fresh preview and recipient.",
-    "5. Execute only the approved preview through `apex deploy --preview PREVIEW_HASH --json`; never substitute an unbound provider command.",
+    `3. With explicit cloud-operation authorization, request \`node .apex/bin/apex.mjs preview --operation apply --provider ${binding.track} --json\`. Terraform preview may perform authenticated planning.`,
+    "4. Review the exact preview, resource ownership, replacements, deletions, policy results and blockers. A human must approve Gate 4 for that exact fresh preview and recipient with `node .apex/bin/apex.mjs gate decide --gate 4 --decision approved --preview PREVIEW_HASH --approval-context-hash APPROVAL_CONTEXT_HASH --yes`.",
+    "5. Execute only the approved preview through `node .apex/bin/apex.mjs deploy --preview PREVIEW_HASH --json`; never substitute an unbound provider command.",
     "6. Inspect the recorded deployment summary and inventory, then perform separately authorized workload health checks. A command exit alone does not prove application readiness.",
     "",
     "## Outputs And Application Handoff",
@@ -29132,44 +29785,6 @@ function renderRunStatus(run) {
     markdownTable(["Gate", "State", "Inherited From", "Decided", "Readiness Recorded", "Reason", "Dependency Hash"], gates)
   ].join("\n");
 }
-function previewAction(action) {
-  return action === "delete" || action === "replace" ? `**${action.toUpperCase()}**` : action;
-}
-function renderDeploymentPreview(preview) {
-  const changes = [...preview.changes].sort((left, right) => compareText2(`${left.resourceId}\0${left.action}`, `${right.resourceId}\0${right.action}`)).map((change) => [
-    change.resourceId,
-    previewAction(change.action),
-    change.material ? "yes" : "no",
-    optional(change.details)
-  ]);
-  const blockers = [...preview.blockers].sort(compareText2);
-  const destructive = preview.operation === "destroy" || preview.changes.some(({ action }) => action === "delete" || action === "replace");
-  return [
-    "# Deployment Preview",
-    "",
-    destructive ? "> **DESTRUCTIVE CHANGES PRESENT**" : "> No destructive changes detected.",
-    "",
-    fieldList([
-      ["Project", preview.projectId],
-      ["Run", preview.runId],
-      ["Environment", preview.environment],
-      ["Track", preview.track],
-      ["Operation", preview.operation],
-      ["Target", preview.target],
-      ["Created", preview.createdAt],
-      ["Expires", preview.expiresAt],
-      ["Preview hash", preview.previewHash]
-    ]),
-    "",
-    "## Blockers",
-    "",
-    blockers.length === 0 ? "None." : blockers.map((blocker) => `- **BLOCKED:** ${escapeMarkdown(blocker)}`).join("\n"),
-    "",
-    "## Semantic Changes",
-    "",
-    changes.length === 0 ? "No changes." : markdownTable(["Resource", "Action", "Material", "Details"], changes)
-  ].join("\n");
-}
 function renderApprovalEvidence(approval) {
   const summary = [
     "# Approval Evidence",
@@ -29186,6 +29801,7 @@ function renderApprovalEvidence(approval) {
       ["Writer epoch", approval.writerEpoch],
       ["Dependency hash", approval.dependencyHash],
       ["Preview hash", optional(approval.previewHash)],
+      ["Approval context hash", optional(approval.approvalContextHash)],
       ["Decided", approval.decidedAt],
       ["Expires", optional(approval.expiresAt)]
     ])
@@ -29437,14 +30053,49 @@ function renderResourceInventory(inventory) {
 }
 
 // packages/renderers/dist/scorecard.js
+var ScorecardValidationError = class extends Error {
+  path;
+  constructor(path2, message) {
+    super(message);
+    this.path = path2;
+    this.name = "ScorecardValidationError";
+  }
+};
 function unavailableDecision(unavailable3) {
   return unavailable3 === "block" ? "fail" : "omitted";
 }
+function scorecardKey(metric, scenario) {
+  return JSON.stringify([metric, scenario]);
+}
 function evaluateQualityScorecard(scorecard, measurements) {
-  const indexed = new Map(measurements.map((item) => [`${item.metric}\0${item.scenario}`, item]));
-  return [...scorecard.rules].sort((left, right) => `${left.metric}\0${left.scenario}`.localeCompare(`${right.metric}\0${right.scenario}`)).map((rule) => {
-    const measurement = indexed.get(`${rule.metric}\0${rule.scenario}`);
-    if (measurement === void 0 || measurement.value === void 0 || !Number.isFinite(measurement.value)) {
+  const seenRules = /* @__PURE__ */ new Set();
+  for (const rule of scorecard.rules) {
+    const key = scorecardKey(rule.metric, rule.scenario);
+    if (seenRules.has(key)) {
+      throw new ScorecardValidationError("/scorecard/rules", `Duplicate scorecard rule for ${rule.metric} (${rule.scenario})`);
+    }
+    seenRules.add(key);
+    if (rule.direction === "exact" && rule.tolerance !== 0) {
+      throw new ScorecardValidationError("/scorecard/rules", `Exact scorecard rule ${rule.metric} (${rule.scenario}) must have tolerance 0`);
+    }
+  }
+  const indexed = /* @__PURE__ */ new Map();
+  for (const item of measurements) {
+    if (!Number.isSafeInteger(item.samples) || item.samples < 0) {
+      throw new ScorecardValidationError("/qualityMeasurements/measurements", `Invalid scorecard sample count for ${item.metric} (${item.scenario})`);
+    }
+    if (item.value !== void 0 && !Number.isFinite(item.value)) {
+      throw new ScorecardValidationError("/qualityMeasurements/measurements", `Invalid scorecard measurement value for ${item.metric} (${item.scenario})`);
+    }
+    const key = scorecardKey(item.metric, item.scenario);
+    if (indexed.has(key)) {
+      throw new ScorecardValidationError("/qualityMeasurements/measurements", `Duplicate scorecard measurement for ${item.metric} (${item.scenario})`);
+    }
+    indexed.set(key, item);
+  }
+  return [...scorecard.rules].sort((left, right) => left.metric.localeCompare(right.metric) || left.scenario.localeCompare(right.scenario)).map((rule) => {
+    const measurement = indexed.get(scorecardKey(rule.metric, rule.scenario));
+    if (measurement === void 0 || measurement.value === void 0) {
       return {
         metric: rule.metric,
         scenario: rule.scenario,
@@ -29463,7 +30114,7 @@ function evaluateQualityScorecard(scorecard, measurements) {
         reason: `requires at least ${rule.minimumSamples} samples`
       };
     }
-    const passed = rule.direction === "min" ? measurement.value >= rule.target - rule.tolerance : rule.direction === "max" ? measurement.value <= rule.target + rule.tolerance : Math.abs(measurement.value - rule.target) <= rule.tolerance;
+    const passed = rule.direction === "min" ? measurement.value >= rule.target - rule.tolerance : rule.direction === "max" ? measurement.value <= rule.target + rule.tolerance : measurement.value === rule.target;
     return {
       metric: rule.metric,
       scenario: rule.scenario,
@@ -29476,9 +30127,9 @@ function evaluateQualityScorecard(scorecard, measurements) {
 }
 function renderQualityScorecardEvaluation(scorecard, measurements) {
   const evaluations = evaluateQualityScorecard(scorecard, measurements);
-  const rules = new Map(scorecard.rules.map((rule) => [`${rule.metric}\0${rule.scenario}`, rule]));
+  const rules = new Map(scorecard.rules.map((rule) => [scorecardKey(rule.metric, rule.scenario), rule]));
   const rows = evaluations.map((evaluation) => {
-    const rule = rules.get(`${evaluation.metric}\0${evaluation.scenario}`);
+    const rule = rules.get(scorecardKey(evaluation.metric, evaluation.scenario));
     return [
       evaluation.metric,
       evaluation.scenario,
@@ -29631,41 +30282,26 @@ fig.tight_layout()
 fig.savefig(SPEC["kind"] + ".png", dpi=150)
 `;
 }
+function assertNonNegativeFinite(value, label2) {
+  if (!Number.isFinite(value) || value < 0) {
+    throw new Error(`Invalid ${label2}: expected a finite non-negative number`);
+  }
+  return value;
+}
 function source(spec, svg) {
   if (spec.rows.length > MAX_DIAGRAM_ROWS)
     throw new Error(`Diagram exceeds ${MAX_DIAGRAM_ROWS} rows`);
-  return { svg, python: pythonSource(spec) };
-}
-function renderArchitectureDiagram(architecture) {
-  const rows = architecture.components.map(({ id, service, purpose }) => ({ id, label: `${id}: ${service}`, detail: purpose })).sort((left, right) => compare2(left.id, right.id));
-  const edges = architecture.components.flatMap(({ id, dependsOn }) => dependsOn.map((dependency) => ({ from: dependency, to: id }))).sort((left, right) => compare2(`${left.from}\0${left.to}`, `${right.from}\0${right.to}`));
-  const columns = Math.min(3, Math.max(1, rows.length));
-  const nodeWidth = 250;
-  const nodeHeight = 82;
-  const columnGap = 42;
-  const rowGap = 52;
-  const positions = new Map(rows.map((row, index) => [
-    row.id,
-    {
-      x: 64 + index % columns * (nodeWidth + columnGap),
-      y: 88 + Math.floor(index / columns) * (nodeHeight + rowGap)
+  for (const row of spec.rows) {
+    for (const [field, value] of [
+      ["value", row.value],
+      ["lower", row.lower],
+      ["upper", row.upper]
+    ]) {
+      if (value !== void 0)
+        assertNonNegativeFinite(value, `diagram row '${row.id}' ${field}`);
     }
-  ]));
-  const height = Math.max(260, 130 + Math.ceil(rows.length / columns) * (nodeHeight + rowGap));
-  const edgeSvg = edges.map(({ from, to }) => {
-    const start = positions.get(from);
-    const end = positions.get(to);
-    if (start === void 0 || end === void 0)
-      return "";
-    return `<line x1="${start.x + nodeWidth / 2}" y1="${start.y + nodeHeight / 2}" x2="${end.x + nodeWidth / 2}" y2="${end.y + nodeHeight / 2}" stroke="#8a9bad" stroke-width="2"/>`;
-  }).join("\n");
-  const nodeSvg = rows.map((row) => {
-    const position = positions.get(row.id);
-    return `<g><rect x="${position.x}" y="${position.y}" width="${nodeWidth}" height="${nodeHeight}" rx="6" fill="#ffffff" stroke="${ACCENT}" stroke-width="2"/><text x="${position.x + 14}" y="${position.y + 30}" fill="${INK}" font-family="Arial, sans-serif" font-size="15" font-weight="700">${xml(short(row.label, 34))}</text><text x="${position.x + 14}" y="${position.y + 56}" fill="${MUTED}" font-family="Arial, sans-serif" font-size="12">${xml(short(row.detail ?? "", 38))}</text></g>`;
-  }).join("\n");
-  const spec = { kind: "architecture", title: architecture.title, rows, edges };
-  return source(spec, document(architecture.title, height, `${edgeSvg}
-${nodeSvg}`, "Accepted architecture components and dependencies"));
+  }
+  return { svg, python: pythonSource(spec) };
 }
 function renderWafAssessmentDiagram(architecture) {
   const assessment = architecture.wellArchitectedAssessment;
@@ -29688,7 +30324,11 @@ function renderWafAssessmentDiagram(architecture) {
   return source(spec, document(spec.title, 480, body, "Qualitative status for the five Azure Well-Architected pillars"));
 }
 function renderCostBreakdownDiagram(cost) {
-  const rows = cost.lineItems.map(({ id, service, sku, monthlyCost }) => ({ id, label: `${service} / ${sku}`, value: monthlyCost })).sort((left, right) => compare2(left.id, right.id));
+  const rows = cost.lineItems.map(({ id, service, sku, monthlyCost }) => ({
+    id,
+    label: `${service} / ${sku}`,
+    value: assertNonNegativeFinite(monthlyCost, `cost line item '${id}' monthlyCost`)
+  })).sort((left, right) => compare2(left.id, right.id));
   const maximum = Math.max(1, ...rows.map(({ value }) => value ?? 0));
   const notes = (cost.unpricedItems ?? []).map(({ service, sku }) => `Unpriced: ${service} / ${sku}`).sort(compare2);
   const height = Math.max(260, 120 + rows.length * 52 + notes.length * 20);
@@ -29706,9 +30346,9 @@ function renderCostUncertaintyDiagram(cost) {
   const rows = cost.lineItems.map(({ id, service, sku, monthlyCost, uncertainty }) => ({
     id,
     label: `${service} / ${sku}`,
-    value: monthlyCost,
-    lower: uncertainty.lowerMonthlyCost,
-    upper: uncertainty.upperMonthlyCost
+    value: assertNonNegativeFinite(monthlyCost, `cost line item '${id}' monthlyCost`),
+    lower: assertNonNegativeFinite(uncertainty.lowerMonthlyCost, `cost line item '${id}' lowerMonthlyCost`),
+    upper: assertNonNegativeFinite(uncertainty.upperMonthlyCost, `cost line item '${id}' upperMonthlyCost`)
   })).sort((left, right) => compare2(left.id, right.id));
   const maximum = Math.max(1, ...rows.map(({ upper }) => upper));
   const height = Math.max(260, 120 + rows.length * 58);
@@ -29723,11 +30363,153 @@ function renderCostUncertaintyDiagram(cost) {
   return source(spec, document(spec.title, height, ranges, "Lower, base, and upper monthly cost by priced line item"));
 }
 
+// packages/renderers/dist/architecture-mermaid.js
+var TIERS = [
+  { id: "edge", title: "Edge & ingress", icon: "\u{1F310}", fill: "#e8f3fc", stroke: "#0f6cbd" },
+  { id: "application", title: "Application & compute", icon: "\u2699\uFE0F", fill: "#e9f6e8", stroke: "#107c10" },
+  { id: "data", title: "Data & messaging", icon: "\u{1F5C4}\uFE0F", fill: "#fdf3e3", stroke: "#b45f06" },
+  { id: "network", title: "Network & private access", icon: "\u{1F50C}", fill: "#efeaf8", stroke: "#6b4ea8" },
+  { id: "security", title: "Security & identity", icon: "\u{1F511}", fill: "#fbeaea", stroke: "#a4262c" },
+  { id: "operations", title: "Monitoring & operations", icon: "\u{1F4CA}", fill: "#e6f2f3", stroke: "#0b6a6f" },
+  { id: "other", title: "Other", icon: "\u{1F4E6}", fill: "#eef0f2", stroke: "#5b6773" }
+];
+var TIER_RULES = [
+  ["microsoft.cdn/", "edge"],
+  ["microsoft.apimanagement/", "edge"],
+  ["microsoft.network/frontdoor", "edge"],
+  ["microsoft.network/applicationgateway", "edge"],
+  ["microsoft.network/trafficmanagerprofiles", "edge"],
+  ["microsoft.network/", "network"],
+  ["microsoft.web/", "application"],
+  ["microsoft.app/", "application"],
+  ["microsoft.containerservice/", "application"],
+  ["microsoft.containerinstance/", "application"],
+  ["microsoft.containerregistry/", "application"],
+  ["microsoft.compute/", "application"],
+  ["microsoft.logic/", "application"],
+  ["microsoft.sql/", "data"],
+  ["microsoft.storage/", "data"],
+  ["microsoft.documentdb/", "data"],
+  ["microsoft.dbforpostgresql/", "data"],
+  ["microsoft.dbformysql/", "data"],
+  ["microsoft.cache/", "data"],
+  ["microsoft.servicebus/", "data"],
+  ["microsoft.eventhub/", "data"],
+  ["microsoft.eventgrid/", "data"],
+  ["microsoft.search/", "data"],
+  ["microsoft.keyvault/", "security"],
+  ["microsoft.managedidentity/", "security"],
+  ["microsoft.authorization/", "security"],
+  ["microsoft.security/", "security"],
+  ["microsoft.insights/", "operations"],
+  ["microsoft.operationalinsights/", "operations"],
+  ["microsoft.monitor/", "operations"],
+  ["microsoft.alertsmanagement/", "operations"],
+  ["microsoft.dashboard/", "operations"]
+];
+function compare3(left, right) {
+  return left < right ? -1 : left > right ? 1 : 0;
+}
+function architectureTierOf(resourceTypes) {
+  for (const type of [...resourceTypes].map((value) => value.toLowerCase()).sort(compare3)) {
+    const rule = TIER_RULES.find(([prefix]) => type.startsWith(prefix));
+    if (rule !== void 0)
+      return rule[1];
+  }
+  return "other";
+}
+function label(value) {
+  return value.replace(/[\u0000-\u001f\u007f]/gu, " ").replaceAll("#", "#35;").replaceAll("&", "#amp;").replaceAll('"', "#quot;").replaceAll("<", "#lt;").replaceAll(">", "#gt;").replaceAll("`", "#96;").trim();
+}
+function plain2(value) {
+  return value.replace(/[\u0000-\u001f\u007f\s]+/gu, " ").replaceAll("{", "(").replaceAll("}", ")").trim();
+}
+function wrap(value, maxChars) {
+  const words = value.replace(/\s+/gu, " ").trim().split(" ").filter(Boolean);
+  const lines = [];
+  let current = "";
+  for (const word of words) {
+    const candidate = current === "" ? word : `${current} ${word}`;
+    if (candidate.length <= maxChars || current === "")
+      current = candidate;
+    else {
+      lines.push(current);
+      current = word;
+    }
+  }
+  if (current !== "")
+    lines.push(current);
+  return lines;
+}
+function nodeText(tier, service, id) {
+  const [first = "", ...rest] = wrap(service, 26).map(label);
+  const lines = [`${tier.icon} <b>${first}</b>`, ...rest.map((line) => `<b>${line}</b>`), `<i>${label(id)}</i>`];
+  return lines.join("<br/>");
+}
+function shape(tier, text5) {
+  switch (tier) {
+    case "data":
+      return `[("${text5}")]`;
+    case "edge":
+      return `(["${text5}"])`;
+    case "security":
+      return `{{"${text5}"}}`;
+    default:
+      return `["${text5}"]`;
+  }
+}
+function renderArchitectureMermaid(architecture) {
+  const components = [...architecture.components].sort((left, right) => compare3(left.id, right.id));
+  const used = /* @__PURE__ */ new Set();
+  const nodeIds = /* @__PURE__ */ new Map();
+  for (const { id } of components) {
+    const base = `n_${id.replace(/[^A-Za-z0-9_]/gu, "_")}`;
+    let candidate = base;
+    for (let suffix = 2; used.has(candidate); suffix += 1)
+      candidate = `${base}_${suffix}`;
+    used.add(candidate);
+    nodeIds.set(id, candidate);
+  }
+  const lines = [
+    `%% ${label(architecture.title)}`,
+    "flowchart TB",
+    `  accTitle: ${plain2(architecture.title)}`,
+    `  accDescr: ${plain2(`Architecture diagram with ${components.length} components grouped by Azure resource family. ${architecture.summary}`)}`
+  ];
+  for (const tier of TIERS) {
+    lines.push(`  classDef tier_${tier.id} fill:${tier.fill},stroke:${tier.stroke},color:#172033,stroke-width:1.5px`, `  classDef lane_${tier.id} fill:${tier.fill},stroke:${tier.stroke},color:${tier.stroke},stroke-width:1px`);
+  }
+  const members2 = /* @__PURE__ */ new Map();
+  for (const tier of TIERS) {
+    const inTier = components.filter(({ resourceTypes }) => architectureTierOf(resourceTypes) === tier.id);
+    if (inTier.length === 0)
+      continue;
+    lines.push(`  subgraph lane_${tier.id}["${label(tier.title)}"]`, "    direction LR");
+    for (const component of inTier) {
+      lines.push(`    ${nodeIds.get(component.id)}${shape(tier.id, nodeText(tier, component.service, component.id))}`);
+    }
+    lines.push("  end");
+    members2.set(tier.id, inTier.map(({ id }) => nodeIds.get(id)));
+  }
+  const edges = components.flatMap((component) => [...new Set(component.dependsOn)].filter((dependency) => nodeIds.has(dependency) && dependency !== component.id).sort(compare3).map((dependency) => `  ${nodeIds.get(component.id)} --> ${nodeIds.get(dependency)}`)).sort(compare3);
+  lines.push(...edges);
+  for (const tier of TIERS) {
+    const ids = members2.get(tier.id);
+    if (ids === void 0)
+      continue;
+    lines.push(`  class ${ids.join(",")} tier_${tier.id}`, `  class lane_${tier.id} lane_${tier.id}`);
+  }
+  if (edges.length > 0)
+    lines.push(`  linkStyle default stroke:#6b7f94,stroke-width:1.5px`);
+  return `${lines.join("\n")}
+`;
+}
+
 // packages/cli/dist/cli.js
 import { join as join26, resolve as resolve22 } from "node:path";
 
 // packages/cli/dist/version.js
-var APEX_VERSION = "0.11.0-next.5";
+var APEX_VERSION = "0.11.0-next.6";
 var MINIMUM_NODE_VERSION = "24.21.0";
 function meetsMinimumVersion(current, minimum) {
   const currentParts = current.split(".").map(Number);
@@ -29788,6 +30570,13 @@ var RUNTIME_MISMATCH_REMEDIATION = {
   RUNTIME_LOCK_INVALID: `Inspect .apex/apex.lock.json; if a newer APEX runtime did not write it, run \`apex doctor --fix --yes\` in the workspace with @apexops/cli@${APEX_VERSION} to rewrite it, then call status again.`
 };
 function remediationForApexError(error62) {
+  if (error62.code === "APEX_CONFLICT") {
+    const reason = error62.details?.reason;
+    if (reason === "ONLY_PROJECT" || reason === "INPUT_ALREADY_RECORDED")
+      return "Do not delete or recreate a project to correct a recorded answer. Read inputHistory, previewInputAmendment, obtain explicit confirmation of its impact, then call amendInput. CLI: apex input history, apex input preview-amendment, apex input amend --yes.";
+    if (reason === "INPUT_NOT_RECORDED")
+      return "Read inputHistory for current recorded Requirements or Architecture requests; use recordInput only for a pending request. Superseded requests and governance choices cannot be amended here.";
+  }
   if (error62.code === "APEX_RUNTIME_MISMATCH") {
     const reason = error62.details?.reason;
     if (typeof reason === "string" && Object.hasOwn(RUNTIME_MISMATCH_REMEDIATION, reason))
@@ -29811,6 +30600,9 @@ function normalizeError(error62) {
   }
   if (error62 instanceof Error && error62.code === "ENOENT") {
     return new ApexError("APEX_NOT_FOUND", error62.message, EXIT_CODES.notFound, void 0, { cause: error62 });
+  }
+  if (error62 instanceof IacProviderError) {
+    return new ApexError("APEX_VALIDATION", `Native validation failed: ${error62.code}: ${error62.message.replace(/[\r\n]+/g, " ").slice(0, 2048)}`, EXIT_CODES.validation, void 0, { cause: error62 });
   }
   return new ApexError("APEX_INTERNAL", error62 instanceof Error ? error62.message : String(error62), EXIT_CODES.internal, void 0, { cause: error62 });
 }
@@ -29897,7 +30689,7 @@ function assertTargetScope(value) {
   return value;
 }
 
-// node_modules/@modelcontextprotocol/server/dist/chunk-Br0eD_fh.mjs
+// node_modules/@modelcontextprotocol/server/dist/chunk-vYduTEsO.mjs
 var __create2 = Object.create;
 var __defProp2 = Object.defineProperty;
 var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
@@ -29937,7 +30729,7 @@ var __toESM2 = (mod, isNodeMode, target) => (target = mod != null ? __create2(__
   enumerable: true
 }) : target, mod));
 
-// node_modules/@modelcontextprotocol/server/dist/dialects-DoSzNhcb.mjs
+// node_modules/@modelcontextprotocol/server/dist/dialects-CDpMbily.mjs
 var DRAFT_2020_12_URIS = /* @__PURE__ */ new Set(["https://json-schema.org/draft/2020-12/schema", "http://json-schema.org/draft/2020-12/schema"]);
 var DRAFT_2019_09_URIS = /* @__PURE__ */ new Set(["https://json-schema.org/draft/2019-09/schema", "http://json-schema.org/draft/2019-09/schema"]);
 var DRAFT_07_URIS = /* @__PURE__ */ new Set(["https://json-schema.org/draft-07/schema", "http://json-schema.org/draft-07/schema"]);
@@ -30205,7 +30997,7 @@ __export(external_exports, {
   uppercase: () => _uppercase,
   url: () => url,
   util: () => util_exports,
-  uuid: () => uuid2,
+  uuid: () => uuid3,
   uuidv4: () => uuidv4,
   uuidv6: () => uuidv6,
   uuidv7: () => uuidv7,
@@ -30605,6 +31397,7 @@ __export(util_exports, {
   required: () => required,
   safeExtend: () => safeExtend,
   shallowClone: () => shallowClone,
+  sizeCaps: () => sizeCaps,
   slugify: () => slugify,
   stringifyPrimitive: () => stringifyPrimitive,
   toZod: () => toZod,
@@ -30733,7 +31526,7 @@ function putProp(target, key, value) {
   else
     target[key] = value;
 }
-function mirrorShape(target, source2, keys, wrap) {
+function mirrorShape(target, source2, keys, wrap2) {
   const raw = sourceShape(source2);
   for (const key of keys) {
     const desc = Object.getOwnPropertyDescriptor(raw, key);
@@ -30742,10 +31535,10 @@ function mirrorShape(target, source2, keys, wrap) {
     if (desc.get) {
       deferProp(target, key, () => {
         const value = source2._zod.def.shape[key];
-        return wrap ? wrap(value, key) : value;
+        return wrap2 ? wrap2(value, key) : value;
       });
     } else
-      putProp(target, key, wrap ? wrap(desc.value, key) : desc.value);
+      putProp(target, key, wrap2 ? wrap2(desc.value, key) : desc.value);
   }
 }
 function mirrorProps(target, source2) {
@@ -30974,9 +31767,9 @@ function stringifyPrimitive(value) {
     return `"${value}"`;
   return `${value}`;
 }
-function optionalKeys(shape) {
-  return Object.keys(shape).filter((k) => {
-    return shape[k]._zod.optin !== void 0 && shape[k]._zod.optout === "optional";
+function optionalKeys(shape2) {
+  return Object.keys(shape2).filter((k) => {
+    return shape2[k]._zod.optin !== void 0 && shape2[k]._zod.optout === "optional";
   });
 }
 var NUMBER_FORMAT_RANGES = /* @__PURE__ */ (() => ({
@@ -31025,33 +31818,33 @@ function omit(schema, mask) {
   mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)).filter((key) => !omitted.has(key)));
   return clone(schema, mergeDefs(currDef, { shape: newShape, checks: [] }));
 }
-function extend(schema, shape) {
-  if (!isPlainObject3(shape)) {
+function extend(schema, shape2) {
+  if (!isPlainObject3(shape2)) {
     throw new Error("Invalid input to extend: expected a plain object");
   }
   const checks = schema._zod.def.checks;
   const hasChecks = checks && checks.length > 0;
   if (hasChecks) {
     const existingShape = sourceShape(schema);
-    for (const key of Reflect.ownKeys(shape)) {
+    for (const key of Reflect.ownKeys(shape2)) {
       if (Object.getOwnPropertyDescriptor(existingShape, key) !== void 0) {
         throw new Error("Cannot overwrite keys on object schemas containing refinements. Use `.safeExtend()` instead.");
       }
     }
   }
-  return clone(schema, mergeDefs(schema._zod.def, { shape: extended(schema, shape) }));
+  return clone(schema, mergeDefs(schema._zod.def, { shape: extended(schema, shape2) }));
 }
-function extended(schema, shape) {
+function extended(schema, shape2) {
   const newShape = {};
   mirrorShape(newShape, schema, Reflect.ownKeys(sourceShape(schema)));
-  mirrorProps(newShape, shape);
+  mirrorProps(newShape, shape2);
   return newShape;
 }
-function safeExtend(schema, shape) {
-  if (!isPlainObject3(shape)) {
+function safeExtend(schema, shape2) {
+  if (!isPlainObject3(shape2)) {
     throw new Error("Invalid input to safeExtend: expected a plain object");
   }
-  return clone(schema, mergeDefs(schema._zod.def, { shape: extended(schema, shape) }));
+  return clone(schema, mergeDefs(schema._zod.def, { shape: extended(schema, shape2) }));
 }
 function merge(a, b) {
   if (!b?._zod?.def) {
@@ -31123,6 +31916,18 @@ function prefixIssues(path2, issues) {
 }
 function unwrapMessage(message) {
   return typeof message === "string" ? message : message?.message;
+}
+function sizeCaps(defChecks) {
+  const caps = [];
+  for (const ch of defChecks ?? []) {
+    const d = ch._zod.def;
+    if (!/_(length|size)$|_equals$/.test(d.check))
+      break;
+    const max = d.maximum ?? d.length ?? d.size;
+    if (max >= 0)
+      caps.push([max, ch]);
+  }
+  return caps;
 }
 function attachSchema(issues, start, inst) {
   var _a3;
@@ -31913,7 +32718,7 @@ __export(regexes_exports, {
   undefined: () => _undefined,
   unicodeEmail: () => unicodeEmail,
   uppercase: () => uppercase,
-  uuid: () => uuid,
+  uuid: () => uuid2,
   uuid4: () => uuid4,
   uuid6: () => uuid6,
   uuid7: () => uuid7,
@@ -31931,14 +32736,14 @@ function nanoidOfLength(length) {
 var duration = /^P(?:(\d+W)|(?!.*W)(?=\d|T\d)(\d+Y)?(\d+M)?(\d+D)?(T(?=\d)(\d+H)?(\d+M)?(\d+([.,]\d+)?S)?)?)$/;
 var extendedDuration = /^[-+]?P(?!$)(?:(?:[-+]?\d+Y)|(?:[-+]?\d+[.,]\d+Y$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:(?:[-+]?\d+W)|(?:[-+]?\d+[.,]\d+W$))?(?:(?:[-+]?\d+D)|(?:[-+]?\d+[.,]\d+D$))?(?:T(?=[\d+-])(?:(?:[-+]?\d+H)|(?:[-+]?\d+[.,]\d+H$))?(?:(?:[-+]?\d+M)|(?:[-+]?\d+[.,]\d+M$))?(?:[-+]?\d+(?:[.,]\d+)?S)?)??$/;
 var guid = /^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12})$/;
-var uuid = (version2) => {
+var uuid2 = (version2) => {
   if (!version2)
     return /^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$/;
   return new RegExp(`^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-${version2}[0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12})$`);
 };
-var uuid4 = /* @__PURE__ */ uuid(4);
-var uuid6 = /* @__PURE__ */ uuid(6);
-var uuid7 = /* @__PURE__ */ uuid(7);
+var uuid4 = /* @__PURE__ */ uuid2(4);
+var uuid6 = /* @__PURE__ */ uuid2(6);
+var uuid7 = /* @__PURE__ */ uuid2(7);
 var email = /^(?:[A-Za-z0-9_'+\-]+\.)*[A-Za-z0-9_'+\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\-]*\.)+[A-Za-z]{2,}$/;
 var html5Email = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/;
 var rfc5322Email = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -32544,7 +33349,7 @@ ${content.join("\n")}
 var version = {
   major: 4,
   minor: 6,
-  patch: 5
+  patch: 7
 };
 
 // node_modules/zod/v4/core/schemas.js
@@ -32721,9 +33526,9 @@ var $ZodUUID = /* @__PURE__ */ $constructor("$ZodUUID", (inst, def) => {
     const v = versionMap[def.version];
     if (v === void 0)
       throw new Error(`Invalid UUID version: "${def.version}"`);
-    def.pattern ?? (def.pattern = uuid(v));
+    def.pattern ?? (def.pattern = uuid2(v));
   } else
-    def.pattern ?? (def.pattern = uuid());
+    def.pattern ?? (def.pattern = uuid2());
   $ZodStringFormat.init(inst, def);
 });
 var $ZodEmail = /* @__PURE__ */ $constructor("$ZodEmail", (inst, def) => {
@@ -33300,6 +34105,31 @@ var $ZodDate = /* @__PURE__ */ $constructor("$ZodDate", (inst, def) => {
     return payload;
   };
 });
+function capSize(inst, size) {
+  const caps = sizeCaps(inst._zod.def.checks);
+  if (!caps.length)
+    return;
+  const cap = Math.min(...caps.map((c) => c[0]));
+  const parse4 = inst._zod.parse;
+  inst._zod.parse = (payload, ctx) => {
+    const n = size(payload.value);
+    if (n > cap && !ctx?.skipChecks && ctx?.direction !== "backward") {
+      for (const [max, ch] of sizeCaps(inst._zod.def.checks)) {
+        if (n > max && ch._zod.def.when(payload)) {
+          const start = payload.issues.length;
+          ch._zod.check(payload);
+          payload.issues[start].continue = false;
+          attachSchema(payload.issues, start, inst);
+          return payload;
+        }
+      }
+    }
+    return parse4(payload, ctx);
+  };
+}
+var arraySize = (input2) => Array.isArray(input2) ? input2.length : -1;
+var mapSize = (input2) => input2 instanceof Map ? input2.size : -1;
+var setSize = (input2) => input2 instanceof Set ? input2.size : -1;
 function handleArrayResult(result, final, index) {
   if (result.issues.length) {
     final.issues.push(...prefixIssues(index, result.issues));
@@ -33343,6 +34173,7 @@ var $ZodArray = /* @__PURE__ */ $constructor("$ZodArray", (inst, def) => {
     }
     return payload;
   };
+  capSize(inst, arraySize);
 });
 function handlePropertyResult(result, final, key, input2, optin, optout) {
   const isPresent = key in input2;
@@ -33461,10 +34292,10 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
   }
   const _normalized = cached(() => normalizeDef(def));
   defineLazyInternal(inst, "propValues", (zod) => {
-    const shape = zod.def.shape;
+    const shape2 = zod.def.shape;
     const propValues = {};
-    for (const key in shape) {
-      const field = shape[key]._zod;
+    for (const key in shape2) {
+      const field = shape2[key]._zod;
       if (field.values) {
         if (!Object.prototype.hasOwnProperty.call(propValues, key)) {
           assignProp(propValues, key, /* @__PURE__ */ new Set());
@@ -33496,7 +34327,7 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
     }
     payload.value = memo3 ? memo3.alloc(inst, payload, {}, ctx) : {};
     const proms = [];
-    const shape = value.shape;
+    const shape2 = value.shape;
     const abortEarly = ctx?.abortEarly;
     let seen = payload.issues.length;
     for (const key of value.allKeys) {
@@ -33507,7 +34338,7 @@ var $ZodObject = /* @__PURE__ */ $constructor("$ZodObject", (inst, def) => {
       }
       if (key === "__proto__")
         continue;
-      const el = shape[key];
+      const el = shape2[key];
       const optin = el._zod.optin;
       const optout = el._zod.optout;
       const r = el._zod.run({ value: input2[key], issues: [] }, ctx);
@@ -33528,10 +34359,10 @@ var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) =>
   const superParse = inst._zod.parse;
   const _normalized = cached(() => normalizeDef(def));
   const memo3 = globalConfig.memoizer;
-  const generateFastpass = (shape) => {
+  const generateFastpass = (shape2) => {
     const normalized = _normalized.value;
     const syms = normalized.symbolKeys;
-    const doc = new Doc(["payload", "ctx"], { shape, inst, memo: memo3, syms });
+    const doc = new Doc(["payload", "ctx"], { shape: shape2, inst, memo: memo3, syms });
     const parseStr = (k) => `shape[${k}]._zod.run({ value: input[${k}], issues: [] }, ctx)`;
     const prefixStr = (id, k) => `
           let ${id}_ab = false;
@@ -33558,7 +34389,7 @@ var $ZodObjectJIT = /* @__PURE__ */ $constructor("$ZodObjectJIT", (inst, def) =>
       const id = ids[key];
       const k = typeof key === "symbol" ? `syms[${syms.indexOf(key)}]` : esc(key);
       const isPresent = `${k} in input`;
-      const schema = shape[key];
+      const schema = shape2[key];
       const optin = schema?._zod?.optin;
       const isOptionalIn = optin !== void 0;
       const isOptionalOut = schema?._zod?.optout === "optional";
@@ -34299,6 +35130,7 @@ var $ZodMap = /* @__PURE__ */ $constructor("$ZodMap", (inst, def) => {
       return Promise.all(proms).then(() => payload);
     return payload;
   };
+  capSize(inst, mapSize);
 });
 function handleMapResult(keyResult, valueResult, final, key, input2, inst, ctx) {
   if (keyResult.issues.length) {
@@ -34365,6 +35197,7 @@ var $ZodSet = /* @__PURE__ */ $constructor("$ZodSet", (inst, def) => {
       return Promise.all(proms).then(() => payload);
     return payload;
   };
+  capSize(inst, setSize);
 });
 function handleSetResult(result, final) {
   if (result.issues.length) {
@@ -34995,7 +35828,7 @@ function isRecursive(inst, stack, resolve23) {
         result = answer;
     }
   };
-  const shape = (sh, spread) => {
+  const shape2 = (sh, spread) => {
     let answer = NONE;
     for (const key of Reflect.ownKeys(sh)) {
       const desc = Object.getOwnPropertyDescriptor(sh, key);
@@ -35016,7 +35849,7 @@ function isRecursive(inst, stack, resolve23) {
   switch (kind) {
     case "object": {
       const raw = rawShape(def);
-      merge2(raw ? shape(raw, true) : ASSUMED);
+      merge2(raw ? shape2(raw, true) : ASSUMED);
       check2(def.catchall);
       break;
     }
@@ -43134,9 +43967,9 @@ function codePointLengthVar(doc, ctx, accessor, inDoubt) {
   doc.write(`const ${v} = typeof ${accessor} === "string" && ${inDoubt} ? ${cpLen}(${accessor}) : ${accessor}.length;`);
   return v;
 }
-function numericOperand(value, label) {
+function numericOperand(value, label2) {
   if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new ZodCompileUnsupportedError(`${label} bound of type ${typeof value}`);
+    throw new ZodCompileUnsupportedError(`${label2} bound of type ${typeof value}`);
   }
   return `${value}`;
 }
@@ -43227,12 +44060,12 @@ function generatePropertiesChecks(doc, ctx, def, accessor) {
     throw new ZodCompileUnsupportedError(`check with a custom "when" condition`);
   }
   doc.write(`if (${accessor} == null) return INVALID;`);
-  const shape = def.shape;
-  for (const key of Reflect.ownKeys(shape)) {
+  const shape2 = def.shape;
+  for (const key of Reflect.ownKeys(shape2)) {
     const keyExpr = typeof key === "symbol" ? addConstant(ctx, key) : esc(key);
     const inputVar = newVar(ctx);
     doc.write(`const ${inputVar} = ${accessor}[${keyExpr}];`);
-    compileChild(doc, ctx, shape[key], inputVar, false);
+    compileChild(doc, ctx, shape2[key], inputVar, false);
   }
 }
 function generatePropertyCheck(doc, ctx, def, accessor) {
@@ -43614,13 +44447,13 @@ function generateDateCheck(doc, accessor) {
 function generateObjectCheck(doc, ctx, schema, accessor, buildsValue = true) {
   const def = schema._zod.def;
   doc.write(`if (typeof ${accessor} !== "object" || ${accessor} === null || Array.isArray(${accessor})) return INVALID;`);
-  const shape = def.shape;
-  const keys = Object.keys(shape);
-  const symbolKeys = Object.getOwnPropertySymbols(shape);
+  const shape2 = def.shape;
+  const keys = Object.keys(shape2);
+  const symbolKeys = Object.getOwnPropertySymbols(shape2);
   const allKeys = symbolKeys.length ? [...keys, ...symbolKeys] : keys;
   const keyExpr = (k) => typeof k === "symbol" ? addConstant(ctx, k) : esc(k);
   const propKey = (k) => typeof k === "symbol" ? `[${keyExpr(k)}]` : esc(k);
-  const propShape = shape;
+  const propShape = shape2;
   if (keys.includes("__proto__")) {
     throw new ZodCompileUnsupportedError('object shape key "__proto__"');
   }
@@ -43895,9 +44728,15 @@ function generateNullableCheck(doc, ctx, schema, accessor, buildsValue = true) {
   doc.write(`}`);
   return outputVar;
 }
+function generateSizeGate(doc, schema, size) {
+  for (const [max, check2] of sizeCaps(schema._zod.def.checks)) {
+    doc.write(`if (${size} > ${numericOperand(max, check2._zod.def.check)}) return INVALID;`);
+  }
+}
 function generateArrayCheck(doc, ctx, schema, accessor, buildsValue = true) {
   const def = schema._zod.def;
   doc.write(`if (!Array.isArray(${accessor})) return INVALID;`);
+  generateSizeGate(doc, schema, `${accessor}.length`);
   const outputVar = buildsValue ? newVar(ctx) : null;
   const iVar = newVar(ctx);
   const elemVar = newVar(ctx);
@@ -44297,6 +45136,7 @@ function literalPropertyKey(ctx, key) {
 function generateMapCheck(doc, ctx, schema, accessor) {
   const def = schema._zod.def;
   doc.write(`if (!(${accessor} instanceof Map)) return INVALID;`);
+  generateSizeGate(doc, schema, `${accessor}.size`);
   const outputVar = newVar(ctx);
   const kVar = newVar(ctx);
   const valVar = newVar(ctx);
@@ -44313,6 +45153,7 @@ function generateMapCheck(doc, ctx, schema, accessor) {
 function generateSetCheck(doc, ctx, schema, accessor) {
   const def = schema._zod.def;
   doc.write(`if (!(${accessor} instanceof Set)) return INVALID;`);
+  generateSizeGate(doc, schema, `${accessor}.size`);
   const outputVar = newVar(ctx);
   const valVar = newVar(ctx);
   doc.write(`const ${outputVar} = new Set();`);
@@ -45119,10 +45960,10 @@ function _property(property, schema, params) {
   });
 }
 // @__NO_SIDE_EFFECTS__
-function _properties(shape, params) {
+function _properties(shape2, params) {
   return new $ZodCheckProperties({
     check: "properties",
-    shape,
+    shape: shape2,
     ...normalizeParams(params)
   });
 }
@@ -46384,21 +47225,21 @@ function inputOptin(schema) {
 var objectProcessor = (schema, ctx, _json, params) => {
   const json2 = _json;
   const def = schema._zod.def;
-  const shape = def.shape;
-  const symbolKeys = Object.getOwnPropertySymbols(shape);
+  const shape2 = def.shape;
+  const symbolKeys = Object.getOwnPropertySymbols(shape2);
   if (symbolKeys.length && handleUnrepresentable(schema, ctx, json2, params, "Symbol keys cannot be represented in JSON Schema")) {
     return;
   }
   json2.type = "object";
   json2.properties = {};
-  for (const key in shape) {
-    assignProp(json2.properties, key, processSchema(shape[key], ctx, {
+  for (const key in shape2) {
+    assignProp(json2.properties, key, processSchema(shape2[key], ctx, {
       ...params,
       path: [...params.path, "properties", key]
     }));
   }
   const requiredKeys = [];
-  for (const key of Object.keys(shape)) {
+  for (const key of Object.keys(shape2)) {
     const field = def.shape[key];
     if (ctx.io === "input" ? inputOptin(field) === void 0 : field._zod.optout === void 0) {
       requiredKeys.push(key);
@@ -47047,7 +47888,7 @@ __export(schemas_exports2, {
   union: () => union,
   unknown: () => unknown,
   url: () => url,
-  uuid: () => uuid2,
+  uuid: () => uuid3,
   uuidv4: () => uuidv4,
   uuidv6: () => uuidv6,
   uuidv7: () => uuidv7,
@@ -47518,7 +48359,7 @@ var ZodUUID = /* @__PURE__ */ $constructor("ZodUUID", (inst, def) => {
   $ZodUUID.init(inst, def);
   ZodStringFormat.init(inst, def);
 });
-function uuid2(params) {
+function uuid3(params) {
   return _uuid(ZodUUID, params);
 }
 function uuidv4(params) {
@@ -47960,8 +48801,8 @@ function array4(element, params) {
   return _array(ZodArray, element, params);
 }
 function keyof(schema) {
-  const shape = schema._zod.def.shape;
-  return _enum2(Object.keys(shape));
+  const shape2 = schema._zod.def.shape;
+  return _enum2(Object.keys(shape2));
 }
 var ZodObject = /* @__PURE__ */ $constructor("ZodObject", (inst, def) => {
   _ensureDefaultMemoizer();
@@ -48013,26 +48854,26 @@ var ZodObject = /* @__PURE__ */ $constructor("ZodObject", (inst, def) => {
     return util_exports.required(ZodNonOptional, this, args[0]);
   }
 });
-function object4(shape, params) {
+function object4(shape2, params) {
   const def = {
     type: "object",
-    shape: shape ?? {},
+    shape: shape2 ?? {},
     ...util_exports.normalizeParams(params)
   };
   return new ZodObject(def);
 }
-function strictObject(shape, params) {
+function strictObject(shape2, params) {
   return new ZodObject({
     type: "object",
-    shape,
+    shape: shape2,
     catchall: never(),
     ...util_exports.normalizeParams(params)
   });
 }
-function looseObject(shape, params) {
+function looseObject(shape2, params) {
   return new ZodObject({
     type: "object",
-    shape,
+    shape: shape2,
     catchall: unknown(),
     ...util_exports.normalizeParams(params)
   });
@@ -48571,8 +49412,8 @@ var meta2 = meta;
 var ZodInstanceOf = /* @__PURE__ */ $constructor("ZodInstanceOf", (inst, def) => {
   ZodCustom.init(inst, def);
 }, {
-  properties(shape, params) {
-    return this.check(_properties(shape, params));
+  properties(shape2, params) {
+    return this.check(_properties(shape2, params));
   }
 });
 function _instanceof(cls, params = {}) {
@@ -49158,13 +49999,13 @@ function convertBaseSchema(schema, ctx) {
       break;
     }
     case "object": {
-      const shape = {};
+      const shape2 = {};
       const properties = schema.properties || {};
       const requiredSet = new Set(schema.required || []);
       const additionalSchema = typeof schema.additionalProperties === "object" ? convertSchema(schema.additionalProperties, ctx) : void 0;
       for (const [key, propSchema] of Object.entries(properties)) {
         const propZodSchema = convertSchema(propSchema, ctx);
-        assignProp(shape, key, requiredSet.has(key) ? propZodSchema : propZodSchema.optional());
+        assignProp(shape2, key, requiredSet.has(key) ? propZodSchema : propZodSchema.optional());
       }
       if (schema.patternProperties) {
         const patternProps = schema.patternProperties;
@@ -49176,8 +50017,8 @@ function convertBaseSchema(schema, ctx) {
           looseRecords.push(z.looseRecord(keySchema, patternValue));
         }
         const schemasToIntersect = [];
-        if (Object.keys(shape).length > 0) {
-          schemasToIntersect.push(z.object(shape).passthrough());
+        if (Object.keys(shape2).length > 0) {
+          schemasToIntersect.push(z.object(shape2).passthrough());
         }
         schemasToIntersect.push(...looseRecords);
         if (schemasToIntersect.length === 0) {
@@ -49192,7 +50033,7 @@ function convertBaseSchema(schema, ctx) {
           zodSchema = result;
         }
         if (schema.additionalProperties === false) {
-          const propertyKeys = Object.keys(shape);
+          const propertyKeys = Object.keys(shape2);
           const patterns = patternKeys.map((p) => new RegExp(p));
           const basePatternSchema = zodSchema;
           zodSchema = zodSchema.check((payload) => {
@@ -49217,7 +50058,7 @@ function convertBaseSchema(schema, ctx) {
           });
         }
       } else {
-        const objectSchema = z.object(shape);
+        const objectSchema = z.object(shape2);
         if (schema.additionalProperties === false) {
           zodSchema = objectSchema.strict();
         } else if (additionalSchema) {
@@ -49622,7 +50463,7 @@ function date4(params) {
   return _coercedDate(ZodDate, params);
 }
 
-// node_modules/@modelcontextprotocol/core/dist/auth-BNDyLTqp.mjs
+// node_modules/@modelcontextprotocol/core/dist/schemas-DscsoNZN.mjs
 var LATEST_PROTOCOL_VERSION = "2025-11-25";
 var SUPPORTED_PROTOCOL_VERSIONS = [
   LATEST_PROTOCOL_VERSION,
@@ -50410,6 +51251,8 @@ var ServerResultSchema = union([
   ListToolsResultSchema,
   SubscriptionsListenResultSchema
 ]);
+
+// node_modules/@modelcontextprotocol/core/dist/auth-UMQCo-ad.mjs
 var SafeUrlSchema = url().superRefine((val, ctx) => {
   if (!URL.canParse(val)) {
     ctx.addIssue({
@@ -50563,7 +51406,7 @@ var OAuthTokenRevocationRequestSchema = object4({
   token_type_hint: string2().optional()
 }).strip();
 
-// node_modules/@modelcontextprotocol/server/dist/src-Cqbh3MYc.mjs
+// node_modules/@modelcontextprotocol/server/dist/src-DdvbAHrR.mjs
 var BRANDS = /* @__PURE__ */ Symbol.for("mcp.sdk.errorBrands");
 function stampErrorBrands(instance, ctor) {
   const brands = /* @__PURE__ */ new Set();
@@ -50716,8 +51559,8 @@ var SdkHttpError = class extends SdkError {
 function isPlainObject$7(value) {
   return value !== null && typeof value === "object" && !Array.isArray(value);
 }
-function isImpliedCapabilityMember(capability2, member, declaredValue) {
-  return capability2 === "elicitation" && member === "form" && declaredValue["form"] === void 0 && declaredValue["url"] === void 0;
+function isImpliedCapabilityMember(capability, member, declaredValue) {
+  return capability === "elicitation" && member === "form" && declaredValue["form"] === void 0 && declaredValue["url"] === void 0;
 }
 function requiredClientCapabilitiesForInputRequest(entry) {
   switch (entry.method) {
@@ -50737,17 +51580,17 @@ function requiredClientCapabilitiesForInputRequest(entry) {
 }
 function missingClientCapabilities(required3, declared) {
   const missing2 = {};
-  for (const [capability2, requirement] of Object.entries(required3)) {
+  for (const [capability, requirement] of Object.entries(required3)) {
     if (requirement === void 0) continue;
-    const declaredValue = declared === void 0 ? void 0 : declared[capability2];
+    const declaredValue = declared === void 0 ? void 0 : declared[capability];
     if (declaredValue === void 0) {
-      missing2[capability2] = requirement;
+      missing2[capability] = requirement;
       continue;
     }
     if (isPlainObject$7(requirement) && isPlainObject$7(declaredValue)) {
       const missingMembers = {};
-      for (const [member, memberRequirement] of Object.entries(requirement)) if (memberRequirement !== void 0 && declaredValue[member] === void 0 && !isImpliedCapabilityMember(capability2, member, declaredValue)) missingMembers[member] = memberRequirement;
-      if (Object.keys(missingMembers).length > 0) missing2[capability2] = missingMembers;
+      for (const [member, memberRequirement] of Object.entries(requirement)) if (memberRequirement !== void 0 && declaredValue[member] === void 0 && !isImpliedCapabilityMember(capability, member, declaredValue)) missingMembers[member] = memberRequirement;
+      if (Object.keys(missingMembers).length > 0) missing2[capability] = missingMembers;
     }
   }
   return Object.keys(missing2).length > 0 ? missing2 : void 0;
@@ -52364,11 +53207,11 @@ function build() {
   const ResultTypeSchema = string2();
   const ResultMetaSchema = looseObject({ [SERVER_INFO_META_KEY]: ImplementationSchema$1.optional().catch(void 0) });
   const wireMeta = ResultMetaSchema.optional();
-  function wireResult(shape) {
+  function wireResult(shape2) {
     return looseObject({
       _meta: wireMeta,
       resultType: ResultTypeSchema.default("complete"),
-      ...shape
+      ...shape2
     });
   }
   const ResultSchema$1 = wireResult({});
@@ -52581,10 +53424,10 @@ function build() {
     "server/discover": dispatchRequest("server/discover", {}),
     "subscriptions/listen": dispatchRequest("subscriptions/listen", subscriptionsListenParamsShape)
   };
-  function liftedResult(shape) {
+  function liftedResult(shape2) {
     return looseObject({
       _meta: wireMeta,
-      ...shape
+      ...shape2
     });
   }
   const dispatchResultSchemas = {
@@ -53522,12 +54365,12 @@ var RFC9110_TOKEN = /^[!#$%&'*+\-.^_`|~0-9A-Za-z]+$/;
 var PERMITTED_X_MCP_HEADER_TYPES = /* @__PURE__ */ new Set([
   "string",
   "integer",
-  "boolean",
-  "number"
+  "boolean"
 ]);
 function scanXMcpHeaderDeclarations(inputSchema) {
   const declarations = [];
   const seenLower = /* @__PURE__ */ new Map();
+  let numberFault;
   const visit2 = (node2, path2, reachable) => {
     if (node2 === null || typeof node2 !== "object") return void 0;
     const schema = node2;
@@ -53537,7 +54380,11 @@ function scanXMcpHeaderDeclarations(inputSchema) {
       if (typeof raw !== "string" || raw.length === 0) return `${pathName(path2)}: x-mcp-header MUST be a non-empty string`;
       if (!RFC9110_TOKEN.test(raw)) return `${pathName(path2)}: x-mcp-header '${raw}' is not a valid RFC 9110 token (no spaces, control characters or HTTP delimiters)`;
       const type = typeof schema.type === "string" ? schema.type : void 0;
-      if (type === void 0 || !PERMITTED_X_MCP_HEADER_TYPES.has(type)) return `${pathName(path2)}: x-mcp-header is only permitted on primitive-typed properties (string, integer, boolean); got ${type ?? "<none>"}`;
+      if (type === void 0 || !PERMITTED_X_MCP_HEADER_TYPES.has(type)) {
+        const fault$1 = `${pathName(path2)}: x-mcp-header is only permitted on primitive-typed properties (string, integer, boolean); got ${type ?? "<none>"}`;
+        if (type !== "number") return fault$1;
+        numberFault ??= fault$1;
+      }
       const lower = raw.toLowerCase();
       const prior = seenLower.get(lower);
       if (prior !== void 0) return `x-mcp-header '${raw}' is not case-insensitively unique (also declared as '${prior}')`;
@@ -53564,12 +54411,17 @@ function scanXMcpHeaderDeclarations(inputSchema) {
     }
   };
   const fault = visit2(inputSchema, [], true);
-  return fault === void 0 ? {
+  if (fault !== void 0) return {
+    valid: false,
+    reason: numberFault ?? fault
+  };
+  return numberFault === void 0 ? {
     valid: true,
     declarations
   } : {
     valid: false,
-    reason: fault
+    reason: numberFault,
+    declarations
   };
 }
 var NON_REACHABLE_SUBSCHEMA_KEYWORDS = [
@@ -53770,15 +54622,18 @@ function standardSchemaToJsonSchema(schema, io = "input") {
     ...result
   };
 }
-function isProvablyObjectShapedRoot(schema) {
+var LOCAL_DEFINITION_REF = /^#\/(\$defs|definitions)\/([^/~%]+)$/;
+function isProvablyObjectShapedRoot(schema, root = schema) {
   if ("properties" in schema || "patternProperties" in schema || "additionalProperties" in schema || "required" in schema) return true;
+  const ref = typeof schema.$ref === "string" && LOCAL_DEFINITION_REF.exec(schema.$ref);
+  if (ref && root[ref[1]]?.[ref[2]]?.type === "object") return true;
   for (const key of [
     "oneOf",
     "anyOf",
     "allOf"
   ]) {
     const members2 = schema[key];
-    if (Array.isArray(members2) && members2.length > 0) return members2.every((m) => m !== null && typeof m === "object" && (m.type === "object" || isProvablyObjectShapedRoot(m)));
+    if (Array.isArray(members2) && members2.length > 0) return members2.every((m) => m !== null && typeof m === "object" && (m.type === "object" || isProvablyObjectShapedRoot(m, "$id" in m ? {} : root)));
   }
   return false;
 }
@@ -55222,7 +56077,7 @@ function normalizeRawShapeSchema(schema) {
   return schema;
 }
 
-// node_modules/@modelcontextprotocol/server/dist/ajvProvider-CEoC__sr.mjs
+// node_modules/@modelcontextprotocol/server/dist/ajvProvider-DyjnscPj.mjs
 var require_code$1 = /* @__PURE__ */ __commonJSMin(((exports) => {
   Object.defineProperty(exports, "__esModule", { value: true });
   exports.regexpCode = exports.getEsmExportName = exports.getProperty = exports.safeStringify = exports.stringify = exports.strConcat = exports.addCodeArg = exports.str = exports._ = exports.nil = exports._Code = exports.Name = exports.IDENTIFIER = exports._CodeOrName = void 0;
@@ -55641,9 +56496,9 @@ var require_codegen = /* @__PURE__ */ __commonJSMin(((exports) => {
     }
   };
   var Label = class extends Node {
-    constructor(label) {
+    constructor(label2) {
       super();
-      this.label = label;
+      this.label = label2;
       this.names = {};
     }
     render({ _n }) {
@@ -55651,9 +56506,9 @@ var require_codegen = /* @__PURE__ */ __commonJSMin(((exports) => {
     }
   };
   var Break = class extends Node {
-    constructor(label) {
+    constructor(label2) {
       super();
-      this.label = label;
+      this.label = label2;
       this.names = {};
     }
     render({ _n }) {
@@ -56018,11 +56873,11 @@ var require_codegen = /* @__PURE__ */ __commonJSMin(((exports) => {
     endFor() {
       return this._endBlockNode(For);
     }
-    label(label) {
-      return this._leafNode(new Label(label));
+    label(label2) {
+      return this._leafNode(new Label(label2));
     }
-    break(label) {
-      return this._leafNode(new Break(label));
+    break(label2) {
+      return this._leafNode(new Break(label2));
     }
     return(value) {
       const node2 = new Return();
@@ -57904,6 +58759,22 @@ var require_data = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 var require_utils = /* @__PURE__ */ __commonJSMin(((exports, module) => {
   const isUUID = RegExp.prototype.test.bind(/^[\da-f]{8}-[\da-f]{4}-[\da-f]{4}-[\da-f]{4}-[\da-f]{12}$/iu);
   const isIPv4 = RegExp.prototype.test.bind(/^(?:(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)\.){3}(?:25[0-5]|2[0-4]\d|1\d{2}|[1-9]\d|\d)$/u);
+  const isPort = RegExp.prototype.test.bind(/^\d*$/u);
+  const isHexPair = RegExp.prototype.test.bind(/^[\da-f]{2}$/iu);
+  const isUnreserved = RegExp.prototype.test.bind(/^[\da-z\-._~]$/iu);
+  const isPathCharacter = RegExp.prototype.test.bind(/^[A-Za-z0-9\-._~!$&'()*+,;=:@/]$/u);
+  const isQueryFragmentCharacter = RegExp.prototype.test.bind(/^[A-Za-z0-9\-._~!$&'()*+,;=:@/?]$/u);
+  const isUserinfoCharacter = RegExp.prototype.test.bind(/^[A-Za-z0-9\-._~!$&'()*+,;=:]$/u);
+  const BYTE_HEX = new Array(256);
+  {
+    const HEX_DIGITS = "0123456789ABCDEF";
+    for (let i = 0; i < 256; i++) BYTE_HEX[i] = "%" + HEX_DIGITS[i >> 4] + HEX_DIGITS[i & 15];
+  }
+  function percentEncodeNonAscii(cp3) {
+    if (cp3 < 2048) return BYTE_HEX[192 | cp3 >> 6] + BYTE_HEX[128 | cp3 & 63];
+    if (cp3 < 65536) return BYTE_HEX[224 | cp3 >> 12] + BYTE_HEX[128 | cp3 >> 6 & 63] + BYTE_HEX[128 | cp3 & 63];
+    return BYTE_HEX[240 | cp3 >> 18] + BYTE_HEX[128 | cp3 >> 12 & 63] + BYTE_HEX[128 | cp3 >> 6 & 63] + BYTE_HEX[128 | cp3 & 63];
+  }
   function stringArrayToHexStripped(input2) {
     let acc = "";
     let code = 0;
@@ -57922,83 +58793,120 @@ var require_utils = /* @__PURE__ */ __commonJSMin(((exports, module) => {
     }
     return acc;
   }
+  const isHextet = RegExp.prototype.test.bind(/^[\dA-Fa-f]{1,4}$/);
+  const isIPvFuture = RegExp.prototype.test.bind(/^[vV][\dA-Fa-f]+\.[A-Za-z\d\-._~!$&'()*+,;=:]+$/);
+  const isZoneCharacter = RegExp.prototype.test.bind(/^[A-Za-z\d\-._~]$/);
   const nonSimpleDomain = RegExp.prototype.test.bind(/[^!"$&'()*+,\-.;=_`a-z{}~]/u);
-  function consumeIsZone(buffer) {
-    buffer.length = 0;
-    return true;
-  }
-  function consumeHextets(buffer, address, output2) {
-    if (buffer.length) {
-      const hex3 = stringArrayToHexStripped(buffer);
-      if (hex3 !== "") address.push(hex3);
-      else {
-        output2.error = true;
-        return false;
+  function isZoneIdentifier(zone) {
+    if (zone.length === 0) return false;
+    for (let i = 0; i < zone.length; i++) {
+      if (isZoneCharacter(zone[i])) continue;
+      if (zone[i] === "%" && i + 2 < zone.length && isHexPair(zone.slice(i + 1, i + 3))) {
+        i += 2;
+        continue;
       }
-      buffer.length = 0;
+      return false;
     }
     return true;
   }
-  function getIPV6(input2) {
-    let tokenCount = 0;
-    const output2 = {
-      error: false,
-      address: "",
-      zone: ""
-    };
-    const address = [];
-    const buffer = [];
-    let endipv6Encountered = false;
-    let endIpv6 = false;
-    let consume = consumeHextets;
-    for (let i = 0; i < input2.length; i++) {
-      const cursor = input2[i];
-      if (cursor === "[" || cursor === "]") continue;
-      if (cursor === ":") {
-        if (endipv6Encountered === true) endIpv6 = true;
-        if (!consume(buffer, address, output2)) break;
-        if (++tokenCount > 7) {
-          output2.error = true;
-          break;
-        }
-        if (i > 0 && input2[i - 1] === ":") endipv6Encountered = true;
-        address.push(":");
-        continue;
-      } else if (cursor === "%") {
-        if (!consume(buffer, address, output2)) break;
-        consume = consumeIsZone;
-      } else {
-        buffer.push(cursor);
+  function compressIPv6ZeroRun(hextets) {
+    let bestStart = -1;
+    let bestLength = 0;
+    let runStart = -1;
+    let runLength = 0;
+    for (let i = 0; i < hextets.length; i++) if (hextets[i] === "0") {
+      if (runStart === -1) runStart = i;
+      runLength++;
+      if (runLength > bestLength) {
+        bestLength = runLength;
+        bestStart = runStart;
+      }
+    } else {
+      runStart = -1;
+      runLength = 0;
+    }
+    if (bestLength < 2) return hextets.join(":");
+    const head = hextets.slice(0, bestStart).join(":");
+    const tail = hextets.slice(bestStart + bestLength).join(":");
+    return head + "::" + tail;
+  }
+  function normalizeIPv6Address(input2) {
+    const compression = input2.indexOf("::");
+    if (compression !== -1 && input2.indexOf("::", compression + 1) !== -1) return void 0;
+    const left = compression === -1 ? input2.split(":") : input2.slice(0, compression).split(":");
+    const right = compression === -1 ? [] : input2.slice(compression + 2).split(":");
+    if (compression !== -1) {
+      if (left.length === 1 && left[0] === "") left.length = 0;
+      if (right.length === 1 && right[0] === "") right.length = 0;
+    }
+    const parts = left.concat(right);
+    let hextetCount = 0;
+    for (let i = 0; i < parts.length; i++) {
+      const part = parts[i];
+      if (part === "") return void 0;
+      if (part.indexOf(".") !== -1) {
+        if (i !== parts.length - 1 || compression !== -1 && right.length === 0 || !isIPv4(part)) return void 0;
+        hextetCount += 2;
         continue;
       }
+      if (!isHextet(part)) return void 0;
+      parts[i] = parseInt(part, 16).toString(16);
+      hextetCount++;
     }
-    if (buffer.length) if (consume === consumeIsZone) output2.zone = buffer.join("");
-    else if (endIpv6) address.push(buffer.join(""));
-    else address.push(stringArrayToHexStripped(buffer));
-    output2.address = address.join("");
-    return output2;
+    if (compression === -1) {
+      if (hextetCount !== 8) return void 0;
+      return compressIPv6ZeroRun(parts);
+    }
+    if (hextetCount >= 8) return void 0;
+    const expanded = parts.slice(0, left.length);
+    for (let i = hextetCount; i < 8; i++) expanded.push("0");
+    for (let i = left.length; i < parts.length; i++) expanded.push(parts[i]);
+    return compressIPv6ZeroRun(expanded);
   }
   function normalizeIPv6(host) {
-    if (findToken(host, ":") < 2) return {
+    const bracketed = host[0] === "[" && host[host.length - 1] === "]";
+    if ((host[0] === "[" || host[host.length - 1] === "]") && !bracketed) return {
       host,
-      isIPV6: false
+      isIPV6: false,
+      error: true
     };
-    const ipv63 = getIPV6(host);
-    if (!ipv63.error) {
-      let newHost = ipv63.address;
-      let escapedHost = ipv63.address;
-      if (ipv63.zone) {
-        newHost += "%" + ipv63.zone;
-        escapedHost += "%25" + ipv63.zone;
-      }
+    let input2 = bracketed ? host.slice(1, -1) : host;
+    if (bracketed && isIPvFuture(input2)) {
+      input2 = input2.toLowerCase();
       return {
-        host: newHost,
-        isIPV6: true,
-        escapedHost
+        host: `[${input2}]`,
+        escapedHost: input2,
+        isIPV6: false,
+        isIPVFuture: true
       };
-    } else return {
+    }
+    if (findToken(input2, ":") < 2) return {
       host,
-      isIPV6: false
+      isIPV6: false,
+      error: bracketed
+    };
+    let zoneIdentifier = "";
+    const zoneSeparator = input2.indexOf("%");
+    if (zoneSeparator !== -1) {
+      const separatorLength = input2.slice(zoneSeparator, zoneSeparator + 3).toLowerCase() === "%25" ? 3 : 1;
+      zoneIdentifier = input2.slice(zoneSeparator + separatorLength);
+      if (!isZoneIdentifier(zoneIdentifier)) return {
+        host,
+        isIPV6: false,
+        error: true
+      };
+      input2 = input2.slice(0, zoneSeparator);
+    }
+    const address = normalizeIPv6Address(input2);
+    if (address === void 0) return {
+      host,
+      isIPV6: false,
+      error: true
+    };
+    return {
+      host: address + (zoneIdentifier ? "%" + zoneIdentifier : ""),
+      escapedHost: address + (zoneIdentifier ? "%25" + zoneIdentifier : ""),
+      isIPV6: true
     };
   }
   function findToken(str, token) {
@@ -58074,41 +58982,225 @@ var require_utils = /* @__PURE__ */ __commonJSMin(((exports, module) => {
     }
     return output2.join("");
   }
-  function normalizeComponentEncoding(component, esc2) {
-    const func = esc2 !== true ? escape : unescape;
-    if (component.scheme !== void 0) component.scheme = func(component.scheme);
-    if (component.userinfo !== void 0) component.userinfo = func(component.userinfo);
-    if (component.host !== void 0) component.host = func(component.host);
-    if (component.path !== void 0) component.path = func(component.path);
-    if (component.query !== void 0) component.query = func(component.query);
-    if (component.fragment !== void 0) component.fragment = func(component.fragment);
-    return component;
+  const HOST_DELIMS = {
+    "@": "%40",
+    "/": "%2F",
+    "?": "%3F",
+    "#": "%23",
+    ":": "%3A"
+  };
+  const HOST_DELIM_RE = /[@/?#:]/g;
+  const HOST_DELIM_NO_COLON_RE = /[@/?#]/g;
+  function reescapeHostDelimiters(host, isIP) {
+    const re = isIP ? HOST_DELIM_NO_COLON_RE : HOST_DELIM_RE;
+    re.lastIndex = 0;
+    return host.replace(re, (ch) => HOST_DELIMS[ch]);
+  }
+  function normalizePercentEncoding(input2, decodeUnreserved = false) {
+    if (input2.indexOf("%") === -1) return input2;
+    let output2 = "";
+    for (let i = 0; i < input2.length; i++) {
+      if (input2[i] === "%" && i + 2 < input2.length) {
+        const hex3 = input2.slice(i + 1, i + 3);
+        if (isHexPair(hex3)) {
+          const normalizedHex = hex3.toUpperCase();
+          const decoded = String.fromCharCode(parseInt(normalizedHex, 16));
+          if (decodeUnreserved && isUnreserved(decoded)) output2 += decoded;
+          else output2 += "%" + normalizedHex;
+          i += 2;
+          continue;
+        }
+      }
+      output2 += input2[i];
+    }
+    return output2;
+  }
+  function normalizePathEncoding(input2) {
+    let output2 = "";
+    for (let i = 0; i < input2.length; i++) {
+      const ch = input2[i];
+      if (ch === "%" && i + 2 < input2.length) {
+        const hex3 = input2.slice(i + 1, i + 3);
+        if (isHexPair(hex3)) {
+          const normalizedHex = hex3.toUpperCase();
+          const decoded = String.fromCharCode(parseInt(normalizedHex, 16));
+          if (decoded !== "." && isUnreserved(decoded)) output2 += decoded;
+          else output2 += "%" + normalizedHex;
+          i += 2;
+          continue;
+        }
+      }
+      if (isPathCharacter(ch)) output2 += ch;
+      else {
+        const code = input2.charCodeAt(i);
+        if (code < 128) output2 += isEscapeSafe(code) ? ch : BYTE_HEX[code];
+        else if (code < 55296 || code > 57343) output2 += percentEncodeNonAscii(code);
+        else if (code <= 56319 && i + 1 < input2.length) {
+          const low = input2.charCodeAt(i + 1);
+          if (low >= 56320 && low <= 57343) {
+            output2 += percentEncodeNonAscii(65536 + (code - 55296 << 10) + (low - 56320));
+            i++;
+          } else output2 += percentEncodeNonAscii(65533);
+        } else output2 += percentEncodeNonAscii(65533);
+      }
+    }
+    return output2;
+  }
+  function serializePathEncoding(input2, pathNoScheme = false) {
+    let output2 = "";
+    let firstSegment = pathNoScheme && input2[0] !== "/";
+    for (let i = 0; i < input2.length; i++) {
+      const ch = input2[i];
+      if (ch === "%" && i + 2 < input2.length) {
+        const hex3 = input2.slice(i + 1, i + 3);
+        if (isHexPair(hex3)) {
+          output2 += "%" + hex3.toUpperCase();
+          i += 2;
+          continue;
+        }
+      }
+      if (ch === "/") firstSegment = false;
+      if (isPathCharacter(ch) && (ch !== ":" || !firstSegment)) output2 += ch;
+      else {
+        const code = input2.charCodeAt(i);
+        if (code < 128) output2 += BYTE_HEX[code];
+        else if (code < 55296 || code > 57343) output2 += percentEncodeNonAscii(code);
+        else if (code <= 56319 && i + 1 < input2.length) {
+          const low = input2.charCodeAt(i + 1);
+          if (low >= 56320 && low <= 57343) {
+            output2 += percentEncodeNonAscii(65536 + (code - 55296 << 10) + (low - 56320));
+            i++;
+          } else output2 += percentEncodeNonAscii(65533);
+        } else output2 += percentEncodeNonAscii(65533);
+      }
+    }
+    return output2;
+  }
+  function encodeComponent(input2, isAllowed) {
+    let output2 = "";
+    for (let i = 0; i < input2.length; i++) {
+      const ch = input2[i];
+      if (ch === "%" && i + 2 < input2.length) {
+        const hex3 = input2.slice(i + 1, i + 3);
+        if (isHexPair(hex3)) {
+          output2 += "%" + hex3.toUpperCase();
+          i += 2;
+          continue;
+        }
+      }
+      if (isAllowed(ch)) output2 += ch;
+      else {
+        const code = input2.charCodeAt(i);
+        if (code < 128) output2 += BYTE_HEX[code];
+        else if (code < 55296 || code > 57343) output2 += percentEncodeNonAscii(code);
+        else if (code <= 56319 && i + 1 < input2.length) {
+          const low = input2.charCodeAt(i + 1);
+          if (low >= 56320 && low <= 57343) {
+            output2 += percentEncodeNonAscii(65536 + (code - 55296 << 10) + (low - 56320));
+            i++;
+          } else output2 += percentEncodeNonAscii(65533);
+        } else output2 += percentEncodeNonAscii(65533);
+      }
+    }
+    return output2;
+  }
+  function encodeUserinfo(input2) {
+    return encodeComponent(input2, isUserinfoCharacter);
+  }
+  function encodeQuery(input2) {
+    return encodeComponent(input2, isQueryFragmentCharacter);
+  }
+  function encodeFragment(input2) {
+    return encodeComponent(input2, isQueryFragmentCharacter);
+  }
+  function isEscapeSafe(cp3) {
+    return cp3 >= 48 && cp3 <= 57 || cp3 >= 65 && cp3 <= 90 || cp3 >= 97 && cp3 <= 122 || cp3 === 42 || cp3 === 43 || cp3 === 45 || cp3 === 46 || cp3 === 47 || cp3 === 64 || cp3 === 95;
+  }
+  function normalizeQueryFragmentEncoding(input2) {
+    let output2 = "";
+    for (let i = 0; i < input2.length; i++) {
+      const ch = input2[i];
+      if (ch === "%" && i + 2 < input2.length) {
+        const hex3 = input2.slice(i + 1, i + 3);
+        if (isHexPair(hex3)) {
+          const normalizedHex = hex3.toUpperCase();
+          const decoded = String.fromCharCode(parseInt(normalizedHex, 16));
+          if (isUnreserved(decoded)) output2 += decoded;
+          else output2 += "%" + normalizedHex;
+          i += 2;
+          continue;
+        }
+      }
+      if (isQueryFragmentCharacter(ch)) output2 += ch;
+      else {
+        const code = input2.charCodeAt(i);
+        if (code < 128) output2 += isEscapeSafe(code) ? ch : BYTE_HEX[code];
+        else if (code < 55296 || code > 57343) output2 += percentEncodeNonAscii(code);
+        else if (code <= 56319 && i + 1 < input2.length) {
+          const low = input2.charCodeAt(i + 1);
+          if (low >= 56320 && low <= 57343) {
+            output2 += percentEncodeNonAscii(65536 + (code - 55296 << 10) + (low - 56320));
+            i++;
+          } else output2 += percentEncodeNonAscii(65533);
+        } else output2 += percentEncodeNonAscii(65533);
+      }
+    }
+    return output2;
+  }
+  function escapePreservingEscapes(input2) {
+    let output2 = "";
+    for (let i = 0; i < input2.length; i++) {
+      if (input2[i] === "%" && i + 2 < input2.length) {
+        const hex3 = input2.slice(i + 1, i + 3);
+        if (isHexPair(hex3)) {
+          output2 += "%" + hex3.toUpperCase();
+          i += 2;
+          continue;
+        }
+      }
+      output2 += escape(input2[i]);
+    }
+    return output2;
   }
   function recomposeAuthority(component) {
     const uriTokens = [];
     if (component.userinfo !== void 0) {
-      uriTokens.push(component.userinfo);
+      uriTokens.push(encodeUserinfo(component.userinfo));
       uriTokens.push("@");
     }
     if (component.host !== void 0) {
-      let host = unescape(component.host);
+      let host = component.host;
       if (!isIPv4(host)) {
-        const ipV6res = normalizeIPv6(host);
-        if (ipV6res.isIPV6 === true) host = `[${ipV6res.escapedHost}]`;
-        else host = component.host;
+        let ipV6res = normalizeIPv6(host);
+        if (ipV6res.isIPV6 !== true && ipV6res.isIPVFuture !== true) {
+          host = normalizePercentEncoding(host, true);
+          ipV6res = normalizeIPv6(host);
+        }
+        if (ipV6res.isIPV6 === true || ipV6res.isIPVFuture === true) host = `[${ipV6res.escapedHost}]`;
+        else host = reescapeHostDelimiters(host, false);
       }
       uriTokens.push(host);
     }
     if (typeof component.port === "number" || typeof component.port === "string") {
+      const port = String(component.port);
+      if (!isPort(port)) throw new TypeError("URI port is malformed.");
       uriTokens.push(":");
-      uriTokens.push(String(component.port));
+      uriTokens.push(port);
     }
     return uriTokens.length ? uriTokens.join("") : void 0;
   }
   module.exports = {
     nonSimpleDomain,
     recomposeAuthority,
-    normalizeComponentEncoding,
+    reescapeHostDelimiters,
+    normalizePercentEncoding,
+    normalizePathEncoding,
+    serializePathEncoding,
+    normalizeQueryFragmentEncoding,
+    encodeUserinfo,
+    encodeQuery,
+    encodeFragment,
+    escapePreservingEscapes,
     removeDotSegments,
     isIPv4,
     isUUID,
@@ -58118,7 +59210,7 @@ var require_utils = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 }));
 var require_schemes = /* @__PURE__ */ __commonJSMin(((exports, module) => {
   const { isUUID } = require_utils();
-  const URN_REG = /([\da-z][\d\-a-z]{0,31}):((?:[\w!$'()*+,\-.:;=@]|%[\da-f]{2})+)/iu;
+  const URN_REG = /^([\da-z][\d\-a-z]{0,31}):((?:[\w!$'()*+,\-./:;=@]|%[\da-f]{2})+)$/iu;
   const supportedSchemeNames = [
     "http",
     "https",
@@ -58160,9 +59252,10 @@ var require_schemes = /* @__PURE__ */ __commonJSMin(((exports, module) => {
       wsComponent.secure = void 0;
     }
     if (wsComponent.resourceName) {
-      const [path2, query] = wsComponent.resourceName.split("?");
+      const queryIndex = wsComponent.resourceName.indexOf("?");
+      const path2 = queryIndex === -1 ? wsComponent.resourceName : wsComponent.resourceName.slice(0, queryIndex);
       wsComponent.path = path2 && path2 !== "/" ? path2 : void 0;
-      wsComponent.query = query;
+      wsComponent.query = queryIndex === -1 ? void 0 : wsComponent.resourceName.slice(queryIndex + 1);
       wsComponent.resourceName = void 0;
     }
     wsComponent.fragment = void 0;
@@ -58174,7 +59267,7 @@ var require_schemes = /* @__PURE__ */ __commonJSMin(((exports, module) => {
       return urnComponent;
     }
     const matches = urnComponent.path.match(URN_REG);
-    if (matches) {
+    if (matches && matches[0] === urnComponent.path) {
       const scheme = options.scheme || urnComponent.scheme || "urn";
       urnComponent.nid = matches[1].toLowerCase();
       urnComponent.nss = matches[2];
@@ -58264,16 +59357,32 @@ var require_schemes = /* @__PURE__ */ __commonJSMin(((exports, module) => {
   };
 }));
 var require_fast_uri = /* @__PURE__ */ __commonJSMin(((exports, module) => {
-  const { normalizeIPv6, removeDotSegments, recomposeAuthority, normalizeComponentEncoding, isIPv4, nonSimpleDomain } = require_utils();
+  const { normalizeIPv6, removeDotSegments, recomposeAuthority, normalizePercentEncoding, normalizePathEncoding, serializePathEncoding, normalizeQueryFragmentEncoding, encodeQuery, encodeFragment, reescapeHostDelimiters, isIPv4, nonSimpleDomain } = require_utils();
   const { SCHEMES, getSchemeHandler } = require_schemes();
+  const VALID_SCHEME = /^[A-Za-z][A-Za-z0-9+.-]*$/u;
+  const MALFORMED_SCHEME_ERROR = "URI scheme is malformed.";
+  function decodeValidScheme(scheme) {
+    const decodedScheme = unescape(String(scheme));
+    if (!VALID_SCHEME.test(decodedScheme)) throw new TypeError(MALFORMED_SCHEME_ERROR);
+    return decodedScheme;
+  }
   function normalize(uri, options) {
-    if (typeof uri === "string") uri = serialize2(parse4(uri, options), options);
+    if (typeof uri === "string") uri = normalizeString(uri, options);
     else if (typeof uri === "object") uri = parse4(serialize2(uri, options), options);
     return uri;
   }
   function resolve23(baseURI, relativeURI, options) {
     const schemelessOptions = options ? Object.assign({ scheme: "null" }, options) : { scheme: "null" };
-    const resolved = resolveComponent(parse4(baseURI, schemelessOptions), parse4(relativeURI, schemelessOptions), schemelessOptions, true);
+    const { parsed: baseParsed, malformedAuthorityOrPort: baseMalformed, malformedPercentEncoding: baseMalformedPercentEncoding, malformedSchemeSpecific: baseMalformedSchemeSpecific, malformedHost: baseMalformedHost, malformedScheme: baseMalformedScheme } = parseWithStatus(baseURI, schemelessOptions);
+    const { parsed: relativeParsed, malformedAuthorityOrPort: relativeMalformed, malformedPercentEncoding: relativeMalformedPercentEncoding, malformedSchemeSpecific: relativeMalformedSchemeSpecific, malformedHost: relativeMalformedHost, malformedScheme: relativeMalformedScheme } = parseWithStatus(relativeURI, schemelessOptions);
+    if (baseMalformed || relativeMalformed || baseMalformedPercentEncoding || relativeMalformedPercentEncoding || baseMalformedSchemeSpecific || relativeMalformedSchemeSpecific || baseMalformedHost || relativeMalformedHost || baseMalformedScheme || relativeMalformedScheme) throw new Error(baseParsed.error || relativeParsed.error || "URI is malformed.");
+    const resolved = resolveComponent(baseParsed, relativeParsed, schemelessOptions, true);
+    const resolvedSchemeHandler = getSchemeHandler(options && options.scheme || resolved.scheme);
+    const resolvedHost = resolved.host;
+    const resolvedHostIsIP = resolvedHost !== void 0 && resolvedHost !== "" && (isIPv4(resolvedHost) || normalizeIPv6(resolvedHost).isIPV6);
+    canonicalizeHost(resolved, options || {}, resolvedSchemeHandler, resolvedHostIsIP);
+    const encodedASCIIHost = resolvedHost && resolvedHost.indexOf("%") !== -1 && !new RegExp("\\P{ASCII}", "u").test(resolvedHost);
+    if (resolved.error && !encodedASCIIHost) throw new Error(resolved.error);
     schemelessOptions.skipEscape = true;
     return serialize2(resolved, schemelessOptions);
   }
@@ -58323,27 +59432,9 @@ var require_fast_uri = /* @__PURE__ */ __commonJSMin(((exports, module) => {
     return target;
   }
   function equal(uriA, uriB, options) {
-    if (typeof uriA === "string") {
-      uriA = unescape(uriA);
-      uriA = serialize2(normalizeComponentEncoding(parse4(uriA, options), true), {
-        ...options,
-        skipEscape: true
-      });
-    } else if (typeof uriA === "object") uriA = serialize2(normalizeComponentEncoding(uriA, true), {
-      ...options,
-      skipEscape: true
-    });
-    if (typeof uriB === "string") {
-      uriB = unescape(uriB);
-      uriB = serialize2(normalizeComponentEncoding(parse4(uriB, options), true), {
-        ...options,
-        skipEscape: true
-      });
-    } else if (typeof uriB === "object") uriB = serialize2(normalizeComponentEncoding(uriB, true), {
-      ...options,
-      skipEscape: true
-    });
-    return uriA.toLowerCase() === uriB.toLowerCase();
+    const normalizedA = normalizeComparableURI(uriA, options);
+    const normalizedB = normalizeComparableURI(uriB, options);
+    return normalizedA !== void 0 && normalizedB !== void 0 && normalizedA === normalizedB;
   }
   function serialize2(cmpts, opts) {
     const component = {
@@ -58364,13 +59455,17 @@ var require_fast_uri = /* @__PURE__ */ __commonJSMin(((exports, module) => {
     };
     const options = Object.assign({}, opts);
     const uriTokens = [];
+    if (component.scheme) component.scheme = decodeValidScheme(component.scheme);
     const schemeHandler = getSchemeHandler(options.scheme || component.scheme);
     if (schemeHandler && schemeHandler.serialize) schemeHandler.serialize(component, options);
-    if (component.path !== void 0) if (!options.skipEscape) {
-      component.path = escape(component.path);
-      if (component.scheme !== void 0) component.path = component.path.split("%3A").join(":");
-    } else component.path = unescape(component.path);
-    if (options.reference !== "suffix" && component.scheme) uriTokens.push(component.scheme, ":");
+    const hasAuthority = component.userinfo !== void 0 || component.host !== void 0 || component.port !== void 0;
+    const pathNoScheme = !options.skipEscape && component.scheme === void 0 && !hasAuthority;
+    if (component.path !== void 0) if (!options.skipEscape) component.path = serializePathEncoding(component.path, pathNoScheme);
+    else component.path = normalizePercentEncoding(component.path);
+    if (options.reference !== "suffix" && component.scheme) {
+      component.scheme = decodeValidScheme(component.scheme);
+      uriTokens.push(component.scheme, ":");
+    }
     const authority = recomposeAuthority(component);
     if (authority !== void 0) {
       if (options.reference !== "suffix") uriTokens.push("//");
@@ -58380,15 +59475,47 @@ var require_fast_uri = /* @__PURE__ */ __commonJSMin(((exports, module) => {
     if (component.path !== void 0) {
       let s = component.path;
       if (!options.absolutePath && (!schemeHandler || !schemeHandler.absolutePath)) s = removeDotSegments(s);
+      if (pathNoScheme) s = serializePathEncoding(s, true);
       if (authority === void 0 && s[0] === "/" && s[1] === "/") s = "/%2F" + s.slice(2);
       uriTokens.push(s);
     }
-    if (component.query !== void 0) uriTokens.push("?", component.query);
-    if (component.fragment !== void 0) uriTokens.push("#", component.fragment);
+    if (component.query !== void 0) uriTokens.push("?", encodeQuery(component.query));
+    if (component.fragment !== void 0) uriTokens.push("#", encodeFragment(component.fragment));
     return uriTokens.join("");
   }
   const URI_PARSE = /^(?:([^#/:?]+):)?(?:\/\/((?:([^#/?@]*)@)?(\[[^#/?\]]+\]|[^#/:?]*)(?::(\d*))?))?([^#?]*)(?:\?([^#]*))?(?:#((?:.|[\n\r])*))?/u;
-  function parse4(uri, opts) {
+  const AUTHORITY_PREFIX = /^(?:[^#/:?]+:)?\/\/([^/?#]*)/;
+  const AUTHORITY_INTRODUCER_REGION = /^(?:[^#/:?]+:)?([/\\\t\n\r]*)/;
+  function getParseError(parsed, matches) {
+    if (matches[2] !== void 0 && parsed.path && parsed.path[0] !== "/") return 'URI path must start with "/" when authority is present.';
+    if (typeof parsed.port === "number" && (parsed.port < 0 || parsed.port > 65535)) return "URI port is malformed.";
+  }
+  function hasMalformedPercentEncoding(component) {
+    if (component === void 0) return false;
+    let percent = component.indexOf("%");
+    while (percent !== -1) {
+      if (percent + 2 >= component.length || !/^[\da-f]{2}$/iu.test(component.slice(percent + 1, percent + 3))) return true;
+      percent = component.indexOf("%", percent + 3);
+    }
+    return false;
+  }
+  function isIPLiteral(host) {
+    return host[0] === "[" && host[host.length - 1] === "]";
+  }
+  function hasMalformedComponentPercentEncoding(matches) {
+    const host = matches[4];
+    return hasMalformedPercentEncoding(matches[3]) || host !== void 0 && !isIPLiteral(host) && hasMalformedPercentEncoding(host) || hasMalformedPercentEncoding(matches[6]) || hasMalformedPercentEncoding(matches[7]) || hasMalformedPercentEncoding(matches[8]);
+  }
+  function canonicalizeHost(parsed, options, schemeHandler, isIP) {
+    if (!options.unicodeSupport && (!schemeHandler || !schemeHandler.unicodeSupport) && parsed.host && !isIPLiteral(parsed.host) && (options.domainHost || schemeHandler && schemeHandler.domainHost) && isIP === false && nonSimpleDomain(parsed.host)) try {
+      parsed.host = new URL("http://" + parsed.host).hostname;
+    } catch (e) {
+      parsed.error = parsed.error || "Host's domain name can not be converted to ASCII: " + e;
+      return true;
+    }
+    return false;
+  }
+  function parseWithStatus(uri, opts) {
     const options = Object.assign({}, opts);
     const parsed = {
       scheme: void 0,
@@ -58399,9 +59526,34 @@ var require_fast_uri = /* @__PURE__ */ __commonJSMin(((exports, module) => {
       query: void 0,
       fragment: void 0
     };
+    let malformedAuthorityOrPort = false;
+    let malformedPercentEncoding = false;
+    let malformedSchemeSpecific = false;
+    let malformedHost = false;
+    let malformedIPLiteral = false;
+    let malformedScheme = false;
     let isIP = false;
     if (options.reference === "suffix") if (options.scheme) uri = options.scheme + ":" + uri;
     else uri = "//" + uri;
+    const authorityMatch = uri.match(AUTHORITY_PREFIX);
+    if (authorityMatch !== null && authorityMatch[1].indexOf("\\") !== -1) {
+      parsed.error = "URI authority must not contain a literal backslash.";
+      malformedAuthorityOrPort = true;
+    }
+    const introducerMatch = uri.match(AUTHORITY_INTRODUCER_REGION);
+    if (introducerMatch !== null) {
+      const region = introducerMatch[1];
+      const normalizedRegion = region.replace(/[\t\n\r]/g, "");
+      if (normalizedRegion.length >= 2) {
+        if (normalizedRegion.slice(0, 2) !== "//") {
+          parsed.error = parsed.error || "URI authority must not contain a literal backslash.";
+          malformedAuthorityOrPort = true;
+        } else if (region.length !== normalizedRegion.length) {
+          parsed.error = parsed.error || "URI authority introducer must not contain whitespace.";
+          malformedAuthorityOrPort = true;
+        }
+      }
+    }
     const matches = uri.match(URI_PARSE);
     if (matches) {
       parsed.scheme = matches[1];
@@ -58411,11 +59563,33 @@ var require_fast_uri = /* @__PURE__ */ __commonJSMin(((exports, module) => {
       parsed.path = matches[6] || "";
       parsed.query = matches[7];
       parsed.fragment = matches[8];
+      if (parsed.scheme !== void 0) {
+        const decodedScheme = unescape(parsed.scheme);
+        if (VALID_SCHEME.test(decodedScheme)) parsed.scheme = decodedScheme.toLowerCase();
+        else {
+          parsed.error = parsed.error || MALFORMED_SCHEME_ERROR;
+          malformedScheme = true;
+        }
+      }
+      malformedPercentEncoding = hasMalformedComponentPercentEncoding(matches);
+      if (malformedPercentEncoding) parsed.error = parsed.error || "URI contains malformed percent-encoding.";
       if (isNaN(parsed.port)) parsed.port = matches[5];
+      const parseError = getParseError(parsed, matches);
+      if (parseError !== void 0) {
+        parsed.error = parsed.error || parseError;
+        malformedAuthorityOrPort = true;
+      }
       if (parsed.host) if (isIPv4(parsed.host) === false) {
+        const bracketedIPLiteral = isIPLiteral(parsed.host);
+        const hasIPLiteralBracket = parsed.host.indexOf("[") !== -1 || parsed.host.indexOf("]") !== -1;
         const ipv6result = normalizeIPv6(parsed.host);
-        parsed.host = ipv6result.host.toLowerCase();
-        isIP = ipv6result.isIPV6;
+        isIP = ipv6result.isIPV6 || ipv6result.isIPVFuture === true;
+        malformedIPLiteral = hasIPLiteralBracket && (!bracketedIPLiteral || ipv6result.error === true);
+        parsed.host = isIP ? ipv6result.host : ipv6result.host.toLowerCase();
+        if (malformedIPLiteral) {
+          parsed.error = parsed.error || "URI host is malformed.";
+          malformedAuthorityOrPort = true;
+        }
       } else isIP = true;
       if (parsed.scheme === void 0 && parsed.userinfo === void 0 && parsed.host === void 0 && parsed.port === void 0 && parsed.query === void 0 && !parsed.path) parsed.reference = "same-document";
       else if (parsed.scheme === void 0) parsed.reference = "relative";
@@ -58423,24 +59597,58 @@ var require_fast_uri = /* @__PURE__ */ __commonJSMin(((exports, module) => {
       else parsed.reference = "uri";
       if (options.reference && options.reference !== "suffix" && options.reference !== parsed.reference) parsed.error = parsed.error || "URI is not a " + options.reference + " reference.";
       const schemeHandler = getSchemeHandler(options.scheme || parsed.scheme);
-      if (!options.unicodeSupport && (!schemeHandler || !schemeHandler.unicodeSupport)) {
-        if (parsed.host && (options.domainHost || schemeHandler && schemeHandler.domainHost) && isIP === false && nonSimpleDomain(parsed.host)) try {
-          parsed.host = URL.domainToASCII(parsed.host.toLowerCase());
-        } catch (e) {
-          parsed.error = parsed.error || "Host's domain name can not be converted to ASCII: " + e;
-        }
+      if (!malformedIPLiteral) malformedHost = canonicalizeHost(parsed, options, schemeHandler, isIP);
+      if (uri.indexOf("%") !== -1 && parsed.host !== void 0 && !malformedIPLiteral) {
+        let host = isIP ? parsed.host : normalizePercentEncoding(parsed.host, true);
+        if (!isIP) host = normalizePercentEncoding(host.toLowerCase());
+        parsed.host = reescapeHostDelimiters(host, isIP);
       }
       if (!schemeHandler || schemeHandler && !schemeHandler.skipNormalize) {
-        if (uri.indexOf("%") !== -1) {
-          if (parsed.scheme !== void 0) parsed.scheme = unescape(parsed.scheme);
-          if (parsed.host !== void 0) parsed.host = unescape(parsed.host);
-        }
-        if (parsed.path) parsed.path = escape(unescape(parsed.path));
-        if (parsed.fragment) parsed.fragment = encodeURI(decodeURIComponent(parsed.fragment));
+        if (parsed.path) parsed.path = normalizePathEncoding(parsed.path);
+        if (parsed.query) parsed.query = normalizeQueryFragmentEncoding(parsed.query);
+        if (parsed.fragment) parsed.fragment = normalizeQueryFragmentEncoding(parsed.fragment);
       }
-      if (schemeHandler && schemeHandler.parse) schemeHandler.parse(parsed, options);
+      if (schemeHandler && schemeHandler.parse) {
+        schemeHandler.parse(parsed, options);
+        if (schemeHandler === SCHEMES.urn && parsed.nid === void 0) malformedSchemeSpecific = true;
+      }
     } else parsed.error = parsed.error || "URI can not be parsed.";
-    return parsed;
+    return {
+      parsed,
+      malformedAuthorityOrPort,
+      malformedPercentEncoding,
+      malformedSchemeSpecific,
+      malformedHost,
+      malformedScheme
+    };
+  }
+  function parse4(uri, opts) {
+    return parseWithStatus(uri, opts).parsed;
+  }
+  function normalizeString(uri, opts) {
+    return normalizeStringWithStatus(uri, opts).normalized;
+  }
+  function normalizeStringWithStatus(uri, opts) {
+    const { parsed, malformedAuthorityOrPort, malformedPercentEncoding, malformedSchemeSpecific, malformedHost, malformedScheme } = parseWithStatus(uri, opts);
+    return {
+      normalized: malformedAuthorityOrPort || malformedPercentEncoding || malformedSchemeSpecific || malformedHost || malformedScheme ? uri : serialize2(parsed, opts),
+      malformedAuthorityOrPort,
+      malformedPercentEncoding,
+      malformedSchemeSpecific,
+      malformedHost,
+      malformedScheme
+    };
+  }
+  function normalizeComparableURI(uri, opts) {
+    if (typeof uri !== "string" && typeof uri !== "object") return;
+    let value;
+    try {
+      value = typeof uri === "string" ? uri : serialize2(uri, opts);
+    } catch {
+      return;
+    }
+    const { normalized, malformedAuthorityOrPort, malformedPercentEncoding, malformedSchemeSpecific, malformedHost, malformedScheme } = normalizeStringWithStatus(value, opts);
+    return malformedAuthorityOrPort || malformedPercentEncoding || malformedSchemeSpecific || malformedHost || malformedScheme ? void 0 : normalized;
   }
   const fastUri = {
     SCHEMES,
@@ -61867,10 +63075,10 @@ var require__2020 = /* @__PURE__ */ __commonJSMin(((exports, module) => {
 var require_formats = /* @__PURE__ */ __commonJSMin(((exports) => {
   Object.defineProperty(exports, "__esModule", { value: true });
   exports.formatNames = exports.fastFormats = exports.fullFormats = void 0;
-  function fmtDef(validate2, compare3) {
+  function fmtDef(validate2, compare4) {
     return {
       validate: validate2,
-      compare: compare3
+      compare: compare4
     };
   }
   exports.fullFormats = {
@@ -62235,7 +63443,7 @@ var Ajv = import_ajv.Ajv;
 // node_modules/@modelcontextprotocol/server/dist/shimsNode.mjs
 import process2 from "node:process";
 
-// node_modules/@modelcontextprotocol/server/dist/mcp-DIH4cS6P.mjs
+// node_modules/@modelcontextprotocol/server/dist/mcp-oHn3ureC.mjs
 var COMPLETABLE_SYMBOL = /* @__PURE__ */ Symbol.for("mcp.completable");
 function isCompletable(schema) {
   return !!schema && typeof schema === "object" && COMPLETABLE_SYMBOL in schema;
@@ -62243,190 +63451,235 @@ function isCompletable(schema) {
 function getCompleter(schema) {
   return schema[COMPLETABLE_SYMBOL]?.complete;
 }
+var DEFAULT_SSE_KEEP_ALIVE_MS = 15e3;
 var MAX_TIMER_DELAY_MS = 2 ** 31 - 1;
-function listenFilterAccepts(filter, event) {
-  switch (event.kind) {
-    case "tools_list_changed":
-      return filter.toolsListChanged === true;
-    case "prompts_list_changed":
-      return filter.promptsListChanged === true;
-    case "resources_list_changed":
-      return filter.resourcesListChanged === true;
-    case "resource_updated":
-      return filter.resourceSubscriptions !== void 0 && filter.resourceSubscriptions.includes(event.uri);
+function armSseKeepAlive(intervalMs, onTick) {
+  if (!Number.isFinite(intervalMs) || intervalMs < 1) return;
+  const timer = setInterval(onTick, Math.min(intervalMs, MAX_TIMER_DELAY_MS));
+  timer.unref?.();
+  return timer;
+}
+var readClassification;
+var PerRequestHTTPServerTransport = class {
+  static {
+    readClassification = (transport) => transport._classification;
   }
-}
-function honoredSubset(requested, capabilities) {
-  const honored = {};
-  const allow = (bit) => capabilities === void 0 || bit === true;
-  if (requested.toolsListChanged === true && allow(capabilities?.tools?.listChanged)) honored.toolsListChanged = true;
-  if (requested.promptsListChanged === true && allow(capabilities?.prompts?.listChanged)) honored.promptsListChanged = true;
-  if (requested.resourcesListChanged === true && allow(capabilities?.resources?.listChanged)) honored.resourcesListChanged = true;
-  if (requested.resourceSubscriptions !== void 0 && requested.resourceSubscriptions.length > 0 && allow(capabilities?.resources?.subscribe)) honored.resourceSubscriptions = [...requested.resourceSubscriptions];
-  return honored;
-}
-var DEFAULT_MAX_SUBSCRIPTIONS = 1024;
-function stampSubscriptionId(notification, subscriptionId) {
-  return {
-    method: notification.method,
-    params: {
-      ...notification.params,
-      _meta: {
-        ...notification.params?._meta,
-        [SUBSCRIPTION_ID_META_KEY]: subscriptionId
+  onclose;
+  onerror;
+  onmessage;
+  _classification;
+  _responseMode;
+  _started = false;
+  _used = false;
+  _closed = false;
+  _terminalDelivered = false;
+  /**
+  * `true` only while the inbound message is being delivered synchronously
+  * to the connected protocol layer. The pre-handler gates (the era
+  * registry gate, the edge→instance handoff check, the missing-handler
+  * rejection) answer inside this window; request handlers always run
+  * after it (the protocol layer defers them to a microtask). An error
+  * sent inside the window is therefore ladder-originated, and an error
+  * sent after it is handler-produced.
+  */
+  _dispatchWindowOpen = false;
+  _requestId;
+  _deferredResponse;
+  _sse;
+  _abortCleanup;
+  _keepAliveMs;
+  constructor(options) {
+    this._classification = options.classification;
+    this._responseMode = options.responseMode ?? "auto";
+    this._keepAliveMs = options.keepAliveMs ?? DEFAULT_SSE_KEEP_ALIVE_MS;
+  }
+  async start() {
+    if (this._started) throw new Error("PerRequestHTTPServerTransport is already started");
+    this._started = true;
+  }
+  /**
+  * Serves the single exchange: delivers the classified message to the
+  * connected server instance and resolves with the HTTP response.
+  *
+  * Throws when called a second time (the transport is strictly
+  * single-use), or before a server has been connected to the transport.
+  * The returned promise rejects with a connection-closed error when the
+  * transport is closed before a response was produced (for example because
+  * the client disconnected).
+  */
+  async handleMessage(message, extra) {
+    if (this._used) throw new Error("PerRequestHTTPServerTransport serves exactly one exchange; construct a new transport per request");
+    if (!this._started || this.onmessage === void 0) throw new Error("PerRequestHTTPServerTransport is not connected: connect a server to this transport before handling a message");
+    if (this._closed) throw new Error("PerRequestHTTPServerTransport is closed");
+    this._used = true;
+    const signal = extra?.request?.signal;
+    if (signal?.aborted) {
+      await this.close();
+      throw new SdkError(SdkErrorCode.ConnectionClosed, "The request was aborted before it could be handled");
+    }
+    const messageExtra = {
+      classification: this._classification,
+      ...extra?.request !== void 0 && { request: extra.request },
+      ...extra?.authInfo !== void 0 && { authInfo: extra.authInfo }
+    };
+    if (isJSONRPCRequest(message)) {
+      this._requestId = message.id;
+      let resolve23;
+      let reject;
+      const promise2 = new Promise((promiseResolve, promiseReject) => {
+        resolve23 = promiseResolve;
+        reject = promiseReject;
+      });
+      this._deferredResponse = {
+        promise: promise2,
+        resolve: resolve23,
+        reject,
+        settled: false
+      };
+      if (signal !== void 0) {
+        const onAbort = () => void this.close();
+        signal.addEventListener("abort", onAbort, { once: true });
+        this._abortCleanup = () => signal.removeEventListener("abort", onAbort);
+      }
+      this._dispatchWindowOpen = true;
+      try {
+        this.onmessage(message, messageExtra);
+      } finally {
+        this._dispatchWindowOpen = false;
+      }
+      if (this._responseMode === "sse" && !this._closed && !this._deferredResponse.settled) this.upgradeToSse();
+      return promise2;
+    }
+    this.onmessage(message, messageExtra);
+    return new Response(null, { status: 202 });
+  }
+  async send(message, options) {
+    if (this._closed) return;
+    const isResponse = isJSONRPCResultResponse(message) || isJSONRPCErrorResponse(message);
+    const relatedId = isResponse ? message.id : options?.relatedRequestId;
+    if (this._requestId === void 0 || relatedId === void 0 || relatedId !== this._requestId) {
+      if (isResponse) this.onerror?.(/* @__PURE__ */ new Error(`Received a response for an unknown request id: ${String(message.id)}`));
+      return;
+    }
+    if (isResponse) {
+      if (this._terminalDelivered) return;
+      this._terminalDelivered = true;
+      const errorCode = isJSONRPCErrorResponse(message) ? message.error.code : void 0;
+      const ladderStatus = errorCode !== void 0 && (this._dispatchWindowOpen || errorCode === ProtocolErrorCode.MissingRequiredClientCapability) ? LADDER_ERROR_HTTP_STATUS[errorCode] : void 0;
+      if (ladderStatus !== void 0 && this._sse === void 0) {
+        this.settleResponse(Response.json(message, {
+          status: ladderStatus,
+          headers: { "Content-Type": "application/json" }
+        }));
+        queueMicrotask(() => void this.close());
+        return;
+      }
+      if (this._sse !== void 0 || this._responseMode === "sse") {
+        if (this._sse === void 0) this.upgradeToSse();
+        this.writeMessageFrame(message);
+        this.finalizeStream();
+        return;
+      }
+      this.settleResponse(Response.json(message, {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      }));
+      queueMicrotask(() => void this.close());
+      return;
+    }
+    if (this._responseMode === "json") return;
+    if (this._sse === void 0) this.upgradeToSse();
+    this.writeMessageFrame(message);
+  }
+  /**
+  * Writes an SSE comment frame (a keep-alive heartbeat). Dropped when the
+  * exchange is not currently streaming.
+  */
+  writeCommentFrame(comment) {
+    if (this._closed || this._sse === void 0 || this._sse.closed) return;
+    const frame = comment.split("\n").map((line) => `: ${line}`).join("\n");
+    this.writeFrame(`${frame}
+
+`);
+  }
+  async close() {
+    if (this._closed) return;
+    this._closed = true;
+    this._abortCleanup?.();
+    this._abortCleanup = void 0;
+    if (this._sse?.keepAliveTimer !== void 0) clearInterval(this._sse.keepAliveTimer);
+    if (this._sse !== void 0 && !this._sse.closed) {
+      this._sse.closed = true;
+      try {
+        this._sse.controller.close();
+      } catch {
       }
     }
-  };
-}
-function parseListenFilter(message) {
-  const outcome = codecForVersion(MODERN_WIRE_REVISION).validateRequest("subscriptions/listen", message);
-  return outcome.ok ? outcome.value.params?.notifications : void 0;
-}
-var CHANGE_NOTIFICATION_METHODS = /* @__PURE__ */ new Set([
-  "notifications/tools/list_changed",
-  "notifications/prompts/list_changed",
-  "notifications/resources/list_changed",
-  "notifications/resources/updated"
-]);
-var StdioListenRouter = class {
-  /** Active subscriptions, keyed by the listen request's JSON-RPC id verbatim. */
-  _subs = /* @__PURE__ */ new Map();
-  /**
-  * The serving instance's declared capabilities. Filled in by the entry
-  * once the modern instance is constructed (the router is created before
-  * the instance exists), so the acknowledged filter is narrowed against
-  * what the server can actually deliver.
-  */
-  _serverCapabilities;
-  /**
-  * The serving instance's identity, stamped onto the graceful-close
-  * results' `_meta` (the spec's `SubscriptionsListenResultMetaObject` extends
-  * `ResultMetaObject`). Handed over together with the capabilities.
-  */
-  _serverInfo;
-  constructor(_maxSubscriptions = DEFAULT_MAX_SUBSCRIPTIONS, serverCapabilities, serverInfo) {
-    this._maxSubscriptions = _maxSubscriptions;
-    this._serverCapabilities = serverCapabilities;
-    this._serverInfo = serverInfo;
+    if (this._deferredResponse !== void 0 && !this._deferredResponse.settled) {
+      this._deferredResponse.settled = true;
+      this._deferredResponse.reject(new SdkError(SdkErrorCode.ConnectionClosed, "Connection closed before a response was produced"));
+    }
+    this.onclose?.();
   }
-  /**
-  * Record the serving instance's declared capabilities and identity once
-  * it has been constructed. Called by `serveStdio`'s connect path;
-  * subsequent `serve()` calls narrow the honored filter against the
-  * capabilities, and `teardownAll()` stamps the identity.
-  */
-  setServerCapabilities(capabilities, serverInfo) {
-    this._serverCapabilities = capabilities;
-    if (serverInfo !== void 0) this._serverInfo = serverInfo;
+  settleResponse(response) {
+    if (this._deferredResponse === void 0 || this._deferredResponse.settled) return;
+    this._deferredResponse.settled = true;
+    this._deferredResponse.resolve(response);
   }
-  /** Whether `id` is an active listen subscription on this connection. */
-  has(id) {
-    return this._subs.has(id);
-  }
-  /**
-  * Serve one inbound `subscriptions/listen` request: registers the
-  * subscription and returns the stamped acknowledged notification (or, on
-  * capacity / params rejection, the in-band JSON-RPC error response).
-  *
-  * @throws when called before {@linkcode setServerCapabilities} (or the
-  * constructor) has supplied the serving instance's capabilities. Honoring a
-  * filter without knowing the server's advertised capabilities would fail
-  * open (deliver unadvertised types); the entry guarantees capabilities are
-  * set before any listen request is routed here.
-  */
-  serve(message) {
-    if (this._serverCapabilities === void 0) throw new Error("StdioListenRouter.serve() called before setServerCapabilities(); refusing to honor a filter without capabilities");
-    if (this._subs.size >= this._maxSubscriptions) return {
-      jsonrpc: "2.0",
-      id: message.id,
-      error: {
-        code: -32603,
-        message: "Subscription limit reached"
-      }
-    };
-    const filter = parseListenFilter(message);
-    if (filter === void 0) return {
-      jsonrpc: "2.0",
-      id: message.id,
-      error: {
-        code: -32602,
-        message: "Invalid params: 'notifications' is required and must be a valid SubscriptionFilter"
-      }
-    };
-    const honored = honoredSubset(filter, this._serverCapabilities);
-    this._subs.set(message.id, honored);
-    return stampSubscriptionId({
-      method: "notifications/subscriptions/acknowledged",
-      params: { notifications: honored }
-    }, message.id);
-  }
-  /**
-  * Tear down one subscription (inbound `notifications/cancelled`). Returns
-  * `true` when a subscription was removed. After this call NOTHING further
-  * is delivered for that subscription id (the post-cancel hardening).
-  */
-  cancel(id) {
-    return this._subs.delete(id);
-  }
-  /**
-  * Route an outbound notification through the active subscriptions.
-  *
-  * - For a subscription-gated change notification, returns one stamped copy
-  *   per subscription that opted in to it (an empty array means it is
-  *   dropped — the modern era never delivers an un-requested change type).
-  * - For any other outbound message, returns `'passthrough'` (the entry
-  *   forwards it as-is).
-  */
-  routeOutbound(message) {
-    if (!CHANGE_NOTIFICATION_METHODS.has(message.method)) return "passthrough";
-    const uriParam = message.params?.["uri"];
-    const uri = typeof uriParam === "string" ? uriParam : void 0;
-    const event = notificationToServerEvent(message.method, uri);
-    const out = [];
-    for (const [subscriptionId, filter] of this._subs) if (listenFilterAccepts(filter, event)) out.push(stampSubscriptionId({
-      method: message.method,
-      params: message.params ?? {}
-    }, subscriptionId));
-    return out;
-  }
-  /**
-  * Server-side graceful teardown of every active subscription: returns the
-  * empty `subscriptions/listen` JSON-RPC result for each subscription id —
-  * the spec's graceful-close signal, `_meta` carrying the subscription id
-  * and the serving instance's identity — for the entry to emit before
-  * closing the wire. Clears the set so nothing further is delivered.
-  */
-  teardownAll() {
-    const out = [];
-    for (const id of this._subs.keys()) out.push({
-      jsonrpc: "2.0",
-      id,
-      result: {
-        resultType: "complete",
-        _meta: {
-          [SUBSCRIPTION_ID_META_KEY]: id,
-          ...this._serverInfo !== void 0 && { [SERVER_INFO_META_KEY]: this._serverInfo }
-        }
+  upgradeToSse() {
+    let controller;
+    const readable = new ReadableStream({
+      start: (streamController) => {
+        controller = streamController;
+      },
+      cancel: () => {
+        this.close();
       }
     });
-    this._subs.clear();
-    return out;
+    this._sse = {
+      controller,
+      encoder: new TextEncoder(),
+      closed: false
+    };
+    this._sse.keepAliveTimer = armSseKeepAlive(this._keepAliveMs, () => this.writeCommentFrame("keepalive"));
+    this.settleResponse(new Response(readable, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/event-stream",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no"
+      }
+    }));
+  }
+  finalizeStream() {
+    if (this._sse?.keepAliveTimer !== void 0) clearInterval(this._sse.keepAliveTimer);
+    if (this._sse !== void 0 && !this._sse.closed) {
+      this._sse.closed = true;
+      try {
+        this._sse.controller.close();
+      } catch {
+      }
+    }
+    queueMicrotask(() => void this.close());
+  }
+  writeMessageFrame(message) {
+    this.writeFrame(`event: message
+data: ${JSON.stringify(message)}
+
+`);
+  }
+  writeFrame(frame) {
+    if (this._sse === void 0 || this._sse.closed) return;
+    try {
+      this._sse.controller.enqueue(this._sse.encoder.encode(frame));
+    } catch (error62) {
+      this.onerror?.(/* @__PURE__ */ new Error(`Failed to write to the response stream: ${error62}`));
+    }
   }
 };
-function notificationToServerEvent(method, uri) {
-  switch (method) {
-    case "notifications/tools/list_changed":
-      return { kind: "tools_list_changed" };
-    case "notifications/prompts/list_changed":
-      return { kind: "prompts_list_changed" };
-    case "notifications/resources/list_changed":
-      return { kind: "resources_list_changed" };
-    default:
-      return {
-        kind: "resource_updated",
-        uri: uri ?? ""
-      };
-  }
+function perRequestClassificationOf(transport) {
+  return transport instanceof PerRequestHTTPServerTransport ? readClassification(transport) : void 0;
 }
 function supportsScopeChallengeResolver(transport) {
   return typeof transport === "object" && transport !== null && "setScopeChallengeResolver" in transport && typeof transport.setScopeChallengeResolver === "function";
@@ -62596,6 +63849,7 @@ var Server = class extends Protocol {
   _requestStateVerify;
   _inputRequiredServing;
   _legacyShim;
+  _boundFromTransport = false;
   /** Lazily-built legacy shim; the loop lives in legacyInputRequiredShim.ts behind a narrow host contract. */
   _legacyInputRequiredShim() {
     return this._legacyShim ??= new LegacyInputRequiredShim({
@@ -62635,6 +63889,15 @@ var Server = class extends Protocol {
   /** Attaches to the given transport; rejects while this instance is connected to another one. */
   async connect(transport) {
     if (this.transport !== void 0) throw new SdkError(SdkErrorCode.AlreadyConnected, "Use a separate Server instance per connection: this instance is already connected to a transport. To connect it to a new transport, call close() first.");
+    if (this._boundFromTransport) {
+      this._boundFromTransport = false;
+      this._negotiatedProtocolVersion = void 0;
+    }
+    const revision = perRequestClassificationOf(transport)?.revision;
+    if (revision !== void 0 && !this._servedModernEra() && SUPPORTED_MODERN_PROTOCOL_VERSIONS.includes(revision) && modernProtocolVersions(this._supportedProtocolVersions).includes(revision)) {
+      this._negotiatedProtocolVersion = revision;
+      this._boundFromTransport = true;
+    }
     await super.connect(transport);
   }
   /**
@@ -62960,8 +64223,8 @@ var Server = class extends Protocol {
   * @deprecated Read client identity from the per-request handler context instead: on
   * 2026-07-28 (per-request envelope) requests `ctx.mcpReq.envelope` carries the client's
   * declared capabilities, while on 2025-era connections this accessor keeps returning the
-  * `initialize`-scoped value. The accessor remains functional — instances serving the
-  * 2026-07-28 era are backfilled per request from the validated envelope.
+  * `initialize`-scoped value. The accessor remains functional where `createMcpHandler`
+  * serves the 2026-07-28 era: it backfills it per request from the validated envelope.
   */
   getClientCapabilities() {
     return this._clientCapabilities;
@@ -62972,8 +64235,8 @@ var Server = class extends Protocol {
   * @deprecated Read client identity from the per-request handler context instead: on
   * 2026-07-28 (per-request envelope) requests `ctx.mcpReq.envelope` carries the client's
   * name and version, while on 2025-era connections this accessor keeps returning the
-  * `initialize`-scoped value. The accessor remains functional — instances serving the
-  * 2026-07-28 era are backfilled per request from the validated envelope.
+  * `initialize`-scoped value. The accessor remains functional where `createMcpHandler`
+  * serves the 2026-07-28 era: it backfills it per request from the validated envelope.
   */
   getClientVersion() {
     return this._clientVersion;
@@ -63548,8 +64811,14 @@ var McpServer = class {
           if (updates.uri) this._registeredResources[updates.uri] = registeredResource;
         }
         if (updates.name !== void 0) registeredResource.name = updates.name;
-        if (updates.title !== void 0) registeredResource.title = updates.title;
         if (updates.metadata !== void 0) registeredResource.metadata = updates.metadata;
+        if (updates.title !== void 0) {
+          registeredResource.title = updates.title;
+          registeredResource.metadata = {
+            ...registeredResource.metadata,
+            title: updates.title
+          };
+        }
         if (updates.callback !== void 0) registeredResource.readCallback = updates.callback;
         if (updates.scopeChallenge !== void 0) registeredResource.scopeChallenge = updates.scopeChallenge === null ? void 0 : updates.scopeChallenge;
         if (updates.enabled !== void 0) registeredResource.enabled = updates.enabled;
@@ -63575,9 +64844,15 @@ var McpServer = class {
           delete this._registeredResourceTemplates[name];
           if (updates.name) this._registeredResourceTemplates[updates.name] = registeredResourceTemplate;
         }
-        if (updates.title !== void 0) registeredResourceTemplate.title = updates.title;
         if (updates.template !== void 0) registeredResourceTemplate.resourceTemplate = updates.template;
         if (updates.metadata !== void 0) registeredResourceTemplate.metadata = updates.metadata;
+        if (updates.title !== void 0) {
+          registeredResourceTemplate.title = updates.title;
+          registeredResourceTemplate.metadata = {
+            ...registeredResourceTemplate.metadata,
+            title: updates.title
+          };
+        }
         if (updates.callback !== void 0) registeredResourceTemplate.readCallback = updates.callback;
         if (updates.scopeChallenge !== void 0) registeredResourceTemplate.scopeChallenge = updates.scopeChallenge === null ? void 0 : updates.scopeChallenge;
         if (updates.enabled !== void 0) registeredResourceTemplate.enabled = updates.enabled;
@@ -63631,9 +64906,9 @@ var McpServer = class {
     };
     this._registeredPrompts[name] = registeredPrompt;
     if (argsSchema) {
-      const shape = getSchemaShape(argsSchema);
-      if (shape) {
-        if (Object.values(shape).some((field) => {
+      const shape2 = getSchemaShape(argsSchema);
+      if (shape2) {
+        if (Object.values(shape2).some((field) => {
           return isCompletable(unwrapOptionalSchema(field));
         })) this.setCompletionRequestHandler();
       }
@@ -63831,6 +65106,192 @@ function isOptionalSchema(schema) {
 function unwrapOptionalSchema(schema) {
   if (!isOptionalSchema(schema)) return schema;
   return schema.def?.innerType ?? schema;
+}
+
+// node_modules/@modelcontextprotocol/server/dist/listenRouter-Bartj63y.mjs
+function listenFilterAccepts(filter, event) {
+  switch (event.kind) {
+    case "tools_list_changed":
+      return filter.toolsListChanged === true;
+    case "prompts_list_changed":
+      return filter.promptsListChanged === true;
+    case "resources_list_changed":
+      return filter.resourcesListChanged === true;
+    case "resource_updated":
+      return filter.resourceSubscriptions !== void 0 && filter.resourceSubscriptions.includes(event.uri);
+  }
+}
+function honoredSubset(requested, capabilities) {
+  const honored = {};
+  const allow = (bit) => capabilities === void 0 || bit === true;
+  if (requested.toolsListChanged === true && allow(capabilities?.tools?.listChanged)) honored.toolsListChanged = true;
+  if (requested.promptsListChanged === true && allow(capabilities?.prompts?.listChanged)) honored.promptsListChanged = true;
+  if (requested.resourcesListChanged === true && allow(capabilities?.resources?.listChanged)) honored.resourcesListChanged = true;
+  if (requested.resourceSubscriptions !== void 0 && requested.resourceSubscriptions.length > 0 && allow(capabilities?.resources?.subscribe)) honored.resourceSubscriptions = [...requested.resourceSubscriptions];
+  return honored;
+}
+var DEFAULT_MAX_SUBSCRIPTIONS = 1024;
+function stampSubscriptionId(notification, subscriptionId) {
+  return {
+    method: notification.method,
+    params: {
+      ...notification.params,
+      _meta: {
+        ...notification.params?._meta,
+        [SUBSCRIPTION_ID_META_KEY]: subscriptionId
+      }
+    }
+  };
+}
+function parseListenFilter(message) {
+  const outcome = codecForVersion(MODERN_WIRE_REVISION).validateRequest("subscriptions/listen", message);
+  return outcome.ok ? outcome.value.params?.notifications : void 0;
+}
+var CHANGE_NOTIFICATION_METHODS = /* @__PURE__ */ new Set([
+  "notifications/tools/list_changed",
+  "notifications/prompts/list_changed",
+  "notifications/resources/list_changed",
+  "notifications/resources/updated"
+]);
+var StdioListenRouter = class {
+  /** Active subscriptions, keyed by the listen request's JSON-RPC id verbatim. */
+  _subs = /* @__PURE__ */ new Map();
+  /**
+  * The serving instance's declared capabilities. Filled in by the entry
+  * once the modern instance is constructed (the router is created before
+  * the instance exists), so the acknowledged filter is narrowed against
+  * what the server can actually deliver.
+  */
+  _serverCapabilities;
+  /**
+  * The serving instance's identity, stamped onto the graceful-close
+  * results' `_meta` (the spec's `SubscriptionsListenResultMetaObject` extends
+  * `ResultMetaObject`). Handed over together with the capabilities.
+  */
+  _serverInfo;
+  constructor(_maxSubscriptions = DEFAULT_MAX_SUBSCRIPTIONS, serverCapabilities, serverInfo) {
+    this._maxSubscriptions = _maxSubscriptions;
+    this._serverCapabilities = serverCapabilities;
+    this._serverInfo = serverInfo;
+  }
+  /**
+  * Record the serving instance's declared capabilities and identity once
+  * it has been constructed. Called by `serveStdio`'s connect path;
+  * subsequent `serve()` calls narrow the honored filter against the
+  * capabilities, and `teardownAll()` stamps the identity.
+  */
+  setServerCapabilities(capabilities, serverInfo) {
+    this._serverCapabilities = capabilities;
+    if (serverInfo !== void 0) this._serverInfo = serverInfo;
+  }
+  /** Whether `id` is an active listen subscription on this connection. */
+  has(id) {
+    return this._subs.has(id);
+  }
+  /**
+  * Serve one inbound `subscriptions/listen` request: registers the
+  * subscription and returns the stamped acknowledged notification (or, on
+  * capacity / params rejection, the in-band JSON-RPC error response).
+  *
+  * @throws when called before {@linkcode setServerCapabilities} (or the
+  * constructor) has supplied the serving instance's capabilities. Honoring a
+  * filter without knowing the server's advertised capabilities would fail
+  * open (deliver unadvertised types); the entry guarantees capabilities are
+  * set before any listen request is routed here.
+  */
+  serve(message) {
+    if (this._serverCapabilities === void 0) throw new Error("StdioListenRouter.serve() called before setServerCapabilities(); refusing to honor a filter without capabilities");
+    if (this._subs.size >= this._maxSubscriptions) return {
+      jsonrpc: "2.0",
+      id: message.id,
+      error: {
+        code: -32603,
+        message: "Subscription limit reached"
+      }
+    };
+    const filter = parseListenFilter(message);
+    if (filter === void 0) return {
+      jsonrpc: "2.0",
+      id: message.id,
+      error: {
+        code: -32602,
+        message: "Invalid params: 'notifications' is required and must be a valid SubscriptionFilter"
+      }
+    };
+    const honored = honoredSubset(filter, this._serverCapabilities);
+    this._subs.set(message.id, honored);
+    return stampSubscriptionId({
+      method: "notifications/subscriptions/acknowledged",
+      params: { notifications: honored }
+    }, message.id);
+  }
+  /**
+  * Tear down one subscription (inbound `notifications/cancelled`). Returns
+  * `true` when a subscription was removed. After this call NOTHING further
+  * is delivered for that subscription id (the post-cancel hardening).
+  */
+  cancel(id) {
+    return this._subs.delete(id);
+  }
+  /**
+  * Route an outbound notification through the active subscriptions.
+  *
+  * - For a subscription-gated change notification, returns one stamped copy
+  *   per subscription that opted in to it (an empty array means it is
+  *   dropped — the modern era never delivers an un-requested change type).
+  * - For any other outbound message, returns `'passthrough'` (the entry
+  *   forwards it as-is).
+  */
+  routeOutbound(message) {
+    if (!CHANGE_NOTIFICATION_METHODS.has(message.method)) return "passthrough";
+    const uriParam = message.params?.["uri"];
+    const uri = typeof uriParam === "string" ? uriParam : void 0;
+    const event = notificationToServerEvent(message.method, uri);
+    const out = [];
+    for (const [subscriptionId, filter] of this._subs) if (listenFilterAccepts(filter, event)) out.push(stampSubscriptionId({
+      method: message.method,
+      params: message.params ?? {}
+    }, subscriptionId));
+    return out;
+  }
+  /**
+  * Server-side graceful teardown of every active subscription: returns the
+  * empty `subscriptions/listen` JSON-RPC result for each subscription id —
+  * the spec's graceful-close signal, `_meta` carrying the subscription id
+  * and the serving instance's identity — for the entry to emit before
+  * closing the wire. Clears the set so nothing further is delivered.
+  */
+  teardownAll() {
+    const out = [];
+    for (const id of this._subs.keys()) out.push({
+      jsonrpc: "2.0",
+      id,
+      result: {
+        resultType: "complete",
+        _meta: {
+          [SUBSCRIPTION_ID_META_KEY]: id,
+          ...this._serverInfo !== void 0 && { [SERVER_INFO_META_KEY]: this._serverInfo }
+        }
+      }
+    });
+    this._subs.clear();
+    return out;
+  }
+};
+function notificationToServerEvent(method, uri) {
+  switch (method) {
+    case "notifications/tools/list_changed":
+      return { kind: "tools_list_changed" };
+    case "notifications/prompts/list_changed":
+      return { kind: "prompts_list_changed" };
+    case "notifications/resources/list_changed":
+      return { kind: "resources_list_changed" };
+    default:
+      return {
+        kind: "resource_updated",
+        uri: uri ?? ""
+      };
+  }
 }
 
 // node_modules/@modelcontextprotocol/server/dist/index.mjs
@@ -64347,6 +65808,7 @@ import { constants as constants15, realpathSync as realpathSync2 } from "node:fs
 import { cp as cp2, lstat as lstat14, mkdir as mkdir11, open as open14, readFile as readFile14, readdir as readdir9, realpath as realpath8, rm as rm12, stat as stat2 } from "node:fs/promises";
 import { userInfo } from "node:os";
 import { basename as basename4, dirname as dirname11, isAbsolute as isAbsolute9, join as join19, relative as relative8, resolve as resolve17, sep as sep6 } from "node:path";
+import { fileURLToPath as fileURLToPath3 } from "node:url";
 
 // packages/cli/dist/host-profile.js
 import { readFile as readFile13, stat } from "node:fs/promises";
@@ -64386,18 +65848,17 @@ function copilotHome(host) {
   return join18(host.homedir, ".copilot");
 }
 function hostCheck(kind) {
-  const sandbox = "client local sandboxing is assumed on and not checked";
   switch (kind) {
     case "windows":
       return {
         id: "host",
         ok: true,
-        value: `windows: VS Code Copilot harness or GitHub Copilot app; Copilot CLI manages the plugin store only; ${sandbox}`
+        value: "windows: VS Code Copilot harness or GitHub Copilot app; Copilot CLI manages the plugin store only"
       };
     case "wsl2":
-      return { id: "host", ok: true, value: `wsl2: GitHub Copilot CLI; ${sandbox}` };
+      return { id: "host", ok: true, value: "wsl2: GitHub Copilot CLI" };
     case "linux":
-      return { id: "host", ok: true, value: `linux: GitHub Copilot CLI; ${sandbox}` };
+      return { id: "host", ok: true, value: "linux: GitHub Copilot CLI" };
     case "macos":
       return {
         id: "host",
@@ -64528,37 +65989,46 @@ async function copilotPluginCheck(kind, inputs) {
       remedy: `${kind === "windows" ? "Close every VS Code window, then run" : "Run"} copilot plugin marketplace add jonathan-vella/apex-plugins and copilot plugin install ${qualified}`
     };
   }
-  if (entries.length > 1)
-    return {
-      id: "copilot-plugin",
-      ok: false,
-      value: `${entries.length} ${name} plugins installed in ${home}`,
-      remedy: `Uninstall the extra copies so that only ${qualified} remains (copilot plugin list shows them)`
-    };
+  if (entries.length > 1) {
+    const activeEntries = entries.filter((candidate) => {
+      const candidateSource = typeof candidate.marketplace === "string" && candidate.marketplace.length > 0 ? candidate.marketplace : "direct";
+      const candidateQualified = candidateSource === "direct" ? name : `${name}@${candidateSource}`;
+      return candidate.enabled !== false && !inputs.workspaceDisabledPlugins?.has(candidateQualified) && !inputs.workspaceDisabledPlugins?.has(`${name}@${candidateSource}`);
+    });
+    if (activeEntries.length !== 1) {
+      return {
+        id: "copilot-plugin",
+        ok: false,
+        value: `${entries.length} ${name} plugins installed in ${home}`,
+        remedy: `Uninstall the extra copies so that only ${qualified} remains (copilot plugin list shows them)`
+      };
+    }
+    entries.splice(0, entries.length, activeEntries[0]);
+  }
   const entry = entries[0];
   const version2 = typeof entry.version === "string" ? entry.version : "unknown";
   const source2 = typeof entry.marketplace === "string" && entry.marketplace.length > 0 ? entry.marketplace : "direct";
-  const label = `${name}@${source2} ${version2}`;
+  const label2 = `${name}@${source2} ${version2}`;
   if (source2 !== "direct" && source2 !== marketplace)
     return {
       id: "copilot-plugin",
       ok: false,
-      value: `${label} from another marketplace`,
+      value: `${label2} from another marketplace`,
       remedy: `Uninstall ${name}@${source2}, then run copilot plugin install ${qualified}`
     };
   if (entry.enabled !== true)
-    return { id: "copilot-plugin", ok: false, value: `${label} disabled`, remedy: reinstall };
+    return { id: "copilot-plugin", ok: false, value: `${label2} disabled`, remedy: reinstall };
   if (version2 !== inputs.apexVersion)
     return {
       id: "copilot-plugin",
       ok: false,
-      value: `${label}; this apex CLI is ${inputs.apexVersion}`,
+      value: `${label2}; this apex CLI is ${inputs.apexVersion}`,
       remedy: `Keep the plugin and CLI at one version: run copilot plugin update ${qualified}, or install @apexops/cli@${version2}`
     };
   return {
     id: "copilot-plugin",
     ok: true,
-    value: kind === "windows" ? `${label} enabled in ${home}; VS Code must list one apex entry under @agentPlugins` : `${label} enabled in ${home}`
+    value: kind === "windows" ? `${label2} enabled in ${home}; VS Code must list one apex entry under @agentPlugins` : `${label2} enabled in ${home}`
   };
 }
 async function sandboxToolsCheck(inputs) {
@@ -64592,28 +66062,26 @@ async function hostDoctorChecks(inputs) {
 var MCP_TOOL_EFFECTS = {
   status: "read-only",
   projectList: "read-only",
-  doctorChecks: "read",
-  capabilityList: "read",
-  capabilityStatus: "read",
+  inputHistory: "read-only",
+  previewInputAmendment: "read-only",
   taskContext: "read",
   readTaskInput: "read",
   preview: "read",
   inventory: "read",
   diagnose: "read",
   render: "read",
-  improvementObservations: "read",
-  improvementProposals: "read",
   releaseWriter: "repeat-guarded",
   nextTask: "repeat-guarded",
   recordInput: "repeat-guarded",
+  amendInput: "repeat-guarded",
   governanceImport: "repeat-guarded",
   governanceSelect: "repeat-guarded",
   projectCreate: "repeat-guarded",
   projectUse: "repeat-guarded",
   projectDelete: "repeat-guarded",
   gateDecide: "repeat-guarded",
+  gateDelegate: "repeat-guarded",
   reviewDecide: "repeat-guarded",
-  stageArtifact: "repeat-guarded",
   stageFile: "repeat-guarded",
   generateIac: "repeat-guarded",
   validateTask: "repeat-guarded",
@@ -64622,24 +66090,21 @@ var MCP_TOOL_EFFECTS = {
   architectureComplete: "repeat-guarded",
   reviewComplete: "repeat-guarded",
   planComplete: "repeat-guarded",
-  reconcile: "repeat-guarded",
-  promote: "repeat-guarded",
-  submitEvidence: "repeat-guarded",
-  improvementObserve: "convergent",
-  doctor: "convergent"
+  reconcile: "repeat-guarded"
 };
 var MCP_TOOL_REVIEW_GUARDS = {
   releaseWriter: null,
   nextTask: null,
   recordInput: "approve",
+  amendInput: "approve",
   governanceImport: null,
   governanceSelect: null,
   projectCreate: null,
   projectUse: null,
   projectDelete: "delete",
   gateDecide: "approve",
+  gateDelegate: "approve",
   reviewDecide: "approve",
-  stageArtifact: null,
   stageFile: null,
   generateIac: null,
   validateTask: null,
@@ -64648,12 +66113,23 @@ var MCP_TOOL_REVIEW_GUARDS = {
   architectureComplete: null,
   reviewComplete: null,
   planComplete: null,
-  reconcile: null,
-  promote: "publish",
-  submitEvidence: "publish",
-  improvementObserve: null,
-  doctor: null
+  reconcile: null
 };
+var SERVICE_REVIEW_GUARDS = {
+  ...MCP_TOOL_REVIEW_GUARDS,
+  promote: "publish",
+  submitEvidence: "publish"
+};
+
+// packages/cli/dist/mcp-limits.js
+var MCP_MAX_SERIALIZED_RESULT_BYTES = 64 * 1024;
+function mcpResultEnvelopeBytes(structuredContent) {
+  const text5 = JSON.stringify(structuredContent);
+  return Buffer.byteLength(JSON.stringify({
+    content: [{ type: "text", text: text5 }],
+    structuredContent
+  }), "utf8");
+}
 
 // packages/cli/dist/workflow-validators.js
 var bicepResourceGroupScopePattern = /^\/subscriptions\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/resourceGroups\/[A-Za-z0-9_()-][A-Za-z0-9_.()-]*$(?![\s\S])/i;
@@ -64904,7 +66380,9 @@ function wellArchitectedAssessmentComplete(value) {
 }
 function costArithmetic(value) {
   const estimate = taskContext(value).outputs["cost-estimate"];
-  return hasValidCostArithmetic(estimate) ? [] : issue2("/outputs/cost-estimate", "Cost arithmetic does not reconcile");
+  if (!hasValidCostArithmetic(estimate))
+    return issue2("/outputs/cost-estimate", "Cost arithmetic does not reconcile");
+  return hasValidCostPricingSources(estimate) ? [] : issue2("/outputs/cost-estimate/lineItems", "Azure MCP pricing requires complete uncapped query metadata");
 }
 function workloadDecisionCoverage(value) {
   const context = taskContext(value);
@@ -64990,7 +66468,17 @@ function policyEffectCoverage(value) {
     context.importedPolicyEffects.filter((value2) => value2 === effect).length
   ]);
   const missing2 = requiredCounts.flatMap(([effect, required3]) => (counts.get(effect) ?? 0) < required3 ? [effect] : []);
-  return missing2.length === 0 ? [] : issue2("/outputs/policy-property-map/mappings", `Missing policy effect coverage: ${missing2.join(", ")}`);
+  const issues = missing2.length === 0 ? [] : issue2("/outputs/policy-property-map/mappings", `Missing policy effect coverage: ${missing2.join(", ")}`);
+  if (context.nodeId === "architecture") {
+    const blocked = policyMap.mappings.filter(({ disposition }) => disposition === "blocked").map(({ logicalResourceId, effect, propertyPath }) => `${logicalResourceId} (${effect} ${propertyPath})`);
+    if (blocked.length > 0) {
+      issues.push({
+        path: "/outputs/policy-property-map/mappings",
+        message: `Blocked policy controls must be resolved in the Architecture before it is accepted: ${blocked.join("; ")}. Change the design so each control is satisfied or planned, or mark it not-applicable with a factual reason; an Architecture review disposition does not change a mapping.`
+      });
+    }
+  }
+  return issues;
 }
 function planSourceCoverage(value) {
   const context = taskContext(value);
@@ -65243,7 +66731,7 @@ function gateApprovalBindingComplete(value) {
   const approval = context.approval;
   if (approval === void 0)
     return issue2("/approval", "Human approval evidence is required");
-  const valid = approval.gate === 4 && approval.decision === "approved" && approval.projectId === context.run.projectId && approval.runId === context.run.runId && approval.previewHash === preview.previewHash && approval.dependencyHash === preview.previewHash && approval.writerEpoch === context.run.ownerEpoch && approval.writerTransferClaimHash === context.provedPreviewTransferClaimHash && approval.recipientIdentity === context.expectedApprovalRecipientIdentity && approval.expiresAt !== void 0 && Date.parse(approval.expiresAt) > Date.parse(context.now);
+  const valid = approval.gate === 4 && approval.decision === "approved" && approval.projectId === context.run.projectId && approval.runId === context.run.runId && approval.previewHash === preview.previewHash && context.approvalContextHash !== void 0 && approval.approvalContextHash === context.approvalContextHash && approval.dependencyHash === preview.previewHash && approval.writerEpoch === context.run.ownerEpoch && approval.writerTransferClaimHash === context.provedPreviewTransferClaimHash && approval.recipientIdentity === context.expectedApprovalRecipientIdentity && approval.expiresAt !== void 0 && Date.parse(approval.expiresAt) > Date.parse(context.now);
   return valid ? [] : issue2("/approval", "Approval does not completely bind the current preview and writer");
 }
 function gateNoHardBlockers(value) {
@@ -65353,7 +66841,7 @@ function deployExactApprovedOperation(value) {
   const preview = context.preview;
   const approval = context.approval;
   const { previewHash, ...previewBody } = preview;
-  const valid = sha256Json(previewBody) === previewHash && context.expectedPreviewHash === previewHash && approval.projectId === context.run.projectId && approval.runId === context.run.runId && approval.gate === 4 && approval.decision === "approved" && approval.previewHash === previewHash && approval.dependencyHash === previewHash && approval.recipientIdentity !== void 0;
+  const valid = sha256Json(previewBody) === previewHash && context.expectedPreviewHash === previewHash && approval.projectId === context.run.projectId && approval.runId === context.run.runId && approval.gate === 4 && approval.decision === "approved" && approval.previewHash === previewHash && context.approvalContextHash !== void 0 && approval.approvalContextHash === context.approvalContextHash && approval.dependencyHash === previewHash && approval.recipientIdentity !== void 0;
   return valid ? [] : issue2("/approval", "Deployment is not authorized by the exact approved operation");
 }
 function deployStaleWriterRejection(value) {
@@ -65471,7 +66959,14 @@ function qualityScorecardDecidable(value) {
   const report = context.outputs["quality-report"];
   const measurementSet = context.qualityMeasurements;
   const measurements = measurementSet.measurements;
-  const evaluations = evaluateQualityScorecard(context.scorecard, measurements);
+  let evaluations;
+  try {
+    evaluations = evaluateQualityScorecard(context.scorecard, measurements);
+  } catch (error62) {
+    if (!(error62 instanceof ScorecardValidationError))
+      throw error62;
+    return issue2(error62.path, error62.message);
+  }
   const checks = new Map(report.checks.map((check2) => [`${check2.id}\0${check2.scenario}`, check2]));
   const issues = [];
   if (report.scorecardHash !== sha256Json(context.scorecard)) {
@@ -65635,8 +67130,16 @@ function taskWorkflowValidatorInput(id, context) {
 
 // packages/cli/dist/service.js
 var ZERO_HASH = "0".repeat(64);
+var STAGE_FOLDERS = {
+  requirements: "01-requirements",
+  architecture: "02-architecture",
+  plan: "03-plan",
+  validation: "04-validation",
+  operations: "05-operations"
+};
 var TASK_TTL_MS = 24 * 60 * 60 * 1e3;
 var PREVIEW_TTL_MS = 24 * 60 * 60 * 1e3;
+var INPUT_AMENDMENT_MAX_PROPOSAL_BYTES = 512 * 1024;
 var WORKSPACE_STATE_FILES = [
   ".apex/config.json",
   ".apex/customizations.selection.json",
@@ -65648,6 +67151,88 @@ var APEX_GITIGNORE = `/cache/
 /work/
 /runtime/capability-packs/
 ${REPEAT_GUARD_FILE}
+`;
+var WORKSPACE_CLI_LAUNCHER = `#!/usr/bin/env node
+import { existsSync, readdirSync, readFileSync } from "node:fs";
+import { homedir } from "node:os";
+import { dirname, join, resolve } from "node:path";
+import { fileURLToPath, pathToFileURL } from "node:url";
+
+const workspaceRoot = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
+
+function readJsonOptional(filePath, stripComments = false) {
+  if (!existsSync(filePath)) return undefined;
+  try {
+    const raw = readFileSync(filePath, "utf8");
+    return JSON.parse(stripComments ? raw.replace(/^\\s*\\/\\/.*$/gmu, "") : raw);
+  } catch {
+    return undefined;
+  }
+}
+
+function resolveCliModule() {
+  for (const envRoot of [process.env.APEX_PLUGIN_ROOT, process.env.PLUGIN_ROOT]) {
+    if (typeof envRoot === "string" && envRoot.trim().length > 0) {
+      const candidate = join(envRoot.trim(), "cli", "apex.mjs");
+      if (existsSync(candidate)) return candidate;
+    }
+  }
+  const localHint = readJsonOptional(join(workspaceRoot, ".apex", "local", "plugin-root.json"));
+  if (typeof localHint?.pluginRoot === "string") {
+    const hinted = join(localHint.pluginRoot, "cli", "apex.mjs");
+    if (existsSync(hinted)) return hinted;
+  }
+  const lock = readJsonOptional(join(workspaceRoot, ".apex", "apex.lock.json"));
+  const expectedVersion = typeof lock?.cliVersion === "string" ? lock.cliVersion : undefined;
+  const copilotHome = process.env.COPILOT_HOME?.trim() || join(homedir(), ".copilot");
+  const config = readJsonOptional(join(copilotHome, "config.json"), true);
+  if (Array.isArray(config?.installedPlugins)) {
+    const matching = config.installedPlugins.filter(
+      (entry) => entry && entry.name === "apex" && entry.enabled !== false && typeof entry.cache_path === "string",
+    );
+    const ordered =
+      expectedVersion === undefined
+        ? matching
+        : [
+            ...matching.filter((entry) => entry.version === expectedVersion),
+            ...matching.filter((entry) => entry.version !== expectedVersion),
+          ];
+    for (const entry of ordered) {
+      const candidate = join(entry.cache_path, "cli", "apex.mjs");
+      if (existsSync(candidate)) return candidate;
+    }
+  }
+  const installedRoot = join(copilotHome, "installed-plugins");
+  for (const candidate of [
+    join(installedRoot, "apex-plugins", "apex", "cli", "apex.mjs"),
+    join(installedRoot, "_direct", "apex", "cli", "apex.mjs"),
+  ]) {
+    if (existsSync(candidate)) return candidate;
+  }
+  const directRoot = join(installedRoot, "_direct");
+  if (existsSync(directRoot)) {
+    for (const entry of readdirSync(directRoot, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const candidate = join(directRoot, entry.name, "cli", "apex.mjs");
+      if (existsSync(candidate)) return candidate;
+    }
+  }
+  const nodeModulesCli = join(workspaceRoot, "node_modules", "@apexops", "cli", "dist", "cli.js");
+  if (existsSync(nodeModulesCli)) return nodeModulesCli;
+  return undefined;
+}
+
+const resolved = resolveCliModule();
+if (resolved === undefined) {
+  process.stderr.write(
+    "APEX_NOT_FOUND: Unable to locate the installed APEX plugin CLI runtime; run copilot plugin install apex@apex-plugins\\n",
+  );
+  process.exit(3);
+}
+const mod = await import(pathToFileURL(resolved).href);
+if (typeof mod.main === "function") {
+  await mod.main(process.argv.slice(2));
+}
 `;
 function repeatGuardError(error62) {
   if (error62 instanceof RepeatGuardBusyError)
@@ -65684,6 +67269,15 @@ function canonicalWorkspacePath(path2) {
     throw error62;
   }
 }
+function delegationCheck(check2) {
+  try {
+    return check2();
+  } catch (error62) {
+    if (error62 instanceof LabDelegationError)
+      throw new ApexError("APEX_AUTHORIZATION", error62.message, EXIT_CODES.authorization, { reason: error62.reason });
+    throw error62;
+  }
+}
 var DERIVED_DECISION_KEYS = /* @__PURE__ */ new Set([
   "projectId",
   "runId",
@@ -65715,6 +67309,10 @@ var ARTIFACTS = {
   "quality-report": ["quality-report", QualityReportV1Schema]
 };
 var SUPPORTED_ARTIFACT_KINDS = Object.keys(ARTIFACTS);
+var TASK_CONTEXT_INLINE_INPUT_MAX_BYTES = 32 * 1024;
+var TASK_CONTEXT_PAGE_RESERVE_BYTES = 1024;
+var WORKER_TASK_CONTEXT_MAX_BYTES = 14 * 1024;
+var WORKER_TASK_ROLES = /* @__PURE__ */ new Set(["bicep-codegen", "terraform-codegen", "validator"]);
 var ENFORCING_POLICY_EFFECTS = /* @__PURE__ */ new Set(["deny", "modify", "deployIfNotExists"]);
 var GOVERNANCE_FINDINGS_SELECTOR = "governance-findings:";
 var TASKS = [
@@ -65871,7 +67469,7 @@ var REQUIREMENTS_INTAKE = [
       {
         id: "compliance",
         prompt: "Select applicable compliance and regulatory scopes, or explicitly defer them.",
-        options: ["gdpr", "hipaa", "pci-dss", "iso-27001", "soc-2", "other"],
+        options: ["gdpr", "hipaa", "pci-dss", "iso-27001", "soc-2", "other", "none"],
         multiSelect: true,
         valueType: "compliance"
       },
@@ -66011,6 +67609,9 @@ var ApexService = class _ApexService {
     for (const [, [validator, schema]] of Object.entries(ARTIFACTS))
       this.validators.register(validator, schema);
     this.validators.register("approval", ApprovalEvidenceV1Schema);
+    this.validators.register("lab-delegation-policy", LabDelegationPolicyV1Schema);
+    this.validators.register("lab-delegation-consent", LabDelegationConsentV1Schema);
+    this.validators.register("approval-context", ApprovalContextV1Schema);
     this.validators.register("runtime-lock", RuntimeBundleLockV1Schema);
     this.validators.register("quality-measurements", QualityMeasurementsV1Schema);
     this.validators.register("architecture-availability", ArchitectureAvailabilityV1Schema);
@@ -66112,6 +67713,7 @@ var ApexService = class _ApexService {
     await mkdir11(join19(this.root, ".apex"), { recursive: true });
     try {
       await this.ensureLocalGitBoundary();
+      await this.ensureWorkspaceLauncher();
       const assets = await resolveBundledAssets();
       const clientId2 = input2.clientId ?? "github-copilot-cli";
       const selection2 = {
@@ -66596,7 +68198,8 @@ var ApexService = class _ApexService {
     });
     const packagePath = join19(this.root, "node_modules", "@apexops", "cli", "package.json");
     const runtime = await inspect(packagePath);
-    let exactRuntime = false;
+    const launcher = runtime === void 0 ? await inspect(join19(this.root, ".apex", "bin", "apex.mjs")) : void 0;
+    let exactRuntime = launcher !== void 0 && launcher.isFile();
     if (runtime !== void 0 && runtime.isFile() && runtime.size <= 65536) {
       try {
         const descriptor = JSON.parse(await readFile14(packagePath, "utf8"));
@@ -66608,8 +68211,8 @@ var ApexService = class _ApexService {
     }
     checks.push({
       id: "workspace-runtime",
-      status: runtime === void 0 ? "pending" : exactRuntime ? "ready" : "blocked",
-      reason: runtime === void 0 ? "Exact workspace APEX runtime must be installed after confirmation." : exactRuntime ? "Workspace package declares the exact runtime version; package integrity is not assessed." : "Workspace runtime version or package metadata conflicts with this installer; preserve it for review."
+      status: runtime === void 0 && !exactRuntime ? "pending" : exactRuntime ? "ready" : "blocked",
+      reason: runtime === void 0 && !exactRuntime ? "Exact workspace APEX runtime must be installed after confirmation." : exactRuntime ? "Workspace package declares the exact runtime version; package integrity is not assessed." : "Workspace runtime version or package metadata conflicts with this installer; preserve it for review."
     });
     const state = await inspect(join19(this.root, ".apex"));
     let resumable = false;
@@ -66739,19 +68342,25 @@ var ApexService = class _ApexService {
   async createProject(input2) {
     const purpose = input2.purpose ?? DEFAULT_DEPLOYMENT_PURPOSE;
     assertDeploymentPurposeUsable(purpose);
+    if (input2.riskOwner !== "partner" && input2.riskOwner !== "customer") {
+      throw new ApexError("APEX_VALIDATION", "Project risk owner must be partner or customer", EXIT_CODES.validation);
+    }
     let runtimeLock;
     try {
       runtimeLock = JSON.parse(await readFile14(join19(this.root, ".apex", "apex.lock.json"), "utf8"));
     } catch (error62) {
       if (error62.code === "ENOENT") {
-        throw new ApexError("APEX_NOT_FOUND", "Initialize the workspace with apex init before creating a project", EXIT_CODES.notFound);
+        if (await this.pathExistsLstat(join19(this.root, ".git")) && !await this.pathExistsLstat(join19(this.root, ".apex"))) {
+          await this.initializeWorkspace({});
+          runtimeLock = JSON.parse(await readFile14(join19(this.root, ".apex", "apex.lock.json"), "utf8"));
+        } else {
+          throw new ApexError("APEX_NOT_FOUND", "Initialize the workspace with apex init before creating a project", EXIT_CODES.notFound);
+        }
+      } else {
+        throw error62;
       }
-      throw error62;
     }
     const runtimeLockHash = sha256Json(runtimeLock);
-    if (input2.riskOwner !== "partner" && input2.riskOwner !== "customer") {
-      throw new ApexError("APEX_VALIDATION", "Project risk owner must be partner or customer", EXIT_CODES.validation);
-    }
     await this.projects.initializeProject({
       projectId: input2.projectId,
       displayName: input2.displayName ?? input2.projectId,
@@ -66773,6 +68382,7 @@ var ApexService = class _ApexService {
     if (selection2 !== void 0)
       await this.acquireRunWriterLease(await this.run(selection2, { readOnly: true }));
     await this.ensureLocalGitBoundary();
+    await this.ensureWorkspaceLauncher();
     const assets = await resolveBundledAssets();
     const previousRuntimeLock = JSON.parse(await readFile14(join19(this.root, ".apex", "apex.lock.json"), "utf8"));
     await this.installRuntimeGeneration(previousRuntimeLock);
@@ -66962,7 +68572,7 @@ var ApexService = class _ApexService {
       throw new ApexError("APEX_NOT_FOUND", `Project not found: ${projectId}`, EXIT_CODES.notFound);
     }
     if (projects.length <= 1) {
-      throw new ApexError("APEX_CONFLICT", "Cannot delete the only project in a workspace", EXIT_CODES.conflict);
+      throw new ApexError("APEX_CONFLICT", "Cannot delete the only project in a workspace. To correct a recorded answer, use input history, preview-amendment and amend instead.", EXIT_CODES.conflict, { reason: "ONLY_PROJECT" });
     }
     const selection2 = await this.selection();
     const nextSelection = selection2.projectId !== projectId ? void 0 : await (async () => {
@@ -67485,16 +69095,27 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const run = await this.run(selection2, { readOnly: true });
     const events = await this.journal(run).replay();
     const route = await this.route(run, events);
+    const delegation = events.some(({ type }) => type === "lab.delegation-consented") ? await this.readLabDelegation(events) : void 0;
     return {
       run,
       head: events.at(-1)?.hash ?? null,
       events: events.length,
       task: route.task?.id ?? null,
       blockers: route.blockers,
-      satisfiedGates: run.gates.flatMap((gate) => this.gateSatisfied(run, gate.gate, events) ? [gate.gate] : [])
+      satisfiedGates: run.gates.flatMap((gate) => this.gateSatisfied(run, gate.gate, events) ? [gate.gate] : []),
+      ...delegation === void 0 ? {} : {
+        delegation: {
+          policyHash: delegation.policyHash,
+          consentHash: delegation.consentHash,
+          expiresAt: delegation.policy.expiresAt,
+          gates: delegation.policy.gates,
+          revoked: delegation.revoked
+        }
+      }
     };
   }
   async nextTask() {
+    await this.reopenExpiredDelegatedGates();
     const selection2 = await this.selection();
     let run = await this.run(selection2);
     let events = await this.journal(run).replay();
@@ -67513,7 +69134,9 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       await this.assertGovernanceCandidate(run, governanceInput.request, "reuse");
     }
     if (requirements === void 0) {
-      const pending = this.pendingRequirementsRevision(events) === void 0 && this.previousRequirementsHash(events) === void 0 ? this.nextRequirementsIntakeRound(events) : void 0;
+      const lastRequirementsInvalidation = events.findLast((event) => event.type === "workflow.invalidated" && event.payload.nodeIds?.includes("requirements"));
+      const correctedIntake = lastRequirementsInvalidation !== void 0 && this.inputAmendment(lastRequirementsInvalidation)?.kind === "requirements";
+      const pending = this.pendingRequirementsRevision(events) === void 0 && (correctedIntake || this.previousRequirementsHash(events) === void 0) ? this.nextRequirementsIntakeRound(events) : void 0;
       if (pending !== void 0)
         return { status: "needs_input", request: await this.issueRequirementsInput(run, pending) };
       return {
@@ -67600,7 +69223,9 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     if (request.governance !== void 0)
       await this.governanceInputState(run, events);
     if (events.some((event) => event.type === recordedType && event.payload?.requestId === request.requestId)) {
-      throw new ApexError("APEX_CONFLICT", "Input request was already recorded", EXIT_CODES.conflict);
+      throw new ApexError("APEX_CONFLICT", "Input request was already recorded", EXIT_CODES.conflict, {
+        reason: "INPUT_ALREADY_RECORDED"
+      });
     }
     if (input2.requestId !== request.requestId) {
       throw new ApexError("APEX_CONFLICT", "Input request ID does not match the pending request", EXIT_CODES.conflict);
@@ -67637,6 +69262,159 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       throw error62;
     }
     return { recorded: true, requestId: request.requestId };
+  }
+  async inputHistory() {
+    const run = await this.run(await this.selection(), { readOnly: true });
+    return { inputs: this.recordedInputs(await this.journal(run).replay()) };
+  }
+  async previewInputAmendment(amendment, reason) {
+    amendment = structuredClone(amendment);
+    if (!value_exports2.Check(InputAmendmentV1Schema, amendment) || Buffer.byteLength(JSON.stringify(amendment), "utf8") > 262144 || typeof reason !== "string" || reason.trim().length === 0 || reason.length > 2048)
+      throw new ApexError("APEX_VALIDATION", "Invalid or oversized input amendment or reason", EXIT_CODES.validation);
+    const run = await this.run(await this.selection(), { readOnly: true });
+    const events = await this.journal(run).replay();
+    const recorded = this.recordedInputs(events).find(({ requestId }) => requestId === amendment.requestId);
+    if (recorded === void 0)
+      throw new ApexError("APEX_CONFLICT", "Amendment requires a recorded Requirements or Architecture input", EXIT_CODES.conflict, { reason: "INPUT_NOT_RECORDED" });
+    if (recorded.baseAnswersHash !== amendment.baseAnswersHash)
+      throw new ApexError("APEX_STALE", "Input amendment base answers are not current", EXIT_CODES.stale);
+    let changes;
+    try {
+      const ids = new Set(amendment.answers.map(({ questionId }) => questionId));
+      if (amendment.answers.some(({ questionId }) => !recorded.questions.some(({ id }) => id === questionId)))
+        throw new Error("Input amendment contains an unknown question");
+      changes = validateInputAnswers(recorded.questions.filter(({ id }) => ids.has(id)), amendment.answers);
+    } catch (error62) {
+      throw new ApexError("APEX_VALIDATION", error62 instanceof Error ? error62.message : "Invalid amendment answers", EXIT_CODES.validation);
+    }
+    const answers = validateInputAnswers(recorded.questions, [
+      ...recorded.answers.filter(({ questionId }) => !amendment.answers.some((change) => change.questionId === questionId)),
+      ...changes
+    ]);
+    if (sha256Json(answers) === recorded.baseAnswersHash)
+      throw new ApexError("APEX_VALIDATION", "Input answers are unchanged", EXIT_CODES.validation);
+    const workflow = await this.lockedWorkflowEngine(run);
+    const nodeIds = /* @__PURE__ */ new Set([
+      recorded.kind,
+      ...workflow.invalidationPlan(recorded.kind, reason.trim()).map(({ nodeId }) => nodeId)
+    ]);
+    for (const descriptor of TASKS)
+      if (descriptor.reviewSubject !== void 0 && nodeIds.has(descriptor.reviewSubject))
+        nodeIds.add(descriptor.id);
+    const body = {
+      schemaVersion: CONTRACT_VERSION,
+      projectId: run.projectId,
+      runId: run.runId,
+      expectedHead: events.at(-1).hash,
+      ownerEpoch: run.ownerEpoch,
+      amendment,
+      kind: recorded.kind,
+      previousAnswers: recorded.answers,
+      answers,
+      reason: reason.trim(),
+      invalidatedNodes: [...nodeIds].sort(),
+      invalidatedGates: run.gates.filter(({ gate }) => nodeIds.has(`gate-${gate}`)).map(({ gate }) => gate),
+      reapprovalPath: recorded.kind === "requirements" ? "Recollect dependent intake panels if their questions changed, regenerate Requirements from corrected intake, and rerun affected stages and reviews. Human Gate 1 and Gate 4 decisions remain required; lab Gate 2 and Gate 3 readiness is recorded automatically when required reviews and checks pass." : "Regenerate Architecture from corrected decisions and rerun affected stages and reviews. Gate 1 remains unchanged; a human Gate 4 decision is required for the fresh preview. Lab Gate 2 and Gate 3 readiness is recorded automatically when required reviews and checks pass.",
+      filesModified: false,
+      deploymentAuthorized: false
+    };
+    const proposal = { ...body, proposalHash: sha256Json(body) };
+    if (!value_exports2.Check(InputAmendmentProposalV1Schema, proposal))
+      throw new ApexError("APEX_VALIDATION", "Invalid input amendment proposal", EXIT_CODES.validation);
+    if (Buffer.byteLength(JSON.stringify(proposal), "utf8") > INPUT_AMENDMENT_MAX_PROPOSAL_BYTES)
+      throw new ApexError("APEX_VALIDATION", "Input amendment is too large to record; shorten the corrected answers", EXIT_CODES.validation, { reason: "INPUT_AMENDMENT_TOO_LARGE", maxBytes: INPUT_AMENDMENT_MAX_PROPOSAL_BYTES });
+    return proposal;
+  }
+  async amendInput(amendment, options) {
+    await this.assertNoPendingReview("amendInput");
+    if (options.confirm !== true)
+      throw new ApexError("APEX_AUTHORIZATION", "Input amendment requires explicit confirmation", EXIT_CODES.authorization);
+    const proposal = await this.previewInputAmendment(amendment, options.reason);
+    if (proposal.proposalHash !== options.expectedHash)
+      throw new ApexError("APEX_STALE", "Input amendment proposal is stale or differs from the confirmed answers", EXIT_CODES.stale);
+    const run = await this.currentRun();
+    const events = await this.journal(run).replay();
+    if (run.projectId !== proposal.projectId || run.runId !== proposal.runId || run.ownerEpoch !== proposal.ownerEpoch || events.at(-1)?.hash !== proposal.expectedHead)
+      throw new ApexError("APEX_STALE", "Input amendment state is stale", EXIT_CODES.stale);
+    const transfers = new WriterTransferStore(this.projects.runDirectory(run.projectId, run.runId), this.clock);
+    await this.assertCurrentWriterAuthority(run, transfers);
+    this.assertNoInFlightDeployment(events);
+    await this.acquireRunWriterLease(run);
+    const proposalHash = await this.objects.putJson(proposal);
+    const payload = {
+      reason: proposal.reason,
+      nodeIds: proposal.invalidatedNodes,
+      artifactKinds: [
+        ...new Set(TASKS.filter(({ id }) => proposal.invalidatedNodes.includes(id)).flatMap(({ outputs }) => outputs))
+      ],
+      inputAmendment: proposal,
+      proposalHash
+    };
+    const dependencyHash = this.dependencyRevision(run, [
+      ...events,
+      { type: "workflow.invalidated", payload }
+    ]);
+    await this.assertCurrentWriterAuthority(run, transfers);
+    await this.mutateRun(run, {
+      ...run,
+      gates: run.gates.map((gate) => proposal.invalidatedGates.includes(gate.gate) ? invalidateGate(gate, dependencyHash, proposal.reason) : gate)
+    }, "workflow.invalidated", payload, proposal.expectedHead);
+    return {
+      amended: true,
+      requestId: amendment.requestId,
+      proposalHash,
+      invalidatedNodes: proposal.invalidatedNodes,
+      deploymentAuthorized: false
+    };
+  }
+  recordedInputs(events) {
+    const records = /* @__PURE__ */ new Map();
+    for (const event of events) {
+      if (event.type === "requirements.input-recorded" || event.type === "architecture.decision-recorded") {
+        const submission = event.payload;
+        const requested = events.find((entry) => entry.type === (event.type === "requirements.input-recorded" ? "requirements.input-requested" : "architecture.decision-requested") && entry.payload.requestId === submission.requestId);
+        if (requested === void 0)
+          throw new ApexError("APEX_INTERNAL", "Recorded input has no request", EXIT_CODES.internal);
+        const request = event.type === "requirements.input-recorded" ? this.inputRequest(requested, requested.ownerEpoch) : this.architectureDecisionRequest(requested, requested.ownerEpoch);
+        const answers = validateInputAnswers(request.questions, submission.answers);
+        records.set(submission.requestId, {
+          requestId: submission.requestId,
+          kind: event.type === "requirements.input-recorded" ? "requirements" : "architecture",
+          questions: request.questions,
+          answers,
+          baseAnswersHash: sha256Json(answers)
+        });
+      }
+      const amendment = this.inputAmendment(event);
+      if (amendment !== void 0) {
+        const record6 = records.get(amendment.amendment.requestId);
+        if (record6 === void 0 || record6.kind !== amendment.kind || record6.baseAnswersHash !== amendment.amendment.baseAnswersHash)
+          throw new ApexError("APEX_INTERNAL", "Persisted input amendment base is invalid", EXIT_CODES.internal);
+        record6.answers = amendment.answers;
+        record6.baseAnswersHash = sha256Json(record6.answers);
+      }
+    }
+    const architectureRequest = this.currentArchitectureInputEvents(events).findLast(({ type }) => type === "architecture.decision-requested");
+    const architectureRequestId = architectureRequest?.payload?.requestId;
+    const requirementsRequests = /* @__PURE__ */ new Map();
+    for (const event of events) {
+      if (event.type !== "requirements.input-requested")
+        continue;
+      const payload = event.payload;
+      requirementsRequests.set(payload.intake.round, payload.requestId);
+    }
+    const currentRequirements = new Set(requirementsRequests.values());
+    return [...records.values()].filter(({ kind, requestId }) => kind === "requirements" ? currentRequirements.has(requestId) : requestId === architectureRequestId);
+  }
+  inputAmendment(event) {
+    if (event.type !== "workflow.invalidated")
+      return void 0;
+    const amendment = event.payload.inputAmendment;
+    if (amendment === void 0)
+      return void 0;
+    if (!value_exports2.Check(InputAmendmentProposalV1Schema, amendment))
+      throw new ApexError("APEX_INTERNAL", "Persisted input amendment is invalid", EXIT_CODES.internal);
+    return amendment;
   }
   async taskReviewMetadata(run, task, events, descriptor) {
     const subjectKind = this.reviewSubjectArtifactKind(descriptor);
@@ -67708,7 +69486,8 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     if (task.taskType === "policy-refresh")
       outputTemplates["policy-property-map"] = (await this.refreshedPolicyMap(run, events)).policyMap;
     const requirementsRevision = this.pendingRequirementsRevision(events);
-    const requirementsCandidateHash = requirementsRevision?.candidateHash ?? this.previousRequirementsHash(events);
+    const invalidation = events.findLast((event) => event.type === "workflow.invalidated" && event.payload.nodeIds?.includes("requirements"));
+    const requirementsCandidateHash = requirementsRevision?.candidateHash ?? (invalidation !== void 0 && this.inputAmendment(invalidation)?.kind === "requirements" ? void 0 : this.previousRequirementsHash(events));
     if (task.taskType === "requirements" && requirementsCandidateHash !== void 0)
       outputTemplates.requirements = await this.objects.getJson(requirementsCandidateHash);
     const artifactHashes2 = Object.fromEntries(Object.entries(this.acceptedArtifactHashes(events)).filter(([, hash2]) => task.inputRefs.includes(hash2)));
@@ -67725,7 +69504,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       })),
       artifactHashes: artifactHashes2,
       recordedInput: task.taskType === "requirements" ? this.recordedRequirementsInput(events) : null,
-      decisions: task.taskType === "architecture" ? this.architectureDecisionValues(events, task.taskId) : {},
+      decisions: task.taskType === "architecture" ? this.architectureDecisionValues(events) : {},
       ...task.taskType === "architecture" ? { governanceFindings: await this.governanceFindingsSummary(run, events) } : task.taskType === "policy-refresh" ? {
         governanceFindings: (await this.refreshedPolicyMap(run, events)).delta.map((finding2) => ({
           policyAssignmentId: finding2.assignmentId,
@@ -67757,10 +69536,16 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     }
     if (Buffer.byteLength(JSON.stringify(context)) > limits.maxInputBytes)
       throw new ApexError("APEX_VALIDATION", "Task context metadata exceeds the locked input byte limit", EXIT_CODES.validation);
+    const inlineBudget = WORKER_TASK_ROLES.has(descriptor.role) ? WORKER_TASK_CONTEXT_MAX_BYTES : limits.maxInputBytes;
     for (const [index, value] of values.entries()) {
+      if (context.inputReferences[index].bytes > TASK_CONTEXT_INLINE_INPUT_MAX_BYTES)
+        continue;
+      const alone = { ...context, inputs: [value] };
+      if (mcpResultEnvelopeBytes(alone) > MCP_MAX_SERIALIZED_RESULT_BYTES - TASK_CONTEXT_PAGE_RESERVE_BYTES)
+        continue;
       context.inputs.push(value);
       context.inputReferences[index].inlined = true;
-      if (Buffer.byteLength(JSON.stringify(context)) > limits.maxInputBytes) {
+      if (Buffer.byteLength(JSON.stringify(context)) > inlineBudget) {
         context.inputs.pop();
         context.inputReferences[index].inlined = false;
       }
@@ -67881,7 +69666,9 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         const actual = await realpath8(sourcePath);
         const currentPath = await lstat14(sourcePath);
         const current = await handle.stat();
-        if (!sameResolvedPath(actual, canonicalSource) || !isContainedPath(canonicalRoot, actual) || [currentPath, current].some((entry) => !entry.isFile() || entry.isSymbolicLink() || entry.dev !== metadata2.dev || entry.ino !== metadata2.ino || entry.size !== metadata2.size || entry.mtimeMs !== metadata2.mtimeMs || entry.ctimeMs !== metadata2.ctimeMs))
+        if (!sameResolvedPath(actual, canonicalSource) || !isContainedPath(canonicalRoot, actual) || [currentPath, current].some((entry) => !entry.isFile() || entry.isSymbolicLink() || entry.dev !== metadata2.dev || entry.ino !== metadata2.ino || entry.size !== metadata2.size || entry.mtimeMs !== metadata2.mtimeMs || // NTFS flushes ChangeTime lazily, so a file that was just written reports a later value without any
+        // content change; the other fields still detect replacement or modification there.
+        process.platform !== "win32" && entry.ctimeMs !== metadata2.ctimeMs))
           throw new ApexError("APEX_STALE", "Governance baseline file changed", EXIT_CODES.stale);
       };
       await assertUnchanged();
@@ -68452,6 +70239,44 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     }
     return { taskId, path: path2, bytes: bytes.byteLength, hash: hash2, idempotent };
   }
+  /** The generator's rejection of an accepted binding is a validation failure the planner can fix, not an internal error. */
+  generateIacTree(run, intent, binding, options = {}) {
+    try {
+      return run.iacTool === "bicep" ? generateBicepTree(intent, binding, {
+        ...options.existingResources === void 0 ? {} : { existingResources: options.existingResources }
+      }) : generateTerraformTree(intent, binding, {
+        ...options.existingResources === void 0 ? {} : { existingResources: options.existingResources },
+        ...options.azurermProviderConstraint === void 0 ? {} : { azurermProviderConstraint: options.azurermProviderConstraint },
+        ...options.azapiProviderConstraint === void 0 ? {} : { azapiProviderConstraint: options.azapiProviderConstraint },
+        ...options.lockFileContent === void 0 ? {} : { lockFileContent: options.lockFileContent }
+      });
+    } catch (error62) {
+      if (error62 instanceof ApexError)
+        throw error62;
+      throw new ApexError("APEX_VALIDATION", `IaC binding cannot be generated: ${error62 instanceof Error ? error62.message : String(error62)}`, EXIT_CODES.validation);
+    }
+  }
+  /**
+   * Fail fast at plan time: dry-run the selected track's generator on the submitted plan, so a binding the generator
+   * rejects is refused here instead of after the review gates. For Bicep, ownership is also resolved when the run
+   * targets an exact resource group; without one, only AVM bindings with no physical resource map are refused here.
+   */
+  assertPlanGeneratable(run, intent, binding) {
+    const tree = this.generateIacTree(run, intent, binding);
+    if (run.iacTool !== "bicep")
+      return;
+    const issues = bicepResourceGroupScopePattern.test(run.targetScope) ? resolveNativeBicepResourceOwnership({
+      intent,
+      binding,
+      manifest: tree.logicalManifest,
+      targetScope: run.targetScope
+    }).issues : Object.entries(binding.resourceBindings).filter(([, entry]) => entry.implementation.startsWith("avm:") && entry.physicalResources === void 0).map(([id]) => ({
+      path: `/binding/resourceBindings/${id}`,
+      message: "Bicep module ownership is unresolved; AVM requires a bounded exact physical resource map"
+    }));
+    if (issues.length > 0)
+      throw new ApexError("APEX_VALIDATION", `IaC binding is not accepted: ${issues.slice(0, 8).map(({ path: path2, message }) => `${path2}: ${message}`).join("; ")}`, EXIT_CODES.validation);
+  }
   async generateIac(taskId, options = {}) {
     const run = await this.currentRun();
     const task = await this.readTask(run, taskId);
@@ -68467,14 +70292,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     if (intent === void 0 || binding === void 0 || environmentInputs === void 0) {
       throw new ApexError("APEX_VALIDATION", "Code generation requires accepted intent, binding, and environment inputs", EXIT_CODES.validation);
     }
-    const tree = run.iacTool === "bicep" ? generateBicepTree(intent, binding, {
-      ...options.existingResources === void 0 ? {} : { existingResources: options.existingResources }
-    }) : generateTerraformTree(intent, binding, {
-      ...options.existingResources === void 0 ? {} : { existingResources: options.existingResources },
-      ...options.azurermProviderConstraint === void 0 ? {} : { azurermProviderConstraint: options.azurermProviderConstraint },
-      ...options.azapiProviderConstraint === void 0 ? {} : { azapiProviderConstraint: options.azapiProviderConstraint },
-      ...options.lockFileContent === void 0 ? {} : { lockFileContent: options.lockFileContent }
-    });
+    const tree = this.generateIacTree(run, intent, binding, options);
     const files2 = [];
     const sourceRoot = previousHandoff?.treeHash === tree.treeHash ? resolve17(this.root, previousHandoff.rootPath) : resolve17(this.root, ".apex", "work", run.runId, taskId, "code");
     if (previousHandoff?.treeHash === tree.treeHash) {
@@ -68804,13 +70622,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       throw new ApexError("APEX_STALE", "Requirements change state is stale", EXIT_CODES.stale);
     const transfers = new WriterTransferStore(this.projects.runDirectory(run.projectId, run.runId), this.clock);
     await this.assertCurrentWriterAuthority(run, transfers);
-    for (const [index, event] of events.entries()) {
-      if (!["deployment.started", "deployment.executed", "deployment.indeterminate"].includes(event.type))
-        continue;
-      const previewHash = event.payload.previewHash;
-      if (!events.slice(index + 1).some((entry) => entry.type === "deployment.completed" && entry.payload.previewHash === previewHash))
-        throw new ApexError("APEX_CONFLICT", "Deployment is in-flight or indeterminate; reconcile before requirements revision", EXIT_CODES.conflict);
-    }
+    this.assertNoInFlightDeployment(events);
     await this.acquireRunWriterLease(run);
     const candidateHash = await this.objects.putJson(candidate);
     const proposalHash = await this.objects.putJson(proposal);
@@ -68837,6 +70649,15 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       invalidatedNodes: proposal.invalidatedNodes,
       deploymentAuthorized: false
     };
+  }
+  assertNoInFlightDeployment(events) {
+    for (const [index, event] of events.entries()) {
+      if (!["deployment.started", "deployment.executed", "deployment.indeterminate"].includes(event.type))
+        continue;
+      const previewHash = event.payload.previewHash;
+      if (!events.slice(index + 1).some((entry) => entry.type === "deployment.completed" && entry.payload.previewHash === previewHash))
+        throw new ApexError("APEX_CONFLICT", "Deployment is in-flight or indeterminate; reconcile before changing workflow inputs", EXIT_CODES.conflict);
+    }
   }
   pendingRequirementsRevision(events) {
     if (this.artifactHash(events, "requirements") !== void 0)
@@ -68915,12 +70736,17 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     decisionIssues("skuDecisions", decisionManifest.skuDecisions);
     decisionIssues("sloDecisions", decisionManifest.sloDecisions);
     costEstimate.lineItems.forEach((line, index) => {
-      if (/\bunpriced\b/iu.test(line.sku) || line.source.uri.startsWith("urn:apex:arm-mcp:pricing-unavailable") || /schema placeholder/iu.test(line.uncertainty.basis))
+      if (/\bunpriced\b/iu.test(line.sku) || /^urn:apex:(?:arm-mcp|azure-mcp):pricing-unavailable/u.test(line.source.uri) || /schema placeholder/iu.test(line.uncertainty.basis))
         issues.push({
           path: `/costEstimate/lineItems/${index}`,
-          message: "Current ARM MCP pricing evidence is required; move an unpriced SKU to unpricedItems instead of a placeholder line"
+          message: "Current Azure MCP pricing evidence is required; move an unpriced SKU to unpricedItems instead of a placeholder line"
         });
     });
+    if (!hasValidCostPricingSources(costEstimate))
+      issues.push({
+        path: "/costEstimate/lineItems",
+        message: "Azure MCP priced lines require a meter priceId, stable 3.x toolVersion and complete source metadata below the 5000-row cap; narrow the query or move the item to unpricedItems"
+      });
     const boundCostEstimate = {
       ...costEstimate,
       projectId: run.projectId,
@@ -69120,7 +70946,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     }
     if (pending === void 0)
       return;
-    throw new ApexError("APEX_REVIEW_PENDING", `${operation} (${MCP_TOOL_REVIEW_GUARDS[operation]}) is blocked while a rubber-duck review waits for its capture in ${pending.workspace === void 0 ? "" : `workspace ${pending.workspace}, `}project ${pending.projectId}, run ${pending.runId} (task ${pending.taskId}). Finish the review with reviewComplete, or stop any running rubber-duck and cancel it from a terminal: apex project use --project ${pending.projectId} --run ${pending.runId}, then apex task cancel --task ${pending.taskId}.`, EXIT_CODES.conflict, { reason: "REVIEW_PENDING", operation, ...pending });
+    throw new ApexError("APEX_REVIEW_PENDING", `${operation} (${SERVICE_REVIEW_GUARDS[operation]}) is blocked while a rubber-duck review waits for its capture in ${pending.workspace === void 0 ? "" : `workspace ${pending.workspace}, `}project ${pending.projectId}, run ${pending.runId} (task ${pending.taskId}). Finish the review with reviewComplete, or stop any running rubber-duck and cancel it from a terminal: apex project use --project ${pending.projectId} --run ${pending.runId}, then apex task cancel --task ${pending.taskId}.`, EXIT_CODES.conflict, { reason: "REVIEW_PENDING", operation, ...pending });
   }
   /**
    * Best effort: removes captures of this run's used review requests whose earlier removal failed, and captures of
@@ -69399,9 +71225,6 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         await this.writeGeneratedReview(join19(this.operationsReviewDirectory(run), "operations-runbook.md"), Buffer.from(renderOperationsRunbook(diagnosis, outputHashes.diagnosis), "utf8"));
       await this.materializeOperationalIndex(run, events, diagnosis, outputHashes.diagnosis);
     }
-    if (descriptor.reviewSubject !== void 0) {
-      await this.materializeReviewerSummary(run, descriptor.reviewSubject, outputs[0].value);
-    }
     if (descriptor.id === "validation-bicep" || descriptor.id === "validation-terraform") {
       await this.materializeValidationReport(run, outputs[0].value, descriptor.id, validation.evidenceModes);
     }
@@ -69410,6 +71233,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         await this.openRunGate(await this.currentRun(), descriptor.gate, dependencyHash);
       }
     }
+    await this.materializeRunIndex(await this.currentRun());
     const completedRun = await this.currentRun();
     const completedEvents = await this.journal(completedRun).replay();
     const route = await this.route(completedRun, completedEvents);
@@ -69427,8 +71251,15 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       outputHash: await this.objects.putJson({ contentType: "text/markdown", content })
     };
   }
-  requirementsReviewDirectory(run) {
+  /** Run root under `agent-output/`; it holds `00-index.md` and one numbered folder per stage. */
+  runOutputDirectory(run) {
     return join19(this.root, "agent-output", run.projectId, run.runId);
+  }
+  stageDirectory(run, stage) {
+    return join19(this.runOutputDirectory(run), STAGE_FOLDERS[stage]);
+  }
+  requirementsReviewDirectory(run) {
+    return this.stageDirectory(run, "requirements");
   }
   generatedReviewBase(path2) {
     return join19(this.root, ".apex", "generated-review-bases", sha256Bytes(Buffer.from(relative8(this.root, path2))));
@@ -69445,54 +71276,54 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       throw new ApexError("APEX_CONFLICT", `Generated review file has manual edits: ${relative8(this.root, path2)}`, EXIT_CODES.conflict);
   }
   async assertTaskReviewFilesUnmodified(run, descriptor) {
-    const root = this.requirementsReviewDirectory(run);
+    const root = this.runOutputDirectory(run);
+    const inStage = (stage, names) => names.map((name) => `${STAGE_FOLDERS[stage]}/${name}`);
     let files2 = [];
     if (descriptor.id === "requirements")
-      files2 = [
-        "01-requirements.md",
+      files2 = inStage("requirements", [
+        "requirements.md",
         "README.md",
         "service-recommendations.md",
         "sku-preferences.md",
         "challenger-findings.md"
-      ];
+      ]);
     if (descriptor.id === "architecture")
-      files2 = [
+      files2 = inStage("architecture", [
         "README.md",
         "architecture-assessment.md",
         "architecture-decisions.md",
         "cost-estimate.md",
         "sku-comparison.md",
         "challenger-findings.md",
-        ...["03-des-diagram", "02-waf-assessment", "03-des-cost-breakdown", "03-des-cost-uncertainty"].flatMap((name) => ["py", "svg", "png"].map((extension) => `${name}.${extension}`))
-      ].map((name) => `architecture/${name}`);
+        "03-des-diagram.mmd",
+        ...["03-des-diagram", "02-waf-assessment", "03-des-cost-breakdown", "03-des-cost-uncertainty"].flatMap((name) => ["py", "svg", "png"].map((extension) => `${name}.${extension}`)),
+        ...["02-waf-assessment", "03-des-cost-breakdown", "03-des-cost-uncertainty"].map((name) => `sources/${name}.py`)
+      ]);
     if (descriptor.id === "plan")
-      files2 = [
+      files2 = inStage("plan", [
         "README.md",
         "implementation-plan.md",
         "deployment-guide.md",
         "iac-binding.md",
         "environment-inputs.md",
         "challenger-findings.md"
-      ].map((name) => `plan/${name}`);
+      ]);
     if (descriptor.id.startsWith("validation-"))
-      files2 = ["validation/validation-report.md"];
+      files2 = inStage("validation", ["validation-report.md"]);
     if (descriptor.id === "diagnosis")
-      files2 = [
+      files2 = inStage("operations", [
         "operations-runbook.md",
         "handoff-index.md",
         "deployment-summary.md",
         "resource-inventory.md",
         "policy-matrix.md",
         "cost-reference.md"
-      ].map((name) => `operations/${name}`);
+      ]);
     if (descriptor.reviewSubject !== void 0) {
-      files2.push(`reviews/${descriptor.reviewSubject}-findings.md`);
-      if (descriptor.reviewSubject === "requirements")
-        files2.push("challenger-findings.md");
-      if (["architecture", "plan"].includes(descriptor.reviewSubject))
-        files2.push(`${descriptor.reviewSubject}/challenger-findings.md`);
+      const stage = descriptor.reviewSubject;
+      files2.push(...inStage(stage, ["challenger-findings.md"]));
     }
-    for (const name of files2)
+    for (const name of ["00-index.md", ...new Set(files2)])
       await this.assertGeneratedReviewUnmodified(join19(root, name));
   }
   // Drops a previously generated file that the current render no longer produces, unless it has manual edits.
@@ -69502,6 +71333,103 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const basePath = this.generatedReviewBase(path2);
     await this.assertSafeDestination(this.root, basePath);
     await rm12(basePath, { force: true });
+  }
+  async assertRunIndexUnmodified(run) {
+    await this.assertGeneratedReviewUnmodified(join19(this.runOutputDirectory(run), "00-index.md"));
+  }
+  /**
+   * Writes `00-index.md`, the entry point of a run's generated review packages. It links only files that exist, in
+   * reading order, so a new reader does not have to scan the stage folders.
+   */
+  async materializeRunIndex(run) {
+    const root = this.runOutputDirectory(run);
+    const stageFiles = (stage, files2) => files2.map(([name, description]) => [`${STAGE_FOLDERS[stage]}/${name}`, description]);
+    const stages = [
+      [
+        "1. Requirements",
+        "What the workload must do, and the review of it.",
+        stageFiles("requirements", [
+          ["requirements.md", "Requirements"],
+          ["service-recommendations.md", "Candidate service recommendations"],
+          ["sku-preferences.md", "SKU preferences"],
+          ["challenger-findings.md", "Review findings with dispositions"],
+          ["README.md", "Package status and hashes"]
+        ])
+      ],
+      [
+        "2. Architecture",
+        "The accepted design, cost and decisions. The architecture diagram is embedded in the assessment.",
+        stageFiles("architecture", [
+          ["architecture-assessment.md", "Architecture assessment with the diagram"],
+          ["architecture-decisions.md", "Architecture decision records"],
+          ["cost-estimate.md", "Cost estimate"],
+          ["sku-comparison.md", "SKU comparison"],
+          ["03-des-diagram.mmd", "Architecture diagram source (Mermaid)"],
+          ["challenger-findings.md", "Review findings with dispositions"],
+          ["README.md", "Package status, hashes and diagram status"]
+        ])
+      ],
+      [
+        "3. Plan",
+        "How the design is built on the selected IaC track.",
+        stageFiles("plan", [
+          ["implementation-plan.md", "Implementation plan"],
+          ["deployment-guide.md", "Deployment guide"],
+          ["iac-binding.md", "IaC binding"],
+          ["environment-inputs.md", "Environment inputs"],
+          ["challenger-findings.md", "Review findings with dispositions"],
+          ["README.md", "Package status and hashes"]
+        ])
+      ],
+      [
+        "4. Validation",
+        "Evidence that the generated IaC was checked.",
+        stageFiles("validation", [["validation-report.md", "Validation report"]])
+      ],
+      [
+        "5. Operations",
+        "Deployment preview, approval and operating handoff.",
+        stageFiles("operations", [
+          ["deployment-preview.md", "Deployment preview"],
+          ["approval.md", "Gate 4 approval"],
+          ["deployment-summary.md", "Deployment summary"],
+          ["resource-inventory.md", "Resource inventory"],
+          ["policy-matrix.md", "Policy matrix"],
+          ["operations-runbook.md", "Operations runbook"],
+          ["handoff-index.md", "Handoff index"],
+          ["cost-reference.md", "Cost reference"]
+        ])
+      ]
+    ];
+    const sections = [];
+    for (const [title, summary, files2] of stages) {
+      const present = [];
+      for (const [path2, description] of files2)
+        if (await this.readOptional(join19(root, path2)) !== void 0)
+          present.push(`- [${description}](${path2})`);
+      sections.push(`## ${title}
+
+${summary}
+
+${present.length === 0 ? "Not generated yet." : present.join("\n")}`);
+    }
+    const text5 = [
+      "# Run index",
+      "",
+      `- Project: \`${this.reviewMarkdownText(run.projectId)}\``,
+      `- Run: \`${this.reviewMarkdownText(run.runId)}\``,
+      `- Purpose: ${this.reviewMarkdownText(run.purpose)}; environment: ${this.reviewMarkdownText(run.environment)}; IaC track: ${this.reviewMarkdownText(run.iacTool)}; target: ${this.reviewMarkdownText(run.targetScope)}`,
+      "",
+      "The APEX kernel state is authoritative. These generated files are read-only projections of accepted work; they are listed in reading order and only existing files are linked.",
+      "",
+      ...sections.flatMap((section) => [section, ""]),
+      "## Which findings file to read",
+      "",
+      "Each review stage keeps one findings file, `challenger-findings.md`, in its own folder. It records every finding with its severity, disposition, evidence and the reviewed subject hash.",
+      ""
+    ].join("\n");
+    await mkdir11(root, { recursive: true });
+    await this.writeGeneratedReview(join19(root, "00-index.md"), Buffer.from(text5, "utf8"));
   }
   async writeGeneratedReview(path2, content) {
     await this.assertGeneratedReviewUnmodified(path2);
@@ -69610,7 +71538,7 @@ Design estimates are not actual spend. Mapping dispositions are not compliance c
     };
     await mkdir11(directory, { recursive: true });
     await Promise.all([
-      this.writeGeneratedReview(join19(directory, "01-requirements.md"), Buffer.from(document2.content, "utf8")),
+      this.writeGeneratedReview(join19(directory, "requirements.md"), Buffer.from(document2.content, "utf8")),
       this.writeGeneratedReview(join19(directory, "README.md"), Buffer.from(`# ${this.reviewMarkdownText(run.projectId)}
 
 Generated Gate 1 review package for run \`${this.reviewMarkdownText(run.runId)}\`. The APEX kernel state remains authoritative.
@@ -69648,19 +71576,29 @@ User constraints only. Architecture owns SKU selection.
       this.writeGeneratedReview(join19(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nRequirements challenger review is pending. The Gate 1 intent confirmation cannot be given until the reviewer completes this document.\n", "utf8"))
     ]);
   }
-  async materializeRequirementsChallengeFindings(run, review2) {
-    const findings = review2.findings.length === 0 ? "No challenger findings remain open." : review2.findings.map(({ id, severity, title, detail, resolution }) => `## ${this.reviewMarkdownText(id)}: ${this.reviewMarkdownText(title)}
+  /** The single findings record for a review stage: subject, every finding with its disposition and its evidence. */
+  reviewFindingsMarkdown(review2) {
+    const findings = review2.findings.length === 0 ? "No findings remain open." : review2.findings.map(({ id, severity, disposition, title, detail, evidenceRefs, resolution }) => `## ${this.reviewMarkdownText(id)}: ${this.reviewMarkdownText(title)}
 
 - Severity: ${this.reviewMarkdownText(severity)}
-- Finding: ${this.reviewMarkdownText(detail)}${resolution === void 0 ? "" : `
+- Disposition: ${this.reviewMarkdownText(disposition)}
+- Finding: ${this.reviewMarkdownText(detail)}
+- Evidence: ${evidenceRefs.map((reference) => this.reviewMarkdownText(reference)).join(", ") || "None"}${resolution === void 0 ? "" : `
 - Resolution: ${this.reviewMarkdownText(resolution)}`}`).join("\n\n");
+    return `- Reviewed artifact kind: ${this.reviewMarkdownText(review2.subjectKind)}
+- Review subject hash: ${review2.subjectHash}
+- Reviewed at: ${this.reviewMarkdownText(review2.reviewedAt)}
+
+${findings}`;
+  }
+  async materializeRequirementsChallengeFindings(run, review2) {
     await this.writeGeneratedReview(join19(this.requirementsReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
 
-${findings}
+${this.reviewFindingsMarkdown(review2)}
 `, "utf8"));
   }
   architectureReviewDirectory(run) {
-    return join19(this.root, "agent-output", run.projectId, run.runId, "architecture");
+    return this.stageDirectory(run, "architecture");
   }
   async materializeArchitectureReviewPackage(run, architecture, cost, decisions, hashes) {
     const directory = this.architectureReviewDirectory(run);
@@ -69705,13 +71643,28 @@ ${findings}
       }
     };
     const diagrams = [
-      renderDiagram("03-des-diagram", () => renderArchitectureDiagram(architecture)),
       renderDiagram("02-waf-assessment", () => renderWafAssessmentDiagram(architecture)),
       renderDiagram("03-des-cost-breakdown", () => renderCostBreakdownDiagram(cost)),
       renderDiagram("03-des-cost-uncertainty", () => renderCostUncertaintyDiagram(cost))
     ];
-    const diagramStatus = diagrams.map((diagram) => "error" in diagram ? `- ${this.reviewMarkdownText(diagram.name)}: unavailable (${this.reviewMarkdownText(diagram.error)})` : "pngError" in diagram ? `- ${this.reviewMarkdownText(diagram.name)}: generated as Python and SVG; PNG unavailable (${this.reviewMarkdownText(diagram.pngError)})` : `- ${this.reviewMarkdownText(diagram.name)}: generated as Python, SVG, and PNG`).join("\n");
-    const architectureImages = diagrams.filter(({ name }) => name === "03-des-diagram" || name === "02-waf-assessment").flatMap((diagram) => "error" in diagram ? [] : [`![${diagram.name}](${diagram.name}.svg)`]).join("\n\n");
+    const architectureMermaid = (() => {
+      try {
+        return { text: renderArchitectureMermaid(architecture) };
+      } catch (error62) {
+        return { error: message(error62, "Diagram rendering failed") };
+      }
+    })();
+    const diagramStatus = [
+      "error" in architectureMermaid ? `- 03-des-diagram: unavailable (${this.reviewMarkdownText(architectureMermaid.error)})` : "- 03-des-diagram: generated as Mermaid (03-des-diagram.mmd), embedded in architecture-assessment.md",
+      ...diagrams.map((diagram) => "error" in diagram ? `- ${this.reviewMarkdownText(diagram.name)}: unavailable (${this.reviewMarkdownText(diagram.error)})` : "pngError" in diagram ? `- ${this.reviewMarkdownText(diagram.name)}: generated as Python and SVG; PNG unavailable (${this.reviewMarkdownText(diagram.pngError)})` : `- ${this.reviewMarkdownText(diagram.name)}: generated as Python, SVG, and PNG`)
+    ].join("\n");
+    const architectureImages = [
+      "error" in architectureMermaid ? [] : [`\`\`\`mermaid
+${architectureMermaid.text}\`\`\`
+
+Source: 03-des-diagram.mmd`],
+      diagrams.filter(({ name }) => name === "02-waf-assessment").flatMap((diagram) => "error" in diagram ? [] : [`![${diagram.name}](${diagram.name}.svg)`])
+    ].flat().join("\n\n");
     const costImages = diagrams.filter(({ name }) => name === "03-des-cost-breakdown" || name === "03-des-cost-uncertainty").flatMap((diagram) => "error" in diagram ? [] : [`![${diagram.name}](${diagram.name}.svg)`]).join("\n\n");
     const pillarTitles = {
       security: "Security",
@@ -69812,8 +71765,15 @@ ${table(["Logical ID", "Service", "Selected SKU", "Quantity", "Rationale"], skuR
 These are user-confirmed Architecture decisions. Alternatives and rejected options must be recorded in the architecture assessment before Gate 2 approval.
 `, "utf8")),
       this.writeGeneratedReview(join19(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nArchitecture challenger review is pending. Gate 2 readiness cannot be recorded until the reviewer completes this document.\n", "utf8")),
+      ..."error" in architectureMermaid ? [] : [
+        this.writeGeneratedReview(join19(directory, "03-des-diagram.mmd"), Buffer.from(architectureMermaid.text, "utf8"))
+      ],
+      // Drop the Python, SVG and PNG architecture outputs that earlier renders wrote before it became Mermaid.
+      ...["py", "svg", "png"].map((extension) => this.removeGeneratedReview(join19(directory, `03-des-diagram.${extension}`))),
       ...diagrams.flatMap((diagram) => "error" in diagram ? [] : [
-        this.writeGeneratedReview(join19(directory, `${diagram.name}.py`), Buffer.from(diagram.source.python, "utf8")),
+        this.writeGeneratedReview(join19(directory, "sources", `${diagram.name}.py`), Buffer.from(diagram.source.python, "utf8")),
+        // Earlier renders wrote the Python source beside the rendered output.
+        this.removeGeneratedReview(join19(directory, `${diagram.name}.py`)),
         this.writeGeneratedReview(join19(directory, `${diagram.name}.svg`), Buffer.from(diagram.source.svg, "utf8")),
         "png" in diagram ? this.writeGeneratedReview(join19(directory, `${diagram.name}.png`), Buffer.from(diagram.png)) : this.removeGeneratedReview(join19(directory, `${diagram.name}.png`))
       ])
@@ -69825,11 +71785,6 @@ These are user-confirmed Architecture decisions. Alternatives and rejected optio
       `| ${headers.map(() => "---").join(" | ")} |`,
       ...rows.map((row) => `| ${row.join(" | ")} |`)
     ].join("\n");
-    const findings = review2.findings.length === 0 ? "No challenger findings remain open." : review2.findings.map(({ id, severity, title, detail, resolution }) => `## ${this.reviewMarkdownText(id)}: ${this.reviewMarkdownText(title)}
-
-- Severity: ${this.reviewMarkdownText(severity)}
-- Finding: ${this.reviewMarkdownText(detail)}${resolution === void 0 ? "" : `
-- Resolution: ${this.reviewMarkdownText(resolution)}`}`).join("\n\n");
     const criteria = review2.criteria === void 0 ? "- Criterion receipts unavailable for this historical review." : table(["Pillar", "Outcome", "Finding IDs", "Rationale"], review2.criteria.map((criterion) => [
       this.reviewMarkdownText(criterion.criterionId),
       this.reviewMarkdownText(criterion.outcome),
@@ -69842,11 +71797,11 @@ These are user-confirmed Architecture decisions. Alternatives and rejected optio
 
 ${criteria}
 
-${findings}
+${this.reviewFindingsMarkdown(review2)}
 `, "utf8"));
   }
   planReviewDirectory(run) {
-    return join19(this.root, "agent-output", run.projectId, run.runId, "plan");
+    return this.stageDirectory(run, "plan");
   }
   async materializePlanReviewPackage(run, intent, binding, inputs, hashes) {
     const directory = this.planReviewDirectory(run);
@@ -69902,37 +71857,13 @@ ${table(["Name", "Kind", "Reference or Value"], inputRows)}
     ]);
   }
   async materializePlanChallengeFindings(run, review2) {
-    const findings = review2.findings.length === 0 ? "No challenger findings remain open." : review2.findings.map(({ id, severity, title, detail, resolution }) => `## ${this.reviewMarkdownText(id)}: ${this.reviewMarkdownText(title)}
-
-- Severity: ${this.reviewMarkdownText(severity)}
-- Finding: ${this.reviewMarkdownText(detail)}${resolution === void 0 ? "" : `
-- Resolution: ${this.reviewMarkdownText(resolution)}`}`).join("\n\n");
     await this.writeGeneratedReview(join19(this.planReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
 
-${findings}
-`, "utf8"));
-  }
-  async materializeReviewerSummary(run, subject, review2) {
-    const findings = review2.findings.length === 0 ? "No findings remain open." : review2.findings.map(({ id, severity, disposition, title, detail, evidenceRefs, resolution }) => `## ${this.reviewMarkdownText(id)}: ${this.reviewMarkdownText(title)}
-
-- Severity: ${this.reviewMarkdownText(severity)}
-- Disposition: ${this.reviewMarkdownText(disposition)}
-- Finding: ${this.reviewMarkdownText(detail)}
-- Evidence: ${evidenceRefs.map((reference) => this.reviewMarkdownText(reference)).join(", ") || "None"}${resolution === void 0 ? "" : `
-- Resolution: ${this.reviewMarkdownText(resolution)}`}`).join("\n\n");
-    const directory = join19(this.root, "agent-output", run.projectId, run.runId, "reviews");
-    await mkdir11(directory, { recursive: true });
-    await this.writeGeneratedReview(join19(directory, `${subject}-findings.md`), Buffer.from(`# ${this.reviewMarkdownText(subject)} Challenger Findings
-
-- Reviewed artifact kind: ${this.reviewMarkdownText(review2.subjectKind)}
-- Review subject hash: ${review2.subjectHash}
-- Reviewed at: ${this.reviewMarkdownText(review2.reviewedAt)}
-
-${findings}
+${this.reviewFindingsMarkdown(review2)}
 `, "utf8"));
   }
   async materializeValidationReport(run, evidence, taskType, evidenceModes) {
-    const directory = join19(this.root, "agent-output", run.projectId, run.runId, "validation");
+    const directory = this.stageDirectory(run, "validation");
     const entries = evidence.entries.length === 0 ? "- No validation evidence entries were produced." : evidence.entries.map(({ kind, hash: hash2, bytes, required: required3, retention }) => `- ${this.reviewMarkdownText(kind)}: ${hash2} (${bytes} bytes; ${required3 ? "required" : "optional"}; ${this.reviewMarkdownText(retention)}; ${this.reviewMarkdownText(evidenceModes[kind] ?? "simulated")})`).join("\n");
     await mkdir11(directory, { recursive: true });
     await this.writeGeneratedReview(join19(directory, "validation-report.md"), Buffer.from(`# Validation Report
@@ -70181,8 +72112,130 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       throw new ApexError("APEX_VALIDATION", "Accepted risk requires a future expiry", EXIT_CODES.validation);
     }
   }
-  async decideGateNumber(gateNumber, decision, actor, options = {}) {
+  async labDelegation() {
+    const run = await this.currentRun();
+    const events = await this.journal(run).replay();
+    return this.readLabDelegation(events);
+  }
+  async readLabDelegation(events) {
+    const event = [...events].reverse().find(({ type }) => type === "lab.delegation-consented");
+    const payload = event?.payload;
+    if (payload?.policyHash === void 0 || payload.consentHash === void 0)
+      throw new ApexError("APEX_AUTHORIZATION", "No human lab delegation consent has been recorded", EXIT_CODES.authorization);
+    const policy = await this.objects.getJson(payload.policyHash);
+    const consent = await this.objects.getJson(payload.consentHash);
+    if (sha256Json(policy) !== payload.policyHash || sha256Json(consent) !== payload.consentHash)
+      throw new ApexError("APEX_AUTHORIZATION", "Delegation receipt content does not match its hash", EXIT_CODES.authorization);
+    return {
+      policyHash: payload.policyHash,
+      consentHash: payload.consentHash,
+      policy,
+      consent,
+      revoked: events.some(({ type, payload: value, sequence }) => type === "lab.delegation-revoked" && sequence > event.sequence && value.policyHash === payload.policyHash)
+    };
+  }
+  async confirmLabDelegation(policy, confirm) {
     await this.assertNoPendingReview("gateDecide");
+    this.assertValid("lab-delegation-policy", policy);
+    const run = await this.currentRun();
+    await this.assertCurrentWriterAuthority(run, new WriterTransferStore(this.projects.runDirectory(run.projectId, run.runId), this.clock));
+    const events = await this.journal(run).replay();
+    const requirementsHash = this.artifactHash(events, "requirements");
+    if (requirementsHash === void 0)
+      throw new ApexError("APEX_AUTHORIZATION", "Accepted Requirements must exist before human policy confirmation", EXIT_CODES.authorization);
+    const requirements = await this.objects.getJson(requirementsHash);
+    const recipient = await this.currentRecipientIdentity(run);
+    delegationCheck(() => assertLabDelegationPolicy(policy, run, requirements, recipient, this.clock().toISOString()));
+    const policyHash = sha256Json(policy);
+    const { actor } = await this.waitOutsideWorkspaceLock(() => confirm(policyHash));
+    const consent = {
+      schemaVersion: CONTRACT_VERSION,
+      policyHash,
+      actor,
+      mechanism: "terminal-policy-confirmation",
+      userOwnedScopeConfirmed: true,
+      syntheticNonSensitiveConfirmed: true,
+      futurePreviewReviewed: false,
+      consentedAt: this.clock().toISOString(),
+      expiresAt: policy.expiresAt
+    };
+    this.assertValid("lab-delegation-consent", consent);
+    delegationCheck(() => assertLabDelegationPolicy(policy, run, requirements, recipient, consent.consentedAt));
+    await this.acquireRunWriterLease(run);
+    await this.objects.putJson(policy);
+    const consentHash = await this.objects.putJson(consent);
+    await this.mutateRun(run, run, "lab.delegation-consented", { policyHash, consentHash }, events.at(-1)?.hash ?? null);
+    return this.labDelegation();
+  }
+  async revokeLabDelegation(policyHash) {
+    const current = await this.labDelegation();
+    if (current.policyHash !== policyHash || current.revoked)
+      throw new ApexError("APEX_AUTHORIZATION", "The requested delegation is not active", EXIT_CODES.authorization);
+    const run = await this.currentRun();
+    const events = await this.journal(run).replay();
+    await this.acquireRunWriterLease(run);
+    await this.mutateRun(run, run, "lab.delegation-revoked", { policyHash }, events.at(-1)?.hash ?? null);
+    return { revoked: policyHash };
+  }
+  async delegatedContext(run, gate, options, events, preview, approvalContextHash) {
+    const transfers = new WriterTransferStore(this.projects.runDirectory(run.projectId, run.runId), this.clock);
+    await this.assertCurrentWriterAuthority(run, transfers);
+    const lease = await transfers.leaseStore().current();
+    const current = await this.readLabDelegation(events);
+    if (current.revoked || current.policyHash !== options.policyHash || current.consentHash !== options.consentHash)
+      throw new ApexError("APEX_AUTHORIZATION", "Delegation consent is revoked or does not match the request", EXIT_CODES.authorization);
+    const requirementsHash = this.artifactHash(events, "requirements");
+    if (requirementsHash === void 0)
+      throw new ApexError("APEX_AUTHORIZATION", "Current accepted Requirements are required", EXIT_CODES.authorization);
+    const requirements = await this.objects.getJson(requirementsHash);
+    const providerEvent = [...events].reverse().find(({ type }) => type === "preview.created");
+    const providerName = providerEvent?.payload?.provider;
+    let scope2;
+    if (gate === 4) {
+      if (preview?.operation !== "apply")
+        throw new ApexError("APEX_AUTHORIZATION", "Delegated destroy is unsupported; use its own preview and normal human approval", EXIT_CODES.authorization, { reason: "LAB_DELEGATION_DESTROY_UNSUPPORTED" });
+      if (options.previewHash !== preview.previewHash || options.approvalContextHash !== approvalContextHash)
+        throw new ApexError("APEX_STALE", "Delegation must request the exact current preview and immutable context", EXIT_CODES.stale);
+      await this.readApprovalContext(run, preview.previewHash, approvalContextHash);
+      const provider = providerName === "bicep" ? this.providers.bicep : void 0;
+      if (provider?.labApplyScope === void 0 || provider.validationMode === "simulated")
+        throw new ApexError("APEX_AUTHORIZATION", "Native azd scope observations are unavailable; fake previews and external ledgers cannot authorize delegated apply", EXIT_CODES.authorization, { reason: "LAB_DELEGATION_SCOPE_UNPROVEN" });
+      scope2 = await this.whileExternalProcessRuns(() => provider.labApplyScope(preview.previewHash));
+      await this.objects.putJson(scope2);
+    } else if (options.previewHash !== void 0 || options.approvalContextHash !== void 0) {
+      throw new ApexError("APEX_USAGE", "Gate 1 has no deployment preview context", EXIT_CODES.usage);
+    }
+    return {
+      policy: current.policy,
+      consent: current.consent,
+      consentHash: options.consentHash,
+      activePolicyHash: current.policyHash,
+      activeConsentHash: current.consentHash,
+      run,
+      gate,
+      now: this.clock().toISOString(),
+      recipientIdentity: await this.currentRecipientIdentity(run),
+      requirements,
+      reviewBlockers: (gate === 1 ? ["requirements-review"] : ["requirements-review", "architecture-review", "plan-review"]).flatMap((node2) => this.reviewBlockers(events, node2)),
+      dependencyRevision: this.dependencyRevision(run, events),
+      ...lease === null ? {} : { authorityExpiresAt: lease.expiresAt },
+      ...preview === void 0 ? {} : { preview },
+      ...approvalContextHash === void 0 ? {} : { approvalContextHash },
+      ...scope2 === void 0 ? {} : { scope: scope2 }
+    };
+  }
+  async decideDelegatedGate(gate, options) {
+    if (gate !== 1 && gate !== 4)
+      throw new ApexError("APEX_USAGE", "Only Gate 1 and apply Gate 4 may be delegated", EXIT_CODES.usage);
+    return this.decideGateNumber(gate, "approved", "agent", { delegation: options });
+  }
+  async decideGateNumber(gateNumber, decision, actor, options = {}) {
+    await this.assertNoPendingReview(options.delegation === void 0 ? "gateDecide" : "gateDelegate");
+    if (options.delegation !== void 0 && (decision !== "approved" || gateNumber !== 1 && gateNumber !== 4))
+      throw new ApexError("APEX_USAGE", "Delegation is limited to approved Gate 1 or apply Gate 4 decisions", EXIT_CODES.usage);
+    if (options.delegation !== void 0 && options.recipientIdentity !== void 0)
+      throw new ApexError("APEX_USAGE", "Delegation cannot override its current execution recipient", EXIT_CODES.usage);
+    await this.reopenExpiredDelegatedGates();
     const run = await this.currentRun();
     if (isReadinessGate(run.purpose, gateNumber)) {
       throw new ApexError("APEX_VALIDATION", `Gate ${gateNumber} is a kernel readiness checkpoint for a ${run.purpose} run: it is recorded automatically once its required reviews and checks pass and has no human decision; resolve blocking review findings or validation failures instead, and confirm Gate 1 and the final Gate 4 preview`, EXIT_CODES.validation, { reason: "GATE_READINESS_AUTOMATIC", gate: gateNumber, purpose: run.purpose });
@@ -70192,6 +72245,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
     if (gateNumber === 4) {
       for (const name of ["README.md", "deployment-preview.md", "approval.md"])
         await this.assertGeneratedReviewUnmodified(join19(this.operationsReviewDirectory(run), name));
+      await this.assertRunIndexUnmodified(run);
     }
     const gate = run.gates.find(({ gate: gate2 }) => gate2 === gateNumber);
     if (gate === void 0)
@@ -70214,6 +72268,9 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       throw new ApexError("APEX_VALIDATION", "Gate 4 preview evidence is incomplete", EXIT_CODES.validation);
     }
     const preview = previewObjectHash === void 0 ? void 0 : await this.objects.getJson(previewObjectHash);
+    const approvalContextHash = gateNumber === 4 ? this.previewApprovalContextHash(events) : void 0;
+    if (preview !== void 0)
+      await this.readApprovalContext(run, preview.previewHash, approvalContextHash);
     if (preview !== void 0 && Date.parse(preview.expiresAt) <= this.clock().getTime()) {
       throw new ApexError("APEX_STALE", "Deployment preview has expired", EXIT_CODES.stale);
     }
@@ -70238,16 +72295,18 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       actor,
       dependencyHash: gate.dependencyHash,
       ...previewHash === void 0 ? {} : { previewHash },
+      ...approvalContextHash === void 0 ? {} : { approvalContextHash },
       ...writerTransferClaimHash === void 0 || writerTransferClaimHash === null ? {} : { writerTransferClaimHash },
       writerEpoch: run.ownerEpoch,
       decidedAt,
       ...approvalExpiresAt === void 0 ? {} : { expiresAt: approvalExpiresAt }
     };
-    const approval = {
+    const delegation = options.delegation === void 0 ? void 0 : await this.delegatedContext(run, gateNumber, options.delegation, events, preview, approvalContextHash);
+    const approval = delegation === void 0 ? {
       ...commonApproval,
       mechanism: "tty",
       recipientIdentity: approvalRecipientIdentity
-    };
+    } : delegationCheck(() => evaluateLabDelegation(delegation));
     this.assertValid("approval", approval);
     const validatorIds = decision === "approved" ? await this.validateGateValidators(run, gate, events, approval, approvalRecipientIdentity) : [];
     if (gateNumber === 4) {
@@ -70260,14 +72319,33 @@ Only native entries reference runtime-executed source-bound command receipts. Si
     const approvalHash = await this.objects.putJson(approval);
     const updated = {
       ...run,
-      gates: run.gates.map((item) => item.gate === gateNumber ? decideGate(item, decision, decidedAt) : item)
+      gates: run.gates.map((item) => item.gate === gateNumber ? decideGate(item, decision, approval.decidedAt) : item)
     };
     await this.mutateRun(run, updated, "gate.decided", {
       gate: gateNumber,
       approvalHash,
       ...previewHash === void 0 ? {} : { previewHash },
-      ...validatorIds.length === 0 ? {} : { validatorIds }
-    }, gateNumber === 4 ? events.at(-1)?.hash ?? null : void 0);
+      ...approvalContextHash === void 0 ? {} : { approvalContextHash },
+      ...validatorIds.length === 0 ? {} : { validatorIds },
+      ...approval.mechanism !== "lab-delegation" ? {} : {
+        mechanism: approval.mechanism,
+        policyHash: approval.policyHash,
+        consentHash: approval.consentHash,
+        expiresAt: approval.expiresAt,
+        writerEpoch: approval.writerEpoch
+      }
+    }, gateNumber === 4 || delegation !== void 0 ? events.at(-1)?.hash ?? null : void 0, preview !== void 0 && approvalContextHash !== void 0 ? async (lockedRun) => {
+      if (decision === "approved")
+        await this.validateGateValidators(lockedRun, gate, events, approval, approvalRecipientIdentity, lockedRun);
+      if (delegation !== void 0)
+        delegationCheck(() => evaluateLabDelegation({ ...delegation, run: lockedRun, now: this.clock().toISOString() }));
+      await this.assertApprovalContextReviewed(run, preview.previewHash, approvalContextHash);
+      if (approval.expiresAt === void 0 || Date.parse(approval.expiresAt) <= this.clock().getTime())
+        throw new ApexError("APEX_STALE", "Approval authority expired before commit", EXIT_CODES.stale);
+    } : delegation === void 0 ? void 0 : async (lockedRun) => {
+      delegationCheck(() => evaluateLabDelegation({ ...delegation, run: lockedRun, now: this.clock().toISOString() }));
+      await this.validateGateValidators(lockedRun, gate, events, approval, approvalRecipientIdentity, lockedRun);
+    });
     if (gateNumber === 4)
       await this.materializeOperationsApprovalPackage(run, approval, approvalHash);
     return approval;
@@ -70285,6 +72363,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
     await this.assertCurrentWriterAuthority(run, new WriterTransferStore(this.projects.runDirectory(run.projectId, run.runId), this.clock));
     const events = await this.journal(run).replay();
     await this.assertPreviewReady(run, events);
+    await this.assertRunIndexUnmodified(run);
     const dependencyRevision2 = this.dependencyRevision(run, events);
     const intendedExecutionRecipientIdentity = options.recipientIdentity ?? await this.currentRecipientIdentity(run);
     const intentHash = this.artifactHash(events, "implementation-intent");
@@ -70388,6 +72467,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       const validation2 = await this.validatePreviewValidators(run, events, preview2, options.provider, options.operation, intent, attestation, intendedExecutionRecipientIdentity, policyReceipt === void 0 ? void 0 : nativePolicyValidationBinding(policyReceipt));
       await this.acquireRunWriterLease(run);
       const previewObjectHash2 = await this.objects.putJson(preview2);
+      const approvalContextHash2 = await this.createApprovalContext(run, events, preview2, provider.approvalMaterial?.(preview2.previewHash));
       const attestationHash = attestation === void 0 ? void 0 : await this.objects.putJson(attestation);
       const policyValidationHash = policyReceipt === void 0 ? void 0 : await this.objects.putJson(policyReceipt);
       await this.append(run, "preview.requested", {
@@ -70399,6 +72479,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       await this.append(await this.currentRun(), "preview.created", {
         previewHash: preview2.previewHash,
         previewObjectHash: previewObjectHash2,
+        approvalContextHash: approvalContextHash2,
         provider: options.provider,
         providerRequestHash: sha256Json(request),
         commit: preview2.commit,
@@ -70408,7 +72489,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
         ...attestationHash === void 0 ? {} : { attestationHash },
         ...policyValidationHash === void 0 ? {} : { policyValidationHash }
       });
-      await this.materializeOperationsPreviewPackage(run, preview2, previewObjectHash2, provider.approvalMaterial?.(preview2.previewHash));
+      await this.materializeOperationsPreviewPackage(run, preview2, previewObjectHash2, approvalContextHash2);
       await this.openRunGate(await this.currentRun(), 4, preview2.previewHash);
       return preview2;
     }
@@ -70442,6 +72523,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
     const validation = await this.validatePreviewValidators(run, events, preview, "fake", options.operation, intent, void 0, intendedExecutionRecipientIdentity);
     await this.acquireRunWriterLease(run);
     const previewObjectHash = await this.objects.putJson(preview);
+    const approvalContextHash = await this.createApprovalContext(run, events, preview);
     await this.append(run, "preview.requested", {
       provider: options.provider,
       operation: options.operation,
@@ -70453,29 +72535,32 @@ Only native entries reference runtime-executed source-bound command receipts. Si
     await this.append(run, "preview.created", {
       previewHash: preview.previewHash,
       previewObjectHash,
+      approvalContextHash,
       provider: options.provider,
       commit: preview.commit,
       validatorIds: validation.validatorIds,
       evidenceMode: validation.evidenceMode,
       ...validation.omittedValidatorIds.length === 0 ? {} : { omittedValidatorIds: validation.omittedValidatorIds }
     });
-    await this.materializeOperationsPreviewPackage(run, preview, previewObjectHash);
+    await this.materializeOperationsPreviewPackage(run, preview, previewObjectHash, approvalContextHash);
     await this.openRunGate(await this.currentRun(), 4, preview.previewHash);
     return preview;
   }
   operationsReviewDirectory(run) {
-    return join19(this.root, "agent-output", run.projectId, run.runId, "operations");
+    return this.stageDirectory(run, "operations");
   }
-  async materializeOperationsPreviewPackage(run, preview, previewObjectHash, executor) {
-    const directory = this.operationsReviewDirectory(run);
+  async createApprovalContext(run, events, preview, executor) {
     const changes = preview.changes.length === 0 ? "- No changes." : preview.changes.map(({ resourceId, action, material, details }) => {
       const detail = details === void 0 ? "" : `: ${this.reviewMarkdownText(details)}`;
       return `- ${this.reviewMarkdownText(action)} ${this.reviewMarkdownText(resourceId)}${material ? " (material)" : ""}${detail}`;
     }).join("\n");
-    const approvalContext = await this.approvalContextMarkdown(run, await this.journal(run).replay());
+    const approvalContext = await this.approvalContextMarkdown(run, events);
+    const { sourceHashes, resolutions } = this.approvalContextSources(events);
+    await this.objects.putJson(resolutions);
     const previewContent = [
       "# Deployment Preview",
       "",
+      `- Preview hash: ${preview.previewHash}`,
       `- Operation: ${this.reviewMarkdownText(preview.operation)}`,
       `- Target: ${this.reviewMarkdownText(preview.target)}`,
       `- Expires: ${this.reviewMarkdownText(preview.expiresAt)}`,
@@ -70496,8 +72581,95 @@ Only native entries reference runtime-executed source-bound command receipts. Si
         ...executor.inventory.map((line) => `- ${this.reviewMarkdownText(line)}`),
         ""
       ],
-      approvalContext
+      approvalContext,
+      "",
+      "## Full Accepted Sources",
+      "",
+      "The sections above are bounded summaries. Full accepted artifacts and risk dispositions are bound by these object hashes:",
+      "",
+      ...Object.entries(sourceHashes).sort(([left], [right]) => left.localeCompare(right)).map(([kind, hash2]) => `- ${kind}: ${hash2}`)
     ].join("\n");
+    const context = {
+      schemaVersion: CONTRACT_VERSION,
+      projectId: run.projectId,
+      runId: run.runId,
+      previewHash: preview.previewHash,
+      sourceHashes,
+      contentType: "text/markdown",
+      content: previewContent
+    };
+    this.assertValid("approval-context", context);
+    return this.objects.putJson(context);
+  }
+  approvalContextSources(events) {
+    const sourceHashes = {};
+    for (const kind of [
+      "requirements",
+      "architecture",
+      "cost-estimate",
+      "workload-decision-manifest",
+      "governance-constraints",
+      "policy-property-map",
+      "implementation-intent",
+      "iac-binding",
+      "environment-inputs"
+    ]) {
+      const hash2 = this.artifactHash(events, kind);
+      if (hash2 !== void 0)
+        sourceHashes[kind] = hash2;
+    }
+    const reviewHashes = /* @__PURE__ */ new Set();
+    for (const nodeId of ["requirements-review", "architecture-review", "plan-review"]) {
+      const hash2 = this.latestPayloadHash(events, "task.completed", "reviewHash", (value) => value.nodeId === nodeId);
+      if (hash2 !== void 0) {
+        sourceHashes[nodeId] = hash2;
+        reviewHashes.add(hash2);
+      }
+    }
+    const resolutions = events.flatMap((event) => {
+      if (event.type !== "review.resolved")
+        return [];
+      const resolution = event.payload.resolution;
+      return resolution !== void 0 && reviewHashes.has(resolution.reviewHash) ? [resolution] : [];
+    });
+    sourceHashes["risk-dispositions"] = sha256Json(resolutions);
+    return { sourceHashes, resolutions };
+  }
+  approvalContextDocument(context, hash2) {
+    return Buffer.from(`${context.content}
+
+- Approval context object hash: ${hash2}
+`, "utf8");
+  }
+  previewApprovalContextHash(events) {
+    const payload = events.findLast(({ type }) => type === "preview.created")?.payload;
+    return typeof payload?.approvalContextHash === "string" ? payload.approvalContextHash : void 0;
+  }
+  async readApprovalContext(run, previewHash, approvalContextHash) {
+    if (approvalContextHash === void 0)
+      throw new ApexError("APEX_STALE", "The preview has no immutable approval context; create a new preview", EXIT_CODES.stale);
+    const context = await this.objects.getJson(approvalContextHash);
+    this.assertValid("approval-context", context);
+    if (context.projectId !== run.projectId || context.runId !== run.runId || context.previewHash !== previewHash)
+      throw new ApexError("APEX_STALE", "Approval context does not match the current preview", EXIT_CODES.stale);
+    const current = this.approvalContextSources(await this.journal(run).replay());
+    if (sha256Json(context.sourceHashes) !== sha256Json(current.sourceHashes))
+      throw new ApexError("APEX_STALE", "Approval context sources or risk dispositions changed; create a fresh preview", EXIT_CODES.stale);
+    for (const hash2 of Object.values(context.sourceHashes))
+      await this.objects.getBytes(hash2);
+    return context;
+  }
+  async assertApprovalContextReviewed(run, previewHash, approvalContextHash) {
+    const context = await this.readApprovalContext(run, previewHash, approvalContextHash);
+    const path2 = join19(this.operationsReviewDirectory(run), "deployment-preview.md");
+    await this.assertSafeDestination(this.root, path2);
+    const current = await this.readOptional(path2);
+    if (current === void 0 || !current.equals(this.approvalContextDocument(context, approvalContextHash)))
+      throw new ApexError("APEX_CONFLICT", "Deployment approval context is missing or differs from immutable preview evidence; restore the exact review material or create a new preview", EXIT_CODES.conflict);
+  }
+  async materializeOperationsPreviewPackage(run, preview, previewObjectHash, approvalContextHash) {
+    const directory = this.operationsReviewDirectory(run);
+    const context = await this.readApprovalContext(run, preview.previewHash, approvalContextHash);
     await mkdir11(directory, { recursive: true });
     await Promise.all([
       this.writeGeneratedReview(join19(directory, "README.md"), Buffer.from(`# Operations Review
@@ -70506,10 +72678,12 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
 
 - Preview hash: ${preview.previewHash}
 - Preview object hash: ${previewObjectHash}
+- Approval context object hash: ${approvalContextHash}
 - Gate 4 status: pending human terminal approval
 `, "utf8")),
-      this.writeGeneratedReview(join19(directory, "deployment-preview.md"), Buffer.from(previewContent, "utf8"))
+      this.writeGeneratedReview(join19(directory, "deployment-preview.md"), this.approvalContextDocument(context, approvalContextHash))
     ]);
+    await this.materializeRunIndex(run);
   }
   /** Deterministic, bounded summary so the single final approval is informed by accepted evidence. */
   async approvalContextMarkdown(run, events) {
@@ -70574,6 +72748,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       `- Actor: ${this.reviewMarkdownText(approval.actor)}`,
       `- Recipient: ${this.reviewMarkdownText(approval.recipientIdentity ?? "Unavailable")}`,
       `- Preview hash: ${approval.previewHash ?? "Unavailable"}`,
+      `- Approval context object hash: ${approval.approvalContextHash ?? "Unavailable"}`,
       `- Approval hash: ${approvalHash}`,
       `- Expires: ${approval.expiresAt === void 0 ? "Unavailable" : this.reviewMarkdownText(approval.expiresAt)}`,
       "",
@@ -70581,6 +72756,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       ""
     ].join("\n");
     await this.writeGeneratedReview(join19(this.operationsReviewDirectory(run), "approval.md"), Buffer.from(content, "utf8"));
+    await this.materializeRunIndex(run);
   }
   async currentPreview() {
     const run = await this.currentRun();
@@ -70639,6 +72815,19 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       throw new ApexError("APEX_STALE", "Deployment dependencies changed after preview", EXIT_CODES.stale);
     if (approval.decision !== "approved" || approval.previewHash !== preview.previewHash || approval.dependencyHash !== preview.previewHash) {
       throw new ApexError("APEX_AUTHORIZATION", "Approval does not authorize the exact preview", EXIT_CODES.authorization);
+    }
+    const approvalContextHash = this.previewApprovalContextHash(events);
+    await this.readApprovalContext(run, preview.previewHash, approvalContextHash);
+    if (approval.approvalContextHash !== approvalContextHash)
+      throw new ApexError("APEX_AUTHORIZATION", "Approval does not bind the immutable preview review context", EXIT_CODES.authorization);
+    if (approval.mechanism === "lab-delegation") {
+      const context = await this.delegatedContext(run, 4, {
+        policyHash: approval.policyHash,
+        consentHash: approval.consentHash,
+        previewHash: preview.previewHash,
+        ...approvalContextHash === void 0 ? {} : { approvalContextHash }
+      }, events, preview, approvalContextHash);
+      delegationCheck(() => verifyLabDelegationApproval(context, approval));
     }
     const providerName = [...events].reverse().find((event) => event.type === "preview.created")?.payload;
     const provider = providerName?.provider === "bicep" || providerName?.provider === "terraform" ? providerName.provider : "fake";
@@ -70822,7 +73011,9 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     const sameScope = source2.targetScope === targetScope;
     const inherited = promoted.gates.map((gate) => {
       const sourceGate = source2.gates.find(({ gate: number4 }) => number4 === gate.gate);
-      const inheritable = sameScope && gate.gate <= 3;
+      const sourceDecision = sourceEvents.findLast((event) => event.type === "gate.decided" && event.payload.gate === gate.gate);
+      const delegated = sourceDecision?.payload?.mechanism === "lab-delegation";
+      const inheritable = sameScope && gate.gate <= 3 && !delegated;
       return inheritable && (sourceGate.state === "approved" || sourceGate.state === "inherited") ? inheritGate(sourceGate, source2.runId, sourceGate.dependencyHash, this.clock().toISOString()) : gate;
     });
     const updated = { ...promoted, gates: inherited };
@@ -70914,6 +73105,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     const apexExists = await this.exists(join19(this.root, ".apex"));
     if (fix && yes && apexExists) {
       await this.ensureLocalGitBoundary(true);
+      await this.ensureWorkspaceLauncher();
       const assets = await resolveBundledAssets();
       const selection2 = await this.customizationSelection();
       if (selection2.sourceMode === "custom-source") {
@@ -71222,8 +73414,15 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         throw new ApexError("APEX_NOT_FOUND", "No requirements artifact exists", EXIT_CODES.notFound);
       return (await this.requirementsDocumentMarkdown(await this.objects.getJson(hash3), hash3)).content;
     }
+    if (kind === "preview") {
+      const previewHash = this.latestPayloadHash(events, "preview.created", "previewHash");
+      if (previewHash === void 0)
+        throw new ApexError("APEX_NOT_FOUND", "No preview artifact exists", EXIT_CODES.notFound);
+      const approvalContextHash = this.previewApprovalContextHash(events);
+      const context = await this.readApprovalContext(run, previewHash, approvalContextHash);
+      return this.approvalContextDocument(context, approvalContextHash).toString("utf8");
+    }
     const map4 = {
-      preview: ["preview.created", "previewObjectHash", renderDeploymentPreview],
       approval: ["gate.decided", "approvalHash", renderApprovalEvidence],
       inventory: ["deployment.completed", "inventoryHash", renderResourceInventory]
     };
@@ -71310,8 +73509,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       ownerEpoch: run.ownerEpoch,
       inputRefs,
       allowedOutputKinds: descriptor.outputs,
-      capabilityGrants: (descriptor.capabilities ?? []).map((capability2) => ({
-        capability: capability2,
+      capabilityGrants: (descriptor.capabilities ?? []).map((capability) => ({
+        capability,
         sideEffect: "remote",
         expiresAt: new Date(this.clock().getTime() + TASK_TTL_MS).toISOString()
       })),
@@ -71375,7 +73574,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }, "gate.readiness-recorded", { gate: gateNumber, dependencyHash: gate.dependencyHash, validatorIds }, events.at(-1)?.hash ?? null);
     return true;
   }
-  async mutateRun(before, after, eventType, payload, expectedJournalHead) {
+  async mutateRun(before, after, eventType, payload, expectedJournalHead, validateBeforeCommit) {
     this.assertNotSnapshotRead();
     const repository = this.runRepository(before);
     try {
@@ -71383,6 +73582,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       await repository.mutate({
         expectedRunHash: sha256Json(before),
         ...expectedJournalHead === void 0 ? {} : { expectedJournalHead },
+        ...validateBeforeCommit === void 0 ? {} : { validateBeforeCommit },
         event: {
           eventId: this.idSource(),
           projectId: before.projectId,
@@ -71431,7 +73631,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return request;
   }
   architectureDecisionState(events, ownerEpoch) {
-    const requested = [...events].reverse().find((event) => event.type === "architecture.decision-requested");
+    const requested = this.currentArchitectureInputEvents(events).findLast((event) => event.type === "architecture.decision-requested");
     if (requested === void 0)
       return {};
     const request = this.architectureDecisionRequest(requested, requested.ownerEpoch);
@@ -71443,23 +73643,13 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
     return { pending: request };
   }
-  architectureDecisionValues(events, taskId) {
-    const result = {};
-    for (const event of events) {
-      if (event.type !== "architecture.decision-recorded")
-        continue;
-      const payload = event.payload;
-      if (payload.decision?.taskId !== taskId || typeof payload.decision.id !== "string" || !Array.isArray(payload.answers)) {
-        continue;
-      }
-      for (const answer of payload.answers) {
-        const value = answer;
-        if (typeof value.questionId === "string" && value_exports2.Check(InputValueV1Schema, value.value)) {
-          result[value.questionId] = value.value;
-        }
-      }
-    }
-    return result;
+  architectureDecisionValues(events) {
+    const recorded = this.recordedInputs(events).find(({ kind }) => kind === "architecture");
+    return Object.fromEntries((recorded?.answers ?? []).map(({ questionId, value }) => [questionId, value]));
+  }
+  currentArchitectureInputEvents(events) {
+    const invalidation = events.findLastIndex((event) => event.type === "workflow.invalidated" && event.payload.nodeIds?.includes("requirements"));
+    return events.slice(invalidation + 1);
   }
   async issueArchitectureDecision(run, task) {
     const decision = ARCHITECTURE_DECISIONS[0];
@@ -71484,17 +73674,23 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
     const recordedRequestIds = new Set(events.flatMap((event) => event.type === "requirements.input-recorded" && typeof event.payload.requestId === "string" ? [event.payload.requestId] : []));
     const catalog = REQUIREMENTS_INTAKE;
-    const latest = requests.at(-1);
-    if (latest !== void 0 && !recordedRequestIds.has(latest.payload.requestId)) {
-      const intake = latest.payload.intake;
-      const ordinal = intake.ordinal;
-      const round = typeof ordinal === "number" && Number.isInteger(ordinal) ? catalog[ordinal - 1] : void 0;
-      if (round === void 0 || intake.round !== round.round || intake.total !== catalog.length) {
-        throw new ApexError("APEX_CONFLICT", "Requirements intake is incompatible; start a new run", EXIT_CODES.conflict);
-      }
-      return round;
+    for (const round of catalog) {
+      const latest = requests.findLast((event) => event.payload.intake.round === round.round);
+      if (latest === void 0 || !recordedRequestIds.has(latest.payload.requestId))
+        return round;
+      const original = this.inputRequest(latest, latest.ownerEpoch).questions;
+      const current = this.requirementsIntakeQuestions(round, events);
+      const shape2 = (questions) => questions.map(({ id, options, multiSelect, valueType, optional: optional3 }) => ({
+        id,
+        options: options ?? null,
+        multiSelect: multiSelect ?? false,
+        valueType: valueType ?? null,
+        optional: optional3 ?? false
+      }));
+      if (sha256Json(shape2(original)) !== sha256Json(shape2(current)))
+        return round;
     }
-    return catalog[recordedRequestIds.size];
+    return void 0;
   }
   async issueRequirementsInput(run, round) {
     const events = await this.journal(run).replay();
@@ -71505,7 +73701,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     const latest = [...events].reverse().find((event2) => event2.type === "requirements.input-requested");
     if (latest !== void 0) {
       const recorded = events.some((event2) => event2.type === "requirements.input-recorded" && event2.payload.requestId === latest.payload.requestId);
-      if (!recorded && latest.hash === events.at(-1)?.hash && latest.ownerEpoch === run.ownerEpoch) {
+      if (!recorded && latest.hash === events.at(-1)?.hash && latest.ownerEpoch === run.ownerEpoch && latest.payload.intake.round === round.round) {
         return this.inputRequest(latest, run.ownerEpoch);
       }
     }
@@ -71857,23 +74053,11 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   recordedRequirementsInput(events) {
     const result = {};
-    let recorded = false;
-    for (const event of events) {
-      if (event.type !== "requirements.input-recorded")
-        continue;
-      const answers = event.payload.answers;
-      if (!Array.isArray(answers))
-        continue;
-      recorded = true;
-      for (const answer of answers) {
-        const value = answer;
-        if (typeof value.questionId !== "string" || !value_exports2.Check(InputValueV1Schema, value.value)) {
-          throw new ApexError("APEX_INTERNAL", "Recorded requirements input is invalid", EXIT_CODES.internal);
-        }
-        result[value.questionId] = value.value;
-      }
-    }
-    return recorded ? result : null;
+    const records = this.recordedInputs(events).filter(({ kind }) => kind === "requirements");
+    for (const record6 of records)
+      for (const { questionId, value } of record6.answers)
+        result[questionId] = value;
+    return records.length > 0 ? result : null;
   }
   outputTemplate(kind, run, events, taskType) {
     if (kind === "requirements") {
@@ -71978,7 +74162,17 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
             unitPrice: 0,
             unitsPerMonth: 1,
             monthlyCost: 0,
-            source: { provider: "ARM MCP", uri: "PRICING_SOURCE_URI", retrievedAt: this.clock().toISOString() },
+            source: {
+              provider: "Azure MCP Server",
+              uri: "PRICING_SOURCE_URI",
+              retrievedAt: this.clock().toISOString(),
+              priceId: "METER_ID",
+              azureMcp: {
+                toolVersion: "OBSERVED_STABLE_3_X_VERSION",
+                returnedRowCount: 1,
+                paginationStatus: "complete"
+              }
+            },
             uncertainty: { lowerMonthlyCost: 0, upperMonthlyCost: 0, confidence: "low", basis: "Pricing basis" }
           }
         ],
@@ -71989,7 +74183,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
             sku: "SELECTED_SKU",
             quantity: 1,
             attemptedAt: this.clock().toISOString(),
-            reason: "A well-scoped ARM MCP query returned no matching retail row."
+            reason: "A well-scoped Azure MCP pricing query returned no matching retail row."
           }
         ],
         totalMonthlyCost: 0,
@@ -72141,11 +74335,11 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       const text6 = this.renderInputValue(input2?.[field.id]);
       return typeof text6 === "string" && text6.length > 0 ? [{ ...field, text: text6 }] : [];
     });
-    const requirements = answered.map(({ id, label, priority, text: text6 }, index) => {
+    const requirements = answered.map(({ id, label: label2, priority, text: text6 }, index) => {
       const status2 = /^deferred:/iu.test(text6.trim()) ? "deferred" : /^unknown$/iu.test(text6.trim()) ? "unknown" : "confirmed";
       return {
         id: `REQ-${String(index + 1).padStart(3, "0")}`,
-        statement: `${label}: ${text6}`,
+        statement: `${label2}: ${text6}`,
         priority,
         status: status2,
         source: `intake:${id}`
@@ -72279,6 +74473,12 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
             ...descriptor.gate === void 0 && descriptor.id !== "architecture-review" ? {} : { reviewGate: descriptor.gate ?? 2 }
           };
         if (descriptor.gate !== void 0 && !this.gateSatisfied(run, descriptor.gate, events)) {
+          const gateState = run.gates.find(({ gate }) => gate === descriptor.gate)?.state;
+          if (gateState === "rejected") {
+            return {
+              blockers: [this.rejectedGateBlocker(descriptor.gate)]
+            };
+          }
           return {
             blockers: [
               isReadinessGate(run.purpose, descriptor.gate) ? `Gate ${descriptor.gate} readiness checkpoint is not recorded${await this.readinessBlockedReason(run, descriptor.gate, events)}` : `Gate ${descriptor.gate} approval is required`
@@ -72294,13 +74494,21 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         const preview = this.latestPayloadHash(events, "preview.created", "previewHash");
         if (preview === void 0)
           return { blockers: ["Deployment preview is required"] };
-        if (!this.gateSatisfied(run, 4, events))
+        if (!this.gateSatisfied(run, 4, events)) {
+          if (run.gates.find(({ gate }) => gate === 4)?.state === "rejected") {
+            return { blockers: [this.rejectedGateBlocker(4)] };
+          }
           return { blockers: ["Gate 4 approval is required"] };
+        }
         return { blockers: ["Deployment and inventory are required"] };
       }
       return { task: descriptor, blockers: [] };
     }
     return { blockers: [] };
+  }
+  rejectedGateBlocker(gateNumber) {
+    const upstream = gateNumber === 1 ? "requirements" : gateNumber === 2 ? "architecture" : gateNumber === 3 ? "implementation plan" : "deployment preview";
+    return `Gate ${gateNumber} approval was rejected (approval-rejected); revise ${upstream} to reopen Gate ${gateNumber}`;
   }
   async retryLabReadiness(run) {
     let recorded = false;
@@ -72334,11 +74542,34 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
    */
   gateSatisfied(run, gateNumber, events) {
     const gate = run.gates.find((candidate) => candidate.gate === gateNumber);
-    if (gate?.state === "approved" || gate?.state === "inherited")
-      return true;
+    if (gate?.state === "approved" || gate?.state === "inherited") {
+      const decision = events.findLast((event) => event.type === "gate.decided" && event.payload.gate === gateNumber);
+      const payload = decision?.payload;
+      if (payload?.mechanism !== "lab-delegation")
+        return true;
+      const consent = events.findLast(({ type }) => type === "lab.delegation-consented");
+      const active = consent?.payload;
+      return run.purpose === "lab" && gate.state === "approved" && payload.writerEpoch === run.ownerEpoch && payload.expiresAt !== void 0 && Date.parse(payload.expiresAt) > this.clock().getTime() && active?.policyHash === payload.policyHash && active?.consentHash === payload.consentHash && !events.some((event) => event.type === "lab.delegation-revoked" && event.sequence > (consent?.sequence ?? 0) && event.payload.policyHash === payload.policyHash);
+    }
     if (gate?.state !== "ready" || !isReadinessGate(run.purpose, gateNumber))
       return false;
     return this.readinessProven(run, gate, events);
+  }
+  async reopenExpiredDelegatedGates() {
+    const run = await this.currentRun();
+    const events = await this.journal(run).replay();
+    const expired = run.gates.filter((gate) => gate.state === "approved" && !this.gateSatisfied(run, gate.gate, events));
+    if (expired.length === 0)
+      return;
+    await this.acquireRunWriterLease(run);
+    for (const gate of expired) {
+      const current = await this.currentRun();
+      const updated = {
+        ...current,
+        gates: current.gates.map((item) => item.gate !== gate.gate ? item : openGate(invalidateGate(item, item.dependencyHash, "Delegation expired, was revoked, or changed writer"), item.dependencyHash))
+      };
+      await this.mutateRun(current, updated, "gate.opened", { gate: gate.gate, dependencyHash: gate.dependencyHash });
+    }
   }
   /**
    * A `ready` gate counts only when the latest journal event touching that gate is the kernel's own readiness record
@@ -72492,6 +74723,9 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     if (output2.kind === "cost-estimate" && !hasValidCostArithmetic(output2.value)) {
       throw new ApexError("APEX_VALIDATION", "Cost estimate arithmetic does not reconcile", EXIT_CODES.validation);
     }
+    if (output2.kind === "cost-estimate" && !hasValidCostPricingSources(output2.value)) {
+      throw new ApexError("APEX_VALIDATION", "Azure MCP pricing sources require complete uncapped query metadata and a meter priceId; narrow the query or record an unpriced item", EXIT_CODES.validation);
+    }
     if (output2.kind === "logical-resource-manifest" && !hasValidLogicalResourceReferences(output2.value)) {
       throw new ApexError("APEX_VALIDATION", "Logical resource dependencies or ownership declarations are invalid", EXIT_CODES.validation);
     }
@@ -72514,6 +74748,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       if (binding.track !== run.iacTool || binding.intentHash !== sha256Json(intent) || bindingIds.length !== resourceIds.size || bindingIds.some((id) => !resourceIds.has(id))) {
         throw new ApexError("APEX_VALIDATION", "IaC binding track, intent hash, or resource coverage is invalid", EXIT_CODES.validation);
       }
+      this.assertPlanGeneratable(run, intent, binding);
     }
     if (descriptor.id.startsWith("codegen-")) {
       const manifest2 = byKind["logical-resource-manifest"];
@@ -72625,7 +74860,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     if (hash2 === void 0)
       return [];
     const snapshot = await this.selectedGovernanceSnapshot(run, await this.objects.getJson(hash2));
-    return snapshot.findings.filter(({ effect }) => ENFORCING_POLICY_EFFECTS.has(effect));
+    return snapshot.findings.filter(({ effect, enforcementMode: enforcementMode2 }) => ENFORCING_POLICY_EFFECTS.has(effect) && !(effect === "deny" && enforcementMode2 === "DoNotEnforce"));
   }
   async governanceFindingsSummary(run, events) {
     const findings = await this.enforcingGovernanceFindings(run, events);
@@ -72691,19 +74926,19 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     policyMap.mappings.forEach((mapping, index) => {
       const path2 = `/policyMappings/${index}`;
       const key = this.policyMappingKey(mapping);
-      const label = findings.get(key)?.displayName ?? mapping.policyAssignmentId;
+      const label2 = findings.get(key)?.displayName ?? mapping.policyAssignmentId;
       if (seen.has(key))
-        issues.push({ path: path2, message: `Policy mapping is duplicated: ${label}` });
+        issues.push({ path: path2, message: `Policy mapping is duplicated: ${label2}` });
       seen.add(key);
       if (mapping.disposition === "exempt")
-        issues.push({ path: `${path2}/disposition`, message: `Reported exemptions are not verified: ${label}` });
+        issues.push({ path: `${path2}/disposition`, message: `Reported exemptions are not verified: ${label2}` });
       if (mapping.disposition === "not-applicable") {
         if (mapping.reason === void 0)
-          issues.push({ path: `${path2}/reason`, message: `Not-applicable policy mapping needs a reason: ${label}` });
+          issues.push({ path: `${path2}/reason`, message: `Not-applicable policy mapping needs a reason: ${label2}` });
       } else if (!components.has(mapping.logicalResourceId))
         issues.push({
           path: `${path2}/logicalResourceId`,
-          message: `Policy mapping must name an Architecture component: ${label}`
+          message: `Policy mapping must name an Architecture component: ${label2}`
         });
     });
     const missing2 = [...findings].filter(([key]) => !seen.has(key)).map(([, finding2]) => finding2);
@@ -72793,7 +75028,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     if ((descriptor.id === "architecture" || descriptor.id === "policy-refresh") && governance !== void 0) {
       const architecture = outputs.find(({ kind }) => kind === "architecture")?.value ?? artifacts.architecture;
       const designed = new Set((architecture?.components ?? []).flatMap(({ resourceTypes }) => resourceTypes.map((type) => type.toLowerCase())));
-      importedPolicyEffects = (await this.selectedGovernanceSnapshot(run, governance)).findings.filter(({ resourceTypes }) => resourceTypes.length === 0 || resourceTypes.some((type) => designed.has(type.toLowerCase()))).map(({ effect }) => effect);
+      importedPolicyEffects = (await this.selectedGovernanceSnapshot(run, governance)).findings.filter(({ resourceTypes }) => resourceTypes.length === 0 || resourceTypes.some((type) => designed.has(type.toLowerCase()))).filter(({ effect, enforcementMode: enforcementMode2 }) => !(effect === "deny" && enforcementMode2 === "DoNotEnforce")).map(({ effect }) => effect);
     }
     if (descriptor.id === "architecture") {
       const pinnedRefs = new Set(task.inputRefs);
@@ -72938,7 +75173,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       qualityMeasurements
     };
   }
-  async validateGateValidators(run, gate, events, approval, expectedApprovalRecipientIdentity) {
+  async validateGateValidators(run, gate, events, approval, expectedApprovalRecipientIdentity, lockedRun) {
     const workflow = await this.lockedWorkflowEngine(run);
     const nodeId = `gate-${gate.gate}`;
     const node2 = workflow.manifest.nodes.find(({ id }) => id === nodeId);
@@ -72974,7 +75209,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         preview = await this.objects.getJson(previewObjectHash);
       expectedDependencyHash = preview?.previewHash;
     }
-    const provedPreviewTransferClaimHash = preview === void 0 || preview.ownerEpoch === run.ownerEpoch ? void 0 : await new WriterTransferStore(this.projects.runDirectory(run.projectId, run.runId), this.clock).proveOneHopPostPreviewLineage(preview.previewHash, preview.ownerEpoch) ?? void 0;
+    const provedPreviewTransferClaimHash = preview === void 0 || preview.ownerEpoch === run.ownerEpoch ? void 0 : await new WriterTransferStore(this.projects.runDirectory(run.projectId, run.runId), this.clock).proveOneHopPostPreviewLineage(preview.previewHash, preview.ownerEpoch, lockedRun) ?? void 0;
+    const approvalContextHash = this.previewApprovalContextHash(events);
     const context = {
       gateNumber: gate.gate,
       now: this.clock().toISOString(),
@@ -72988,7 +75224,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       ...expectedApprovalRecipientIdentity === void 0 ? {} : { expectedApprovalRecipientIdentity },
       ...provedPreviewTransferClaimHash === void 0 ? {} : { provedPreviewTransferClaimHash },
       ...expectedDependencyHash === void 0 ? {} : { expectedDependencyHash },
-      ...preview === void 0 ? {} : { preview }
+      ...preview === void 0 ? {} : { preview },
+      ...gate.gate === 4 && approvalContextHash !== void 0 ? { approvalContextHash } : {}
     };
     for (const id of validatorIds)
       this.assertValid(id, context);
@@ -73105,6 +75342,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       const ownership = workflowValidatorOwnership(id);
       return ownership?.boundary === "deploy" && ownership.owner === owner;
     });
+    const approvalContextHash = this.previewApprovalContextHash(await this.journal(run).replay());
     const context = {
       now: this.clock().toISOString(),
       run,
@@ -73113,6 +75351,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       approval,
       expectedPreviewHash,
       currentDependencyRevision,
+      ...approvalContextHash === void 0 ? {} : { approvalContextHash },
       ...provedPreviewTransferClaimHash === void 0 ? {} : { provedPreviewTransferClaimHash },
       ...operation === void 0 ? {} : { operation },
       ...executionEvidence === void 0 ? {} : { executionEvidence },
@@ -73456,11 +75695,29 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     } catch {
       plugin = { name: "apex", marketplace: "apex-plugins" };
     }
+    const workspaceDisabledPlugins = /* @__PURE__ */ new Set();
+    for (const rel of [".github/copilot/settings.json", ".github/copilot/settings.local.json"]) {
+      const settingsPath = join19(this.root, rel);
+      try {
+        await this.assertSafeDestination(this.root, settingsPath);
+        if (!await this.pathExistsLstat(settingsPath))
+          continue;
+        const parsed = JSON.parse(await readFile14(settingsPath, "utf8"));
+        for (const [key, value] of Object.entries(parsed?.enabledPlugins ?? {})) {
+          if (value === false)
+            workspaceDisabledPlugins.add(key);
+          else if (value === true)
+            workspaceDisabledPlugins.delete(key);
+        }
+      } catch {
+      }
+    }
     return hostDoctorChecks({
       host: this.host,
       minimums: await this.bundledToolchainMinimums(),
       plugin,
       apexVersion: APEX_VERSION,
+      workspaceDisabledPlugins,
       executableExists: this.executableChecker,
       toolVersion: (executable, args) => this.hostToolVersion(executable, args)
     });
@@ -73569,6 +75826,27 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       throw new ApexError("APEX_CONFLICT", "APEX local Git boundary was modified", EXIT_CODES.conflict);
     await atomicWriteBytes(path2, Buffer.from(APEX_GITIGNORE));
   }
+  async ensureWorkspaceLauncher() {
+    const apexRoot = join19(this.root, ".apex");
+    const binRoot = join19(apexRoot, "bin");
+    const launcherPath = join19(binRoot, "apex.mjs");
+    await this.assertSafeDestination(this.root, launcherPath);
+    const existing = await this.readOptional(launcherPath);
+    const changed = existing?.toString("utf8") !== WORKSPACE_CLI_LAUNCHER;
+    if (changed) {
+      await mkdir11(binRoot, { recursive: true });
+      await atomicWriteBytes(launcherPath, Buffer.from(WORKSPACE_CLI_LAUNCHER));
+    }
+    if (true) {
+      const pluginRoot = dirname11(dirname11(fileURLToPath3(import.meta.url)));
+      const localRoot = join19(apexRoot, "local");
+      const hintPath = join19(localRoot, "plugin-root.json");
+      await this.assertSafeDestination(apexRoot, hintPath);
+      await mkdir11(localRoot, { recursive: true });
+      await atomicWriteJson(hintPath, { pluginRoot });
+    }
+    return changed;
+  }
   async ensureWorkspaceRuntime() {
     const packagePath = join19(this.root, "node_modules", "@apexops", "cli", "package.json");
     try {
@@ -73584,24 +75862,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       if (error62.code !== "ENOENT")
         throw error62;
     }
-    try {
-      await this.processRunner.run({
-        executable: "npm",
-        args: [
-          "install",
-          "--save-dev",
-          "--save-exact",
-          "--ignore-scripts",
-          "--no-audit",
-          "--no-fund",
-          `@apexops/cli@${APEX_VERSION}`
-        ],
-        cwd: this.root,
-        timeoutMs: 12e4,
-        maxOutputBytes: 1048576
-      });
-    } catch (error62) {
-      throw new ApexError("APEX_INTERNAL", `Unable to install @apexops/cli@${APEX_VERSION} in the workspace`, EXIT_CODES.internal, void 0, { cause: error62 });
+    if (await this.pathExistsLstat(join19(this.root, ".apex", "bin", "apex.mjs"))) {
+      return false;
     }
     return true;
   }
@@ -73752,18 +76014,18 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       if (await this.pathExistsLstat(destination))
         retained.set(file2.path, sha256Bytes(await readFile14(destination)));
     }
-    const prepare = async (sourceRoot, destinationRoot, oldFiles, label) => {
+    const prepare = async (sourceRoot, destinationRoot, oldFiles, label2) => {
       const sourceFiles = await this.walkFiles(sourceRoot);
       const managed2 = [];
       const incomingPaths = /* @__PURE__ */ new Set();
       for (const absoluteSource of sourceFiles) {
         const path2 = relative8(sourceRoot, absoluteSource).split(sep6).join("/");
-        if (label === "customization" && pluginOwnsPath(plugin, path2))
+        if (label2 === "customization" && pluginOwnsPath(plugin, path2))
           throw new ApexError("APEX_VALIDATION", `Customization source must not copy ${path2}; the ${plugin.name} plugin provides it`, EXIT_CODES.validation);
         incomingPaths.add(path2);
         const destination = resolve17(destinationRoot, path2);
         if (destination !== destinationRoot && !destination.startsWith(`${destinationRoot}${sep6}`))
-          throw new ApexError("APEX_VALIDATION", `${label} destination escapes its root`, EXIT_CODES.validation);
+          throw new ApexError("APEX_VALIDATION", `${label2} destination escapes its root`, EXIT_CODES.validation);
         await this.assertSafeDestination(destinationRoot, destination);
         const incoming = await readFile14(absoluteSource);
         const sourceHash = sha256Bytes(incoming);
@@ -73774,27 +76036,27 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
           const current = await readFile14(destination);
           const currentHash = sha256Bytes(current);
           if (old === void 0 && currentHash !== sourceHash)
-            throw new ApexError("APEX_CONFLICT", `Existing file conflicts with managed ${label}: ${path2}`, EXIT_CODES.conflict);
+            throw new ApexError("APEX_CONFLICT", `Existing file conflicts with managed ${label2}: ${path2}`, EXIT_CODES.conflict);
           if (!repair && old !== void 0 && currentHash !== old.baseHash) {
             const base = await this.readManagedBase(old.baseRef);
             const merged = base === void 0 ? void 0 : this.mergeText(base, current, incoming);
             if (merged === void 0)
-              throw new ApexError("APEX_CONFLICT", `Managed ${label} conflict: ${path2}`, EXIT_CODES.conflict);
+              throw new ApexError("APEX_CONFLICT", `Managed ${label2} conflict: ${path2}`, EXIT_CODES.conflict);
             output2 = Buffer.from(merged);
           }
         }
-        const staged = join19(transactionRoot, "incoming", label, path2);
+        const staged = join19(transactionRoot, "incoming", label2, path2);
         await atomicWriteBytes(staged, output2);
-        const backup = existed ? join19(transactionRoot, "backup", label, path2) : void 0;
+        const backup = existed ? join19(transactionRoot, "backup", label2, path2) : void 0;
         if (backup !== void 0)
           await atomicWriteBytes(backup, await readFile14(destination));
         entries.push({ destination, staged, ...backup === void 0 ? {} : { backup }, existed });
-        const baseRef = join19(".apex", "customization-bases", sourceHash, label, path2).split(sep6).join("/");
+        const baseRef = join19(".apex", "customization-bases", sourceHash, label2, path2).split(sep6).join("/");
         const baseDestination = join19(this.root, baseRef);
         await this.assertSafeDestination(this.root, baseDestination);
         entries.push({
           destination: baseDestination,
-          staged: join19(transactionRoot, "bases", sourceHash, label, path2),
+          staged: join19(transactionRoot, "bases", sourceHash, label2, path2),
           existed: await this.pathExistsLstat(baseDestination)
         });
         await atomicWriteBytes(entries.at(-1).staged, incoming);
@@ -73803,7 +76065,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       for (const old of oldFiles.filter((file2) => !incomingPaths.has(file2.path))) {
         const destination = resolve17(destinationRoot, old.path);
         await this.assertSafeDestination(destinationRoot, destination);
-        const pluginOwned = label === "customization" && pluginOwnsPath(plugin, old.path);
+        const pluginOwned = label2 === "customization" && pluginOwnsPath(plugin, old.path);
         if (!await this.pathExistsLstat(destination)) {
           if (pluginOwned)
             retired.push(old.path);
@@ -73817,8 +76079,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         if (pluginOwned)
           retired.push(old.path);
         if (currentHash !== old.currentHash && currentHash !== old.baseHash)
-          throw new ApexError("APEX_CONFLICT", `Removed managed ${label} was locally modified: ${old.path}`, EXIT_CODES.conflict);
-        const backup = join19(transactionRoot, "backup", label, old.path);
+          throw new ApexError("APEX_CONFLICT", `Removed managed ${label2} was locally modified: ${old.path}`, EXIT_CODES.conflict);
+        const backup = join19(transactionRoot, "backup", label2, old.path);
         await atomicWriteBytes(backup, await readFile14(destination));
         entries.push({ destination, backup, existed: true, remove: true });
       }
@@ -74109,22 +76371,20 @@ function contract(schema, options = {}) {
   }).meta({ ...json2(envelope), ...json2(schema) });
 }
 var selection = object5({ projectId: NonEmptyStringSchema, runId: NonEmptyStringSchema });
-var capability = object5({
-  id: Type.String(),
-  state: Type.Union(["installed", "unavailable", "blocked", "invalid", "not-installed"].map((value) => Type.Literal(value))),
-  version: Type.Optional(Type.String()),
-  installedVersion: Type.Optional(Type.String()),
-  requiredWorkflows: strings3,
-  reason: Type.Optional(Type.String()),
-  action: Type.String()
-});
 var status = object5({
   run: RunConfigV1Schema,
   head: Type.Union([Sha256Schema, Type.Null()]),
   events: count2,
   task: Type.Union([NonEmptyStringSchema, Type.Null()]),
   blockers: strings3,
-  satisfiedGates: Type.Array(Type.Integer({ minimum: 1, maximum: 4 }), { uniqueItems: true, maxItems: 4 })
+  satisfiedGates: Type.Array(Type.Integer({ minimum: 1, maximum: 4 }), { uniqueItems: true, maxItems: 4 }),
+  delegation: Type.Optional(object5({
+    policyHash: Sha256Schema,
+    consentHash: Sha256Schema,
+    expiresAt: IsoDateTimeSchema,
+    gates: Type.Array(Type.Union([Type.Literal(1), Type.Literal(4)]), { minItems: 1, uniqueItems: true }),
+    revoked: Type.Boolean()
+  }))
 });
 var MCP_DOCTOR_CHECK_LIMIT = 32;
 var doctorCheck = object5({
@@ -74186,13 +76446,6 @@ var stagedFile = object5({
   idempotent: Type.Boolean()
 });
 var completion = object5({ outputHashes: artifactHashes, summary: Type.String() });
-var evidenceProperties = {
-  kind: Type.String(),
-  bytes: count2,
-  retention: Type.Union(["immutable", "project", "optional"].map((value) => Type.Literal(value))),
-  redacted: Type.Boolean(),
-  reasons: strings3
-};
 var MCP_OUTPUT_SCHEMAS = {
   status: contract(Type.Union([
     status,
@@ -74215,8 +76468,6 @@ var MCP_OUTPUT_SCHEMAS = {
     projectId: NonEmptyStringSchema,
     runId: NonEmptyStringSchema
   })),
-  capabilityList: contract(object5({ packs: Type.Array(capability) })),
-  capabilityStatus: contract(capability),
   nextTask: contract(Type.Union([
     object5({ status: Type.Literal("needs_input"), request: InputRequestV1Schema }),
     object5({ status: Type.Literal("needs_review"), review }),
@@ -74256,6 +76507,15 @@ var MCP_OUTPUT_SCHEMAS = {
     nextOffset: Type.Optional(count2)
   }), { pageable: true }),
   recordInput: contract(object5({ recorded: Type.Literal(true), requestId: NonEmptyStringSchema })),
+  inputHistory: contract(object5({ inputs: Type.Array(RecordedInputV1Schema) }), { pageable: true }),
+  previewInputAmendment: contract(InputAmendmentProposalV1Schema),
+  amendInput: contract(object5({
+    amended: Type.Literal(true),
+    requestId: NonEmptyStringSchema,
+    proposalHash: Sha256Schema,
+    invalidatedNodes: strings3,
+    deploymentAuthorized: Type.Literal(false)
+  })),
   governanceImport: contract(object5({ outputHash: Sha256Schema, summary: Type.String() })),
   governanceSelect: contract(Type.Union([
     object5({ status: Type.Literal("needs_input"), request: InputRequestV1Schema }),
@@ -74272,8 +76532,8 @@ var MCP_OUTPUT_SCHEMAS = {
   projectUse: contract(selection),
   projectDelete: contract(object5({ deleted: NonEmptyStringSchema, selected: Type.Optional(selection) })),
   gateDecide: contract(ApprovalEvidenceV1Schema),
+  gateDelegate: contract(ApprovalEvidenceV1Schema),
   reviewDecide: contract(object5({ status: Type.Union([Type.Literal("revision_requested"), Type.Literal("resolved")]) })),
-  stageArtifact: contract(Type.Union([stagedArtifact, object5({ artifacts: Type.Array(stagedArtifact) })])),
   stageFile: contract(stagedFile),
   generateIac: contract(object5({ files: Type.Array(stagedFile), outputHashes: artifactHashes, treeHash: Sha256Schema })),
   validateTask: contract(Type.Union([
@@ -74308,19 +76568,7 @@ var MCP_OUTPUT_SCHEMAS = {
   inventory: contract(ResourceInventoryV1Schema, { pageable: true }),
   reconcile: contract(ResourceInventoryV1Schema),
   diagnose: contract(object5({ status, doctor })),
-  improvementObserve: contract(object5({ observation: ImprovementObservationV1Schema, deduplicated: Type.Boolean() })),
-  improvementObservations: contract(object5({ observations: Type.Array(ImprovementObservationV1Schema) }), {
-    pageable: true
-  }),
-  improvementProposals: contract(object5({ proposals: Type.Array(ImprovementProposalV1Schema) }), { pageable: true }),
-  render: contract(object5({ markdown: Type.String() }), { pageable: true }),
-  promote: contract(RunConfigV1Schema),
-  doctor: contract(doctor),
-  doctorChecks: contract(object5({ checks: Type.Array(doctorCheck) }), { pageable: true }),
-  submitEvidence: contract(Type.Union([
-    object5({ ...evidenceProperties, status: Type.Literal("accepted"), hash: Sha256Schema }),
-    object5({ ...evidenceProperties, status: Type.Literal("quarantined"), quarantinePath: NonEmptyStringSchema })
-  ]))
+  render: contract(object5({ markdown: Type.String() }), { pageable: true })
 };
 
 // packages/cli/dist/workspace-root.js
@@ -74363,12 +76611,18 @@ async function gitCommonDirectory(gitDirectory) {
   });
   return realpath9(resolveGitPath(gitDirectory, content?.trim() || gitDirectory));
 }
+function ignoreMissingPath(error62) {
+  if (error62.code === "ENOENT")
+    return void 0;
+  throw error62;
+}
 async function mcpWorkspaceRoot(start) {
-  for (let directory = resolve18(start); ; directory = dirname12(directory)) {
-    const apex = await lstat15(join20(directory, ".apex")).catch(() => void 0);
-    if (apex?.isDirectory() === true)
+  const initial = resolve18(start);
+  for (let directory = initial; ; directory = dirname12(directory)) {
+    const apex = await lstat15(join20(directory, ".apex")).catch(ignoreMissingPath);
+    const repository = await lstat15(join20(directory, ".git")).catch(ignoreMissingPath);
+    if (apex?.isDirectory() === true && (directory === initial || repository !== void 0))
       return directory;
-    const repository = await lstat15(join20(directory, ".git")).catch(() => void 0);
     if (repository !== void 0 || dirname12(directory) === directory)
       return start;
   }
@@ -74524,20 +76778,18 @@ var MCP_SERVER_INSTRUCTIONS = [
   "Do not retry mutations blindly after timeout, cancellation, or conflict; refresh status and confirm intent first.",
   "Use ask_user for human approvals, risk decisions, missing inputs, and any choice the kernel requires.",
   "Never ask the user to approve a kernel-recorded readiness checkpoint (Gates 2 and 3 in a lab run); report the blocking review or validation finding instead.",
+  "gateDelegate evaluates only already recorded, time-bounded human lab policy consent. It cannot create consent, accept risks, approve production or destroy. Human approvals remain the default.",
   "Large read results may include nextCursor; call the same tool with the same workspace and cursor until it is absent."
 ].join(" ");
-var MCP_MAX_SERIALIZED_RESULT_BYTES = 64 * 1024;
 var cursorInput = external_exports.string().min(1).max(4096).optional();
 var pagePaths = {
   taskContext: ["inputs"],
   readTaskInput: ["content"],
   projectList: ["projects"],
+  inputHistory: ["inputs"],
   preview: ["markdown"],
   inventory: ["resources"],
-  improvementObservations: ["observations"],
-  improvementProposals: ["proposals"],
-  render: ["markdown"],
-  doctorChecks: ["checks"]
+  render: ["markdown"]
 };
 function serviceResolver(serviceOrResolver) {
   if (typeof serviceOrResolver.resolve === "function" && serviceOrResolver.defaultService !== void 0) {
@@ -74602,7 +76854,7 @@ var repeatFileArguments = {
   governanceSelect: ["path"]
 };
 var readOnlyTools = new Set(Object.entries(MCP_TOOL_EFFECTS).filter(([, effect]) => effect === "read-only").map(([name]) => name));
-var externalTools = /* @__PURE__ */ new Set(["reconcile", "inventory", "diagnose", "doctor", "doctorChecks"]);
+var externalTools = /* @__PURE__ */ new Set(["reconcile", "inventory", "diagnose"]);
 function assertBoundedInput(value) {
   const stack = [{ value, depth: 0 }];
   let nodes = 0;
@@ -74626,14 +76878,33 @@ function assertBoundedInput(value) {
   if (Buffer.byteLength(JSON.stringify(value)) > 4 * 1024 * 1024)
     throw new ApexError("APEX_VALIDATION", "Input budget exceeded", EXIT_CODES.validation);
 }
-var resultEnvelopeBytes = (structuredContent) => {
-  const text5 = JSON.stringify(structuredContent);
-  return Buffer.byteLength(JSON.stringify({
-    content: [{ type: "text", text: text5 }],
-    structuredContent
-  }), "utf8");
-};
+var resultEnvelopeBytes = mcpResultEnvelopeBytes;
 var MCP_DOCTOR_SUMMARY_BYTES = 48 * 1024;
+var MCP_ELIDE_ANSWER_ABOVE_BYTES = 2048;
+function elideLongAnswer(answer) {
+  if (typeof answer.value !== "string")
+    return answer;
+  const bytes = Buffer.byteLength(answer.value, "utf8");
+  if (bytes <= MCP_ELIDE_ANSWER_ABOVE_BYTES)
+    return answer;
+  const digest2 = createHash14("sha256").update(answer.value).digest("hex");
+  return { ...answer, value: `[elided ${bytes} bytes; sha256 ${digest2}]` };
+}
+function boundedAmendmentPreview(proposal) {
+  if (resultEnvelopeBytes(proposal) <= MCP_MAX_SERIALIZED_RESULT_BYTES)
+    return proposal;
+  const bounded = {
+    ...proposal,
+    previousAnswers: proposal.previousAnswers.map(elideLongAnswer),
+    answers: proposal.answers.map(elideLongAnswer)
+  };
+  if (resultEnvelopeBytes(bounded) <= MCP_MAX_SERIALIZED_RESULT_BYTES)
+    return bounded;
+  return {
+    ...bounded,
+    amendment: { ...bounded.amendment, answers: bounded.amendment.answers.map(elideLongAnswer) }
+  };
+}
 function summarizeDoctorReport(report) {
   const failed = report.checks.filter(({ ok }) => !ok);
   const passed = report.checks.filter(({ ok }) => ok);
@@ -74826,9 +77097,10 @@ var inputSubmission = external_exports.object({
   ownerEpoch: external_exports.number().int().positive(),
   answers: external_exports.array(external_exports.object({
     questionId: external_exports.string().min(1),
-    value: inputValue
+    value: external_exports.union([external_exports.string(), inputValue])
   }).strict()).min(1)
 }).strict();
+var inputAmendment = inputSubmission.pick({ schemaVersion: true, requestId: true, answers: true }).extend({ baseAnswersHash: external_exports.string().regex(/^[0-9a-f]{64}$/u) }).strict();
 var projectCreateInput = external_exports.object({
   projectId: external_exports.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/),
   displayName: external_exports.string().min(1).max(256),
@@ -74857,6 +77129,13 @@ var gateDecisionInput = external_exports.object({
   gate: external_exports.union([external_exports.literal(1), external_exports.literal(2), external_exports.literal(3)]),
   decision: external_exports.enum(["approved", "rejected"]),
   confirm: external_exports.literal(true)
+}).strict();
+var delegatedGateInput = external_exports.object({
+  gate: external_exports.union([external_exports.literal(1), external_exports.literal(4)]),
+  policyHash: external_exports.string().regex(/^[0-9a-f]{64}$/),
+  consentHash: external_exports.string().regex(/^[0-9a-f]{64}$/),
+  previewHash: external_exports.string().regex(/^[0-9a-f]{64}$/).optional(),
+  approvalContextHash: external_exports.string().regex(/^[0-9a-f]{64}$/).optional()
 }).strict();
 var reviewDecisionInput = external_exports.object({
   reviewHash: external_exports.string().regex(/^[0-9a-f]{64}$/),
@@ -74952,6 +77231,7 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     const effect = MCP_TOOL_EFFECTS[name];
     if (effect === void 0)
       throw new Error(`Missing effect class for ${name}`);
+    const reviewGuard = name in MCP_TOOL_REVIEW_GUARDS ? MCP_TOOL_REVIEW_GUARDS[name] : null;
     const fileArguments = repeatFileArguments[name];
     const originalInputSchema = config2.inputSchema === void 0 ? external_exports.object({}).strict() : config2.inputSchema instanceof external_exports.ZodObject ? config2.inputSchema.strict().meta(config2.inputSchema.meta() ?? {}) : external_exports.object(config2.inputSchema).strict();
     const inputSchema = originalInputSchema.extend({ workspace: workspaceInput }).strict().meta(originalInputSchema.meta() ?? {});
@@ -74991,6 +77271,9 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
         activeService = resolved.service;
         let response;
         try {
+          if (reviewGuard !== null && binding.state !== "mismatch") {
+            await resolved.service.assertNoPendingReview?.(name);
+          }
           const execute3 = async () => binding.state === "mismatch" ? result(runtimeMismatchStatus(binding)) : await Reflect.apply(callback, void 0, config2.inputSchema === void 0 ? [extra] : [toolInput, extra]);
           response = effect === "repeat-guarded" ? result(await resolved.service.repeatSafe({
             operation: name,
@@ -75056,7 +77339,6 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
       name,
       ...config2.description === void 0 ? {} : { description: config2.description },
       inputSchema: inputJson2,
-      outputSchema: external_exports.toJSONSchema(outputSchema, { target: "draft-7" }),
       annotations
     };
     toolDefinitions.push(definition);
@@ -75064,8 +77346,6 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
   }
   registerTool("status", { description: "Read selected APEX run status" }, async () => result(await service.workspaceStatus()));
   registerTool("releaseWriter", { description: "Release this workspace's writer lease for the selected run." }, async () => result(await service.releaseWriter()));
-  registerTool("capabilityList", { description: "Read capability pack availability" }, async () => result({ packs: await service.capabilityList() }));
-  registerTool("capabilityStatus", { description: "Read one capability pack status", inputSchema: { pack: external_exports.string() } }, async ({ pack }) => result(await service.capabilityStatus(pack)));
   registerTool("nextTask", {
     description: "Advance the workflow by issuing a request or task; this can write state and is not retry-safe. For status=needs_input, collect answers and call recordInput; for status=needs_review, present findings and call reviewDecide with the user's decisions. Only status=task returns a task.taskId for taskContext. Do not poll unresolved input or review results."
   }, async () => result(await service.nextTask()));
@@ -75091,8 +77371,25 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     description: "Record answers for the exact pending kernel input request",
     inputSchema: inputSubmission
   }, async (input2) => result(await service.recordInput(input2)));
+  registerTool("inputHistory", {
+    description: "Read recorded Requirements intake and current Architecture answers and base hashes for correction. Never delete a project to correct an answer.",
+    inputSchema: { cursor: cursorInput }
+  }, async () => result(await service.inputHistory()));
+  registerTool("previewInputAmendment", {
+    description: "Preview an append-only correction to recorded answers, including dependent review/gate invalidation and re-approval. Does not apply it. Long text answers show size and SHA-256 when over budget; proposalHash binds the full proposal.",
+    inputSchema: { amendment: inputAmendment, reason: external_exports.string().min(1).max(2048) }
+  }, async ({ amendment, reason }) => result(boundedAmendmentPreview(await service.previewInputAmendment(amendment, reason))));
+  registerTool("amendInput", {
+    description: "Apply only after the user confirms the exact preview and impact. Preserves audit history; does not approve any gate or authorize deployment.",
+    inputSchema: {
+      amendment: inputAmendment,
+      reason: external_exports.string().min(1).max(2048),
+      expectedHash: external_exports.string().regex(/^[0-9a-f]{64}$/u),
+      confirm: external_exports.literal(true)
+    }
+  }, async ({ amendment, ...options2 }) => result(await service.amendInput(amendment, options2)));
   registerTool("governanceImport", {
-    description: "Import governance for the active discovery task: either a reviewed local subscription baseline by path (never its contents) or reference: true for the shipped ALZ Corp reference baseline.",
+    description: "Import governance for the active discovery task: a reviewed local subscription baseline path or reference: true for the shipped ALZ Corp reference baseline.",
     inputSchema: { path: external_exports.string().min(1).optional(), reference: external_exports.literal(true).optional() }
   }, async ({ path: path2, reference }) => {
     if (path2 === void 0 === (reference === void 0))
@@ -75100,11 +77397,11 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     return result(await (path2 === void 0 ? service.importGovernanceReference() : service.importGovernanceBaseline(path2)));
   });
   registerTool("governanceSelect", {
-    description: "Prepare or recall the target governance snapshot reuse/refresh question; only a local path is accepted. Does not import or collect Azure policy.",
+    description: "Prepare or recall the target governance snapshot reuse/refresh question for a local baseline path. Does not import or collect Azure policy.",
     inputSchema: { path: external_exports.string().min(1), reopen: external_exports.boolean().optional() }
   }, async ({ path: path2, reopen }) => result(await service.selectGovernanceBaseline(path2, ...reopen === void 0 ? [] : [{ reopen }])));
   registerTool("projectCreate", {
-    description: "Create and select a new project with its initial environment run. targetScope is the user's explicit choice: local, or a full /subscriptions/<id>/resourceGroups/<name> path. purpose is lab (default) or production; production is unavailable until CP-28/CP-29 ship and is rejected.",
+    description: "Create and select a new project and initial run. targetScope is local or /subscriptions/<id>/resourceGroups/<name>. purpose is lab (default) or production (rejected until CP-28/CP-29).",
     inputSchema: projectCreateInput
   }, async (input2) => result(await service.createProject(input2)));
   registerTool("projectList", { description: "List projects in the current workspace", inputSchema: { cursor: cursorInput } }, async () => result({ projects: await service.listProjects() }));
@@ -75114,9 +77411,18 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     inputSchema: projectDeleteInput
   }, async ({ projectId, confirm }) => result(await service.deleteProject(projectId, confirm)));
   registerTool("gateDecide", {
-    description: "Record the explicitly confirmed human Gate 1 intent confirmation (purpose, target and requirements) using the local OS username as actor. In a lab run Gates 2 and 3 are kernel-recorded readiness checkpoints, not human decisions, and are refused here with reason GATE_READINESS_AUTOMATIC: resolve the reported review or validation blocker instead. Gate 4, the final preview approval, remains CLI-only.",
+    description: "Record confirmed human Gate 1 intent (purpose, target, requirements). In lab runs Gates 2 and 3 are automatic readiness checkpoints (refused with GATE_READINESS_AUTOMATIC). Gate 4 is CLI-only.",
     inputSchema: gateDecisionInput
   }, async ({ gate, decision }) => result(await service.decideInteractiveGate(gate, decision)));
+  registerTool("gateDelegate", {
+    description: "Evaluate Gate 1 or exact apply Gate 4 under an existing human-confirmed lab delegation policy using recorded policy/consent hashes and, for Gate 4, exact preview/context hashes. Native AzureCloud Bicep create-only; expired or revoked consent fails closed.",
+    inputSchema: delegatedGateInput
+  }, async ({ gate, policyHash, consentHash, previewHash, approvalContextHash }) => result(await service.decideDelegatedGate(gate, {
+    policyHash,
+    consentHash,
+    ...previewHash === void 0 ? {} : { previewHash },
+    ...approvalContextHash === void 0 ? {} : { approvalContextHash }
+  })));
   registerTool("reviewDecide", {
     description: "Resolve review findings atomically by revision, Requirements obligation acknowledgment with an owner, or permitted time-bound risk.",
     inputSchema: reviewDecisionInput
@@ -75126,23 +77432,6 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     ...owner === void 0 ? {} : { owner },
     ...expiresAt === void 0 ? {} : { expiresAt }
   })))));
-  registerTool("stageArtifact", {
-    description: "Stage one typed artifact or an outputs[] bundle for the exact active task; staging does not complete the task.",
-    inputSchema: stagingInput(false)
-  }, async ({ taskId, kind, value, summary, outputs }, extra) => {
-    if (outputs !== void 0) {
-      const artifacts = [];
-      for (const output2 of normalizeOutputs(outputs)) {
-        if (extra.signal.aborted)
-          throw new ApexError("APEX_CONFLICT", "Cancelled", EXIT_CODES.conflict);
-        artifacts.push(await service.stageArtifact(taskId, output2));
-      }
-      return result({ artifacts });
-    }
-    if (kind === void 0)
-      throw new Error("stageArtifact requires kind/value or outputs[]");
-    return result(await service.stageArtifact(taskId, { kind, value, ...summary === void 0 ? {} : { summary } }));
-  });
   registerTool("stageFile", {
     description: "Stage a generated file for the exact active task, optionally checking its expected SHA; does not deploy it.",
     inputSchema: {
@@ -75168,7 +77457,7 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     ...lockFileContent === void 0 ? {} : { lockFileContent }
   })));
   registerTool("validateTask", {
-    description: "With only taskId for an IaC validation task, execute native checks and return runtime-owned outputs and execution metadata. valid:false and blockedValidatorIds mean required checks remain unexecuted; do not complete. Supplied artifacts are only checked/staged. Task completion and approval are separate.",
+    description: "With only taskId for an IaC validation task, execute native checks and return runtime-owned outputs and execution metadata; valid:false or blockedValidatorIds means checks remain unexecuted. Supplied artifacts are checked and staged.",
     inputSchema: stagingInput(true)
   }, async ({ taskId, kind, value, summary, outputs }, extra) => {
     if (outputs !== void 0) {
@@ -75196,7 +77485,7 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     inputSchema: { taskId: external_exports.string(), requirements: external_exports.unknown() }
   }, async ({ taskId, requirements }) => result(await service.completeRequirements(taskId, requirements)));
   registerTool("architectureComplete", {
-    description: "Complete Architecture atomically; APEX derives identity, artifact hashes, top-level requirementTraceability, and cost/SKU bindings. Each SKU and SLO decision lists its component requirementIds. policyMappings maps each governanceFindings entry from task context to a component; APEX marks findings whose resource types match no component resourceTypes not-applicable. A rejection lists every problem across all four inputs.",
+    description: "Complete Architecture atomically; APEX derives identity, hashes, requirementTraceability, and cost/SKU bindings. Each SKU and SLO decision lists component requirementIds; policyMappings maps governanceFindings to components.",
     inputSchema: {
       taskId: external_exports.string(),
       architecture: external_exports.unknown(),
@@ -75206,7 +77495,7 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     }
   }, async ({ taskId, architecture, costEstimate, decisionManifest, policyMappings }) => result(await service.completeArchitecture(taskId, architecture, costEstimate, decisionManifest, policyMappings)));
   registerTool("reviewComplete", {
-    description: "Complete the active review task from rubber-duck's captured output after running rubber-duck in sync mode with the exact reviewRequest.prompt from taskContext. Takes no findings: APEX derives them only from the verified capture. A missing, edited, replayed or mismatched capture fails closed and the review counts as not done.",
+    description: "Complete the active review task from rubber-duck's captured output after running rubber-duck in sync mode with reviewRequest.prompt from taskContext. Missing or tampered captures fail closed.",
     inputSchema: { taskId: external_exports.string() }
   }, async ({ taskId }) => result(await service.completeReview(taskId)));
   registerTool("planComplete", {
@@ -75223,39 +77512,6 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     const { status: status2, doctor: doctor2 } = await service.diagnose();
     return result({ status: status2, doctor: summarizeDoctorReport(doctor2) });
   });
-  registerTool("improvementObserve", {
-    description: "Submit one bounded redacted observation for the selected run",
-    inputSchema: {
-      taskId: external_exports.string().optional(),
-      observedAt: external_exports.string().datetime().optional(),
-      source: external_exports.enum([
-        "task-completion",
-        "deterministic-test",
-        "validation-failure",
-        "capability-execution",
-        "cache-check",
-        "explicit-correction"
-      ]),
-      category: external_exports.enum([
-        "correctness",
-        "security",
-        "reliability",
-        "performance",
-        "usability",
-        "documentation",
-        "capability-gap"
-      ]),
-      severity: external_exports.enum(["critical", "high", "medium", "low", "info"]),
-      statement: external_exports.string().min(1).max(1024),
-      evidenceRefs: external_exports.array(external_exports.string().regex(/^[0-9a-f]{64}$/)).min(1).max(32)
-    }
-  }, async ({ taskId, observedAt, ...input2 }) => result(await service.improvementObserve({
-    ...input2,
-    ...taskId === void 0 ? {} : { taskId },
-    ...observedAt === void 0 ? {} : { observedAt }
-  })));
-  registerTool("improvementObservations", { description: "Read bounded observations", inputSchema: { cursor: cursorInput } }, async () => result({ observations: await service.improvementObservations() }));
-  registerTool("improvementProposals", { description: "Read inert improvement proposals", inputSchema: { cursor: cursorInput } }, async () => result({ proposals: await service.improvementProposals() }));
   registerTool("render", {
     description: "Render the selected run's status, requirements, preview, approval, inventory, structured Architecture decisions, implementation plan, plan-bound deployment guide, operational runbook, or evidence-bound deployment summary as a human-readable projection.",
     inputSchema: {
@@ -75274,36 +77530,9 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
       cursor: cursorInput
     }
   }, async ({ kind }) => result({ markdown: await service.render(kind) }));
-  registerTool("promote", {
-    description: "Promote the selected run to a target environment through kernel checks; does not approve or execute deployment. The run's purpose is kept; a different purpose needs a new project.",
-    inputSchema: { environment: external_exports.string(), target: external_exports.string(), purpose: external_exports.enum(["lab", "production"]).optional() }
-  }, async ({ environment, target, purpose }) => result(await service.promote(environment, target, purpose)));
-  registerTool("doctor", {
-    description: "Inspect local APEX installation health; request repairs with fix and explicit confirmation with yes. Returns counts, remedies, and a bounded check list with failing checks first; when truncated, read every check with doctorChecks.",
-    inputSchema: { fix: external_exports.boolean().optional(), yes: external_exports.boolean().optional() }
-  }, async ({ fix, yes }) => result(summarizeDoctorReport(await service.doctor(fix, yes))));
-  registerTool("doctorChecks", {
-    description: "Read every local APEX installation health check without repairing; failedOnly limits the list to failing checks.",
-    inputSchema: { failedOnly: external_exports.boolean().optional(), cursor: cursorInput }
-  }, async ({ failedOnly }) => {
-    const { checks } = await service.doctor();
-    return result({ checks: failedOnly === true ? checks.filter(({ ok }) => !ok) : checks });
-  });
-  registerTool("submitEvidence", {
-    description: "Submit JSON evidence bound to the exact active task after validating its context; does not complete the task.",
-    inputSchema: {
-      taskId: external_exports.string(),
-      kind: external_exports.string(),
-      value: external_exports.record(external_exports.string(), external_exports.json()),
-      required: external_exports.boolean().optional()
-    }
-  }, async ({ taskId, kind, value, required: required3 }) => {
-    await service.taskContext(taskId);
-    return result(await service.acceptEvidence({ kind, contentType: "application/json", value, required: required3 ?? false }));
-  });
   const unknownTool = (name) => {
-    const label = typeof name === "string" && /^[A-Za-z][A-Za-z0-9_-]{0,63}$/u.test(name) ? ` ${name}` : "";
-    const error62 = new ApexError("APEX_USAGE", `Unknown tool${label}; call tools/list for available tools`, EXIT_CODES.usage);
+    const label2 = typeof name === "string" && /^[A-Za-z][A-Za-z0-9_-]{0,63}$/u.test(name) ? ` ${name}` : "";
+    const error62 = new ApexError("APEX_USAGE", `Unknown tool${label2}; call tools/list for available tools`, EXIT_CODES.usage);
     return {
       ...result({ error: { code: error62.code, message: error62.message, remediation: remediationForApexError(error62) } }),
       isError: true
@@ -75402,9 +77631,9 @@ async function createRuntimeDirectory(runtimeRoot, name) {
   await ensureDirectory(path2, 448);
   return path2;
 }
-function requireHash(value, label) {
+function requireHash(value, label2) {
   if (!HASH_PATTERN2.test(value))
-    throw new Error(`${label} must be a SHA-256 hash`);
+    throw new Error(`${label2} must be a SHA-256 hash`);
   return value;
 }
 function storageKey(value) {
@@ -75422,10 +77651,10 @@ async function readJsonFile(path2) {
     throw error62;
   }
 }
-async function readRegularFile2(path2, label) {
+async function readRegularFile2(path2, label2) {
   const info = await lstat17(path2);
   if (info.isSymbolicLink() || !info.isFile())
-    throw new Error(`${label} is not a regular file: ${path2}`);
+    throw new Error(`${label2} is not a regular file: ${path2}`);
   return await readFile17(path2);
 }
 function isTerraformInputFile(name) {
@@ -75597,52 +77826,52 @@ var PLAN_KEY_PATH = "plan-transport.key";
 function earliestExpiry(...values) {
   return values.reduce((earliest, value) => Date.parse(value) < Date.parse(earliest) ? value : earliest);
 }
-function requireRecord(value, label) {
+function requireRecord(value, label2) {
   if (value === null || typeof value !== "object" || Array.isArray(value))
-    throw new Error(`${label} is invalid`);
+    throw new Error(`${label2} is invalid`);
   return value;
 }
-function requireNonempty(value, label) {
+function requireNonempty(value, label2) {
   if (typeof value !== "string" || value.trim().length === 0)
-    throw new Error(`${label} is required`);
+    throw new Error(`${label2} is required`);
   return value;
 }
-function requireHash2(value, label) {
+function requireHash2(value, label2) {
   if (typeof value !== "string" || !HASH_PATTERN3.test(value))
-    throw new Error(`${label} must be a SHA-256 hash`);
+    throw new Error(`${label2} must be a SHA-256 hash`);
   return value;
 }
-function requireBase64(value, bytes, label) {
+function requireBase64(value, bytes, label2) {
   if (typeof value !== "string" || !BASE64_PATTERN2.test(value))
-    throw new Error(`${label} is invalid`);
+    throw new Error(`${label2} is invalid`);
   const decoded = Buffer.from(value, "base64");
   if (decoded.byteLength !== bytes || decoded.toString("base64") !== value)
-    throw new Error(`${label} is invalid`);
+    throw new Error(`${label2} is invalid`);
   return value;
 }
-function parseJson(bytes, label) {
+function parseJson(bytes, label2) {
   try {
     return JSON.parse(bytes.toString("utf8"));
   } catch {
-    throw new Error(`${label} is not valid JSON`);
+    throw new Error(`${label2} is not valid JSON`);
   }
 }
-async function readRegular(path2, label) {
+async function readRegular(path2, label2) {
   const info = await lstat18(path2);
   if (info.isSymbolicLink() || !info.isFile())
-    throw new Error(`${label} is not a regular file`);
+    throw new Error(`${label2} is not a regular file`);
   if (info.size > PROVIDER_TRANSFER_MAX_FILE_BYTES)
-    throw new Error(`${label} exceeds the 4 MiB file limit`);
+    throw new Error(`${label2} exceeds the 4 MiB file limit`);
   return await readFile18(path2);
 }
-function exactKeys2(value, expected, label) {
+function exactKeys2(value, expected, label2) {
   if (Object.keys(value).sort().join("\0") !== [...expected].sort().join("\0")) {
-    throw new Error(`${label} shape is invalid`);
+    throw new Error(`${label2} shape is invalid`);
   }
 }
-function requireTimestamp(value, label) {
+function requireTimestamp(value, label2) {
   if (typeof value !== "string" || !Number.isFinite(Date.parse(value)))
-    throw new Error(`${label} is invalid`);
+    throw new Error(`${label2} is invalid`);
   return value;
 }
 function validatePreview(preview) {
@@ -76008,11 +78237,11 @@ function validateBundle(value, envelopeBindings) {
     throw new Error("Provider transfer contains unrelated files");
   return { bundle, entries };
 }
-async function assertSafeDirectory(path2, label) {
+async function assertSafeDirectory(path2, label2) {
   try {
     const info = await lstat18(path2);
     if (info.isSymbolicLink() || !info.isDirectory())
-      throw new Error(`${label} is unsafe`);
+      throw new Error(`${label2} is unsafe`);
     return true;
   } catch (error62) {
     if (error62.code === "ENOENT")
@@ -76125,14 +78354,14 @@ function prohibitedStatePath(path2) {
   }
   return /(?:^|\/)(?:credentials?(?:\.json)?|terraform\.tfstate(?:\.[^/]*)?|[^/]+\.tfplan(?:\.enc)?|state-plans?)(?:\/|$)/i.test(path2);
 }
-function requireIdentifier(value, label) {
+function requireIdentifier(value, label2) {
   if (typeof value !== "string" || !IDENTIFIER_PATTERN.test(value))
-    throw new Error(`${label} is invalid`);
+    throw new Error(`${label2} is invalid`);
   return value;
 }
-function requireHash3(value, label) {
+function requireHash3(value, label2) {
   if (typeof value !== "string" || !HASH_PATTERN4.test(value))
-    throw new Error(`${label} must be a SHA-256 hash`);
+    throw new Error(`${label2} must be a SHA-256 hash`);
   return value;
 }
 function parseJson2(bytes, path2) {
@@ -76171,17 +78400,17 @@ function validateJsonSafety(bytes, path2) {
   }
   return value;
 }
-async function readRegular2(path2, label) {
+async function readRegular2(path2, label2) {
   const info = await lstat19(path2);
   if (info.isSymbolicLink() || !info.isFile())
-    throw new Error(`${label} is not a regular file: ${path2}`);
+    throw new Error(`${label2} is not a regular file: ${path2}`);
   if (info.size > STATE_TRANSFER_MAX_FILE_BYTES)
-    throw new Error(`${label} exceeds the 4 MiB file limit: ${path2}`);
+    throw new Error(`${label2} exceeds the 4 MiB file limit: ${path2}`);
   return await readFile19(path2);
 }
-async function readOptionalRegular(path2, label) {
+async function readOptionalRegular(path2, label2) {
   try {
-    return await readRegular2(path2, label);
+    return await readRegular2(path2, label2);
   } catch (error62) {
     if (error62.code === "ENOENT")
       return void 0;
@@ -77002,13 +79231,23 @@ async function configuredProviders(root, flags) {
     const journal = new EventJournal(join26(runDirectory, "journal"));
     const events = await journal.replay();
     const dependencyRevision2 = dependencyRevision(run, events);
+    const consentEvent = events.findLast(({ type }) => type === "lab.delegation-consented");
+    const consent = consentEvent?.payload;
+    const revoked = consentEvent !== void 0 && events.some(({ type, sequence, payload }) => type === "lab.delegation-revoked" && sequence > consentEvent.sequence && payload.policyHash === consent?.policyHash);
+    const delegationAuthority = consent === void 0 || revoked ? {} : { activeLabDelegation: consent };
     let recipientIdentity = "local";
     let previousOwnerEpoch;
     let writerTransferClaimHash;
     try {
       const ownership = await new WriterTransferStore(runDirectory).currentActiveOwnership();
       if (ownership === null)
-        return { head: dependencyRevision2, dependencyRevision: dependencyRevision2, ownerEpoch: run.ownerEpoch, recipientIdentity };
+        return {
+          head: dependencyRevision2,
+          dependencyRevision: dependencyRevision2,
+          ownerEpoch: run.ownerEpoch,
+          recipientIdentity,
+          ...delegationAuthority
+        };
       if (ownership.ownerEpoch === run.ownerEpoch && typeof ownership.ownerId === "string") {
         recipientIdentity = ownership.ownerId;
         if (typeof ownership.previousOwnerEpoch === "number" && ownership.previousOwnerEpoch + 1 === run.ownerEpoch && typeof ownership.claimHash === "string" && /^[0-9a-f]{64}$/.test(ownership.claimHash)) {
@@ -77025,7 +79264,8 @@ async function configuredProviders(root, flags) {
       dependencyRevision: dependencyRevision2,
       ownerEpoch: run.ownerEpoch,
       ...previousOwnerEpoch === void 0 || writerTransferClaimHash === void 0 ? {} : { previousOwnerEpoch, writerTransferClaimHash },
-      recipientIdentity
+      recipientIdentity,
+      ...delegationAuthority
     };
   };
   const providers = {};
@@ -77392,6 +79632,17 @@ async function dispatch(service, command, flags, root, options, interaction) {
       });
     case "status":
       return service.workspaceStatus();
+    case "input history":
+      return service.inputHistory();
+    case "input preview-amendment":
+      return service.previewInputAmendment(await inputJson(flags), required2(flags, "reason"));
+    case "input amend":
+      confirmed(flags, "input amend");
+      return service.amendInput(await inputJson(flags), {
+        reason: required2(flags, "reason"),
+        expectedHash: required2(flags, "expected-hash"),
+        confirm: true
+      });
     case "requirements preview-change":
       return service.previewRequirementsChange(await inputJson(flags), required2(flags, "reason"));
     case "requirements preview-amendment":
@@ -77470,6 +79721,41 @@ async function dispatch(service, command, flags, root, options, interaction) {
       }
       return service.decideGateNumber(Number(required2(flags, "gate")), required2(flags, "decision"), required2(flags, "actor"), typeof flags.recipient === "string" ? { recipientIdentity: flags.recipient } : {});
     }
+    case "lab delegation-confirm": {
+      if (!process.stdin.isTTY || !process.stderr.isTTY || flags.yes !== void 0 || flags.actor !== void 0 || flags.json !== void 0)
+        throw new ApexError("APEX_AUTHORIZATION", "Human policy confirmation requires an interactive terminal; --yes, --actor, --json and piped input are not consent", EXIT_CODES.authorization);
+      const policy = JSON.parse(await readFile20(required2(flags, "file"), "utf8"));
+      return service.confirmLabDelegation(policy, async (policyHash) => {
+        process.stderr.write(`Lab delegation policy ${policyHash}
+${JSON.stringify(policy, null, 2)}
+
+Confirm that this exact resource-group scope is yours to authorize and the workload is synthetic and non-sensitive. Only allowlisted absent-resource creates and non-material no-ops are delegated for apply. No destroy, production, updates, risk acceptance or other human questions are delegated. This consents to the bounded policy, NOT human review of an unseen future preview.
+`);
+        const terminal = createInterface2({ input: process.stdin, output: process.stderr });
+        try {
+          const answer = await terminal.question(`Type DELEGATE ${policyHash} to consent until ${policy.expiresAt}: `);
+          if (answer !== `DELEGATE ${policyHash}`)
+            throw new ApexError("APEX_AUTHORIZATION", "Delegation was not confirmed", EXIT_CODES.authorization);
+          const actor = userInfo2().username;
+          if (!actor.trim())
+            throw new ApexError("APEX_AUTHORIZATION", "Local consent identity is unavailable", EXIT_CODES.authorization);
+          return { actor };
+        } finally {
+          terminal.close();
+        }
+      });
+    }
+    case "lab delegation-show":
+      return service.labDelegation();
+    case "lab delegation-revoke":
+      return service.revokeLabDelegation(required2(flags, "policy"));
+    case "gate delegated":
+      return service.decideDelegatedGate(Number(required2(flags, "gate")), {
+        policyHash: required2(flags, "policy"),
+        consentHash: required2(flags, "consent"),
+        ...typeof flags.preview === "string" ? { previewHash: flags.preview } : {},
+        ...typeof flags.context === "string" ? { approvalContextHash: flags.context } : {}
+      });
     case "validate":
       return service.validate();
     case "preview":
@@ -77563,24 +79849,86 @@ async function dispatch(service, command, flags, root, options, interaction) {
       throw new ApexError("APEX_USAGE", `Unknown command: ${command || "<none>"}`, EXIT_CODES.usage);
   }
 }
+async function main(args = process.argv.slice(2)) {
+  const json2 = args.includes("--json");
+  const verbose = args.includes("--verbose");
+  try {
+    const result = await execute2(args);
+    if (result !== void 0)
+      process.stdout.write(json2 ? `${JSON.stringify({ ok: true, result })}
+` : `${verbose ? typeof result === "string" ? result : JSON.stringify(result, null, 2) : formatHumanResult(args, result)}
+`);
+  } catch (error62) {
+    const normalized = normalizeError(error62);
+    const value = {
+      ok: false,
+      error: { code: normalized.code, message: normalized.message, details: normalized.details }
+    };
+    process.stderr.write(json2 ? `${JSON.stringify(value)}
+` : `${normalized.code}: ${normalized.message}
+`);
+    process.exitCode = normalized.exitCode;
+  }
+}
+function formatHumanResult(args, result) {
+  const command = args.find((argument) => !argument.startsWith("--"));
+  if (command === "status" && result !== null && typeof result === "object") {
+    if ("status" in result && result.status === "needs_project")
+      return "Workspace configured. No projects yet. Open APEX to gather details and create the first project.";
+    const status2 = result;
+    const task = status2.task ?? null;
+    const stage = task?.startsWith("requirements") ? "Requirements" : task?.startsWith("architecture") || task?.startsWith("governance") ? "Architecture" : task?.startsWith("plan") ? "Planning" : task?.startsWith("codegen") || task?.startsWith("validation") ? "Build and validate" : task?.startsWith("preview") || task?.startsWith("deploy") || task === "inventory" ? "Operations" : "Ready for next decision";
+    const blocker = status2.blockers?.[0] ?? "None";
+    const next = task !== null ? `Continue ${stage}` : blocker !== "None" ? blocker : "Ask APEX to continue";
+    return [
+      `Project: ${status2.run?.projectId ?? "unknown"} (${status2.run?.environment ?? "unknown"})`,
+      `Stage: ${stage}`,
+      `Blocker: ${blocker}`,
+      `Next: ${next}`
+    ].join("\n");
+  }
+  if (command === "doctor" && result !== null && typeof result === "object") {
+    const doctor2 = result;
+    const passed = doctor2.checks?.filter(({ ok }) => ok).length ?? 0;
+    const total = doctor2.checks?.length ?? 0;
+    const remaining = doctor2.remedies?.length ?? 0;
+    const warnings = doctor2.checks?.filter(({ ok, severity }) => ok && severity === "warning") ?? [];
+    const warning = warnings[0]?.remedy ?? warnings[0]?.value;
+    return [
+      `Status: ${doctor2.healthy ? "Ready" : "Setup incomplete"} (${passed}/${total} checks ready)`,
+      `Next: ${doctor2.nextAction ?? "No action required"}`,
+      ...remaining > 1 ? [`Later: ${remaining - 1} additional setup item${remaining === 2 ? "" : "s"}`] : [],
+      ...warnings.length > 0 ? [`Warning: ${warning ?? "see doctor --json"}${warnings.length > 1 ? ` (+${warnings.length - 1} more)` : ""}`] : []
+    ].join("\n");
+  }
+  return typeof result === "string" ? result : JSON.stringify(result, null, 2);
+}
 if (false)
   await main();
 
 // plugin/mcp/apex.mjs
-try {
-  await execute2(["mcp", "serve"]);
-} catch (error62) {
-  const normalized = normalizeError(error62);
-  process.stderr.write(`${normalized.code}: ${normalized.message}
+var isDirectMcp = process.argv[1] !== void 0 && await realpath12(process.argv[1]).catch(() => process.argv[1]) === await realpath12(fileURLToPath4(import.meta.url)).catch(() => fileURLToPath4(import.meta.url));
+if (isDirectMcp) {
+  try {
+    await execute2(["mcp", "serve"]);
+  } catch (error62) {
+    const normalized = normalizeError(error62);
+    process.stderr.write(`${normalized.code}: ${normalized.message}
 `);
-  process.exitCode = normalized.exitCode;
+    process.exitCode = normalized.exitCode;
+  }
 }
+export {
+  execute2 as execute,
+  main,
+  normalizeError
+};
 /*! Bundled license information:
 
 js-yaml/dist/js-yaml.mjs:
-  (*! js-yaml 5.4.3 https://github.com/nodeca/js-yaml @license MIT *)
+  (*! js-yaml 5.5.0 https://github.com/nodeca/js-yaml @license MIT *)
 
-@modelcontextprotocol/server/dist/src-Cqbh3MYc.mjs:
+@modelcontextprotocol/server/dist/src-DdvbAHrR.mjs:
   (*!
   * content-type
   * Copyright(c) 2015 Douglas Christopher Wilson

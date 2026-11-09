@@ -1,6 +1,6 @@
 ---
 name: apex-azure-prepare
-description: '**WORKFLOW SKILL** — Prepare traceable Azure app and IaC intent from accepted APEX inputs. WHEN: "create app", "generate Bicep", "generate Terraform", "azure.yaml", "Dockerfile", "function app", "managed identity". DO NOT USE FOR: cross-cloud migration (use apex-azure-cloud-migrate), execution (use apex-azure-deploy), preflight evidence (use apex-azure-validate).'
+description: '**WORKFLOW SKILL** — Prepares traceable Azure app and IaC intent from accepted APEX inputs. WHEN: "create app", "generate Bicep", "generate Terraform", "azure.yaml", "Dockerfile", "function app", "managed identity". DO NOT USE FOR: cross-cloud migration (use apex-azure-cloud-migrate), execution (use apex-azure-deploy), preflight evidence (use apex-azure-validate).'
 user-invocable: false
 disable-model-invocation: false
 ---
@@ -62,8 +62,8 @@ before loading an upstream-derived reference.
   [phase adaptation](references/phases.md) and [binding fields](references/plan-template.md) - kernel-safe handoff.
 - [azd configuration](references/recipes/azd/README.md), [Azure CLI](references/recipes/azcli/README.md),
   [Bicep](references/recipes/bicep/README.md) and [Terraform](references/recipes/terraform/README.md) - static
-  configuration and provider syntax. azd is the planned executor for Bicep only (CP-26, #443), not available today;
-  Terraform uses the native CLI.
+  configuration and provider syntax. azd is the implemented Bicep provisioning/preview/destroy executor (CP-26, #443);
+  live qualification remains separate. Application-package/pipeline operations are unavailable; Terraform uses native CLI.
 - [.NET Aspire](references/aspire.md), [APIM](references/apim.md),
   [Node.js](references/runtimes/nodejs.md), [Functions](references/services/functions/README.md) and
   [Durable Task Scheduler](references/services/durable-task-scheduler/README.md) - select by accepted workload.

@@ -7,6 +7,16 @@
 
 # AZD Errors
 
+## Navigation
+
+- Deployment Runtime Errors
+- Principal Type Mismatch
+- Container App Revision Timeout
+- Missing Container Registry Variables
+- Retry
+- Cleanup (DESTRUCTIVE)
+- Port Source
+
 ## Deployment Runtime Errors
 
 These are upstream provider errors from provisioning, packaging and service delivery. APEX never runs the combined

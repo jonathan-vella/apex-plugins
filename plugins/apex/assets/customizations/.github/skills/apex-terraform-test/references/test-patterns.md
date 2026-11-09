@@ -8,6 +8,13 @@
 
 # Terraform Test Patterns
 
+## Navigation
+
+- Unit Test Patterns (Plan Mode)
+- Integration Test Patterns (Apply Mode)
+- CI/CD Integration
+- Testing AVM Modules
+
 Extended test patterns beyond the core examples in SKILL.md.
 
 ---

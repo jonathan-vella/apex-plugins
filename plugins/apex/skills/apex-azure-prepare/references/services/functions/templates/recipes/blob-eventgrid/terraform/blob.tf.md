@@ -7,6 +7,12 @@
 
 # blob syntax reference
 
+## Navigation
+
+- Reference content
+
+## Reference content
+
 ```hcl
 # recipes/blob-eventgrid/terraform/blob.tf
 # Blob Storage + Event Grid recipe module for Terraform — adds Storage account

@@ -1,8 +1,9 @@
 # Azure Developer CLI Quick Reference
 
 Adapted from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
-Read [the authority boundary](../kernel-boundary.md). azd is the planned executor for Bicep only (CP-26, #443); it is
-not implemented, and it is never a Terraform executor.
+Read [the authority boundary](../kernel-boundary.md). azd provision/preview/down is the implemented Bicep-only
+executor (CP-26, #443), subject to kernel approval and separate live qualification. Application-package/pipeline
+operations remain unsupported, and azd is never the Terraform executor.
 
 ## Setup and Context
 
@@ -24,7 +25,7 @@ If authentication is missing, the user signs in to the intended tenant. `azd ini
 # Read-only provisioning preview; accepted kernel preview evidence is still required.
 azd provision --preview
 
-# Provider syntax only: Changes Azure. Planned CP-26 runtime (Bicep only); not enabled today.
+# Provider syntax only: Changes Azure. Kernel-owned Bicep operation; never run directly from this reference.
 # azd provision
 
 # Changes Azure: planned CP-26 operation, separate from provisioning; not enabled today.

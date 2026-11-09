@@ -7,6 +7,13 @@
 
 # JavaScript SQL Trigger + Output
 
+## Navigation
+
+- Dependencies
+- Source Code
+- Files to Remove
+- Common Patterns
+
 ## Dependencies
 
 **package.json:**

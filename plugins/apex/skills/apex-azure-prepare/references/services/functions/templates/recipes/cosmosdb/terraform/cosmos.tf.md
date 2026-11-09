@@ -7,6 +7,12 @@
 
 # cosmos syntax reference
 
+## Navigation
+
+- Reference content
+
+## Reference content
+
 ```hcl
 # recipes/cosmosdb/terraform/cosmos.tf
 # Cosmos DB recipe module for Terraform — adds Cosmos DB account, database,

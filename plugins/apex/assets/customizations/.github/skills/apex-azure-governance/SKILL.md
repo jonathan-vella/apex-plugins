@@ -23,7 +23,9 @@ Governance is accepted after Gate 1 and before Architecture. It is either a revi
 or the shipped ALZ Corp reference baseline (`source: reference`), generated from a pinned Azure Landing Zones Library
 release (root, landing zones and corp archetypes). The reference is the default for `local` targets and for pre-sales
 work without Azure access; it has no freshness window, and a subscription target must replace it with its reviewed
-baseline before Gate 3.
+baseline before Gate 3. To import the reference, call `apex/governanceImport` with `reference: true` and no `path`; a
+reviewed baseline is imported by `path` only. The reference is local design input, not target-policy authority, and the
+run records which source it used.
 
 Return a blocker when collected evidence is missing, partial, failed, stale, or scoped to a different subscription or
 management-group ancestry. Do not infer policy state from model memory, templates, a policy display name, or a prior

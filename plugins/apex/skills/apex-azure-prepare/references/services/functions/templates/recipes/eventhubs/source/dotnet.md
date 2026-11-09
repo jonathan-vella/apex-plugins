@@ -7,6 +7,14 @@
 
 # C# (.NET) Event Hub Trigger
 
+## Navigation
+
+- Source Code
+- Files to Remove
+- Package Dependencies
+- Configuration Notes
+- Common Patterns
+
 ## Source Code
 
 Replace the HTTP trigger class with:

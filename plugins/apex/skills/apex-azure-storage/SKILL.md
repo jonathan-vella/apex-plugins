@@ -1,6 +1,6 @@
 ---
 name: apex-azure-storage
-description: '**UTILITY SKILL** — Selects Azure Storage services, tiers, redundancy, lifecycle and access posture for APEX architecture and planning decisions. WHEN: "blob storage", "file shares", "queue storage", "table storage", "data lake", "hot vs cool vs archive", "storage redundancy". DO NOT USE FOR: role selection (use apex-azure-rbac), storage cost review (use apex-azure-cost-optimization).'
+description: '**UTILITY SKILL** — Selects Azure Storage services, tiers, redundancy, lifecycle and access posture for APEX architecture and planning decisions. WHEN: "blob storage", "file shares", "queue storage", "table storage", "data lake", "hot vs cool vs archive", "storage redundancy". DO NOT USE FOR: role selection (use apex-azure-rbac), storage cost optimization (use apex-azure-cost-optimization).'
 user-invocable: false
 disable-model-invocation: false
 ---

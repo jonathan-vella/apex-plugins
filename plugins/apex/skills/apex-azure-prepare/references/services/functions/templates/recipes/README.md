@@ -6,6 +6,15 @@
 
 # Function Template Recipes
 
+## Navigation
+
+- Architecture
+- Common Patterns
+- Available Recipes
+- How It Works
+- Design Principles
+- Base Templates
+
 Composable IaC + source code modules that extend the HTTP base template
 to support specific Azure service integrations.
 

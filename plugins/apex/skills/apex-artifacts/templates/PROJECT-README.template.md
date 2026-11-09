@@ -136,7 +136,7 @@ _Generated with [apex-python-diagrams](../references/kernel-boundary.md)_
 | [01-requirements.md](../references/kernel-boundary.md)                       | Project requirements with NFRs    | ![Done](https://img.shields.io/badge/-Done-success?style=flat-square) | {created-date} |
 | [02-architecture-assessment.md](../references/kernel-boundary.md) | WAF assessment with pillar scores | ![Done](https://img.shields.io/badge/-Done-success?style=flat-square) | {created-date} |
 | [03-des-cost-estimate.md](../references/kernel-boundary.md)             | Azure pricing estimate            | ![Done](https://img.shields.io/badge/-Done-success?style=flat-square) | {created-date} |
-| [03-des-diagram.py](../references/kernel-boundary.md)                         | Architecture diagram source       | ![Done](https://img.shields.io/badge/-Done-success?style=flat-square) | {created-date} |
+| [03-des-diagram.mmd](../references/kernel-boundary.md)                        | Architecture diagram (Mermaid)    | ![Done](https://img.shields.io/badge/-Done-success?style=flat-square) | {created-date} |
 
 </details>
 

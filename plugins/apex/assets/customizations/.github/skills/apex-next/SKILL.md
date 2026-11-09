@@ -1,6 +1,7 @@
 ---
 name: apex-next
-description: "Routes the next APEX kernel step inside the same APEX agent by mapping owner roles to stage skills, hidden workers or captured rubber-duck reviews."
+description: "Routes explicit APEX continuation and kernel next-step results to same-agent stage skills, hidden workers or captured rubber-duck reviews. Preserves status-only requests and human stop points. Not repository maintenance, independent workflow authority or an agent-switching command."
+user-invocable: true
 ---
 
 When calling any `apex/*` MCP tool, include the current session checkout or worktree as the required absolute
@@ -70,6 +71,9 @@ active and loads the mapped skill, delegates one hidden worker, or runs one capt
 
 ## Rubber-duck reviews
 
+The only exception to the human Gate 1/Gate 4 stop rules above is an existing recorded lab delegation, evaluated
+through [Delegated lab gates](../apex-workflow/SKILL.md#delegated-lab-gates). It does not alter review or question routing.
+
 The Requirements, Architecture and Plan reviews run in the built-in `rubber-duck` agent. A managed hook saves its exact
 output and the kernel derives the findings from that capture; this agent never writes, edits or restates findings.
 
@@ -77,6 +81,8 @@ output and the kernel derives the findings from that capture; this agent never w
 2. Call `task` once with `agent_type: "rubber-duck"`, `mode: "sync"` and `prompt` set to `reviewRequest.prompt`
    exactly as returned. Copy it character for character; add nothing before or after it and do not summarize or
    extend it. Do not provide model, model-policy or reasoning-effort.
+   If the `task` result is only an `Agent moved to background` notice (with an `agent_id`), do not call
+   `apex/reviewComplete` on it: call `read_agent` for that `agent_id` with `wait: true` (repeat until it completes).
 3. Call `apex/reviewComplete` with only the task ID. Do not pass, interpret or correct rubber-duck's answer.
 4. If `apex/reviewComplete` fails, branch on the error. For a missing capture, run rubber-duck once more with the same
    prompt. For `APEX_CONFLICT` or `APEX_STALE`, do not run rubber-duck: call `apex/nextTask` and follow what it returns.
@@ -103,3 +109,11 @@ output and the kernel derives the findings from that capture; this agent never w
 
 Report the mapped skill or worker, the kernel task/request/review identifier, the carried stop point, and the next
 action. If the requested outcome is complete, summarize and stop.
+
+## Examples
+
+| Result | Required response |
+| --- | --- |
+| Status-only request | Return `apex/status` and stop without issuing work |
+| `status=needs_review` | Present dispositions with the mapped stage skill; do not poll or rerun a captured review |
+| `status=task`, owner `validator` | Delegate only the hidden Validator with exact task ID, complete context instruction and stop boundary |

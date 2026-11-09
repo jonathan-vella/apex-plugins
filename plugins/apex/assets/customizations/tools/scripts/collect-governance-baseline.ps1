@@ -197,8 +197,12 @@ function Get-EffectOf {
 }
 
 function Get-Classification {
-    param([string]$Effect)
-    if ($BLOCKER_EFFECTS -contains $Effect) { return "blocker" }
+    param([string]$Effect, [string]$EnforcementMode)
+    if ($BLOCKER_EFFECTS -contains $Effect) {
+        # A deny in a DoNotEnforce assignment is never enforced by Azure.
+        if ($EnforcementMode -ceq "DoNotEnforce") { return "informational" }
+        return "blocker"
+    }
     if ($AUTO_REMEDIATE_EFFECTS -contains $Effect) { return "auto-remediate" }
     return "informational"
 }
@@ -538,7 +542,7 @@ function Process-Subscription {
                 }
             }
 
-            $classification = Get-Classification $eff
+            $classification = Get-Classification $eff $enforcementMode
             if ($exemption) { $classification = "informational" }
 
             $effectLower = $eff.Substring(0,1).ToLower() + $eff.Substring(1)

@@ -296,7 +296,7 @@ or Governance directly. Never route directly to implementation planning.
 > | Cost        | X/10  |
 > | Operations  | X/10  |
 >
-> **Estimated Monthly Cost**: ~$X ({within budget / over budget by $Y})
+> **Estimated Monthly Cost**: ~$X ({compared with customer-provided budget, if any})
 >
 > **Confidence Level**: {High / Medium / Low}
 >
@@ -326,7 +326,7 @@ or Governance directly. Never route directly to implementation planning.
 
 ---
 
-_Assessment performed using Azure Well-Architected Framework. Pricing data from Azure Resource Manager MCP ({date})._
+_Assessment performed using Azure Well-Architected Framework. Pricing data from guarded Azure MCP ({date})._
 
 ---
 

@@ -6,6 +6,15 @@
 
 # Azure Functions
 
+## Navigation
+
+- When to Use
+- Service Type in azure.yaml
+- Supporting Resources
+- Hosting Plans
+- Runtime Stacks
+- References
+
 Serverless compute for event-driven workloads, APIs, and scheduled tasks.
 
 > **⚠️ MANDATORY: Use Composition Algorithm**

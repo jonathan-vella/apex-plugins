@@ -1,5 +1,17 @@
 # Azure Resource Graph Queries
 
+## Navigation
+
+- How to Query
+- Lookup Workflow
+- Key Tables
+- KQL Essentials
+- Resource Inventory Patterns
+- Orphaned Resource Patterns
+- Tag & Compliance Patterns
+- Health & Diagnostics Patterns
+- Service-Specific Patterns
+
 Azure Resource Graph (ARG) commands and KQL patterns ported from the upstream `azure-resource-graph.md`,
 `lookup-workflow.md` and the shared Resource Graph primer. ARG is read-only: every query here may run directly against
 the approved subscriptions. A query result is an observation; the typed inventory decision still cites accepted

@@ -7,6 +7,12 @@
 
 # eventhubs syntax reference
 
+## Navigation
+
+- Reference content
+
+## Reference content
+
 ```hcl
 # Event Hubs Recipe - Terraform Module
 # Adds Azure Event Hubs namespace, event hub, consumer group, and RBAC for managed identity

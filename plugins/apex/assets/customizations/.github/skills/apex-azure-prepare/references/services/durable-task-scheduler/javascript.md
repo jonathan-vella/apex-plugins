@@ -6,6 +6,16 @@
 
 # Durable Task Scheduler — JavaScript
 
+## Navigation
+
+- Learn More
+- Durable Functions Setup
+- Minimal Example
+- Workflow Patterns
+- Orchestration Determinism
+- Error Handling & Retry
+- Durable Task SDK (Non-Functions)
+
 ## Learn More
 
 - [Durable Task Scheduler documentation](https://learn.microsoft.com/azure/durable-task/scheduler/durable-task-scheduler)

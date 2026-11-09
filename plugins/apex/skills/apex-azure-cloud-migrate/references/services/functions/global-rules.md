@@ -31,7 +31,8 @@ Request missing user-owned choices through the kernel input contract before:
 
 ## Best Practices
 
-- Always use `mcp_azure-mcp_get_azure_bestpractices` tool before generating Azure code
+- Before generating Azure code, use `apex-azure/get_azure_bestpractices` with a bounded intent,
+  `get_azure_bestpractices_get` and parameters `{resource: "azurefunctions", action: "code-generation"}`.
 - Prefer managed identity over connection strings
 - **Always use the latest supported language runtime** — check [supported
   languages](https://learn.microsoft.com/en-us/azure/azure-functions/supported-languages) for the newest GA version.

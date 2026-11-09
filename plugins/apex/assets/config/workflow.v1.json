@@ -642,7 +642,17 @@
     {
       "from": "gate-2",
       "to": "plan",
-      "event": "approved"
+      "event": "approved",
+      "condition": {
+        "not": {
+          "equals": [
+            {
+              "path": "run.governanceRefreshRequired"
+            },
+            true
+          ]
+        }
+      }
     },
     {
       "from": "plan",
@@ -759,12 +769,43 @@
     {
       "from": "gate-2",
       "to": "governance-refresh",
-      "event": "approved"
+      "event": "approved",
+      "condition": {
+        "equals": [
+          {
+            "path": "run.governanceRefreshRequired"
+          },
+          true
+        ]
+      }
+    },
+    {
+      "from": "governance-refresh",
+      "to": "plan",
+      "event": "completed",
+      "condition": {
+        "not": {
+          "equals": [
+            {
+              "path": "run.policyRefreshRequired"
+            },
+            true
+          ]
+        }
+      }
     },
     {
       "from": "governance-refresh",
       "to": "policy-refresh",
-      "event": "completed"
+      "event": "completed",
+      "condition": {
+        "equals": [
+          {
+            "path": "run.policyRefreshRequired"
+          },
+          true
+        ]
+      }
     },
     {
       "from": "policy-refresh",

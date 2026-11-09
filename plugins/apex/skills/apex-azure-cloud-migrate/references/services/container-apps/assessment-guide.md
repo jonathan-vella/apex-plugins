@@ -7,6 +7,15 @@
 
 # Kubernetes to Azure Container Apps - Assessment Guide
 
+## Navigation
+
+- Compatibility Matrix
+- Unsupported Patterns
+- Assessment Checklist
+- Complexity Assessment Guidelines
+- Assessment Report Structure
+- Port Source
+
 ## Compatibility Matrix
 
 ### Kubernetes → Container Apps Resource Mapping

@@ -1,5 +1,5 @@
-> MCP names in this reference are upstream pseudo-interfaces, not current vNext tool registrations.
-> Use only capabilities projected by the active task; unavailable tools are blockers, never substitutes.
+> Managed Azure reads use verified `apex-azure` namespaces and actual command schemas.
+> Other provider examples are conditional; absent tools never grant mutation or hook-bypass authority.
 
 <!-- ref:policy-validation-v1 -->
 
@@ -26,7 +26,11 @@ az account show --query id -o tsv
 Call the Azure MCP Policy tool to retrieve policies for your subscription:
 
 ```text
-mcp_azure-mcp_policy(command: "list", parameters: { subscription_id: "<subscription-id>" })
+apex-azure/policy({
+  intent: "read policy assignments for the approved subscription",
+  command: "policy_assignment_list",
+  parameters: { subscription: "<subscription-id>" }
+})
 ```
 
 Replace `<subscription-id>` with the actual subscription ID obtained from step 1.

@@ -7,6 +7,16 @@
 
 # Kubernetes to Azure Container Apps Migration
 
+## Navigation
+
+- Overview
+- Resource Mapping
+- Configuration Mapping
+- Migration Workflow
+- Unsupported Features
+- Best Practices
+- Port Source
+
 Detailed guidance for migrating containerized workloads from Kubernetes (GKE, EKS, self-hosted) to Azure Container Apps.
 
 ## Overview

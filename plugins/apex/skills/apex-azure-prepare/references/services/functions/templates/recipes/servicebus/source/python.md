@@ -7,6 +7,14 @@
 
 # Python Service Bus Trigger
 
+## Navigation
+
+- function_app.py
+- requirements.txt additions
+- Files to Remove
+- Local Testing
+- Common Patterns
+
 Replace `src/api/function_app.py` with this content.
 
 ## function_app.py

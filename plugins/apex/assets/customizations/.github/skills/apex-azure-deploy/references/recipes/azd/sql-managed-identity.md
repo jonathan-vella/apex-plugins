@@ -7,6 +7,17 @@
 
 # SQL Managed Identity Access
 
+## Navigation
+
+- Prerequisites
+- Quick Grant
+- Database Roles
+- Automate with azd Hook
+- Verification
+- Troubleshooting
+- References
+- Port Source
+
 Grant Azure managed identities database permissions on Azure SQL with Entra authentication.
 
 ## Prerequisites

@@ -1,5 +1,5 @@
-> MCP names in this reference are upstream pseudo-interfaces, not current vNext tool registrations.
-> Use only capabilities projected by the active task; unavailable tools are blockers, never substitutes.
+> Managed Azure reads use verified `apex-azure` namespaces and actual command schemas.
+> Other provider examples are conditional; absent tools never grant mutation or hook-bypass authority.
 
 <!-- ref:resources-limits-quotas-v1 -->
 
@@ -10,6 +10,22 @@
 > Raw resources illustrate provider syntax; use AVM first and record any accepted coverage exception.
 
 # Azure Resource Limits and Quotas
+
+## Navigation
+
+- Types
+- Hard Limits
+- Quotas
+- Workflow
+- Limit Scopes
+- Service Patterns
+- CLI Reference
+- apex-azure-prepare Integration
+- Error Messages
+- Best Practices
+- Quick Reference Limits
+- Related Documentation
+- Example: Complete Check Workflow
 
 Check Azure quota evidence during apex-azure-prepare workflow after the customer selects a region.
 Read the canonical [quota evidence and fallback contract](https://github.com/jonathan-vella/apex/blob/c209d8bb765681aa21dce5d3cd2a3b080dad8d5e/.github/skills/apex-azure-quotas/references/commands.md#quota-evidence-and-fallback).
@@ -28,7 +44,8 @@ or `Unlimited` values are unknown evidence, not zero, unlimited quota or proof o
 
 Fixed service constraints (cannot be changed).
 
-**Check via**: `mcp_azure-mcp_documentation` with `command: "microsoft_docs_search"` (query the relevant Azure service
+**Check via**: `apex-azure/documentation` with a bounded `intent`, `command: "microsoft_docs_search"` and
+`parameters.query` (query the relevant Azure service
 docs) or the apex-azure-quotas skill
 
 **Examples**: Cosmos DB item size (2 MB), Container Apps HTTP timeout (240s), App Service Free tier deployment slots (0)

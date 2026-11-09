@@ -7,6 +7,12 @@
 
 # JavaScript MCP Tools
 
+## Navigation
+
+- tools.mjs
+- functions.mjs
+- Local SDK Host: sdk-server.mjs
+
 Native Azure Functions uses `@azure/functions` **4.16.5** and the MCP extension.
 Keep the base entry point and load the new .mjs registration file through its
 existing discovery pattern; do not delete unrelated HTTP functions.

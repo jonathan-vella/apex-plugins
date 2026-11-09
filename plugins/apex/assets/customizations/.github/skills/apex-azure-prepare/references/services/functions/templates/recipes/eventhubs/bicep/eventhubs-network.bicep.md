@@ -7,6 +7,12 @@
 
 # eventhubs-network syntax reference
 
+## Navigation
+
+- Reference content
+
+## Reference content
+
 ```bicep
 // Event Hubs Recipe - Network Module
 // Adds private endpoint and DNS configuration for VNet scenarios

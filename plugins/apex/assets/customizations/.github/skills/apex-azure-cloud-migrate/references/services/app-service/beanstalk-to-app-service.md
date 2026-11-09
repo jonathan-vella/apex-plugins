@@ -7,6 +7,18 @@
 
 # AWS Elastic Beanstalk to Azure App Service Migration
 
+## Navigation
+
+- Service Mapping
+- Platform Preset → Runtime Stack Mapping
+- `.ebextensions/` Migration
+- RDS → Azure Database Migration
+- Auto Scaling Migration
+- ALB → App Service Load Balancing
+- Environment Variables Migration
+- Reference Links
+- Port Source
+
 Detailed guidance for migrating AWS Elastic Beanstalk applications to Azure App Service.
 
 ## Service Mapping

@@ -7,6 +7,18 @@
 
 # EF Core Migrations Deployment
 
+## Navigation
+
+- Detection
+- Deployment Methods
+- Combined Hook: SQL Access + Migrations
+- Prerequisites
+- Connection String
+- Troubleshooting
+- Best Practices
+- References
+- Port Source
+
 Apply Entity Framework Core migrations to Azure SQL Database after deployment.
 
 Require explicit approval of the target, reviewed migrations and migration identity. Preparation/validation never

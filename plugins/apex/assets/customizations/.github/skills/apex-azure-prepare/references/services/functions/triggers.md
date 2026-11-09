@@ -6,6 +6,15 @@
 
 # Function Triggers
 
+## Navigation
+
+- HTTP Trigger
+- Timer Trigger
+- Service Bus Trigger (Managed Identity)
+- Service Bus Topic Trigger
+- Queue Trigger (Legacy - Connection String)
+- Blob Trigger
+
 ## HTTP Trigger
 
 ```javascript

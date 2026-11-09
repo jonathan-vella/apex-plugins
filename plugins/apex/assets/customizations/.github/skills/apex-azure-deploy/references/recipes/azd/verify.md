@@ -7,6 +7,15 @@
 
 # AZD Verification
 
+## Navigation
+
+- Step 1: Verify Resources
+- Step 2: Health Check
+- Step 3: Post-Deployment Verification (if applicable)
+- Common Issues
+- References
+- Port Source
+
 Verify deployment success and application health.
 
 ## Step 1: Verify Resources

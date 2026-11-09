@@ -2,15 +2,27 @@
 > accepted task scope.
 > Mutation examples are provider context, never direct agent instructions; they need a fresh preview, current Gate 4 and
 > trusted execution.
-> CP-26 azd/pipeline operations are planned, not available. Examples do not create kernel artifacts, approvals or
-> native-provider lifecycle authority.
+> Bicep provision/preview/down is kernel-owned; application-package/pipeline operations remain unsupported.
+> Examples do not create kernel artifacts, approvals or native-provider lifecycle authority.
 
 <!-- ref:troubleshooting-v1 -->
 
 # Troubleshooting
 
-This reference covers common errors reported by `azd` and how to resolve them. azd is a planned executor for Bicep only
-(DECISION-036, CP-26); today's runtime does not run it, so treat fixes and commands as provider context for diagnosis.
+## Navigation
+
+- Language Not Supported
+- SWA Project Path Issues
+- SWA Dist Not Found
+- Service Resource Not Found
+- Location Not Available for Resource Type
+- Missing Infrastructure Parameters
+- .NET Aspire Limited Mode - Missing Environment Variables
+- Port Source
+
+This reference covers reported `azd` errors. Bicep provision/preview/down uses the bounded runtime executor
+(DECISION-036, CP-26); application-package/pipeline operations remain unsupported. Treat commands as provider
+context for diagnosis, not permission to run a fix or an unimplemented operation.
 
 ## Language Not Supported
 

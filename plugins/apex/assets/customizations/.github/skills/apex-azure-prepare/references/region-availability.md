@@ -1,5 +1,5 @@
-> MCP names in this reference are upstream pseudo-interfaces, not current vNext tool registrations.
-> Use only capabilities projected by the active task; unavailable tools are blockers, never substitutes.
+> Managed Azure reads use verified `apex-azure` namespaces and actual command schemas.
+> Other provider examples are conditional; absent tools never grant mutation or hook-bypass authority.
 
 <!-- ref:region-availability-v1 -->
 
@@ -27,7 +27,12 @@
 
 | Tool                  | Purpose                                                                                                                   |
 | --------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `mcp_azure-mcp_quota` | Check Azure region availability and quota by setting `command` to `quota_usage_check` or `quota_region_availability_list` |
+| `apex-azure/quota` | Verified commands `quota_usage_check` or `quota_region_availability_list`; include bounded `intent` and `parameters` |
+
+Both commands require `parameters["resource-types"]` as a comma-separated string and the approved `subscription`.
+`quota_usage_check` also requires `region`. Schema-only discovery is `{intent: "", learn: true}` without
+command/parameters. Returned availability is not allocation proof; Architecture still treats availability/quota as
+assumptions rather than approval blockers.
 
 ---
 
@@ -37,8 +42,8 @@
 | ------------------------------ | ----------------------- | --------------------------------------------------------------------------- |
 | Static Web Apps                | Limited (5 regions)     | [Region Details](services/static-web-apps/region-availability.md)           |
 | Azure AI Foundry               | Very limited (by model) | [Region Details](services/foundry/region-availability.md)                   |
-| Azure Kubernetes Service (AKS) | Limited in some regions | To get available regions with enough quota, use `mcp_azure-mcp_quota` tool. |
-| Azure Database for PostgreSQL  | Limited in some regions | To get available regions with enough quota, use `mcp_azure-mcp_quota` tool. |
+| Azure Kubernetes Service (AKS) | Limited in some regions | Use verified `apex-azure/quota` reads for regional/quota observations, not allocation proof. |
+| Azure Database for PostgreSQL  | Limited in some regions | Use verified `apex-azure/quota` reads for regional/quota observations, not allocation proof. |
 
 ---
 

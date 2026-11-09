@@ -1,6 +1,6 @@
 ---
 name: apex-terraform-test
-description: '**WORKFLOW SKILL** — Design receipt-gated Terraform tests. WHEN: "create terraform test", "write tftest", ".tftest.hcl", "mock provider", "test module", "test assertion". DO NOT USE FOR: Bicep (use apex-bicep-patterns), architecture decisions (use apex-azure-adr), deployment (use apex-azure-deploy).'
+description: '**WORKFLOW SKILL** — Designs receipt-gated Terraform tests. WHEN: "create terraform test", "write tftest", ".tftest.hcl", "mock provider", "test module", "test assertion". DO NOT USE FOR: Bicep (use apex-bicep-patterns), architecture decisions (use apex-azure-adr), deployment (use apex-azure-deploy).'
 user-invocable: false
 disable-model-invocation: false
 ---

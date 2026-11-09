@@ -7,6 +7,12 @@
 
 # blob syntax reference
 
+## Navigation
+
+- Reference content
+
+## Reference content
+
 ```bicep
 // recipes/blob-eventgrid/bicep/blob.bicep
 // Blob Storage + Event Grid recipe module — adds Storage account with blob trigger

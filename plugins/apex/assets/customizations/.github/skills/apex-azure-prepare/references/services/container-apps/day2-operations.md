@@ -6,6 +6,16 @@
 
 # Container Apps Day-2 Operations
 
+## Navigation
+
+- Restart and Lifecycle
+- Exec into a Container
+- Log Streaming
+- Environment Variable Updates
+- Secret Management
+- Health Monitoring
+- Common Troubleshooting
+
 Operational tasks for running Container Apps in production: restart, exec, logs, environment updates, and secret rotation.
 
 ## Restart and Lifecycle

@@ -7,6 +7,12 @@
 
 # servicebus syntax reference
 
+## Navigation
+
+- Reference content
+
+## Reference content
+
 ```hcl
 # Service Bus Recipe - Terraform Module
 # Adds Azure Service Bus namespace, queue, and RBAC for managed identity

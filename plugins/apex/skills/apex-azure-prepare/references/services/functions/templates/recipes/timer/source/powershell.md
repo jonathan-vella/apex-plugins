@@ -7,6 +7,15 @@
 
 # PowerShell Timer Trigger
 
+## Navigation
+
+- src/functions/TimerTrigger/function.json
+- src/functions/TimerTrigger/run.ps1
+- src/functions/HealthCheck/function.json
+- src/functions/HealthCheck/run.ps1
+- Local Testing
+- Common Patterns
+
 Replace the contents of `src/functions/` with these files.
 
 ## src/functions/TimerTrigger/function.json

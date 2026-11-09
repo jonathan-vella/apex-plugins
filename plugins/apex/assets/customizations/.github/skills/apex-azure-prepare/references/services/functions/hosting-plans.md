@@ -6,6 +6,15 @@
 
 # Azure Functions Hosting Plans
 
+## Navigation
+
+- Plan Comparison Matrix
+- Instance Sizing
+- Cost Models
+- Decision Criteria
+- Plan-Specific Considerations
+- Migration Notes
+
 ## Plan Comparison Matrix
 
 | Feature | Consumption (Y1) | Flex Consumption (FC1) | Premium (EP1-EP3) | Dedicated (App Service) | Container Apps |

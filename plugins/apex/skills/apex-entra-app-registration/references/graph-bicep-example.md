@@ -1,5 +1,11 @@
 # Microsoft Graph Bicep Example
 
+## Navigation
+
+- Reference content
+
+## Reference content
+
 App registration and service principal as Microsoft Graph Bicep, ported from the upstream `BICEP-EXAMPLE.bicep`. This is
 the routed form of the `az ad app create` and `az ad sp create` commands in [CLI commands](cli-commands.md): the
 registration ships as IaC through `apex preview`, the current runtime's Gate 4 and `apex deploy`. The agent never

@@ -1,5 +1,22 @@
 # Azure CLI Commands for App Registration
 
+## Navigation
+
+- Command Routing
+- Prerequisites
+- App Registration Management
+- List and Query Apps
+- Update App Registration
+- Client Credentials (Secrets & Certificates)
+- API Permissions
+- Service Principal Management
+- App Roles and Claims
+- Owners
+- Delete App Registration
+- Tenant and Identity Information
+- Scripting Examples
+- Troubleshooting Commands
+
 Reference for managing Microsoft Entra app registrations with the Azure CLI, ported in full from the upstream
 `cli-commands.md`, with the troubleshooting and permission-lookup commands from `troubleshooting.md` and
 `api-permissions.md`.

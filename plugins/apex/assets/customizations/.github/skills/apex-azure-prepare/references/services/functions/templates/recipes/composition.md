@@ -6,6 +6,15 @@
 
 # Composition Algorithm
 
+## Navigation
+
+- Algorithm
+- Base Template Lookup
+- Storage Endpoint Requirements
+- Recipe Classification
+- Critical Rules
+- Terraform-Specific Requirements
+
 Step-by-step algorithm for composing a base HTTP template with an integration recipe.
 
 > **This is the authoritative process. Follow it exactly.**

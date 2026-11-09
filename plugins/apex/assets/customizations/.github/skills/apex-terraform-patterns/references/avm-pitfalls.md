@@ -8,6 +8,17 @@
 
 # Terraform AVM Known Pitfalls
 
+## Navigation
+
+- Set-Type Attribute Phantom Diffs
+- Provider Version Constraint Pitfalls
+- Ignore Changes for Externally-Managed Tags
+- `for_each` Over `count` for Named Resources
+- `moved` Block for Resource Renaming
+- AVM Module `enable_telemetry` Default
+- azurerm 4.x Breaking Changes from 3.x
+- Provider Runtime Failures (pass validate + plan, fail at apply)
+
 ## Set-Type Attribute Phantom Diffs
 
 AzureRM resources using Terraform's `Set` type (Application Gateway, Load Balancer,

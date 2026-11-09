@@ -4,7 +4,7 @@
     "preToolUse": [
       {
         "type": "command",
-        "matcher": "task|Task|Agent|.*apex[-_]azure[-_]pricing.*",
+        "matcher": "task|Task|Agent|.*apex[-_]azure.*",
         "bash": "f=\"${PLUGIN_ROOT}/com.github.copilot/hooks/apex-hook.mjs\"; if [ -f \"$f\" ]; then exec node \"$f\" preToolUse; fi; cat > /dev/null; echo \"APEX hook: $f is missing; reinstall the APEX plugin. Call denied.\" >&2; exit 1",
         "powershell": "$f = [System.IO.Path]::Combine([string]$env:PLUGIN_ROOT, 'com.github.copilot', 'hooks', 'apex-hook.mjs'); if ([System.IO.File]::Exists($f)) { try { & node $f preToolUse } catch { exit 1 }; exit $LASTEXITCODE }; [void][Console]::In.ReadToEnd(); [Console]::Error.WriteLine(\"APEX hook: $f is missing; reinstall the APEX plugin. Call denied.\"); exit 1",
         "timeoutSec": 15
@@ -20,7 +20,7 @@
     "postToolUse": [
       {
         "type": "command",
-        "matcher": "task|Task|Agent",
+        "matcher": "task|Task|Agent|read_agent",
         "bash": "f=\"${PLUGIN_ROOT}/com.github.copilot/hooks/apex-hook.mjs\"; if [ -f \"$f\" ]; then exec node \"$f\" postToolUse; fi; cat > /dev/null; echo \"APEX hook: $f is missing; reinstall the APEX plugin. Call allowed.\" >&2",
         "powershell": "$f = [System.IO.Path]::Combine([string]$env:PLUGIN_ROOT, 'com.github.copilot', 'hooks', 'apex-hook.mjs'); if ([System.IO.File]::Exists($f)) { try { & node $f postToolUse } catch { exit 1 }; exit $LASTEXITCODE }; [void][Console]::In.ReadToEnd(); [Console]::Error.WriteLine(\"APEX hook: $f is missing; reinstall the APEX plugin. Call allowed.\"); exit 0",
         "timeoutSec": 15

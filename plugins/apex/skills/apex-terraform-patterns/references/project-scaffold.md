@@ -8,6 +8,13 @@
 
 # Terraform Project Scaffold
 
+## Navigation
+
+- File Structure
+- Key Pattern: `locals.tf`
+- Key Pattern: Phased Deployment
+- Output Files
+
 Standard file structure and key patterns for every Terraform project.
 
 ## File Structure

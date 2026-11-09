@@ -1,6 +1,6 @@
 ---
 name: apex-azure-diagnostics
-description: '**WORKFLOW SKILL** — Diagnoses scoped Azure incidents using health, metrics, logs and KQL. WHEN: "debug production", "container app image pull", "function cold start", "app service high CPU", "AKS crashloop", "VM SSH or RDP failure", "service bus errors". DO NOT USE FOR: preflight (use apex-azure-validate), ADX analytics (use apex-azure-kusto), spending (use apex-azure-cost-optimization).'
+description: '**WORKFLOW SKILL** — Diagnoses scoped Azure incidents using health, metrics, logs and KQL. WHEN: "debug production", "container app image pull", "function cold start", "app service high CPU", "AKS crashloop", "VM SSH or RDP failure", "service bus errors". DO NOT USE FOR: preflight (use apex-azure-validate), ADX analytics (use apex-azure-kusto), cost optimization (use apex-azure-cost-optimization).'
 user-invocable: false
 disable-model-invocation: false
 ---

@@ -6,6 +6,15 @@
 
 # Bicep Patterns
 
+## Navigation
+
+- File Structure
+- main.bicep Template
+- main.parameters.json
+- Naming Convention
+- Security Requirements
+- Common Modules
+
 Common patterns for Bicep infrastructure templates.
 
 ## File Structure

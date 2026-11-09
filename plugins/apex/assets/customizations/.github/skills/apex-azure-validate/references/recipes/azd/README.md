@@ -1,5 +1,5 @@
-> MCP names in this reference are upstream pseudo-interfaces, not current vNext tool registrations.
-> Use only capabilities projected by the active task; unavailable tools are blockers, never substitutes.
+> Managed Azure reads use verified `apex-azure` namespaces and actual command schemas.
+> Other provider examples are conditional; absent tools never grant mutation or hook-bypass authority.
 
 > Ported from `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 > Read the [vNext authority and command boundary](../../../references/kernel-boundary.md) before using this reference.
@@ -8,6 +8,13 @@
 > Raw resources illustrate provider syntax; use AVM first and record any accepted coverage exception.
 
 # AZD Validation
+
+## Navigation
+
+- Prerequisites
+- Validation Steps
+- References
+- Next
 
 Validation steps for Azure Developer CLI projects.
 
@@ -30,17 +37,15 @@ azd version
 
 **If not installed:**
 
-```text
-mcp_azure-mcp_extension_cli_install(cli-type: "azd")
-```
+Report the missing azd CLI as a prerequisite gap. Local installers/extensions are excluded from the managed MCP
+allowlist; do not install through a fabricated tool or a shell workaround.
 
 ### 2. Schema Validation
 
 Validate azure.yaml against official schema:
 
-```text
-mcp_azure-mcp_azd(command: "validate_azure_yaml", parameters: { path: "./azure.yaml" })
-```
+The advertised `azd` proxy has no verified managed command inventory and is not granted. Use the kernel-selected
+validation capability and its actual schema; if unavailable, report that gap rather than invent `validate_azure_yaml`.
 
 ### 3. Environment Setup
 
@@ -71,13 +76,14 @@ azd env get-values
 Use Azure MCP tools to list subscriptions:
 
 ```text
-mcp_azure-mcp_subscription_list
+apex-azure/subscription_list
+  tenant: <approved-tenant-id>
 ```
 
 Use Azure MCP tools to list resource groups (check for conflicts):
 
 ```text
-mcp_azure-mcp_group_list
+apex-azure/group_list
   subscription: <subscription-id>
 ```
 
@@ -103,8 +109,9 @@ Validate IaC is ready (must complete without error):
 azd provision --preview --no-prompt
 ```
 
-> 💡 **Note:** `azd provision --preview` is design syntax for the planned Bicep-only azd executor (CP-26, #443). azd is
-> not a Terraform path (DECISION-036): Terraform validation uses the native CLI (`terraform validate` and a saved plan).
+> 💡 **Note:** `azd provision --preview` is provider context for the implemented Bicep-only executor (CP-26, #443),
+> not direct execution permission. azd is not a Terraform path (DECISION-036): Terraform validation uses the native CLI
+> (`terraform validate` and a saved plan).
 
 ### 7. Build Verification
 

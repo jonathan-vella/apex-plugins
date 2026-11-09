@@ -1,6 +1,6 @@
 ---
 name: apex-mermaid
-description: '**UTILITY SKILL** — Guides safe inline Mermaid in supported APEX Markdown slots. WHEN: "mermaid flowchart", "sequence diagram", "state diagram", "ER diagram", "class diagram", "Gantt chart", "inline markdown diagram". DO NOT USE FOR: standalone architecture, network, runtime, as-built, WAF, cost or compliance diagrams (Python diagram path), IaC generation (use apex-codegen).'
+description: '**UTILITY SKILL** — Guides safe inline Mermaid in supported APEX Markdown slots. WHEN: "mermaid flowchart", "sequence diagram", "state diagram", "ER diagram", "class diagram", "Gantt chart", "inline markdown diagram". DO NOT USE FOR: standalone diagrams (use apex-python-diagrams), IaC generation (use apex-codegen).'
 user-invocable: false
 disable-model-invocation: false
 ---

@@ -7,6 +7,7 @@ disable-model-invocation: true
 tools:
   - ask_user
   - task
+  - read_agent
   - view
   - glob
   - rg
@@ -19,6 +20,9 @@ tools:
   - apex/projectUse
   - apex/projectDelete
   - apex/recordInput
+  - apex/inputHistory
+  - apex/previewInputAmendment
+  - apex/amendInput
   - apex/taskContext
   - apex/readTaskInput
   - apex/requirementsComplete
@@ -28,23 +32,57 @@ tools:
   - apex/reviewComplete
   - apex/reviewDecide
   - apex/gateDecide
+  - apex/gateDelegate
   - apex/governanceImport
   - apex/governanceSelect
   - apex/preview
   - apex/reconcile
   - apex/inventory
   - apex/diagnose
-  - apex-azure-pricing/get_retail_prices
-  - apex-azure-pricing/query_costs
-  - apex-azure-pricing/query_aks_costs
-  - apex-azure-pricing/forecast_costs
-  - apex-azure-pricing/list_dimensions
-  - apex-azure-pricing/list_budgets
-  - apex-azure-pricing/get_budget
-  - apex-azure-pricing/list_alerts
-  - apex-azure-pricing/list_benefit_utilization
-  - apex-azure-pricing/get_benefit_recommendations
-  - apex-azure-pricing/list_reservation_transactions
+  - apex-azure/documentation
+  - apex-azure/get_azure_bestpractices
+  - apex-azure/aks
+  - apex-azure/applens
+  - apex-azure/appservice
+  - apex-azure/role
+  - apex-azure/azurebackup
+  - apex-azure/azureterraform
+  - apex-azure/azureterraformbestpractices
+  - apex-azure/acr
+  - apex-azure/advisor
+  - apex-azure/bicepschema
+  - apex-azure/cloudarchitect
+  - apex-azure/compute
+  - apex-azure/containerapps
+  - apex-azure/cosmos
+  - apex-azure/deploy
+  - apex-azure/eventgrid
+  - apex-azure/eventhubs
+  - apex-azure/fileshares
+  - apex-azure/functionapp
+  - apex-azure/functions
+  - apex-azure/quota
+  - apex-azure/monitor
+  - apex-azure/applicationinsights
+  - apex-azure/mysql
+  - apex-azure/optimization
+  - apex-azure/policy
+  - apex-azure/postgres
+  - apex-azure/pricing
+  - apex-azure/redis
+  - apex-azure/resiliency
+  - apex-azure/resourcehealth
+  - apex-azure/servicebus
+  - apex-azure/sql
+  - apex-azure/storage
+  - apex-azure/storagesync
+  - apex-azure/virtualdesktop
+  - apex-azure/wellarchitectedframework
+  - apex-azure/workbooks
+  - apex-azure/kusto
+  - apex-azure/subscription_list
+  - apex-azure/group_list
+  - apex-azure/group_resource_list
 ---
 
 ## Client Mechanics
@@ -103,9 +141,12 @@ ambiguous, ask for correction before calling an APEX tool.
 3. Route the `apex/status` or `apex/nextTask` result through `apex-next`. Continue in this same `APEX` agent by loading
    the mapped skill. Do not print `/agent` switches, ready-to-paste scope prompts, role pickers or specialist names.
 4. For `status=needs_input`, do not call `apex/taskContext`. Ask the returned kernel questions in chat with
-   `ask_user`, using the active client's native question surface. For requests with several values, use native
-   checkboxes where offered; otherwise show numbered options in the exact kernel order and ask for the numbers. Record
-   only explicit user answers through `apex/recordInput`, preserving typed shapes, arrays, request ID, expected head and
+   `ask_user`, using the active client's native question surface. When a question takes several values and carries a
+   recommendation, first ask a single-choice question offering to accept the recommended set (name its values) or
+   customize. An accept answer maps exactly and needs no further confirmation. Otherwise use native checkboxes where
+   the tool offers them; if it offers only single-choice and free text, show numbered options in the exact kernel order
+   and ask for the numbers. Name any invalid, duplicate or out-of-range entry and why before asking again. Record only
+   explicit user answers through `apex/recordInput`, preserving typed shapes, arrays, request ID, expected head and
    owner epoch. Never replace an invalid or missing answer with a recommendation or default.
 5. For `status=needs_review`, handle the review with the mapped stage skill; do not request task context or run
    rubber-duck again unless the kernel issues a review task. For `status=task`, call `apex/taskContext` only with the
@@ -130,6 +171,20 @@ ambiguous, ask for correction before calling an APEX tool.
 
 ## Boundaries
 
+The opt-in lab exception is kernel-recorded delegation, not inferred permission. When status includes `delegation`,
+follow the [delegated gate path](../skills/apex-workflow/SKILL.md#delegated-lab-gates) in the same foreground agent.
+Otherwise every human-gate stop above remains unchanged. Delegation never answers intake, architecture or governance
+questions, accepts risks, or permits production or destroy.
+
+- Use `apex-azure` only for the verified read-only command inventory, including supported pricing and recommendation
+  reads. The separate ARM CostManagement server is retired; actual spend, forecasts, budgets, alerts, and commitment
+  records are unavailable and must not be inferred. Follow
+  `.github/skills/apex-azure-defaults/references/azure-mcp-tools.md` before external queries; pricing follows that
+  skill's `retail-pricing.md`. Namespace discovery uses exactly
+  `{intent: "", learn: true}` without command/parameters; nonempty learn intent can execute sampling. Read results are
+  observations, not kernel acceptance or authorization. Unsupported data blocks only conclusions that depend on it.
+  Never invoke Azure mutations, secrets, local installers, exports, unverified proxies or denied commands; unavailable
+  capability is not permission for a bypass.
 - Do not infer workflow completion from chat history, session history or repository files.
 - Never use `session_store_sql`, SQL, session-history searches or tool discovery to route work.
 - Do not use shell, Git, deployment, Bicep, Terraform or filesystem mutation tools for managed workflow work.

@@ -1,6 +1,6 @@
 ---
 name: apex-azure-resources
-description: '**ANALYSIS SKILL** — Interprets accepted Azure resource inventory evidence for APEX tasks: scoped inventories, tag coverage, configuration posture and orphan candidates. WHEN: "list resources", "resource inventory", "what is deployed", "find orphaned resources", "resources missing tags". DO NOT USE FOR: cost (use apex-azure-cost-optimization), security findings (use apex-azure-compliance).'
+description: '**ANALYSIS SKILL** — Interprets Azure inventory evidence: scoped resources, tag coverage, configuration posture and orphan candidates. WHEN: "list resources", "resource inventory", "what is deployed", "find orphans", "missing tags". DO NOT USE FOR: cost optimization (use apex-azure-cost-optimization), security findings (use apex-azure-compliance).'
 user-invocable: false
 disable-model-invocation: false
 ---

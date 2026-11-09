@@ -7,6 +7,18 @@
 
 # AKS Command Flows
 
+## Navigation
+
+- Cluster Baseline Flow
+- Kubernetes Baseline Flow
+- Connectivity Flow
+- Detector Flow
+- Monitoring Flow
+- Scheduling Flow
+- Deep Diagnostics Flow (Inspektor Gadget)
+- Safety Boundary
+- Port Source
+
 ## Cluster Baseline Flow
 
 ```text

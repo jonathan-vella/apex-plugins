@@ -7,6 +7,14 @@
 
 # Java Service Bus Trigger
 
+## Navigation
+
+- Function.java
+- pom.xml additions
+- Files to Remove
+- Local Testing
+- Common Patterns
+
 Replace the contents of `src/main/java/com/function/` with these files.
 
 ## Function.java

@@ -7,6 +7,23 @@
 
 # C# — Azure Functions Isolated Worker Model Triggers & Bindings
 
+## Navigation
+
+- HTTP Trigger
+- Blob Storage
+- Queue Storage
+- Timer
+- Event Grid
+- Cosmos DB
+- Service Bus
+- Event Hubs
+- Table Storage
+- SQL
+- SignalR
+- SendGrid
+- Multiple Outputs
+- Port Source
+
 > **Model**: .NET isolated worker model (recommended). Uses attributes on methods/parameters.
 > Import: `using Microsoft.Azure.Functions.Worker;`
 

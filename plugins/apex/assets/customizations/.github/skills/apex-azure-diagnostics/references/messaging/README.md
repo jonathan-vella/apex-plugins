@@ -36,11 +36,14 @@ Diagnose and resolve issues with Azure Event Hubs and Service Bus SDKs.
 
 | Tool | Use |
 |------|-----|
-| `mcp_azure-mcp_eventhubs` | List namespaces, hubs, consumer groups |
-| `mcp_azure-mcp_servicebus` | List namespaces, queues, topics, subscriptions |
-| `mcp_azure-mcp_monitor` | Query diagnostic logs with KQL |
-| `mcp_azure-mcp_resourcehealth` | Check service health status |
-| `mcp_azure-mcp_documentation` | Search Microsoft Learn for troubleshooting docs |
+| `apex-azure/eventhubs` | Discover verified namespace/hub/consumer-group reads |
+| `apex-azure/servicebus` | Discover verified namespace/queue/topic/subscription reads |
+| `apex-azure/monitor` | Query diagnostic logs with a verified bounded read |
+| `apex-azure/resourcehealth` | `resourcehealth_availability-status_get` |
+| `apex-azure/documentation` | `microsoft_docs_search` with `parameters.query` |
+
+Namespace schema discovery uses exactly `{intent: "", learn: true}` with no command/parameters. Then call the actual
+command with its required parameters and a bounded intent; absent or denied operations remain coverage gaps.
 
 ## Port Source
 

@@ -7,6 +7,16 @@
 
 # JavaScript Service Bus Trigger
 
+## Navigation
+
+- src/functions/serviceBusTrigger.js
+- src/functions/sendMessage.js
+- src/functions/healthCheck.js
+- package.json additions
+- Files to Remove
+- Local Testing
+- Common Patterns
+
 Replace the contents of `src/functions/` with these files.
 
 > ⚠️ **IMPORTANT**: Do NOT delete `src/index.js` — it's required for function discovery. See [nodejs-entry-point.md](../../common/nodejs-entry-point.md).

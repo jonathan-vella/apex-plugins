@@ -6,6 +6,14 @@
 
 # Functions Bicep Patterns — REFERENCE ONLY
 
+## Navigation
+
+- Flex Consumption (Recommended)
+- Consumption Plan (Legacy)
+- Service Bus Integration (Managed Identity)
+- Premium Plan (No Cold Starts)
+- Functions on Azure Container Apps (Aspire)
+
 > ⛔ **DO NOT COPY THIS CODE DIRECTLY**
 >
 > This file contains **reference patterns** for understanding Azure Functions Bicep structure.

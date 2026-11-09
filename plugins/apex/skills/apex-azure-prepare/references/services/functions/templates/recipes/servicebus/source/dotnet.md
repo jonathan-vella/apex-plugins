@@ -7,6 +7,14 @@
 
 # C# (.NET) Service Bus Trigger - Isolated Worker Model
 
+## Navigation
+
+- ServiceBusFunctions.cs
+- .csproj additions
+- Files to Remove
+- Local Testing
+- Common Patterns
+
 > ⚠️ **IMPORTANT**: Do NOT modify `Program.cs` — the base template's entry point already has the correct configuration
 > (`ConfigureFunctionsWebApplication()` with App Insights). Only add trigger-specific files.
 

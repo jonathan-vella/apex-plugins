@@ -9,6 +9,21 @@
 
 # SPEC: Composable Functions Templates Architecture
 
+## Navigation
+
+- 1\. Problem Statement
+- 2\. Hypothesis: HTTP Base + Composable Recipes
+- 3\. Proposed Architecture: Base + Recipe Composition
+- 4\. Terraform Strategy
+- 5\. Recipe Anatomy: Cosmos DB Example
+- 6\. Skill Workflow Changes
+- 7\. Implementation Plan
+- 8\. Eval Framework
+- 9\. Risks and Mitigations
+- 10\. Decision: Start with Proof of Concept
+- Appendix A: Current Template Fleet
+- Appendix B: IaC Provider Comparison for Recipes
+
 **Status:** Draft
 **Author:** GitHub Copilot (research + design)
 **Date:** 2026-02-16

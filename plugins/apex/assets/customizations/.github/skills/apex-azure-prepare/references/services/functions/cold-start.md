@@ -6,6 +6,13 @@
 
 # Azure Functions Cold Start Mitigation
 
+## Navigation
+
+- Cold Start Behavior by Plan
+- Mitigation Strategies
+- Language-Specific Optimization
+- Recommendation Summary
+
 Cold starts occur when a function app must allocate infrastructure, load the runtime, and initialize your code before
 handling a request. Impact and mitigation options differ significantly by hosting plan.
 

@@ -1,11 +1,37 @@
 # Preserved Content Index
 
+## Navigation
+
+- references
+- references/recipes/azcli
+- references/recipes/azd
+- references/recipes/bicep
+- references/recipes/terraform
+- references/runtimes
+- references/sdk
+- references/services/aks
+- references/services/app-insights
+- references/services/app-service
+- references/services/container-apps
+- references/services/cosmos-db
+- references/services/durable-task-scheduler
+- references/services/event-grid
+- references/services/foundry
+- references/services/functions
+- references/services/key-vault
+- references/services/logic-apps
+- references/services/service-bus
+- references/services/sql-database
+- references/services/static-web-apps
+- references/services/storage
+
 Pinned source: `jonathan-vella/apex@c209d8bb765681aa21dce5d3cd2a3b080dad8d5e`.
 
 Read [the authority boundary](kernel-boundary.md), then load only the topic required by accepted task inputs.
 The index preserves progressive disclosure; these are design references, not capability registrations.
-Native Terraform CLI with exact saved plans is the Terraform path; azd is the planned Bicep-only executor (CP-26) and
-is not available today. Source document outlines never create a second state or renderer contract.
+Native Terraform CLI with exact saved plans is the Terraform path; azd provision/preview/down is the implemented
+Bicep-only executor (CP-26). Application-package/pipeline operations remain unavailable. Source outlines never create
+a second state, renderer or execution contract.
 
 ## references
 

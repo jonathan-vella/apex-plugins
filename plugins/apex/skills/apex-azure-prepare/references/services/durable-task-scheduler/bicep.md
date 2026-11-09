@@ -6,6 +6,15 @@
 
 # Durable Task Scheduler — Bicep Patterns
 
+## Navigation
+
+- Scheduler + Task Hub
+- SKU Selection
+- RBAC — Durable Task Data Contributor
+- RBAC — Dashboard Access for Developers
+- Connection String App Setting
+- Provision via CLI
+
 Bicep templates for provisioning the Durable Task Scheduler, task hubs, and RBAC role assignments.
 
 ## Scheduler + Task Hub

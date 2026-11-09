@@ -1,7 +1,7 @@
 {
   "version": 1,
   "sources": {
-    "customizations": "0.11.0-next.5",
+    "customizations": "0.11.0-next.6",
     "config": "1.0.0"
   },
   "composition": {
@@ -113,7 +113,7 @@
         "client-projections/github-copilot-cli/tools/schemas/governance-baseline.schema.json",
         "client-projections/github-copilot-cli/tools/scripts/collect-governance-baseline.ps1"
       ],
-      "digest": "e226b517562b4c95476473ad8c1b77b508bc5be47ee7c81a4a5613aa47e795ab"
+      "digest": "12743053695efbdd1413a8b1ad1658ebc1e3117f54a49d8e4fce4fb13ed97a98"
     }
   ],
   "files": [
@@ -133,8 +133,8 @@
         "path": "tools/registry/copilot-cli-agent-tools.json",
         "mapping": "copilot-cli-tool-inventory"
       },
-      "sha256": "8fd92b3b2c4676e3f299c2f966b8b833a9ffd33197aea3b46e8f4894bc61b896",
-      "bytes": 3744
+      "sha256": "4477403007574af027fb78ccdf39db3f911b5cbf0ffe0c71a6a03802d5416704",
+      "bytes": 3442
     },
     {
       "path": "client-projections/github-copilot-cli/.github/copilot-instructions.md",
@@ -341,10 +341,10 @@
         "target": ".github/instructions/apex-markdown.instructions.md",
         "adapterVersion": "1.12.0",
         "sourcePath": ".github/instructions/apex-markdown.instructions.md",
-        "sourceHash": "00abc03a066ce0148918e60e9d8236ad0f4b6776c3132a1fafff702acaae24ba"
+        "sourceHash": "9b551efb390551e72d1a0a1e06cf07020efb86aa0913131d24cdf8bbfe1f3988"
       },
-      "sha256": "00abc03a066ce0148918e60e9d8236ad0f4b6776c3132a1fafff702acaae24ba",
-      "bytes": 901
+      "sha256": "9b551efb390551e72d1a0a1e06cf07020efb86aa0913131d24cdf8bbfe1f3988",
+      "bytes": 948
     },
     {
       "path": "client-projections/github-copilot-cli/.github/instructions/apex-powershell.instructions.md",
@@ -495,10 +495,10 @@
         "target": "tools/scripts/collect-governance-baseline.ps1",
         "adapterVersion": "1.12.0",
         "sourcePath": "tools/scripts/collect-governance-baseline.ps1",
-        "sourceHash": "ff5642cb768f130c04aaace50549bfab156a563d1d4cdea4dfb40d92330f408e"
+        "sourceHash": "b898dc3311f316824e5653b154b2474811cd4e63eaacf0e4354f8facd67c231d"
       },
-      "sha256": "ff5642cb768f130c04aaace50549bfab156a563d1d4cdea4dfb40d92330f408e",
-      "bytes": 38498
+      "sha256": "b898dc3311f316824e5653b154b2474811cd4e63eaacf0e4354f8facd67c231d",
+      "bytes": 38704
     },
     {
       "path": "config/capability-packs.v1.json",
@@ -509,6 +509,16 @@
       },
       "sha256": "cca237526a6d322a743ac4b9ee2da283e7602f8fa674c971e31673fabb308b9e",
       "bytes": 292
+    },
+    {
+      "path": "config/context-budget.v1.json",
+      "source": {
+        "kind": "repository-file",
+        "path": "config/context-budget.v1.json",
+        "mapping": "config"
+      },
+      "sha256": "85eb549ecebc652be721d5d67691be718df0ed63be80b4d732e898fa13900b8d",
+      "bytes": 198
     },
     {
       "path": "config/defaults.v1.json",
@@ -527,8 +537,8 @@
         "path": "config/governance-reference.v1.json",
         "mapping": "config"
       },
-      "sha256": "630b64af1b058628cd1b1a467de05654c54ef9bc19c4887c45699c4076249c37",
-      "bytes": 1443697
+      "sha256": "4f45248311c0f2c54431c5e6626efbeb8579a052e8aaef460afcb6e721d7526a",
+      "bytes": 1444548
     },
     {
       "path": "config/improvement-policy.v1.json",
@@ -567,7 +577,7 @@
         "path": "config/runtime-bundle.v1.json",
         "mapping": "config"
       },
-      "sha256": "4dcaca391086a00cc16216b287c3bc4e19b3a358fce8ec89e2233b25f908c152",
+      "sha256": "0b9f3da2b9ad2734b947f27afd8e964ed36cefed7e11da12ebc480718cb9379e",
       "bytes": 2039
     },
     {
@@ -587,8 +597,8 @@
         "path": "config/workflow.v1.json",
         "mapping": "config"
       },
-      "sha256": "fd8d372e47f3d1e078fc6eccb3eda15039f301d9eaa7ae2c316dc28b46e49706",
-      "bytes": 23610
+      "sha256": "b397be2675cb88b8006ba7c7276bba79abde03a352f4d7df2c67f02b7273c211",
+      "bytes": 24384
     },
     {
       "path": "customizations/.github/agents/apex-codegen.agent.md",
@@ -597,8 +607,8 @@
         "path": "customizations/.github/agents/apex-codegen.agent.md",
         "mapping": "customizations"
       },
-      "sha256": "82ba0be03b4b5cd684a556b05709aeb568b3e5e83fefc11c3115fcce1150a5b7",
-      "bytes": 2149
+      "sha256": "65278e4e433f21abc0bcd75e558a839be40763372d0e1d04a0a06962b08d0dcb",
+      "bytes": 2488
     },
     {
       "path": "customizations/.github/agents/apex-validator.agent.md",
@@ -607,8 +617,8 @@
         "path": "customizations/.github/agents/apex-validator.agent.md",
         "mapping": "customizations"
       },
-      "sha256": "91713c49ea8aa003a8144075fbac5f58d085d75c8d4398d82dd5a3d5a5e437fd",
-      "bytes": 2838
+      "sha256": "70dacf4e85d4678015a9750a6146e992e187c4f560bf16f1f27a4abfa5be76e6",
+      "bytes": 3090
     },
     {
       "path": "customizations/.github/agents/apex.agent.md",
@@ -617,8 +627,8 @@
         "path": "customizations/.github/agents/apex.agent.md",
         "mapping": "customizations"
       },
-      "sha256": "6b821be55368bab73dd3a3f2e3dc4890ed38a85d1e813c0fdc45e0950d4cb773",
-      "bytes": 9044
+      "sha256": "535a7811f29ec5a18b23e30e3f776e0be36173214e6c7e816f50fcd956d6c847",
+      "bytes": 11497
     },
     {
       "path": "customizations/.github/copilot-instructions.md",
@@ -767,8 +777,8 @@
         "path": "customizations/.github/instructions/apex-markdown.instructions.md",
         "mapping": "customizations"
       },
-      "sha256": "00abc03a066ce0148918e60e9d8236ad0f4b6776c3132a1fafff702acaae24ba",
-      "bytes": 901
+      "sha256": "9b551efb390551e72d1a0a1e06cf07020efb86aa0913131d24cdf8bbfe1f3988",
+      "bytes": 948
     },
     {
       "path": "customizations/.github/instructions/apex-powershell.instructions.md",
@@ -857,8 +867,8 @@
         "path": "customizations/.github/skills/apex-architecture/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "105d1504382a17cdf280a0becb1542a7f3d52f6b9eb592757040215c6f60f154",
-      "bytes": 6383
+      "sha256": "a769aa4d073582d789e6669264e58b309f0c39ad13d45070da754d5e7aae0945",
+      "bytes": 11384
     },
     {
       "path": "customizations/.github/skills/apex-artifacts/SKILL.md",
@@ -867,8 +877,8 @@
         "path": "customizations/.github/skills/apex-artifacts/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "e1eb0778bda657e41f0e2f257bee6105b84058b112dd100738e78110dab900ad",
-      "bytes": 7560
+      "sha256": "d8fcf4a3f03ffc5fda8387c0ca00e7d213eb24f7000d8fd4bf5d626aad7c4128",
+      "bytes": 7915
     },
     {
       "path": "customizations/.github/skills/apex-artifacts/references/01-requirements-template.md",
@@ -927,8 +937,8 @@
         "path": "customizations/.github/skills/apex-artifacts/references/07-docs-template.md",
         "mapping": "customizations"
       },
-      "sha256": "d01faccaf01a82b41e0e71f32bbe2e7343fbacfe0c149a4b74fd4fd0b255b9c5",
-      "bytes": 3637
+      "sha256": "0fa02d3261d9044db170aa9442aae1230f6798f6df4c0815d84df61ca799ef0e",
+      "bytes": 3738
     },
     {
       "path": "customizations/.github/skills/apex-artifacts/references/content-index.md",
@@ -937,8 +947,8 @@
         "path": "customizations/.github/skills/apex-artifacts/references/content-index.md",
         "mapping": "customizations"
       },
-      "sha256": "d77d791b0c446b5f5573c8b8d7ff4512828a8bdb3e47d68dab6f9d155de9453d",
-      "bytes": 3882
+      "sha256": "97b565ad2834a9a8070678eba9d659ac425db1bfe112ffd20e7023c562e4d554",
+      "bytes": 3944
     },
     {
       "path": "customizations/.github/skills/apex-artifacts/references/cost-estimate-sections.md",
@@ -947,8 +957,8 @@
         "path": "customizations/.github/skills/apex-artifacts/references/cost-estimate-sections.md",
         "mapping": "customizations"
       },
-      "sha256": "efb469909520825c78ebd9863be57fb6f8c7e8dba07baf4e18dd1e6a1a727c7a",
-      "bytes": 11615
+      "sha256": "ece585625bfbcce9b4cf7edb94659c7ad73d2b2ff773b403d97b88a82ae0ce5d",
+      "bytes": 12071
     },
     {
       "path": "customizations/.github/skills/apex-artifacts/references/kernel-boundary.md",
@@ -1007,8 +1017,8 @@
         "path": "customizations/.github/skills/apex-artifacts/references/styling-standards.md",
         "mapping": "customizations"
       },
-      "sha256": "49d6d0f6adce6ec49679b9cd452817cbcc92be2890e7b114ae3e07ee114ad8ab",
-      "bytes": 6395
+      "sha256": "0226dfb44aaaa0f7249b6f6f0226a26323bef399cca87144c6b42c088619f591",
+      "bytes": 6627
     },
     {
       "path": "customizations/.github/skills/apex-artifacts/templates/01-requirements.template.md",
@@ -1017,8 +1027,8 @@
         "path": "customizations/.github/skills/apex-artifacts/templates/01-requirements.template.md",
         "mapping": "customizations"
       },
-      "sha256": "eedcf610be10eeb3ff31adc7d9354a08674899e6a0358524a26a6d2e512f7c08",
-      "bytes": 16792
+      "sha256": "d1200de0d5710fb1d00aa0e8ea736d489100c7f64d42c9ac1d625aef37563577",
+      "bytes": 16775
     },
     {
       "path": "customizations/.github/skills/apex-artifacts/templates/02-architecture-assessment.template.md",
@@ -1027,8 +1037,8 @@
         "path": "customizations/.github/skills/apex-artifacts/templates/02-architecture-assessment.template.md",
         "mapping": "customizations"
       },
-      "sha256": "2394ab62c2eac759c3bd6027b290abc709ccdfd6131b441b8266215689e0ff5e",
-      "bytes": 12618
+      "sha256": "d2110c802dfaed070a710aafa45823edb6baaa7d0b0dbaa32f9ab7dfc231ce40",
+      "bytes": 12622
     },
     {
       "path": "customizations/.github/skills/apex-artifacts/templates/03-des-cost-estimate.template.md",
@@ -1037,8 +1047,8 @@
         "path": "customizations/.github/skills/apex-artifacts/templates/03-des-cost-estimate.template.md",
         "mapping": "customizations"
       },
-      "sha256": "2c9d5effdbed3140856a2b85e1470349aa968a29a570da1f2e3f27696e2f9608",
-      "bytes": 11855
+      "sha256": "8d877cb108c1fd3d17715aa9fdc94c60a7e26ee25a1ec06d3c51449793964de0",
+      "bytes": 11188
     },
     {
       "path": "customizations/.github/skills/apex-artifacts/templates/04-governance-constraints.template.md",
@@ -1097,8 +1107,8 @@
         "path": "customizations/.github/skills/apex-artifacts/templates/07-ab-cost-estimate.template.md",
         "mapping": "customizations"
       },
-      "sha256": "5805db9469ef14d8656b83b2e086fe0bc1ff853d6b7b630c8c2f06389eefdb65",
-      "bytes": 11571
+      "sha256": "34eeb16d8a0dd30cab22eb7bb74dec17a380862c2b28130fe860a0e6119dd572",
+      "bytes": 11091
     },
     {
       "path": "customizations/.github/skills/apex-artifacts/templates/07-backup-dr-plan.template.md",
@@ -1127,8 +1137,8 @@
         "path": "customizations/.github/skills/apex-artifacts/templates/07-design-document.template.md",
         "mapping": "customizations"
       },
-      "sha256": "22820a8e003740d9c5eada88a773ab496fc26989916c66eab0d2ce2f408b2030",
-      "bytes": 9897
+      "sha256": "fbba02060fc45f0767a54ef9c2a421e4dd1627326d610a99d38cd78d63d6498f",
+      "bytes": 9915
     },
     {
       "path": "customizations/.github/skills/apex-artifacts/templates/07-documentation-index.template.md",
@@ -1177,7 +1187,7 @@
         "path": "customizations/.github/skills/apex-artifacts/templates/PROJECT-README.template.md",
         "mapping": "customizations"
       },
-      "sha256": "511c80f17b768a9c3f40902a1aa851dbd7d706bc3e05e11f5f25bb17a5a39ee0",
+      "sha256": "4a78ddc83475a3bb2002435de7e882cced381a6b6b302ecbd31952d76a175e69",
       "bytes": 10639
     },
     {
@@ -1377,8 +1387,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/app-service/app-engine-to-app-service.md",
         "mapping": "customizations"
       },
-      "sha256": "f8faf14dd66793613fd8b3ab7887c7758bd6aec79c5e133b406d9c5928fdbd77",
-      "bytes": 8092
+      "sha256": "28b42b3ca945a91573a58b7fe3ed707ac7037e6b6b302d9bdc0f549c09ea1184",
+      "bytes": 8460
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/app-service/assessment.md",
@@ -1387,8 +1397,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/app-service/assessment.md",
         "mapping": "customizations"
       },
-      "sha256": "16025b191993a930aa5c78b81522d8e98c8f2017ed1b9c1ea12b6273ba795561",
-      "bytes": 6296
+      "sha256": "b87ee54d91b7f57ed459704bdedac9cb4da6d029481a0715ec71f96b31ceb9e3",
+      "bytes": 6525
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/app-service/beanstalk-to-app-service.md",
@@ -1397,8 +1407,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/app-service/beanstalk-to-app-service.md",
         "mapping": "customizations"
       },
-      "sha256": "bbfa91275ba9083dded462530653976557dee8b434bd7903456e3d60a1f772df",
-      "bytes": 7242
+      "sha256": "b99d09de04f793abc87290722bbadcedb29af66c42ac8b50b737bee0c50c0657",
+      "bytes": 7512
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/app-service/code-migration.md",
@@ -1407,8 +1417,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/app-service/code-migration.md",
         "mapping": "customizations"
       },
-      "sha256": "a1de8c0af53a0fa4f49a0468192e9720f21b1256f52416b88f575499bf3291d5",
-      "bytes": 6003
+      "sha256": "b594c2375f6635d8acae419de2cb1c54583c12d14fc9bbcb8dca781f415f41c9",
+      "bytes": 6386
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/app-service/global-rules.md",
@@ -1417,8 +1427,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/app-service/global-rules.md",
         "mapping": "customizations"
       },
-      "sha256": "9ffed6505530ef7daa9c8d903cc2b00dda9af3fcddf4a14674617b6fbe6baab2",
-      "bytes": 4129
+      "sha256": "65be65b3bdfb803aafee8f970341a0f5f33f0a666f4b0f180452687336b250b0",
+      "bytes": 4237
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/app-service/heroku-to-app-service.md",
@@ -1427,8 +1437,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/app-service/heroku-to-app-service.md",
         "mapping": "customizations"
       },
-      "sha256": "60db79f0756d7a542fc018f22e1b68337a180775e89458a7ff96d9e5fd21f9db",
-      "bytes": 8556
+      "sha256": "01f425cda9abd954ebe1b9417691e109907c5105a4db9003a8079f2d9cbcbba3",
+      "bytes": 8877
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/container-apps/assessment-guide.md",
@@ -1437,8 +1447,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/container-apps/assessment-guide.md",
         "mapping": "customizations"
       },
-      "sha256": "380d072ec0787b6faa3b82c3d4adf86ea3fa2c4daf980705871d594c7c73738a",
-      "bytes": 7906
+      "sha256": "24d3572a72207e2cd7d6a020fc9a5b9ac56460ece79cce8f80d58aa0f81cf8e5",
+      "bytes": 8070
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/container-apps/cloudrun-assessment-guide.md",
@@ -1487,8 +1497,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/container-apps/k8s-to-container-apps.md",
         "mapping": "customizations"
       },
-      "sha256": "8033f0fcc8cf5eee217cdfc61f61f0c80836697e2b2ed35a2fbd8da45f40d3a3",
-      "bytes": 6067
+      "sha256": "2cebc1dc9da291c78962ace74b4e5fed971e603763e83a4cbcb29ed93bd5de67",
+      "bytes": 6212
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/container-apps/spring-apps-to-aca.md",
@@ -1507,8 +1517,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/container-apps/spring-assessment-guide.md",
         "mapping": "customizations"
       },
-      "sha256": "7cdb97cad01b847b802deb3aaa6751512fbd4de9f545e49678a854e5f56c9e30",
-      "bytes": 6118
+      "sha256": "b435792292904ce7339c8072e787d0eb0b75086e10ee8f9a1ec56f3a7158c0f4",
+      "bytes": 6376
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/container-apps/spring-dependency-patterns.md",
@@ -1527,8 +1537,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/assessment.md",
         "mapping": "customizations"
       },
-      "sha256": "552b96413d60029f8ece520e1c694a1ea7392be1219fa29069b68d505d02bd5c",
-      "bytes": 8967
+      "sha256": "4b706c33ca34507847d529cad161f9c06f9d24d30b859ce2964d3102fc1c9ba0",
+      "bytes": 9140
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/code-migration.md",
@@ -1537,8 +1547,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/code-migration.md",
         "mapping": "customizations"
       },
-      "sha256": "a6374b4a02270b9f1e36b9f81ef2be8e61b3897ace926c291e870c8d2d40e949",
-      "bytes": 8394
+      "sha256": "10b92c62402563ae264135254c3acbda1b3008eb7e8c055174ecd92df6eb6fe2",
+      "bytes": 8752
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/global-rules.md",
@@ -1547,8 +1557,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/global-rules.md",
         "mapping": "customizations"
       },
-      "sha256": "785c3ced336636715b3102b700477b5284bba66b95e69df0424a5052d8f7f429",
-      "bytes": 4737
+      "sha256": "53a836833b248506942cab5deb64eb7dd72357686f73f66bf5b2f31c229a9b6e",
+      "bytes": 4852
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/lambda-to-functions.md",
@@ -1557,8 +1567,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/lambda-to-functions.md",
         "mapping": "customizations"
       },
-      "sha256": "646fb5760666ce10b65f4f600d354e9fdc7e7e4dba377adc2623fa386926176f",
-      "bytes": 15469
+      "sha256": "8444ce1aca543895c32a46fd4443c5f31695467bb23cfa8ead64b2e6977953f2",
+      "bytes": 15813
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/csharp.md",
@@ -1567,8 +1577,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/csharp.md",
         "mapping": "customizations"
       },
-      "sha256": "1f1fa7f54cbc8e9c4a71c91385054affb74c43f1a2f4bcecfbeedb6677e4c2f1",
-      "bytes": 6341
+      "sha256": "cc82a02c525734a643f796968b6bd03ab0d40795b73ee0943c2d774ae0d84dc4",
+      "bytes": 6539
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/java.md",
@@ -1577,8 +1587,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/java.md",
         "mapping": "customizations"
       },
-      "sha256": "e007ba4992e59e5042fe69a1d1bc76f24d8a711ec9075651f1949b980c2a2f90",
-      "bytes": 7282
+      "sha256": "a4cf3a52218cc9cd54b38dab2c5e85dedcb06e7e9c3639a5cfe46d13f78c7596",
+      "bytes": 7480
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/javascript.md",
@@ -1587,8 +1597,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/javascript.md",
         "mapping": "customizations"
       },
-      "sha256": "04a6461da0945b23e2f930d27238087c58aed8fe104ea0ddd881ead196e222f0",
-      "bytes": 9718
+      "sha256": "c288931e31aa596cd106ffbb8f31c7c71215c414628eb2db49ece297785635a6",
+      "bytes": 9954
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/powershell.md",
@@ -1597,8 +1607,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/powershell.md",
         "mapping": "customizations"
       },
-      "sha256": "f4f0d5929c41138d9955642e3841a458342fa291cb16b067f4ef1958dbb28cc4",
-      "bytes": 6250
+      "sha256": "edb00bf1268c8ecbe4ba9c497c711b5691aa7f55ca9e821b5816b4c772dc54a9",
+      "bytes": 6439
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/python.md",
@@ -1607,8 +1617,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/python.md",
         "mapping": "customizations"
       },
-      "sha256": "22a36a0fb85f3b1f689c1cbb6edb3f95dbef8de455e2f65b48dfea41048fb463",
-      "bytes": 7260
+      "sha256": "1c17bc7dd5f510a876f0f0a4f6ec1319c91a23978abdc5d0fa22b55789cf19c3",
+      "bytes": 7487
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/typescript.md",
@@ -1617,8 +1627,8 @@
         "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/services/functions/runtimes/typescript.md",
         "mapping": "customizations"
       },
-      "sha256": "774da36cb02a0da097d9459e8894fd310e63f70043db9991dc278ebd0f5f06d4",
-      "bytes": 4338
+      "sha256": "3580ea950015e7a21aeec4e496990d532546da41405388b9f4a4c1a2e491dc5e",
+      "bytes": 4560
     },
     {
       "path": "customizations/.github/skills/apex-azure-cloud-migrate/references/staged-validation-handoff.md",
@@ -1667,8 +1677,8 @@
         "path": "customizations/.github/skills/apex-azure-compliance/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "7e325856dd5300f96cab3a83586dafbc5f1d4f9d49aad92d10d68d927608f638",
-      "bytes": 5835
+      "sha256": "d53fea8007bc5be3131825e9f70699fd99c0935079f80e12a0d580a20577eb1f",
+      "bytes": 5812
     },
     {
       "path": "customizations/.github/skills/apex-azure-compliance/references/azure-quick-review.md",
@@ -1677,8 +1687,8 @@
         "path": "customizations/.github/skills/apex-azure-compliance/references/azure-quick-review.md",
         "mapping": "customizations"
       },
-      "sha256": "813f9fd0081a14e11f49ea2edc9cb7d5b31949f95465f3eeec2a964d299db325",
-      "bytes": 4980
+      "sha256": "59b172da5f3b31af4ee06504a5cddadbe3bf1814d9f45c59ad42ff91bdeb2add",
+      "bytes": 5337
     },
     {
       "path": "customizations/.github/skills/apex-azure-compliance/references/azure-resource-graph.md",
@@ -1727,8 +1737,8 @@
         "path": "customizations/.github/skills/apex-azure-compliance/references/remediation-patterns.md",
         "mapping": "customizations"
       },
-      "sha256": "e8c0d07723b5fa1602b9603bf4819facf3101dc48208abc963e96cd4fa6dc04f",
-      "bytes": 10584
+      "sha256": "a3acd60ca2da1b0685221763ffe116f33516840a2069a94f9549de3637db7d68",
+      "bytes": 10950
     },
     {
       "path": "customizations/.github/skills/apex-azure-compute/SKILL.md",
@@ -1737,8 +1747,8 @@
         "path": "customizations/.github/skills/apex-azure-compute/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "cef212ba65fab46f1cbc9169b1ad0cf8a737b259c2f22c864fb5380d877a8033",
-      "bytes": 4790
+      "sha256": "7ce5ce545c521042efa7025d6e532daf853b55b02c0520e342e1f4541ea00fbd",
+      "bytes": 4381
     },
     {
       "path": "customizations/.github/skills/apex-azure-compute/references/compute-selection.md",
@@ -1757,8 +1767,8 @@
         "path": "customizations/.github/skills/apex-azure-compute/references/pricing-evidence.md",
         "mapping": "customizations"
       },
-      "sha256": "6b352eae3fce9532ff5e28145226b173e96a7ed24dcb51afcba8c9eed988737f",
-      "bytes": 1800
+      "sha256": "6d09ab79cb63f7a4fe864b1199686e9b718a2f378f6bbee254fe04d3f27416ec",
+      "bytes": 1905
     },
     {
       "path": "customizations/.github/skills/apex-azure-compute/references/recommendation-and-scale-rules.md",
@@ -1777,8 +1787,8 @@
         "path": "customizations/.github/skills/apex-azure-compute/references/retail-prices-api.md",
         "mapping": "customizations"
       },
-      "sha256": "291e1e1a56a465e4b63c76b16e9692e5ded82b640d655ee5343e1a0f039f6af6",
-      "bytes": 6888
+      "sha256": "8caeb44daecdd0b25d0d66427f648b887904162b63f9aa3679b916a403e382b3",
+      "bytes": 835
     },
     {
       "path": "customizations/.github/skills/apex-azure-cost-optimization/SKILL.md",
@@ -1787,18 +1797,8 @@
         "path": "customizations/.github/skills/apex-azure-cost-optimization/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "fa8ff8006ac82b2cd28ac32521df5299ea1b92bd9ae2fd657a22b62471b0061c",
-      "bytes": 6458
-    },
-    {
-      "path": "customizations/.github/skills/apex-azure-cost-optimization/references/azure-resource-graph.md",
-      "source": {
-        "kind": "repository-file",
-        "path": "customizations/.github/skills/apex-azure-cost-optimization/references/azure-resource-graph.md",
-        "mapping": "customizations"
-      },
-      "sha256": "b0b0d04a80c461665d297e09a7cdce64ffc2fb06410f086bc0857d05abfa6d99",
-      "bytes": 3390
+      "sha256": "08b6cf913a19c792f9050100cde6d026d4d546e707267c29f3035850a15524ca",
+      "bytes": 5803
     },
     {
       "path": "customizations/.github/skills/apex-azure-cost-optimization/references/cost-assessment-criteria.md",
@@ -1807,18 +1807,8 @@
         "path": "customizations/.github/skills/apex-azure-cost-optimization/references/cost-assessment-criteria.md",
         "mapping": "customizations"
       },
-      "sha256": "15af83dbd3b3df3b0460d7fa3513635f637c4b8d03e35efdd615115a163d2b43",
-      "bytes": 4993
-    },
-    {
-      "path": "customizations/.github/skills/apex-azure-cost-optimization/references/cost-cli-workflow.md",
-      "source": {
-        "kind": "repository-file",
-        "path": "customizations/.github/skills/apex-azure-cost-optimization/references/cost-cli-workflow.md",
-        "mapping": "customizations"
-      },
-      "sha256": "446232f1f485aed8f77b8aae4c352d4342af86e6e4afb575f5c599f78841c81e",
-      "bytes": 9872
+      "sha256": "4720c01e6154a82508ff7d692f00529b3a8cef069bc9fff91902c831c1d589ab",
+      "bytes": 2945
     },
     {
       "path": "customizations/.github/skills/apex-azure-cost-optimization/references/cost-tool-guardrails.md",
@@ -1827,8 +1817,8 @@
         "path": "customizations/.github/skills/apex-azure-cost-optimization/references/cost-tool-guardrails.md",
         "mapping": "customizations"
       },
-      "sha256": "34615b1297d71875ab3bd0831a3c264047bb108d39069f751b89787512b7376e",
-      "bytes": 3294
+      "sha256": "63b98a41683e034b5e062b67bcccee06dbd7275dd49417611ef874cb642edc7c",
+      "bytes": 2879
     },
     {
       "path": "customizations/.github/skills/apex-azure-cost-optimization/references/operational-checklist.md",
@@ -1837,8 +1827,8 @@
         "path": "customizations/.github/skills/apex-azure-cost-optimization/references/operational-checklist.md",
         "mapping": "customizations"
       },
-      "sha256": "db24fe81411b5e7aedde5df1ea1c6298f19bd3a9d5a5b2f52a54965a397cb237",
-      "bytes": 1099
+      "sha256": "96ffac357df84b40db22578ca548bcb058e79279226c1c7e86bd4f9bebbb5550",
+      "bytes": 1030
     },
     {
       "path": "customizations/.github/skills/apex-azure-defaults/SKILL.md",
@@ -1847,8 +1837,8 @@
         "path": "customizations/.github/skills/apex-azure-defaults/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "b1915dad50c883d1b1239def0e49cdc01e60545894c0801ef64b8ecbe09c49e3",
-      "bytes": 7214
+      "sha256": "67baf54f7c3365b276ecda5581b5efc66f3e2a2587142e9c69d1c0bcb58f6bb2",
+      "bytes": 7618
     },
     {
       "path": "customizations/.github/skills/apex-azure-defaults/references/avm-binding-guidance.md",
@@ -1857,8 +1847,8 @@
         "path": "customizations/.github/skills/apex-azure-defaults/references/avm-binding-guidance.md",
         "mapping": "customizations"
       },
-      "sha256": "adefa072de00751f75a47db47f0e93be3f29eabe43cb8733c3636d28f994c4ac",
-      "bytes": 2936
+      "sha256": "50c234083ae2eed851dab07a0bab1b9e28cc76497b6e5272c14406aad42db82e",
+      "bytes": 5688
     },
     {
       "path": "customizations/.github/skills/apex-azure-defaults/references/azure-cli-and-azd.md",
@@ -1867,8 +1857,18 @@
         "path": "customizations/.github/skills/apex-azure-defaults/references/azure-cli-and-azd.md",
         "mapping": "customizations"
       },
-      "sha256": "1dac27388bf5b2e391a28faf50aeada714b273d0404ddf53a10de641a7f025f6",
-      "bytes": 11735
+      "sha256": "bb5725f3e783ec709dc6de89fb0b0ef879b4ebbca004134f3e68d929d79ae5be",
+      "bytes": 12209
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-defaults/references/azure-mcp-tools.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-defaults/references/azure-mcp-tools.md",
+        "mapping": "customizations"
+      },
+      "sha256": "3dc510ec023f61a175c5ab2ed125bd9c25e2fd1e082d4c0610b2ec51b9220b59",
+      "bytes": 6895
     },
     {
       "path": "customizations/.github/skills/apex-azure-defaults/references/baseline-fallbacks.md",
@@ -1937,8 +1937,8 @@
         "path": "customizations/.github/skills/apex-azure-defaults/references/retail-pricing.md",
         "mapping": "customizations"
       },
-      "sha256": "f66861fb3477ff5a69ba017f395c1aa5a7393ce629c8ad5c2bd29a7f3898e876",
-      "bytes": 4625
+      "sha256": "e0d77a7d2c5d353039c97a1149741a425efa99019f6e3703d39d2c78362352ba",
+      "bytes": 7098
     },
     {
       "path": "customizations/.github/skills/apex-azure-defaults/references/security-baseline.md",
@@ -1977,8 +1977,8 @@
         "path": "customizations/.github/skills/apex-azure-deploy/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "55f554fb85370cd41515864869a443d38f4f41b547a419e4d1c97fd9c6ab9b63",
-      "bytes": 7803
+      "sha256": "5eb39fe4a55bbfa37883eed0a68c0dbff9a299718f21f27cd756e6f85f04d5e1",
+      "bytes": 8229
     },
     {
       "path": "customizations/.github/skills/apex-azure-deploy/references/execution-boundaries.md",
@@ -2007,8 +2007,8 @@
         "path": "customizations/.github/skills/apex-azure-deploy/references/live-role-verification.md",
         "mapping": "customizations"
       },
-      "sha256": "14b2361d03d1ccc24f9c25e81b84db2cd29346cb19f133eb57b8e4b342f8b8ec",
-      "bytes": 3976
+      "sha256": "7f8ce7a9ee76f37919d48350d78bf001cb1b42dfa16668fbe76967dd35460e4b",
+      "bytes": 4016
     },
     {
       "path": "customizations/.github/skills/apex-azure-deploy/references/operational-checklist.md",
@@ -2027,8 +2027,8 @@
         "path": "customizations/.github/skills/apex-azure-deploy/references/pre-deploy-checklist.md",
         "mapping": "customizations"
       },
-      "sha256": "e28962fabfae59259386c58281f41fdf36233856b47b29fd4ce1dd3608d13d72",
-      "bytes": 5916
+      "sha256": "1c738ee210ed0633aa2758f427b975a801ee2b46eb688e859465da7782d68310",
+      "bytes": 6251
     },
     {
       "path": "customizations/.github/skills/apex-azure-deploy/references/preview-recovery-verification.md",
@@ -2097,8 +2097,8 @@
         "path": "customizations/.github/skills/apex-azure-deploy/references/recipes/azd/ef-migrations.md",
         "mapping": "customizations"
       },
-      "sha256": "77e9cbde33eef50c29d4b700a4e094397e5f9288fd925aa5b7dd02abfa2f2625",
-      "bytes": 5970
+      "sha256": "cf129fb64d7f28d11cc40de56e4e570d11d0632e2b4b0d140ed129db4321e63f",
+      "bytes": 6158
     },
     {
       "path": "customizations/.github/skills/apex-azure-deploy/references/recipes/azd/errors.md",
@@ -2107,8 +2107,8 @@
         "path": "customizations/.github/skills/apex-azure-deploy/references/recipes/azd/errors.md",
         "mapping": "customizations"
       },
-      "sha256": "19634b69d6dd4b01e13833024728d0307afc4fe2b713dbc257735e0642316b39",
-      "bytes": 11415
+      "sha256": "e2050e044722d6621692e3fff282fa28789fabd58cec9757a4e9965ef016bfdf",
+      "bytes": 11603
     },
     {
       "path": "customizations/.github/skills/apex-azure-deploy/references/recipes/azd/functions-deploy.md",
@@ -2117,8 +2117,8 @@
         "path": "customizations/.github/skills/apex-azure-deploy/references/recipes/azd/functions-deploy.md",
         "mapping": "customizations"
       },
-      "sha256": "d6526e855499d4ce6aa8ae54fad8cc75414f3de7cfe2b81d0d56b07f47f8d1ad",
-      "bytes": 5391
+      "sha256": "dfdfa6b93a39693f6a5aaf6d6e43123c9c09e38533ba120ba7e7a45339355be5",
+      "bytes": 5593
     },
     {
       "path": "customizations/.github/skills/apex-azure-deploy/references/recipes/azd/post-deployment.md",
@@ -2127,8 +2127,8 @@
         "path": "customizations/.github/skills/apex-azure-deploy/references/recipes/azd/post-deployment.md",
         "mapping": "customizations"
       },
-      "sha256": "826fe378fea9a7b9dc85be817a373af988dee7e44a9f9f23299e2a31b40f25a2",
-      "bytes": 5676
+      "sha256": "c62aa7ac1338226e3b4ae3d25690ebd212acbbe4f32f1341a1845ec33656625b",
+      "bytes": 5805
     },
     {
       "path": "customizations/.github/skills/apex-azure-deploy/references/recipes/azd/sql-entra-auth.md",
@@ -2137,8 +2137,8 @@
         "path": "customizations/.github/skills/apex-azure-deploy/references/recipes/azd/sql-entra-auth.md",
         "mapping": "customizations"
       },
-      "sha256": "98379cab1efa919ae03a0f7a3a2c95dfeddd4ab6ce22fddd98f2251206294cba",
-      "bytes": 4925
+      "sha256": "2984934c4e863e9e70563c9f5df049d5d5240aa85eaf8b2c62d86e536ce5b869",
+      "bytes": 5078
     },
     {
       "path": "customizations/.github/skills/apex-azure-deploy/references/recipes/azd/sql-managed-identity.md",
@@ -2147,8 +2147,8 @@
         "path": "customizations/.github/skills/apex-azure-deploy/references/recipes/azd/sql-managed-identity.md",
         "mapping": "customizations"
       },
-      "sha256": "a92a1dc0c48ef4ed808512460768a027678dd70056baaf06fc443aa8072e3d75",
-      "bytes": 5425
+      "sha256": "0dccef720e90a9e1bd43743a4a531f167448a0764e754f1e7363595793e89c9a",
+      "bytes": 5573
     },
     {
       "path": "customizations/.github/skills/apex-azure-deploy/references/recipes/azd/verify.md",
@@ -2157,8 +2157,8 @@
         "path": "customizations/.github/skills/apex-azure-deploy/references/recipes/azd/verify.md",
         "mapping": "customizations"
       },
-      "sha256": "c947acb2a6753d446d14fe844b5007765c6e2193d7baffefc8871c4586179185",
-      "bytes": 3931
+      "sha256": "98bac6f0c033d5dc07ef0642adb28d5484f73105a4f8fe592a88899ee05b15f3",
+      "bytes": 4095
     },
     {
       "path": "customizations/.github/skills/apex-azure-deploy/references/recipes/bicep/README.md",
@@ -2297,8 +2297,8 @@
         "path": "customizations/.github/skills/apex-azure-deploy/references/region-availability.md",
         "mapping": "customizations"
       },
-      "sha256": "e8d3f7ddd3e994b1f9736e40f646f1fdc05f5880832ae2896b49a2bfc25627ac",
-      "bytes": 4905
+      "sha256": "3c965af92aa8da0f09d5cd3d0211d13ad9d10ba4f34fa267a1aba58ceb665d0c",
+      "bytes": 5377
     },
     {
       "path": "customizations/.github/skills/apex-azure-deploy/references/script-examples/run-sql.sh.md",
@@ -2367,8 +2367,8 @@
         "path": "customizations/.github/skills/apex-azure-deploy/references/troubleshooting.md",
         "mapping": "customizations"
       },
-      "sha256": "f74ca8d047aa2572f909aaa2b37c2a674d106ff24d4b7221c0f1756ddd2f8655",
-      "bytes": 7356
+      "sha256": "23577a16daa56b12e2230506c63609babeed28616de80f2874715e0f0f493063",
+      "bytes": 7734
     },
     {
       "path": "customizations/.github/skills/apex-azure-deploy/references/upstream-coverage.md",
@@ -2387,8 +2387,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "895a97e95127065398551edd255ab12c729e5ddd145c1a38e8c45fda548d532d",
-      "bytes": 5829
+      "sha256": "7de5e4a981a5137beef2f81c9f71515843f7633fdc2f1b2dd141ddcd15c7ce21",
+      "bytes": 5838
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/aks-troubleshooting.md",
@@ -2397,8 +2397,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/aks-troubleshooting.md",
         "mapping": "customizations"
       },
-      "sha256": "992416bf05b5c94c78167758d27195c4d8089a46fcbca3bc8e9fc91eaf69b422",
-      "bytes": 6564
+      "sha256": "64d6ccaec13eafb13e38310f22ea197c232396c111a18e9e11a06dd027f1158b",
+      "bytes": 6901
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/general-diagnostics.md",
@@ -2407,8 +2407,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/general-diagnostics.md",
         "mapping": "customizations"
       },
-      "sha256": "ee47c33751db2e6e4419bfa9b5f0b9aa32f068364ff7bfd0593c3c5e020b822e",
-      "bytes": 2545
+      "sha256": "1933511b57f1daf8560789f4de42a05d78ceaa2cf5179e657b0313f2f5c058fa",
+      "bytes": 2631
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/load-balancer-and-ingress.md",
@@ -2437,8 +2437,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/networking.md",
         "mapping": "customizations"
       },
-      "sha256": "da0ec45e87fb8938263534ddeb3f1d4d7ea94410e4eb4bfb6d4e47cb5974f1dc",
-      "bytes": 6769
+      "sha256": "643846c34cc16f831bd41992dad1102f1a8754fe939f8ca17abd3e965d8f1ae9",
+      "bytes": 6897
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/node-issues.md",
@@ -2447,8 +2447,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/node-issues.md",
         "mapping": "customizations"
       },
-      "sha256": "476fe318acdd9b95c1d8951b273a1b00aa9aa4529288a28178e5ac649796a322",
-      "bytes": 6155
+      "sha256": "89c6cc9577b3e97f3be1fc625d38589e378874be07703fc0b86fbf0704e1c7d6",
+      "bytes": 6300
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/pod-failures.md",
@@ -2457,8 +2457,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/pod-failures.md",
         "mapping": "customizations"
       },
-      "sha256": "1998f5563525dc8345e5e76c1ed982d3ed38789786e536537c417391bc4528ff",
-      "bytes": 8875
+      "sha256": "4ee28b86e51b215f9249c110ac1ac367791b82dd86e18f2869959a87647ae44e",
+      "bytes": 9057
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/references/aks-mcp.md",
@@ -2467,8 +2467,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/references/aks-mcp.md",
         "mapping": "customizations"
       },
-      "sha256": "3fe664cebbe7d4b2435e3086c0df55144ac332244a80a9cdfe68bd5c861851e9",
-      "bytes": 2269
+      "sha256": "ebd74f18cb69c59b81b60c72710ed4f6892186fd62d900a6b0e08e64d21eaf2d",
+      "bytes": 2495
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/references/command-flows.md",
@@ -2477,8 +2477,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/references/command-flows.md",
         "mapping": "customizations"
       },
-      "sha256": "1d8f2cc2b6e296268364577226fd56bfc7ec953d4e9f5277fd12c05edae637ca",
-      "bytes": 4430
+      "sha256": "fdafc19e10824a46de85c22390c2389f3950747b40e23e262c49f970c69c2233",
+      "bytes": 4644
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/references/inspektor-gadget.md",
@@ -2487,8 +2487,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/references/inspektor-gadget.md",
         "mapping": "customizations"
       },
-      "sha256": "15913c17e1a89dc7bffbc5ac51db5a527d74fbe430f726e6353e4a218cb7d801",
-      "bytes": 9099
+      "sha256": "c83d327a9aaa9fa30d8cdfd8dfdabcda83e837c494e50dcdaa6c198128b6dde8",
+      "bytes": 9254
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/aks/references/structured-input-modes.md",
@@ -2527,8 +2527,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/app-service/README.md",
         "mapping": "customizations"
       },
-      "sha256": "34fecec8d705459da46abe2eb8350da6003f931e20eb4711a5439723897ca5e5",
-      "bytes": 8208
+      "sha256": "0dbad93a513f73c4f4a2d988451d98b0eca8608a7f24affbf0f5cc3bbba8cf05",
+      "bytes": 8769
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/azure-resource-graph.md",
@@ -2627,8 +2627,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/compute/vm-troubleshooting.md",
         "mapping": "customizations"
       },
-      "sha256": "749ce3f7b5fad1fca353ff14879154b4fd47a89d94230fe2a1d83f5b2749170c",
-      "bytes": 4106
+      "sha256": "44715bc344c4291e5c0455100666b8489977267e61541a48f551332027d4e02d",
+      "bytes": 4250
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/container-apps/README.md",
@@ -2637,8 +2637,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/container-apps/README.md",
         "mapping": "customizations"
       },
-      "sha256": "78d3a754a800378e6810ba07553f4317c7cb975dca19ff08e1650fe3a490e19e",
-      "bytes": 4054
+      "sha256": "603a7aaa3b4b9de4d081edbdd0c0e6a8ad2d11b2a26479f3e7c8abd23bcba993",
+      "bytes": 4084
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/diagnostic-interpretation.md",
@@ -2697,8 +2697,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/infraops-remediation-playbooks.md",
         "mapping": "customizations"
       },
-      "sha256": "651736b41ff809159e07ad346722f2e545e9238a4ec5442b609a6818bac2de55",
-      "bytes": 4318
+      "sha256": "c5532ab3b47f2133c709a8f8f5394368fc7812e85249ba4135c65e53b85cc976",
+      "bytes": 4414
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/kql-queries.md",
@@ -2717,8 +2717,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/messaging/README.md",
         "mapping": "customizations"
       },
-      "sha256": "8e5093cca593f3e835cd18cb8178ba2753905cae009f3f2e3782379ba9de9b81",
-      "bytes": 2312
+      "sha256": "506849fd184c11fd0165c299b81014a8b50602bd3c638602ea8eef150dce6aa5",
+      "bytes": 2583
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/messaging/azure-eventhubs-dotnet.md",
@@ -2757,8 +2757,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/messaging/azure-eventhubs-py.md",
         "mapping": "customizations"
       },
-      "sha256": "63ed2db5939c46a2f32c1902ff325c47067e2b77d56388661c7abac325f38297",
-      "bytes": 5625
+      "sha256": "a638f7860b65e48cf8ce1c3e668459a288721c057dc1fcf04383601dfe9a72ca",
+      "bytes": 5799
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/messaging/azure-servicebus-dotnet.md",
@@ -2837,8 +2837,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/aks-baseline.ps1.md",
         "mapping": "customizations"
       },
-      "sha256": "670b1cbfa8fb11b6ddf624e6447d057b97d4ddc8d946ac1eaf64a2f97b2ace56",
-      "bytes": 8308
+      "sha256": "50868fb4facb38f8c6975d8a57f6754cc83ea8f267d7a7b2a487fc6134caf5da",
+      "bytes": 8338
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/aks-baseline.sh.md",
@@ -2847,8 +2847,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/aks-baseline.sh.md",
         "mapping": "customizations"
       },
-      "sha256": "9595690b4d679864df2d130e3d6b676fd96e3328813d97c57ea1fa0f7e49b7f8",
-      "bytes": 7947
+      "sha256": "0f2bd22bb3a1b740d9bcd05e54329b85257c18104d98fe462ce2923a1607c8dc",
+      "bytes": 7977
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/appservice-diagnostics.ps1.md",
@@ -2867,8 +2867,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/appservice-diagnostics.sh.md",
         "mapping": "customizations"
       },
-      "sha256": "fe9bfecb9d42d5820d7ec329ac30201c450fc9edfa5206bff9ae13afabdb7beb",
-      "bytes": 4084
+      "sha256": "58bc382c3b7d66feb5a37c164e93112b9b547aa1cc068525cf0101a84cc058da",
+      "bytes": 4114
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/containerapp-diagnostics.ps1.md",
@@ -2887,8 +2887,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/containerapp-diagnostics.sh.md",
         "mapping": "customizations"
       },
-      "sha256": "8cea2489c3a4614e7afce2b0ee3c340fe48ded2e5e6074b404a634dd049a2ac2",
-      "bytes": 3926
+      "sha256": "1d24b1f7a8fb3dc71f82f4a5f20652096ee6f9d9291378e627d8181a0afba4d9",
+      "bytes": 3956
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/pod-evidence.ps1.md",
@@ -2897,8 +2897,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/pod-evidence.ps1.md",
         "mapping": "customizations"
       },
-      "sha256": "2e4adfc9f0763e15fab9f5f31c30d341e016612885466e46de4922e6b0e051ee",
-      "bytes": 7867
+      "sha256": "f7f4d2f40da40af2122a5b50d91c5511f2cd88b9d1271305872931a0ee126599",
+      "bytes": 7897
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/pod-evidence.sh.md",
@@ -2907,8 +2907,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/pod-evidence.sh.md",
         "mapping": "customizations"
       },
-      "sha256": "b3b2fcbca06fa410245b31a411c208fe920cdef87071d72ee3b913d12d204221",
-      "bytes": 8332
+      "sha256": "c304243d06d033e19ae20b04a5ac200b6fcf307c327e02c37759926e623a111b",
+      "bytes": 8362
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/run-ig.ps1.md",
@@ -2917,8 +2917,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/run-ig.ps1.md",
         "mapping": "customizations"
       },
-      "sha256": "3dda29b7ac74b11addc23f4da9ed197fe03be83d6df6af784051defeaf991f0f",
-      "bytes": 7557
+      "sha256": "afcc32233b344ad816f962d9585899f00e40c4dd5abf9476285cb578730f2021",
+      "bytes": 7587
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/run-ig.sh.md",
@@ -2927,8 +2927,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/run-ig.sh.md",
         "mapping": "customizations"
       },
-      "sha256": "70da7151af186960bc53f37d4e2ae92e9285f614afce32931533add1ef8a5701",
-      "bytes": 8627
+      "sha256": "a552216b798de417d78f68814757ed49a483af0613fe7a585c9191e7f0ae0d54",
+      "bytes": 8657
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/test-messaging-connectivity.ps1.md",
@@ -2937,8 +2937,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/test-messaging-connectivity.ps1.md",
         "mapping": "customizations"
       },
-      "sha256": "65e966d9106f1dc4521a52bd58cbe309ec03c5604e0cf345b4909407a0a94882",
-      "bytes": 7639
+      "sha256": "72ad466de7b1723c0458a3dd09cbb4b0ce87aec911a33b91404b1a9f0a2383c8",
+      "bytes": 7669
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/test-messaging-connectivity.sh.md",
@@ -2947,8 +2947,8 @@
         "path": "customizations/.github/skills/apex-azure-diagnostics/references/script-examples/test-messaging-connectivity.sh.md",
         "mapping": "customizations"
       },
-      "sha256": "5a44a0e335f6852670bd042dfa4087d649e2c42332d5e00906e383baadd3c66b",
-      "bytes": 8114
+      "sha256": "a54f65d66397d047f486707a3f0e61a1a877f5e64503580a307364d105e96d7b",
+      "bytes": 8144
     },
     {
       "path": "customizations/.github/skills/apex-azure-diagnostics/references/upstream-coverage.md",
@@ -2967,8 +2967,8 @@
         "path": "customizations/.github/skills/apex-azure-governance/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "ebd4b396007f42d32f2b7786553dc2041a713ed4bf5549c538c63e78c0f2b280",
-      "bytes": 5599
+      "sha256": "af4e0106be35f687ed3de7a5184408bf4b23e4975981e98c7ba6edf7ab04ac7a",
+      "bytes": 5847
     },
     {
       "path": "customizations/.github/skills/apex-azure-governance/references/evidence-interpretation.md",
@@ -2977,8 +2977,8 @@
         "path": "customizations/.github/skills/apex-azure-governance/references/evidence-interpretation.md",
         "mapping": "customizations"
       },
-      "sha256": "cf962956e59c979f8e8bd6fac4042d44b20d70213a7082cbcef89f762d28b6b8",
-      "bytes": 7965
+      "sha256": "27eeaa226755ddedffbc8bf500017526746da0ccdc8c5e7cc2f23ffa039be057",
+      "bytes": 8160
     },
     {
       "path": "customizations/.github/skills/apex-azure-governance/references/operational-checklist.md",
@@ -3001,14 +3001,104 @@
       "bytes": 5145
     },
     {
+      "path": "customizations/.github/skills/apex-azure-kubernetes/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-kubernetes/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "e97dc17d4cf6c8aa09e0d9630431eca880ee8e5a79476b402f8c293a9fd3186e",
+      "bytes": 7478
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-kubernetes/references/azure-aks-autoscaler.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-kubernetes/references/azure-aks-autoscaler.md",
+        "mapping": "customizations"
+      },
+      "sha256": "ebce3abde642afbc274adb7665fd7359a8d865234e685b33c61cd91cac92d669",
+      "bytes": 4023
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-kubernetes/references/azure-aks-rightsizing.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-kubernetes/references/azure-aks-rightsizing.md",
+        "mapping": "customizations"
+      },
+      "sha256": "6c17bb41f661218c0ffefcdb36b4371366854ea4c90ac1efc8564cd1dae56051",
+      "bytes": 6030
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-kubernetes/references/azure-aks-spot.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-kubernetes/references/azure-aks-spot.md",
+        "mapping": "customizations"
+      },
+      "sha256": "8211800198a9d38cb6dc7af32108ca00093848494a54d86985928bacf77827d8",
+      "bytes": 4007
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-kubernetes/references/azure-aks-vpa.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-kubernetes/references/azure-aks-vpa.md",
+        "mapping": "customizations"
+      },
+      "sha256": "bafccde634bec7744b0e27375a3226e902aaa5dd69abf4d64223b326ab6e37a4",
+      "bytes": 2454
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-kubernetes/references/cli-reference.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-kubernetes/references/cli-reference.md",
+        "mapping": "customizations"
+      },
+      "sha256": "cc5cba2fdb33c196aa9eee3af9f76a3967a1f54f79b8f7de927f281ae080b662",
+      "bytes": 2913
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-kubernetes/references/safeguards.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-kubernetes/references/safeguards.md",
+        "mapping": "customizations"
+      },
+      "sha256": "edc7d85449baa5f2e47d04ca5bf8c9af5b442b8a282c35f74e6f8d47bd9e517f",
+      "bytes": 3540
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-kubernetes/references/upstream-coverage.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-kubernetes/references/upstream-coverage.md",
+        "mapping": "customizations"
+      },
+      "sha256": "096fb0edd1874368222c2b2007b2ff4c6548b5a73f07c376433b8852a4244229",
+      "bytes": 3984
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-kubernetes/references/workload-identity.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-kubernetes/references/workload-identity.md",
+        "mapping": "customizations"
+      },
+      "sha256": "a11c6249cac7161482d6dbff8d8b63d289e60a178f754899a8ea50ad5ebd3c0b",
+      "bytes": 6447
+    },
+    {
       "path": "customizations/.github/skills/apex-azure-kusto/SKILL.md",
       "source": {
         "kind": "repository-file",
         "path": "customizations/.github/skills/apex-azure-kusto/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "62353b5dcc3faf914f8547098d559f85aee84af5d9b7574e39d51d66770b18ba",
-      "bytes": 4337
+      "sha256": "ab8c85eafdc95ce39819cc9bd203f33e073beec6d86d33502f9d4708c72164d1",
+      "bytes": 4347
     },
     {
       "path": "customizations/.github/skills/apex-azure-kusto/references/common-issues.md",
@@ -3067,8 +3157,8 @@
         "path": "customizations/.github/skills/apex-azure-kusto/references/query-patterns.md",
         "mapping": "customizations"
       },
-      "sha256": "3ab4c63223edbf4751d69ea286565019e63e2ed083de63733e489875a97330ee",
-      "bytes": 3802
+      "sha256": "1c3f9cfbb08be79fb695033f40ccc50563dc2f76bf15d78c137603a2203dd0a4",
+      "bytes": 4020
     },
     {
       "path": "customizations/.github/skills/apex-azure-kusto/references/upstream-coverage.md",
@@ -3087,8 +3177,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "57cdfcb79692886e11f918771d1c903a23f28d34ab2dbc90501f28af558e7d92",
-      "bytes": 5977
+      "sha256": "8c9939721c0adbbfdd89f6ff97fbba287d9445f41ee0d83c0b7c6b8ebe0e352d",
+      "bytes": 6071
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/analyze.md",
@@ -3097,8 +3187,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/analyze.md",
         "mapping": "customizations"
       },
-      "sha256": "0e5775f9cf645924df5aff061400171aaeb523469d0e29c4d65ee2d9304ff3df",
-      "bytes": 5405
+      "sha256": "5244154f8e637d288757abc99921f7dec2b859e8c20fe9b77e811c5caf7a485d",
+      "bytes": 5675
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/apim.md",
@@ -3107,8 +3197,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/apim.md",
         "mapping": "customizations"
       },
-      "sha256": "b5ce2dba3f05c49f59d9fbe13d58a4a707ac12e6d7875e8b4c61befaf98482f3",
-      "bytes": 7354
+      "sha256": "652db7e6e65cceb7c5f576123f6dd1edba56a9af06371248415e668f655c3518",
+      "bytes": 7535
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/architecture.md",
@@ -3127,8 +3217,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/aspire.md",
         "mapping": "customizations"
       },
-      "sha256": "6e3221162f2c6a02bb8058f3916e14142749f40ee2db13036631a00188d4e8f4",
-      "bytes": 12152
+      "sha256": "467b27d66fe80fa307a0a10b191883ada4fc48cf0904ecc0580e7ecc6640ceb2",
+      "bytes": 12318
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/azure-context.md",
@@ -3147,8 +3237,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/content-index.md",
         "mapping": "customizations"
       },
-      "sha256": "514bb6274878b4b3cc4c3029330e632de524e3e9bb82579884cb5eae5ebe379e",
-      "bytes": 25927
+      "sha256": "c0f748bd1756b64ccc56579c5e5171ca4dee7bf418d4a0cbfd2531ee6e5a45d6",
+      "bytes": 26673
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/generate.md",
@@ -3157,8 +3247,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/generate.md",
         "mapping": "customizations"
       },
-      "sha256": "f692c9905374cf17f526a69ba57397d8ed27e45bc0f69587aead74e0d9f9782d",
-      "bytes": 5056
+      "sha256": "637c711699a315d6207577bd789630f9e74af06f38d49d692c023d8e7675370b",
+      "bytes": 5305
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/global-rules.md",
@@ -3227,8 +3317,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azcli/README.md",
         "mapping": "customizations"
       },
-      "sha256": "21eb30d1ac5d90b634efe9b30f8ecd28b709b23d8914dfc5793a5e7ac4c2781a",
-      "bytes": 3334
+      "sha256": "34e414f8559c4989e4efd14638326009a20c826cd968e0ee8ecd5b9c6edc325d",
+      "bytes": 3345
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azcli/commands.md",
@@ -3237,8 +3327,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azcli/commands.md",
         "mapping": "customizations"
       },
-      "sha256": "0a915bd9418e85114c0a0f414fe1d7a3879b5d0d2395d4f0e8f1c0cbd74091e5",
-      "bytes": 3253
+      "sha256": "142315f49a9e2c22ad84d55e53306c7bf8a949048d2c7d6e06d29d98f7e0a799",
+      "bytes": 3362
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azcli/scripts.md",
@@ -3247,8 +3337,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azcli/scripts.md",
         "mapping": "customizations"
       },
-      "sha256": "78074f293768c40dcf3e3e839112d9348a1b01140e20d01125480d4073e01c39",
-      "bytes": 3564
+      "sha256": "db9ebac58c37429bc429582b749f658fec9e9833312eb874ba2b2b9a3389dd3f",
+      "bytes": 3638
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azd/README.md",
@@ -3257,8 +3347,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azd/README.md",
         "mapping": "customizations"
       },
-      "sha256": "93cca2b67481ce871bb0adab727768bf90f8f12b839a542921af6f97302dadf5",
-      "bytes": 6865
+      "sha256": "eb51bbe79c1a3ba91739f4288e7bbac3de41fe7a7777e0376c7491e0b9edfea0",
+      "bytes": 6982
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azd/aspire.md",
@@ -3267,8 +3357,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azd/aspire.md",
         "mapping": "customizations"
       },
-      "sha256": "3d5f38c4d743afe96c55fec2c659348cea1267c9aea7e6f8cd345024deab52b7",
-      "bytes": 7481
+      "sha256": "666131240785be702118591e6a87c01a32989f04c37a5dd48720983cf2945d19",
+      "bytes": 7674
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azd/azure-yaml.md",
@@ -3277,8 +3367,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azd/azure-yaml.md",
         "mapping": "customizations"
       },
-      "sha256": "419ac23d52bf58bcb88c5b68cdf800010113aede4e557f19ba0a74326595158b",
-      "bytes": 8259
+      "sha256": "2c80a22879da82597eea9dbef7304fbc701e5805f9225700dd8dc3d6eb900196",
+      "bytes": 8354
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azd/docker.md",
@@ -3287,8 +3377,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azd/docker.md",
         "mapping": "customizations"
       },
-      "sha256": "9dfc8ed3a298868e663c6f0af1c1b453de671828d499de4b34322ce5e6e5c399",
-      "bytes": 2835
+      "sha256": "b186e437d0a591992d008008bcb7b0a8ffd8d776d22987a83a5483ca55cfa95f",
+      "bytes": 2964
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azd/iac-rules.md",
@@ -3297,8 +3387,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azd/iac-rules.md",
         "mapping": "customizations"
       },
-      "sha256": "0eb9d13a79008fce9d1033c8e9791f86866585c7d865d3270952790290b4f118",
-      "bytes": 6468
+      "sha256": "56d0ee423a7d269d62cfa6da1c6c4b0d2725a82cd2714f55cefe5e11bda135f9",
+      "bytes": 7146
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azd/terraform.md",
@@ -3307,8 +3397,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/azd/terraform.md",
         "mapping": "customizations"
       },
-      "sha256": "7192612566817810714eb9ece244a283ad5995d1fad97329e62e7844238ae55c",
-      "bytes": 16485
+      "sha256": "8cb766dee573060459b8a29f3ff6fc43702480beb92e16a43f6e98f0d8240d2e",
+      "bytes": 16914
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/bicep/README.md",
@@ -3327,8 +3417,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/bicep/patterns.md",
         "mapping": "customizations"
       },
-      "sha256": "43388d5fa2ee766d48b12be79eb3b429f2b174b6cf305cdccb5792353206d7d2",
-      "bytes": 3421
+      "sha256": "273c04adc2ed931e5fb4cb8e3318e58923fd53b31f0935b15c2c7297ae9c25e0",
+      "bytes": 3560
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/terraform/README.md",
@@ -3337,8 +3427,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/terraform/README.md",
         "mapping": "customizations"
       },
-      "sha256": "a065d009100055d2546caea33f54a0ddb03f4931fe0713a3b0fc79413b35f675",
-      "bytes": 3003
+      "sha256": "78983759901747d34c0a53f5338ecf47382b15c082a9c29ef2e6f65135696c97",
+      "bytes": 3111
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/terraform/patterns.md",
@@ -3347,8 +3437,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/recipes/terraform/patterns.md",
         "mapping": "customizations"
       },
-      "sha256": "783067b674ae2fa856b6f22f0e6ae0e3fedf5efa45c341e19a7c5a0d430f6467",
-      "bytes": 3586
+      "sha256": "8e5c81df492325b90e8e654602cf93d22022d881565c71455092fa6d77b2d8c8",
+      "bytes": 3757
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/region-availability.md",
@@ -3357,8 +3447,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/region-availability.md",
         "mapping": "customizations"
       },
-      "sha256": "dabe569af60320229a868748098f7dfe8f80a022a29415eca31a991e857a794c",
-      "bytes": 3164
+      "sha256": "24abd02ae1732dc6117721521333c12d251f3115382bf57e55aa4c6d9ce891fb",
+      "bytes": 3553
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/requirements.md",
@@ -3377,8 +3467,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/research.md",
         "mapping": "customizations"
       },
-      "sha256": "8bb4ac7b0e58e19d9b7f01eecdaa7a080b5d39a7447d9b1752ab5708f50efe57",
-      "bytes": 17927
+      "sha256": "0ecf095f008149465a804abd79385cb3ba743ebceeca1df7f437384b232229e0",
+      "bytes": 18155
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/resources-limits-quotas.md",
@@ -3387,8 +3477,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/resources-limits-quotas.md",
         "mapping": "customizations"
       },
-      "sha256": "befb0fcc06d6f9bf7062d4571b73de1e6d23c4838ed2860a2bde37d06e48254d",
-      "bytes": 20829
+      "sha256": "ad161e9afefa19156b570bcdf9e616a3e56cedb87c7e5e9353116a3f106e6f6d",
+      "bytes": 21113
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/runtimes/nodejs.md",
@@ -3397,8 +3487,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/runtimes/nodejs.md",
         "mapping": "customizations"
       },
-      "sha256": "b56e7b4bfd370a23ce6000da4e1524ae02482f449a12e5222a8a9951d22d3b9f",
-      "bytes": 7042
+      "sha256": "9021bd9355af96d7438539bec756b5d4d0e880f805c5600eb8b85969dfc70d1d",
+      "bytes": 7188
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/scan.md",
@@ -3407,8 +3497,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/scan.md",
         "mapping": "customizations"
       },
-      "sha256": "9d4f873d8494efc0fe644fc3de6f54920b8ab91dc8d0a69e9bcc2ca0cf98f99d",
-      "bytes": 4856
+      "sha256": "fa6be1a8eef8572917cdb9ab34b3559e1fa8f03fdafcd37d74343abc0b26af5b",
+      "bytes": 4902
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/sdk/azd-deployment.md",
@@ -3417,8 +3507,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/sdk/azd-deployment.md",
         "mapping": "customizations"
       },
-      "sha256": "974cdb33ad212d18324eb2604fa22cfc75be8167e7abcee85c92826ceb2e4097",
-      "bytes": 2910
+      "sha256": "f7be7baf41826aa54fbd1a7e9e5c9201fd062240dafeb0cfb396e31a06a4066d",
+      "bytes": 3048
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/sdk/azure-appconfiguration-java.md",
@@ -3457,8 +3547,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/security.md",
         "mapping": "customizations"
       },
-      "sha256": "bb10ce4450caac4996d7df38b627fce05a841106d00c8d4c17ce95b51715969f",
-      "bytes": 10758
+      "sha256": "bd8477da3ceb7eb88320adf57d3a8dd77004f08a9293735e6112e8b178bf01ce",
+      "bytes": 10940
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/aks/README.md",
@@ -3487,8 +3577,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/aks/bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "28aaef565915c2f92b22aefbdd3f0f4552fe20deb65d1f935561069a2abd10bb",
-      "bytes": 2438
+      "sha256": "eea98fb5f45da42dddc04429b7001fd2ed9a9afb14f342cc308b85e23bce3f20",
+      "bytes": 2546
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/aks/manifests.md",
@@ -3537,8 +3627,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/app-service/custom-domains.md",
         "mapping": "customizations"
       },
-      "sha256": "125520b62d81d8ea4d251e4f76733fcc450336a9d743282eca3c819db0978cd1",
-      "bytes": 5655
+      "sha256": "7f1aa4c02b549b13ebbb85d385c9c509961ec93693452accb3c32d0a66c8ecf7",
+      "bytes": 5896
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/app-service/deployment-slots.md",
@@ -3557,8 +3647,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/app-service/networking.md",
         "mapping": "customizations"
       },
-      "sha256": "2d9a16d6eb9c494bf227d533366e9e4d2d3cef7e989994c32ca96576ecd4856b",
-      "bytes": 8049
+      "sha256": "0f956409ed56bcdbf8f2828daf0223689113ce2e219b69464914d558431afdd4",
+      "bytes": 8216
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/app-service/scaling.md",
@@ -3577,8 +3667,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/app-service/sku-selection.md",
         "mapping": "customizations"
       },
-      "sha256": "759fc4b156b659763af68d52e0e3a53f0fbbe516bfac50dc93eb34f4431e0c49",
-      "bytes": 5325
+      "sha256": "2bdb1f35c4990f4ea9cdcafba1629fe0ec0db1b562dea231b0c330ee0bcf11e4",
+      "bytes": 5563
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/container-apps/README.md",
@@ -3597,8 +3687,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/container-apps/bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "40344221154a0eedd9797b2cc4c134aa97edb0e70e057ae1335ecb9bd457c05f",
-      "bytes": 3554
+      "sha256": "712646cc4a768b148524e1fa77ee61a82af37ca78c45ce3e0b9ccf24fc392717",
+      "bytes": 3654
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/container-apps/day2-operations.md",
@@ -3607,8 +3697,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/container-apps/day2-operations.md",
         "mapping": "customizations"
       },
-      "sha256": "47d69b398f89094d99cc476511bdb5f93fea0cbfe7cdc59498410048bd5f57c3",
-      "bytes": 6272
+      "sha256": "6aa17b8f18250bee57dbcb5802c2ccb6ac93452befd91cced846ebafc8e2cbfe",
+      "bytes": 6448
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/container-apps/environment.md",
@@ -3637,8 +3727,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/container-apps/networking.md",
         "mapping": "customizations"
       },
-      "sha256": "261d2ae5c866d315ddf0260873f5e090f619757268e52aa404c1c9455f625f63",
-      "bytes": 5947
+      "sha256": "1dc1e9ffed8975426869c27066c120f00f6f23854009aef261fd31effa3cd480",
+      "bytes": 6080
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/container-apps/revisions.md",
@@ -3647,8 +3737,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/container-apps/revisions.md",
         "mapping": "customizations"
       },
-      "sha256": "b6e014aea98c2374ea9e0a1e6d74c98d724a9fe372a637b69a27055fce0b8358",
-      "bytes": 6266
+      "sha256": "6f10e366219987397de388c5fa9d0a9824f9af4bd371a7a9aa31de382435c323",
+      "bytes": 6437
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/container-apps/scaling.md",
@@ -3667,8 +3757,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/container-apps/terraform.md",
         "mapping": "customizations"
       },
-      "sha256": "d72b9f1b024ac36f20b89e57009f6f84e75dae69059e15905da8302d8c5396a0",
-      "bytes": 7726
+      "sha256": "946eb509121fcd78ad2f8178587307fab6139a90faab8a08b7f93c02feabf32e",
+      "bytes": 7910
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/cosmos-db/README.md",
@@ -3687,8 +3777,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/cosmos-db/bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "1f433358a1e968f002823cad7949f046790a1331c7f085fe8431906bcdbf0af3",
-      "bytes": 3125
+      "sha256": "c3b4be45e401018e3ae6492dc814363882d7e96205f316829c76a57022e1cc08",
+      "bytes": 3247
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/cosmos-db/partitioning.md",
@@ -3727,8 +3817,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/durable-task-scheduler/bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "b5fda2b6247886cb63449b7ffeacf4eef59c668987866da5e4b977756471b15b",
-      "bytes": 5743
+      "sha256": "52009aaa696350d4ec0aa57009228c7b8a5c07bb6e2728e871eff42a5414e3b8",
+      "bytes": 5934
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/durable-task-scheduler/dotnet.md",
@@ -3737,8 +3827,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/durable-task-scheduler/dotnet.md",
         "mapping": "customizations"
       },
-      "sha256": "79c262af56c9dedd107fed2e4f2277bbfe68df83b1d1527b8401e9fc629f8c64",
-      "bytes": 7000
+      "sha256": "291ce25ac5d6a475439cec5f47bb9c5f8ae6c39f46b3793bf8be2fa20bf37e05",
+      "bytes": 7181
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/durable-task-scheduler/java.md",
@@ -3747,8 +3837,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/durable-task-scheduler/java.md",
         "mapping": "customizations"
       },
-      "sha256": "b5f80645bc5f9cd659018744072b8108f3f23088c2f624b98609a8c41e32081b",
-      "bytes": 8593
+      "sha256": "b69aff5b860041df4f39e7326f8583fc01310786c8bfe0dc6b829d22e36851e8",
+      "bytes": 8774
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/durable-task-scheduler/javascript.md",
@@ -3757,8 +3847,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/durable-task-scheduler/javascript.md",
         "mapping": "customizations"
       },
-      "sha256": "cf118f133a301052c2cac5675b82966458212962f15c2d1e8e93c72f2be366fd",
-      "bytes": 6446
+      "sha256": "f21b6bc073b8f67cbb570b37fb82a0e2394ff82740dd60909743ff46e6398620",
+      "bytes": 6627
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/durable-task-scheduler/python.md",
@@ -3767,8 +3857,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/durable-task-scheduler/python.md",
         "mapping": "customizations"
       },
-      "sha256": "cc7d142dcc9a4ae74bc8428dea8b2491106a1668f16c98bda2a1826670dae2ca",
-      "bytes": 7271
+      "sha256": "38ebbfd6ed217907a4ceab9064ddf117a709140492f151fc1888c3b780de9c35",
+      "bytes": 7452
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/event-grid/README.md",
@@ -3797,8 +3887,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/event-grid/subscriptions.md",
         "mapping": "customizations"
       },
-      "sha256": "392772e3b9460623f299c94274d0a6873d5be75273b68c8a1356b187644dee6b",
-      "bytes": 2103
+      "sha256": "9c8e369debd815a137ea4280ae5fa2e293a2773229ed27c12a1fbfa2e48956ca",
+      "bytes": 2172
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/foundry/README.md",
@@ -3827,8 +3917,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/README.md",
         "mapping": "customizations"
       },
-      "sha256": "9db770f76616d9b9d9c23bf986686496be19dd91fd2737c8ba12ee704985ed39",
-      "bytes": 4530
+      "sha256": "ce753c72c794b6b6d4307a99238ee88255d5062c1e4acbf639def169fd8b3381",
+      "bytes": 4658
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/aspire-containerapps.md",
@@ -3837,8 +3927,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/aspire-containerapps.md",
         "mapping": "customizations"
       },
-      "sha256": "a1d5a9d0ee703de8e3300b65a414883117382409fe3321b5fcbf3dd168161ae1",
-      "bytes": 3969
+      "sha256": "d02760bbc07a4d1761ea6374c6b3143668506ed802b946c119274fe13ecbc4b1",
+      "bytes": 4151
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/bicep.md",
@@ -3847,8 +3937,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "a6812f8df30a7b1bb4fd35fe15b98cb97b2493b0c9d3a1fad8b9c0eabea49dc1",
-      "bytes": 9233
+      "sha256": "02b947452d29520b613965e554583724a61906640e69f9c5d2a96b151d4d920e",
+      "bytes": 9432
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/cold-start.md",
@@ -3857,8 +3947,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/cold-start.md",
         "mapping": "customizations"
       },
-      "sha256": "ddacc6d1233df7bb41c1e68e8ab9093a7a71423099a40c9c6b417a4d5e3b93d5",
-      "bytes": 7508
+      "sha256": "211af65af88e6b23f14c6c22121fd600b654c64c4399aeab94de3f5beb514671",
+      "bytes": 7636
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/durable.md",
@@ -3877,8 +3967,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/hosting-plans.md",
         "mapping": "customizations"
       },
-      "sha256": "5342eb8ce4ccf73b19ab0b3176e0a6598413fee2265d9cbf89fa67fe6d4cbb09",
-      "bytes": 7543
+      "sha256": "acfe82f4980bc7570891afdf9922d2a0bc4155f8035c85e6c8cb74af4b773e65",
+      "bytes": 7685
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/README.md",
@@ -3897,8 +3987,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/SPEC-composable-templates.md",
         "mapping": "customizations"
       },
-      "sha256": "921c3bad3c64fd8801f7e00575853dc6c1f99ec62ec4fd5b1f94b50814bd174b",
-      "bytes": 34608
+      "sha256": "ff845679ad4f1e2a5361188019672e6e511820a2bda268550417305602776377",
+      "bytes": 35053
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/base/eval/python.md",
@@ -3957,8 +4047,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/README.md",
         "mapping": "customizations"
       },
-      "sha256": "8cefef1a04aa80098564f3783d82e18ad245814b67778398b8bd1ab81038aaf1",
-      "bytes": 6200
+      "sha256": "150dfb943c43190eceb3070d100757fb1bfa18582723251852f1b6b8eb67e1c7",
+      "bytes": 6321
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/README.md",
@@ -3967,8 +4057,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/README.md",
         "mapping": "customizations"
       },
-      "sha256": "1faa31f91bae7b95863e41e88d93f0662880fa2e268ada25aa0b18ed598096bb",
-      "bytes": 6469
+      "sha256": "2b6ecb6a9c1f5c3f3408853f6028841ef4b6a2607fba040986a5954d971dd501",
+      "bytes": 6673
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/bicep/blob.bicep.md",
@@ -3977,8 +4067,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/bicep/blob.bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "d989ec867ecb0aa4f9b196767ef6855c17b70d412cd4ff1f3beac80f28fce90f",
-      "bytes": 6738
+      "sha256": "1cff482c3081db1cbe60c92971ee7a0c4266338612da92f318e99fb14059d2ab",
+      "bytes": 6796
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/eval/python.md",
@@ -4007,8 +4097,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/source/dotnet.md",
         "mapping": "customizations"
       },
-      "sha256": "82b7324d982c655f8ff09428afd4018f92a5a78bfa6504b4086e7bcfdea1d8bb",
-      "bytes": 3647
+      "sha256": "03beefaa59b897460ee47d68e9a08c2a88374d39c5b448491523478be2bf86df",
+      "bytes": 3752
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/source/java.md",
@@ -4017,8 +4107,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/source/java.md",
         "mapping": "customizations"
       },
-      "sha256": "90b3f53d53d2d33c7496e3f751d1b41c11c4c3d0f56c44289df8b4d1ba0f0922",
-      "bytes": 3774
+      "sha256": "5daa5a45a99be64febc2d8075977cd11d54923e4e785e03ee81880927b7ffe26",
+      "bytes": 3879
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/source/javascript.md",
@@ -4027,8 +4117,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/source/javascript.md",
         "mapping": "customizations"
       },
-      "sha256": "6917e6131c1a5284553d5c1e2c10cca559899206a3dd3a98405de3f940251b14",
-      "bytes": 3217
+      "sha256": "4ab4d1809eb814562881e07a4e493b6b91758a10195051967bc4a999fc929f8f",
+      "bytes": 3298
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/source/powershell.md",
@@ -4037,8 +4127,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/source/powershell.md",
         "mapping": "customizations"
       },
-      "sha256": "fe307240022f5bf7f6fc560261d58ee20f9cb4f715032ae91c3a208d673d8e78",
-      "bytes": 3093
+      "sha256": "3dd887c2b5b152ff9ca62144b77aff0d7cbc39bc3db8dcf7edd1c43285b42d78",
+      "bytes": 3180
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/source/python.md",
@@ -4047,8 +4137,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/source/python.md",
         "mapping": "customizations"
       },
-      "sha256": "75ff14889712ab385a53ee04ca3262e008d3894d4aa1f175005afcd3c4f10a9e",
-      "bytes": 3362
+      "sha256": "820948c4f142440fcc629d407c4752e760bd851858a73d96bd599362333b4b48",
+      "bytes": 3474
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/source/typescript.md",
@@ -4057,8 +4147,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/source/typescript.md",
         "mapping": "customizations"
       },
-      "sha256": "5f7eda10c01fa0230a0ccb09e26352d0f206bd08784cc68fb306f91ff8380135",
-      "bytes": 3765
+      "sha256": "ff68f9e91a00414df26738c89419adcdb24835e2773689f6afc86d87b80e55a4",
+      "bytes": 3877
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/terraform/blob.tf.md",
@@ -4067,8 +4157,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/blob-eventgrid/terraform/blob.tf.md",
         "mapping": "customizations"
       },
-      "sha256": "1f640f2e776a33cda2b85fa0110716cb965bc6c0ac91bedff8943d42e9ada6a0",
-      "bytes": 8136
+      "sha256": "4adc31718a3927a490c06dfeebfcbca6dbb019f41991e58a00b1ec87ba72f73f",
+      "bytes": 8194
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/common/dotnet-entry-point.md",
@@ -4097,8 +4187,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/common/health-check.md",
         "mapping": "customizations"
       },
-      "sha256": "275403b3cabf39439d702959345e7dddbcaa5145ece75a9c0bdc52ca736a912d",
-      "bytes": 3225
+      "sha256": "fb12b3312f23a9e8a170c813a77eb54bff439b75254c42609335011341bd61f5",
+      "bytes": 3322
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/common/nodejs-entry-point.md",
@@ -4107,8 +4197,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/common/nodejs-entry-point.md",
         "mapping": "customizations"
       },
-      "sha256": "3e11268c27d73137bdb8a28329965de89b2072afa905793cad0ed9b26f51128b",
-      "bytes": 5107
+      "sha256": "1fa0ddb31b916f5f2f9ed6a21181462d68eb3249a82777f185c2bd8b61a3aec6",
+      "bytes": 5368
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/common/uami-bindings.md",
@@ -4117,8 +4207,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/common/uami-bindings.md",
         "mapping": "customizations"
       },
-      "sha256": "2cf2445c7e5c2adb07f35bd16563df08e1cab4d73fec205f3d28c738a9fae163",
-      "bytes": 7881
+      "sha256": "bb131594de5ae546109410929eed21344670d520a5e95cd16919ffef896be1d0",
+      "bytes": 8100
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/composition.md",
@@ -4127,8 +4217,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/composition.md",
         "mapping": "customizations"
       },
-      "sha256": "45d149e2dda93d16534fb7636e8ab3b8aa09b94d90ce53c95ee158ca21adc7c1",
-      "bytes": 20816
+      "sha256": "5971bbbf1d544b466c8ba6ecb4109927ff3781dc16a03224b452bdc6e9049a1b",
+      "bytes": 20974
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/cosmosdb/README.md",
@@ -4137,8 +4227,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/cosmosdb/README.md",
         "mapping": "customizations"
       },
-      "sha256": "1a6e8b6065a57772a4381ee41f842e2131494fa576db55c2ee321b68592a39a4",
-      "bytes": 8792
+      "sha256": "7b03a43a83e322252fc6c81ea94f89c31293178feb168e7c89015737120027e2",
+      "bytes": 8968
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/cosmosdb/bicep/cosmos-network.bicep.md",
@@ -4147,8 +4237,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/cosmosdb/bicep/cosmos-network.bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "1f0779d085840d95343e6d9ea38251db19fbec14e2c61d3313cca4db9ebb0d79",
-      "bytes": 3182
+      "sha256": "e354a90f73aa4c0dd92884336e599f174a00724c99eccbf58fb2c2fce3cb8309",
+      "bytes": 3240
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/cosmosdb/bicep/cosmos.bicep.md",
@@ -4157,8 +4247,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/cosmosdb/bicep/cosmos.bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "32ed75197eb83301373c43212f7873ea833b9b0d952cbb0a411339eb4ca95a39",
-      "bytes": 7089
+      "sha256": "edeaa746545faf864cc760b7d58b111d50137341b1b94826898aafdc2c6e4f1c",
+      "bytes": 7147
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/cosmosdb/eval/python.md",
@@ -4247,8 +4337,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/cosmosdb/terraform/cosmos.tf.md",
         "mapping": "customizations"
       },
-      "sha256": "349514d0b8178ca2b59a66b78a9678f44ec4cf54436bb4e2b3cfd8cc1245f75f",
-      "bytes": 8217
+      "sha256": "e8d66c4c51dab75d299618011bb3f09a921e3390f77bbcc30bec65bebc24a6a0",
+      "bytes": 8275
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/durable/README.md",
@@ -4257,8 +4347,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/durable/README.md",
         "mapping": "customizations"
       },
-      "sha256": "db39e5494ee010be271eb7eaadb85fef39ffc00f9fba45659c3333955044a6ea",
-      "bytes": 10193
+      "sha256": "1000af6b5dcbbc6d14cc36d8e9d5eeaed47021e1e3b1087b987f720119b2337c",
+      "bytes": 10385
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/durable/bicep/durable-task-scheduler.bicep.md",
@@ -4267,8 +4357,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/durable/bicep/durable-task-scheduler.bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "63a93a1f1cdfaef4482bf3a2adaf6e8aa7c9c681179a5f6aa77a287fe90298cd",
-      "bytes": 5473
+      "sha256": "6daac9f69e0ebae96edb131adacd2de4ef78665ce47a1eff1788498cc8364df9",
+      "bytes": 5531
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/durable/eval/python.md",
@@ -4297,8 +4387,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/durable/source/dotnet.md",
         "mapping": "customizations"
       },
-      "sha256": "c3ce84d0b87437b6fc29cc4552022f8937c5dfb6cb367fad0bf391c883367e51",
-      "bytes": 4493
+      "sha256": "7c4f4a6c7fd7acfb285019c716cc2098ac0ef5d011f5880e5ac7f2a6fb61932a",
+      "bytes": 4567
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/durable/source/java.md",
@@ -4317,8 +4407,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/durable/source/javascript.md",
         "mapping": "customizations"
       },
-      "sha256": "99d77f8632b7d2e21aa04e9a9536449dc8aa239365d3c6333e3d71905fc6be6f",
-      "bytes": 3088
+      "sha256": "203f8b7ff683863de9d5531e13f54b64b5974efde069b23b2b4e1460a555767e",
+      "bytes": 3270
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/durable/source/powershell.md",
@@ -4327,8 +4417,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/durable/source/powershell.md",
         "mapping": "customizations"
       },
-      "sha256": "b01ac07ffc2b99de9524364e220f22b2577dc8db9c5496c142cb789058c5c899",
-      "bytes": 3114
+      "sha256": "57aee3d272c98aeabb1876b09f07dcf26f6018655eb741edb40f93eb1826d800",
+      "bytes": 3184
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/durable/source/python.md",
@@ -4337,8 +4427,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/durable/source/python.md",
         "mapping": "customizations"
       },
-      "sha256": "2854fb05c2bbec149a2565c22770973a8083c17c797963c3ef45f12fde859ec0",
-      "bytes": 4281
+      "sha256": "924c1c793acfcff1bf8fb441a5cc071bb22d54fa9bf9e5db64215f618139ae4b",
+      "bytes": 4368
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/durable/source/typescript.md",
@@ -4347,8 +4437,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/durable/source/typescript.md",
         "mapping": "customizations"
       },
-      "sha256": "d33ce37f5f8986efdeed48769a3620cc7abc3ed081eb365c80e1f079f19569f5",
-      "bytes": 3753
+      "sha256": "2de7640378503332a1369d3c01486307fc2eb8b736a87712df495e47f124c96d",
+      "bytes": 3935
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/README.md",
@@ -4357,8 +4447,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/README.md",
         "mapping": "customizations"
       },
-      "sha256": "1596d38a7e4c8437ac44119037c38ae2e1435508b9a20c6de3620b34c009262f",
-      "bytes": 8346
+      "sha256": "c2e4fc27174473ad86526271ce5ffb7a72af335722501e8d2e2d7a73292fdda5",
+      "bytes": 8538
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/bicep/eventhubs-network.bicep.md",
@@ -4367,8 +4457,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/bicep/eventhubs-network.bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "b0cacb3b602aa4e5ea3610c5f723a733e1de94a5bc89cb744ae09efb2f7f8cf5",
-      "bytes": 2897
+      "sha256": "d2b0496cbbaf462e19abeaca69322924028bafd592e5314335b5697008c43c77",
+      "bytes": 2955
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/bicep/eventhubs.bicep.md",
@@ -4377,8 +4467,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/bicep/eventhubs.bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "7df7048324ccdc5dcbe1b97435bf72cf1f7d2ab15a8e9b452ed2f89f288e0e5d",
-      "bytes": 4552
+      "sha256": "bd71650bd29154c72d0773be2d8ca6d5101282fe75736aa5474c3a2502a7289c",
+      "bytes": 4610
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/eval/python.md",
@@ -4407,8 +4497,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/source/dotnet.md",
         "mapping": "customizations"
       },
-      "sha256": "bc084eca523d6321540ad95f033c76a3c945d0790baf743e142a918cfded0141",
-      "bytes": 3604
+      "sha256": "4b044611413dd83970bd9c2a2b7edd13dee3c5dbfa33ed7f87c41eaeaae466cf",
+      "bytes": 3715
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/source/java.md",
@@ -4417,8 +4507,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/source/java.md",
         "mapping": "customizations"
       },
-      "sha256": "32757659400e2e2c886ec51d905124bb63c2b2072a481641f05d1ef32f76906f",
-      "bytes": 3942
+      "sha256": "906ef0c870375088b5f4298734cd4339e55555266d88cf6b8d90a6dd84a2e8cf",
+      "bytes": 4053
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/source/javascript.md",
@@ -4437,8 +4527,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/source/powershell.md",
         "mapping": "customizations"
       },
-      "sha256": "983101b5766c1e3e9156a2f0cb366e0f13f06d4c1f0ed1ddf76f71eec4f59332",
-      "bytes": 3677
+      "sha256": "d81094c7de61fe8f2c3cbf6d4a28374ea7f736e712f039b77e83e80167ef0521",
+      "bytes": 3788
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/source/python.md",
@@ -4457,8 +4547,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/source/typescript.md",
         "mapping": "customizations"
       },
-      "sha256": "c6b8ad56462173c7ed972f0c817a922d3efdbf2e79141fb2eab33c5c341433b8",
-      "bytes": 3481
+      "sha256": "daa81850c7d32488699a98e261baaf3191156c0b510befd9a25e0d88010fff9d",
+      "bytes": 3592
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/terraform/eventhubs.tf.md",
@@ -4467,8 +4557,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/eventhubs/terraform/eventhubs.tf.md",
         "mapping": "customizations"
       },
-      "sha256": "60c6f039cbcbdaf2eb99034fa53d28398b09539573ca922cb2b0df1b083163ab",
-      "bytes": 6857
+      "sha256": "3d50ff7338a7a4179755bccaf6db728184bf43199184c6be7018380d8df33295",
+      "bytes": 6915
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/mcp/README.md",
@@ -4477,8 +4567,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/mcp/README.md",
         "mapping": "customizations"
       },
-      "sha256": "7bfc994ebf72db29ec3be171abce4a081d9c23d55659ad2ead403e75d2328c38",
-      "bytes": 9707
+      "sha256": "8ca497cc32168606f2e794b2e3d5a47a7472608b9a20b261860b6998bcea3a48",
+      "bytes": 9795
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/mcp/eval/python.md",
@@ -4527,8 +4617,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/mcp/source/javascript.md",
         "mapping": "customizations"
       },
-      "sha256": "0a12a2fe4ce9dade5a4c56b7fa1e11cdb62b8729d7bb6caf9bb3e4c2818ba5cc",
-      "bytes": 6218
+      "sha256": "e8c9fa8cfaf0e9e9fb7a2c57ebc05b253697c1e2d891d4b27827b0e86d7a571e",
+      "bytes": 6295
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/mcp/source/powershell.md",
@@ -4547,8 +4637,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/mcp/source/python.md",
         "mapping": "customizations"
       },
-      "sha256": "2c578b5ef61c8bf447ef198cc797344061dbeac0da2a288871e242d270a91dde",
-      "bytes": 6743
+      "sha256": "d04510fce4081cd837b59d09b9b0c5056ff00537792eda6ffb6b41accf9c21ae",
+      "bytes": 6835
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/mcp/source/typescript.md",
@@ -4567,8 +4657,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/README.md",
         "mapping": "customizations"
       },
-      "sha256": "af8ef788d10ef3aeef7f852e28e5ea090916d490b0a893eb5b8c2380a558c3d7",
-      "bytes": 7082
+      "sha256": "7849c80a74b1b285b414dc90663471c09743de030d4b365a33bf3556040e998a",
+      "bytes": 7236
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/bicep/servicebus.bicep.md",
@@ -4607,8 +4697,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/source/dotnet.md",
         "mapping": "customizations"
       },
-      "sha256": "a0b6a188fead9c3bd71dd4153763b13839f9631a2ae90d5759dfdedc37a3a853",
-      "bytes": 5736
+      "sha256": "23e44112a58ed2d71a4369d62a9ce1b7059526d1a820d10783e7e3e002ad44ab",
+      "bytes": 5849
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/source/java.md",
@@ -4617,8 +4707,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/source/java.md",
         "mapping": "customizations"
       },
-      "sha256": "485cf8d0e9d7586be9a473fd831e8d41894e8fcbac049feeded1d71a53ef6ef5",
-      "bytes": 4684
+      "sha256": "eef5f6f8184bce54f9896b97e220a2c4909a64380a9f604a62780028b64d7f53",
+      "bytes": 4788
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/source/javascript.md",
@@ -4627,8 +4717,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/source/javascript.md",
         "mapping": "customizations"
       },
-      "sha256": "de438a314ea95b9826fc681aedb6c281d24530831251b6ffe0b6697696aa0286",
-      "bytes": 3469
+      "sha256": "b9ec831819ff75827640e0e847e17b804eab5445c273b1cc0c9f42fe073b5f06",
+      "bytes": 3661
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/source/powershell.md",
@@ -4637,8 +4727,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/source/powershell.md",
         "mapping": "customizations"
       },
-      "sha256": "9958331c4fb85bd86da5c0ab7cca942eba4143a4ca375375400abb389a0af06d",
-      "bytes": 4323
+      "sha256": "de2b1bcd8f1b938b888a332d134bfadb2712717ac9556343432f6c7fdd44419a",
+      "bytes": 4565
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/source/python.md",
@@ -4647,8 +4737,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/source/python.md",
         "mapping": "customizations"
       },
-      "sha256": "c977603365cd3cf6639d33ec5df8b17e3ecee017146b3d032cf371bd27ff6fce",
-      "bytes": 3879
+      "sha256": "e3c4fe7f66a49bdce00b3f8b32adc80e8f56d6c40b47ce57b3778e4beb410c06",
+      "bytes": 3994
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/source/typescript.md",
@@ -4657,8 +4747,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/source/typescript.md",
         "mapping": "customizations"
       },
-      "sha256": "031bcd64b01408ff7b72f2d2d3cdaadc18cebdcaf445fe78e2ff95eef4adaec3",
-      "bytes": 3913
+      "sha256": "44d309e014f0f4be1268fc67364d796c8a95e24beb47e353be7b0d173bc79640",
+      "bytes": 4105
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/terraform/servicebus.tf.md",
@@ -4667,8 +4757,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/servicebus/terraform/servicebus.tf.md",
         "mapping": "customizations"
       },
-      "sha256": "4e97b01ace7ec9cbc3369922d9ed3cba1ea0017c6642f3079b0f756772be8d7d",
-      "bytes": 4037
+      "sha256": "771c3e6e65b7927c260f294c6cdb24b6274ed438a3404fe45962b19faf810014",
+      "bytes": 4095
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/README.md",
@@ -4677,8 +4767,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/README.md",
         "mapping": "customizations"
       },
-      "sha256": "21059c0933ef323db5589c590a160ed974afd21dc1edf453807843692b96a70a",
-      "bytes": 6033
+      "sha256": "2446730e1d0951224c0d2fa2cdd9c1953d1cda92c4e12d2bdcc4e8e0e79f110b",
+      "bytes": 6234
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/bicep/sql.bicep.md",
@@ -4687,8 +4777,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/bicep/sql.bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "612befdf9c1bc23abb0df535bbadd62981bb29a20d5b6cffad6a345d00b3499c",
-      "bytes": 6650
+      "sha256": "2c722dafc2e2429dcdcb16efd98b6ca14896ceb93cffcba389cce66d4816e20c",
+      "bytes": 6708
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/eval/python.md",
@@ -4717,8 +4807,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/source/dotnet.md",
         "mapping": "customizations"
       },
-      "sha256": "28304cf4d8f27b57762f6ff421bbaa4cf537b09babc957fd307959b45e95c2a0",
-      "bytes": 3781
+      "sha256": "a11a1968d0441809079843fc7f0bb27eaae69f3d9902a6cd94254fb90a52cd80",
+      "bytes": 3869
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/source/java.md",
@@ -4727,8 +4817,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/source/java.md",
         "mapping": "customizations"
       },
-      "sha256": "bb30bfd4ae687e32965794b80c63eab2346766342cbacd7c3ebac2c9ebd3c695",
-      "bytes": 4520
+      "sha256": "72e5c140afceccff1b408e0b5303196d24d70cafd785e9d917b2328b0f7ad071",
+      "bytes": 4625
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/source/javascript.md",
@@ -4737,8 +4827,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/source/javascript.md",
         "mapping": "customizations"
       },
-      "sha256": "c9b1bf82ace3a4c6be47c2fe671797ac720caab56c96056de44ee12176c78d9a",
-      "bytes": 3062
+      "sha256": "796ffdd89d5118374f06140580c34bcde608f446cbf7148882325a2f6976f124",
+      "bytes": 3143
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/source/powershell.md",
@@ -4747,8 +4837,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/source/powershell.md",
         "mapping": "customizations"
       },
-      "sha256": "83a7638aa4a918a84747e029b5caa8a64c20f219255180fe698a765d72f8b725",
-      "bytes": 3654
+      "sha256": "3e78c6ffdf8c1cd8a5e88ea22aa26708513304bcad72cb897f9a821d9f31970c",
+      "bytes": 3741
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/source/python.md",
@@ -4757,8 +4847,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/source/python.md",
         "mapping": "customizations"
       },
-      "sha256": "fe7c9e80319e94f8f22f3a999f415156c42d49a6897ece4e8781b6b873430e15",
-      "bytes": 4767
+      "sha256": "747f55ba6ff2499516a3939f407fd9a3ffa6c8586012a41b313bf95fa0847433",
+      "bytes": 4855
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/source/typescript.md",
@@ -4767,8 +4857,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/source/typescript.md",
         "mapping": "customizations"
       },
-      "sha256": "f54d26cc06c3d153ec2119dfdbf3035321da795518fdf2d90808640b0f6966bd",
-      "bytes": 3593
+      "sha256": "b2b1121ff1968e3687bed40e4684c014d488284ba3e94fa9cf3bbe9e96e88a8d",
+      "bytes": 3681
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/terraform/sql.tf.md",
@@ -4777,8 +4867,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/sql/terraform/sql.tf.md",
         "mapping": "customizations"
       },
-      "sha256": "5365de0a245e40b29b29a81b338bd153e74291931265772302a0e1cf829fb46e",
-      "bytes": 8154
+      "sha256": "b8fc24177727b8a8f3a6f1a2679e300162c1c057215db579f5c1d7f8a3387ace",
+      "bytes": 8212
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/timer/README.md",
@@ -4817,8 +4907,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/timer/source/dotnet.md",
         "mapping": "customizations"
       },
-      "sha256": "199b36efbe06c17ce08d0789825ec0086edc2dbb7c7861d4c234fc464927b071",
-      "bytes": 3678
+      "sha256": "1927b80ae59025f5918de2205b7cb871c94a1d94f6d74f7eb634d2110df4f7a0",
+      "bytes": 3768
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/timer/source/java.md",
@@ -4827,8 +4917,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/timer/source/java.md",
         "mapping": "customizations"
       },
-      "sha256": "3ec518a651e66bb2fe3a4e9cc19332d028a5be2f9783096938c46407f36f0dc0",
-      "bytes": 3118
+      "sha256": "9de76d845e7b622a418dc83f45e272f9a29f9e8f0aa9013188713ffe6c8c7795",
+      "bytes": 3204
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/timer/source/javascript.md",
@@ -4847,8 +4937,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/timer/source/powershell.md",
         "mapping": "customizations"
       },
-      "sha256": "74f43fa6b45fb126721afd4e30b1cb1c9c93aaa871325d8160a25c34ea879bf9",
-      "bytes": 2551
+      "sha256": "92fb91c8adfdc03054e036b2c91b0a4d6e5ef92e6f5a20dbbadea10dfd00122a",
+      "bytes": 2759
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/templates/recipes/timer/source/python.md",
@@ -4887,8 +4977,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/terraform.md",
         "mapping": "customizations"
       },
-      "sha256": "19573556491e82dfdf6dad488d3fc63a67cc380ba13ef84b843e6aeb6580543b",
-      "bytes": 10960
+      "sha256": "8ebfc76d14572aa14c2dcb12a8398e31524f60326ae5422481ab3c7c52439ba9",
+      "bytes": 11114
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/triggers.md",
@@ -4897,8 +4987,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/functions/triggers.md",
         "mapping": "customizations"
       },
-      "sha256": "ccb24c0c7731c30ca9b98eabe972908c0c280f6109fc30f9989047ebc67872aa",
-      "bytes": 3859
+      "sha256": "5f55edb34ebc2c5f4c9f4a61fb45eea30debdf286a7ba11a820bb0d15a5c8c44",
+      "bytes": 4035
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/key-vault/README.md",
@@ -4947,8 +5037,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/logic-apps/bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "d080cf097f222cd86d2e855ddb4a7ae436ad5ebce29ebc415ce543f0eef79ece",
-      "bytes": 3911
+      "sha256": "e7934c4803fd5c41516728a27236dfcf52fa1d85d1a71e099db921fdd429cff3",
+      "bytes": 4000
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/logic-apps/triggers.md",
@@ -4957,8 +5047,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/logic-apps/triggers.md",
         "mapping": "customizations"
       },
-      "sha256": "f151363298e1f66a06e8dd401a1de93ce095de6e4f1f2a31584f8c006f826d69",
-      "bytes": 2240
+      "sha256": "648ecf4e506e10cbe1155ab551262d9d4b910a01189ffd725c2ddbe2515e5a21",
+      "bytes": 2332
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/service-bus/README.md",
@@ -4977,8 +5067,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/service-bus/bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "1fc168893e56cfa091774204135c3998d0964a6bcb4b7d14a498e20ada1219ba",
-      "bytes": 4365
+      "sha256": "fe90a50ccc874c78f3796f1485b7eb5d96288c4706bbec6a4b030156448dcb78",
+      "bytes": 4475
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/service-bus/patterns.md",
@@ -4987,8 +5077,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/service-bus/patterns.md",
         "mapping": "customizations"
       },
-      "sha256": "ed314baca370abfcfa0c049f0965bbcea54e7f125d619178b62e0812df8c5f08",
-      "bytes": 4358
+      "sha256": "3120da4815d5a73d99e27ee6c985335d61ec75ae1e65405e849f7c503be7c4e9",
+      "bytes": 4471
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/sql-database/README.md",
@@ -5007,8 +5097,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/sql-database/auth.md",
         "mapping": "customizations"
       },
-      "sha256": "3ba511cec5e92b41b38e842f86e2d0cf831fc98dae1a2fa49a58a8844c427529",
-      "bytes": 4326
+      "sha256": "580cbe72b38af26a344d81ab875dec971e798f383d40365461aab996f3ead2dd",
+      "bytes": 4490
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/sql-database/bicep.md",
@@ -5017,8 +5107,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/sql-database/bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "379fe9051101eaabe4abc6391e0bcaf105746d8b1fde96ac311cbe0ead4721f2",
-      "bytes": 3757
+      "sha256": "50a5e126eedc9c5a72471b72974d299cee5f4ea7a943822f2936fef98ee2f440",
+      "bytes": 3906
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/sql-database/sdk.md",
@@ -5047,8 +5137,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/static-web-apps/bicep.md",
         "mapping": "customizations"
       },
-      "sha256": "855c4de3857028ac466c638dcf680e8d93251234194c627c7111bcfd600e846a",
-      "bytes": 1551
+      "sha256": "3474764d48baafd3f93dcc31fcf9bfee9563c00e2d09542968591feb7d3f8f76",
+      "bytes": 2048
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/static-web-apps/deployment.md",
@@ -5097,8 +5187,8 @@
         "path": "customizations/.github/skills/apex-azure-prepare/references/services/storage/access.md",
         "mapping": "customizations"
       },
-      "sha256": "c98a6a2ba3600ae18a353977ce1068624631109b1275d9db70363c14e38bac5a",
-      "bytes": 4967
+      "sha256": "eddc84d97050432e01e571381dd066904a9d92ec36adf547c7c7e1f42274ffc4",
+      "bytes": 5130
     },
     {
       "path": "customizations/.github/skills/apex-azure-prepare/references/services/storage/bicep.md",
@@ -5127,8 +5217,8 @@
         "path": "customizations/.github/skills/apex-azure-quotas/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "2360a1fecda7912547ae6f3f2fa8740c3a07cc90e22ddaffc18519107b837449",
-      "bytes": 5805
+      "sha256": "25ce8cf811948827c1255ec9b4a5889dc3ed94240c3bfe79c2a0ddc633f37b5d",
+      "bytes": 5771
     },
     {
       "path": "customizations/.github/skills/apex-azure-quotas/references/capacity-decision-rules.md",
@@ -5157,8 +5247,8 @@
         "path": "customizations/.github/skills/apex-azure-quotas/references/quota-cli-commands.md",
         "mapping": "customizations"
       },
-      "sha256": "19c410324b5dc9b7a44a2a666d88082babcdfb29552dc0bc2935196440252995",
-      "bytes": 12960
+      "sha256": "4c73468b17d8e1c1f9a4aa28bbc1988db8375411cc47a7dce86a247d42cf720d",
+      "bytes": 13300
     },
     {
       "path": "customizations/.github/skills/apex-azure-quotas/references/quota-workflows.md",
@@ -5167,8 +5257,8 @@
         "path": "customizations/.github/skills/apex-azure-quotas/references/quota-workflows.md",
         "mapping": "customizations"
       },
-      "sha256": "fc3c4060ead9a9cef32aeb0b7a7e30b0a478b7c6093f04a9c92fcee3368de496",
-      "bytes": 4447
+      "sha256": "3638bdcd8837e9109c02b0677639a2f0f802bae367a05a9de9a6685cbd116ce7",
+      "bytes": 4632
     },
     {
       "path": "customizations/.github/skills/apex-azure-quotas/references/sku-availability.md",
@@ -5217,8 +5307,88 @@
         "path": "customizations/.github/skills/apex-azure-rbac/references/role-cli-and-iac.md",
         "mapping": "customizations"
       },
-      "sha256": "34854050d0cadb82e883439bd5ff15c8bbc23dee030ba734aa1603459a91512d",
-      "bytes": 6042
+      "sha256": "72057d998745c830b0659025dc8c6150dfd68652634c587b290a1dbfaa8a574a",
+      "bytes": 6195
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-reliability/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-reliability/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "885003f983ac74f78a294866e2e2ff60b5120e0b8236a64e9abe6b53e9a59ab6",
+      "bytes": 7542
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-reliability/references/health-probe-checks.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-reliability/references/health-probe-checks.md",
+        "mapping": "customizations"
+      },
+      "sha256": "d244e7ae1b369fa4714880ee2ce4536dbac3c0bef09c2a99bf42649bef1439e1",
+      "bytes": 4322
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-reliability/references/multi-region-checks.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-reliability/references/multi-region-checks.md",
+        "mapping": "customizations"
+      },
+      "sha256": "e2eb0e1a2867701c95e05c0b86c1494b8c903c5ec88a5446d3a163755c8f3b1f",
+      "bytes": 5363
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-reliability/references/services/app-service/reliability.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-reliability/references/services/app-service/reliability.md",
+        "mapping": "customizations"
+      },
+      "sha256": "57c9f7cd15af2827b91ff48794d5986905f6008ff0ff16b4f5c3f15be7acd9b2",
+      "bytes": 6580
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-reliability/references/services/functions/reliability.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-reliability/references/services/functions/reliability.md",
+        "mapping": "customizations"
+      },
+      "sha256": "88ea33eadb567523fdf09aff875138a26c1bdc9561959e2fc4b941b4b3a547aa",
+      "bytes": 5538
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-reliability/references/storage-redundancy-checks.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-reliability/references/storage-redundancy-checks.md",
+        "mapping": "customizations"
+      },
+      "sha256": "2f5b07a16e6a75e0197c74e0b4701dd4ea69e209d82f7f6fb4c8cde8c9b8b0b7",
+      "bytes": 6084
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-reliability/references/upstream-coverage.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-reliability/references/upstream-coverage.md",
+        "mapping": "customizations"
+      },
+      "sha256": "c8f5fdd4ef9641b5ad0c842551b3daddbf2356fe084f3a63d4f0a0cc61ffd759",
+      "bytes": 3856
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-reliability/references/zone-redundancy-checks.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-reliability/references/zone-redundancy-checks.md",
+        "mapping": "customizations"
+      },
+      "sha256": "2fc4bcc03e6b6e939f6e854b9dbfb1831e9dc95422f62def926e301931bad59a",
+      "bytes": 3371
     },
     {
       "path": "customizations/.github/skills/apex-azure-resources/SKILL.md",
@@ -5227,8 +5397,8 @@
         "path": "customizations/.github/skills/apex-azure-resources/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "53b71ec8637c325ac5f5d696d097659455e78c65db710a5ae7685f5362f677c9",
-      "bytes": 4770
+      "sha256": "2094286716066b71434338c8a860f9c27c6ca92258b085c8182b4a0c647ee89c",
+      "bytes": 4727
     },
     {
       "path": "customizations/.github/skills/apex-azure-resources/references/azure-resource-graph.md",
@@ -5237,8 +5407,8 @@
         "path": "customizations/.github/skills/apex-azure-resources/references/azure-resource-graph.md",
         "mapping": "customizations"
       },
-      "sha256": "84a81feb2013896b91b3884a4aaa66ebbb05ad656d009deb6e1a6eb9d8bb84f5",
-      "bytes": 8511
+      "sha256": "06be8afb6f5c6bfe325f325bdb0b42bb0d0ade509199a5dad57cf11438c58f18",
+      "bytes": 8737
     },
     {
       "path": "customizations/.github/skills/apex-azure-resources/references/inventory-query-patterns.md",
@@ -5267,8 +5437,8 @@
         "path": "customizations/.github/skills/apex-azure-storage/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "98ab74a4c2ad55a5fc0b62280c535c67c4a6bd08365fb31b0092a46064309785",
-      "bytes": 4538
+      "sha256": "e9cf156f3e6dbaf1614321a78ebdfc55ea037460007879d11482767aa4c8f567",
+      "bytes": 4544
     },
     {
       "path": "customizations/.github/skills/apex-azure-storage/references/security-and-governance.md",
@@ -5311,14 +5481,74 @@
       "bytes": 2557
     },
     {
+      "path": "customizations/.github/skills/apex-azure-upgrade/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-upgrade/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "c9e8e3fcf4977dc6d8f5b024f2352f100aa1a76d3820f596e361a34ed6c46bcb",
+      "bytes": 6729
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-upgrade/references/global-rules.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-upgrade/references/global-rules.md",
+        "mapping": "customizations"
+      },
+      "sha256": "d8e406d26ea5bea2b08fc5825e52ca46b8eee8c0f3a289129b32ab823c772fcf",
+      "bytes": 4594
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-upgrade/references/services/functions/assessment.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-upgrade/references/services/functions/assessment.md",
+        "mapping": "customizations"
+      },
+      "sha256": "6dd8f3043474a18fa8da8e077976b30488efa13b969b545298f43bf45c1fa74c",
+      "bytes": 6407
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-upgrade/references/services/functions/consumption-to-flex.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-upgrade/references/services/functions/consumption-to-flex.md",
+        "mapping": "customizations"
+      },
+      "sha256": "9ac63de29d0b55b63fb89341c23f9d5c7849f529d2d10c1ca01ce3d39603526b",
+      "bytes": 12534
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-upgrade/references/services/redis/redis-to-amr.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-upgrade/references/services/redis/redis-to-amr.md",
+        "mapping": "customizations"
+      },
+      "sha256": "71f538e1061570173dfc381d799a04fe285c08d511383820ab4f0350285c2ca2",
+      "bytes": 8031
+    },
+    {
+      "path": "customizations/.github/skills/apex-azure-upgrade/references/upstream-coverage.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-azure-upgrade/references/upstream-coverage.md",
+        "mapping": "customizations"
+      },
+      "sha256": "9cfd46d8276328eb6982eb5b85d204f28d143e79941936a2751d7b67b6169ce9",
+      "bytes": 3830
+    },
+    {
       "path": "customizations/.github/skills/apex-azure-validate/SKILL.md",
       "source": {
         "kind": "repository-file",
         "path": "customizations/.github/skills/apex-azure-validate/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "c0914f2a2c87148df175aa68b54b532dab82af48400a812c3bba7eeb7cd7f82c",
-      "bytes": 4908
+      "sha256": "37a7e66eb64170a5cb9b1ab352a6cd22039d992e9166fcd5a59bd1fd498070f1",
+      "bytes": 4988
     },
     {
       "path": "customizations/.github/skills/apex-azure-validate/references/infraops-preflight.md",
@@ -5357,8 +5587,8 @@
         "path": "customizations/.github/skills/apex-azure-validate/references/policy-validation.md",
         "mapping": "customizations"
       },
-      "sha256": "a3562fe8e2595a78ee2ba22450f66f964eb9a5a0546dbd47d542fa4bda2317a3",
-      "bytes": 2506
+      "sha256": "f7c9fce19d008d1247088651d20a7813d74069ad59740c79734f54c358ebd107",
+      "bytes": 2578
     },
     {
       "path": "customizations/.github/skills/apex-azure-validate/references/preflight-evidence.md",
@@ -5387,8 +5617,8 @@
         "path": "customizations/.github/skills/apex-azure-validate/references/recipes/azcli/README.md",
         "mapping": "customizations"
       },
-      "sha256": "ea0f647e70bdb28f06b1c2d4104260992ca808615d4ba9199a49a96fdad2ba6c",
-      "bytes": 2678
+      "sha256": "71ed1260dd3ed77d6ed3462ddb709965888a02771208e5a6426854b1e517b361",
+      "bytes": 2859
     },
     {
       "path": "customizations/.github/skills/apex-azure-validate/references/recipes/azcli/errors.md",
@@ -5407,8 +5637,8 @@
         "path": "customizations/.github/skills/apex-azure-validate/references/recipes/azd/README.md",
         "mapping": "customizations"
       },
-      "sha256": "70255312bf9c8d3bd14d39fb67d1a1b5da9bb88c319e43d3650b66777e2ee865",
-      "bytes": 6620
+      "sha256": "1d97ee7a0604cf468c57441db84184dc7b3e96dd9db922489aeb1bf3a0d4e25a",
+      "bytes": 6993
     },
     {
       "path": "customizations/.github/skills/apex-azure-validate/references/recipes/azd/environment.md",
@@ -5417,8 +5647,8 @@
         "path": "customizations/.github/skills/apex-azure-validate/references/recipes/azd/environment.md",
         "mapping": "customizations"
       },
-      "sha256": "08e0160f435d30d5cd9c8fac742f1fd1df17f961bef7569f65c4bd6bf8fbe236",
-      "bytes": 2917
+      "sha256": "c5b36f4f2fff6e8339135c1eb502b3974d8c098840ca5278fd7fa3f3062f22be",
+      "bytes": 3079
     },
     {
       "path": "customizations/.github/skills/apex-azure-validate/references/recipes/azd/errors.md",
@@ -5437,8 +5667,8 @@
         "path": "customizations/.github/skills/apex-azure-validate/references/recipes/bicep/README.md",
         "mapping": "customizations"
       },
-      "sha256": "85ba4efc07cc29ba94f6ab2967dc0f612276efeb6b6880bbcf64b3a62958240f",
-      "bytes": 2742
+      "sha256": "3b247fba831f05d7575091ef253adb5570295828fe982551c0c0c585313b3525",
+      "bytes": 2825
     },
     {
       "path": "customizations/.github/skills/apex-azure-validate/references/recipes/bicep/errors.md",
@@ -5457,8 +5687,8 @@
         "path": "customizations/.github/skills/apex-azure-validate/references/recipes/terraform/README.md",
         "mapping": "customizations"
       },
-      "sha256": "e3aa1df3bfe800fc9b6addf6a99c9dd7355267909295fcc00d606561df4e11be",
-      "bytes": 3055
+      "sha256": "d13d3602ac6e274463b25e7da9a56e17b179802b6f7629942ee089543e88b955",
+      "bytes": 3236
     },
     {
       "path": "customizations/.github/skills/apex-azure-validate/references/recipes/terraform/errors.md",
@@ -5477,8 +5707,8 @@
         "path": "customizations/.github/skills/apex-azure-validate/references/region-availability.md",
         "mapping": "customizations"
       },
-      "sha256": "eefe04a83d7d87b81a7a05c9b33c287d100cc873c3bd9328b0b5da6fab3b4f18",
-      "bytes": 4806
+      "sha256": "6dacc9ea60fa6ee1cb2e5a56648186c74031c3c312f2f33530d5bb9fb69ccacc",
+      "bytes": 5254
     },
     {
       "path": "customizations/.github/skills/apex-azure-validate/references/role-verification.md",
@@ -5497,8 +5727,8 @@
         "path": "customizations/.github/skills/apex-bicep-patterns/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "3f6810e9b775d040c11f17913454869f962ece01a016081f8c559b771066db23",
-      "bytes": 4820
+      "sha256": "1569ee6f1e6cb0642608884804d4f53fc23d77d034024514eb55acc454494215",
+      "bytes": 4822
     },
     {
       "path": "customizations/.github/skills/apex-bicep-patterns/references/avm-and-codegen-acceptance.md",
@@ -5517,8 +5747,8 @@
         "path": "customizations/.github/skills/apex-bicep-patterns/references/avm-pitfalls.md",
         "mapping": "customizations"
       },
-      "sha256": "a31355e5fe206d41c1eb04383ffef62c64740f3f0b8aee4246b3b0f5f1bb2775",
-      "bytes": 33723
+      "sha256": "b98653bf003ca3cdc153ecbeaa1232778e0d9bdadfcdef6ab179cc25c55417a7",
+      "bytes": 34573
     },
     {
       "path": "customizations/.github/skills/apex-bicep-patterns/references/bicepparam-pattern.md",
@@ -5567,8 +5797,8 @@
         "path": "customizations/.github/skills/apex-bicep-patterns/references/common-patterns.md",
         "mapping": "customizations"
       },
-      "sha256": "f76ad55fb3ad85909c96a6b95c746589bab94df3b221a6eb3ac26bf5fcbe149d",
-      "bytes": 8776
+      "sha256": "83ebd41b9db6267bceb718b0285200ba3c89bc82107f7e1c4e50513e39342f7f",
+      "bytes": 9065
     },
     {
       "path": "customizations/.github/skills/apex-bicep-patterns/references/compiler-and-provider-gotchas.md",
@@ -5647,8 +5877,8 @@
         "path": "customizations/.github/skills/apex-codegen/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "54f76b9843fd13d29a6ee1ead6b71683a927641b3c7a2f615d9d7014b310b3ef",
-      "bytes": 1534
+      "sha256": "8fbef8f0567c8142759563509c0485b2d3acaed0d73f6e8adae786370a63607d",
+      "bytes": 2436
     },
     {
       "path": "customizations/.github/skills/apex-entra-app-registration/SKILL.md",
@@ -5677,8 +5907,8 @@
         "path": "customizations/.github/skills/apex-entra-app-registration/references/cli-commands.md",
         "mapping": "customizations"
       },
-      "sha256": "bf091c423827d3d13ea348c06ffb1296234a00dcf98c7ea0866e026986b2b9ed",
-      "bytes": 16208
+      "sha256": "c06c55529dd9c3dfa6f9c93f4fb93d79a671adc08136fc9791be798ce1d39995",
+      "bytes": 16571
     },
     {
       "path": "customizations/.github/skills/apex-entra-app-registration/references/design-and-diagnostics.md",
@@ -5697,8 +5927,8 @@
         "path": "customizations/.github/skills/apex-entra-app-registration/references/graph-bicep-example.md",
         "mapping": "customizations"
       },
-      "sha256": "51f294061549ab7280bdce114c5558354c148276d45ce14ef2cd4d6cc715c16c",
-      "bytes": 6501
+      "sha256": "ef1dc89e8a60828667d485f36374fe120e541baaac351d746115d55519aeeb00",
+      "bytes": 6559
     },
     {
       "path": "customizations/.github/skills/apex-entra-app-registration/references/oauth-registration-model.md",
@@ -5727,8 +5957,8 @@
         "path": "customizations/.github/skills/apex-mermaid/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "16b276d32cee218e0fff61edd36f5ef73dd43155aeaf32fab05c9dfe24c82218",
-      "bytes": 3225
+      "sha256": "fe7cfc325fff0e3482277b3dbbbec5df5697d4ffc4243e51129ec0e31b15b36d",
+      "bytes": 3164
     },
     {
       "path": "customizations/.github/skills/apex-mermaid/references/styling.md",
@@ -5777,8 +6007,8 @@
         "path": "customizations/.github/skills/apex-microsoft-docs/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "0325aa8d992aed45923a30c1c662e684ed1e59c0aabd1d6e31620a9aa0874f3b",
-      "bytes": 4826
+      "sha256": "063f759d970098cf365b6a4a4f24cd1e096ae70f0c9c2fab9a4c829adf8f482e",
+      "bytes": 4922
     },
     {
       "path": "customizations/.github/skills/apex-microsoft-docs/references/learn-cli.md",
@@ -5807,8 +6037,8 @@
         "path": "customizations/.github/skills/apex-next/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "d99987cc2aebddc5cd051675526cae853a10d354e2fb01c1dc88f8d35056721e",
-      "bytes": 7641
+      "sha256": "c53c39261b87630ed8b1e068088bd5dc383f16fe87fe8a48181bee1a3c990e44",
+      "bytes": 8650
     },
     {
       "path": "customizations/.github/skills/apex-operations/SKILL.md",
@@ -5817,8 +6047,8 @@
         "path": "customizations/.github/skills/apex-operations/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "2dfcdd48cc79302bd5bb5b9e1e9d48d657318a20c26c5f4ec8f0b8201b587d9c",
-      "bytes": 4643
+      "sha256": "addcdadb55517e9555893fc8c6d5c046c4dec7c5eb897b041644165d45c0edbe",
+      "bytes": 6675
     },
     {
       "path": "customizations/.github/skills/apex-planning/SKILL.md",
@@ -5827,8 +6057,148 @@
         "path": "customizations/.github/skills/apex-planning/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "4028ea40cf06ab991b6a07b438be309786391e813bb193b0557b16f2df94d51f",
-      "bytes": 4690
+      "sha256": "988f115846f583c4c36bfe5e77f82fd97833c43f0db34800add63dfc420dcfec",
+      "bytes": 6913
+    },
+    {
+      "path": "customizations/.github/skills/apex-python-diagrams/SKILL.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-python-diagrams/SKILL.md",
+        "mapping": "customizations"
+      },
+      "sha256": "e9a6b3658d4899b453197749fafbe9f7a927b63538c73bc43edd78f8b0173007",
+      "bytes": 5392
+    },
+    {
+      "path": "customizations/.github/skills/apex-python-diagrams/references/azure-components.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-python-diagrams/references/azure-components.md",
+        "mapping": "customizations"
+      },
+      "sha256": "1dd0dbff90ef91a177f0a5b2bcf9d4ee849d6428eca0612a44850d66ae7ba701",
+      "bytes": 2265
+    },
+    {
+      "path": "customizations/.github/skills/apex-python-diagrams/references/business-process-flows.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-python-diagrams/references/business-process-flows.md",
+        "mapping": "customizations"
+      },
+      "sha256": "d8710b67a229a5f515d85452486177117f4c09ad24a233cdcae755ed0d4cb39f",
+      "bytes": 1807
+    },
+    {
+      "path": "customizations/.github/skills/apex-python-diagrams/references/common-patterns.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-python-diagrams/references/common-patterns.md",
+        "mapping": "customizations"
+      },
+      "sha256": "8d78fe4e6fda3d695e8a27978a9f21a1d45216693978b53611462ab5efbe2528",
+      "bytes": 3093
+    },
+    {
+      "path": "customizations/.github/skills/apex-python-diagrams/references/entity-relationship-diagrams.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-python-diagrams/references/entity-relationship-diagrams.md",
+        "mapping": "customizations"
+      },
+      "sha256": "917e799f8aa001a3eada0392127d141b708e1fa7581c6d941dc38d271344bd99",
+      "bytes": 1845
+    },
+    {
+      "path": "customizations/.github/skills/apex-python-diagrams/references/iac-to-diagram.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-python-diagrams/references/iac-to-diagram.md",
+        "mapping": "customizations"
+      },
+      "sha256": "b3a4333e844035872dcccf58eb2bc5b09e5f722813d5d2268d9e522d41be0bd8",
+      "bytes": 1969
+    },
+    {
+      "path": "customizations/.github/skills/apex-python-diagrams/references/integration-services.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-python-diagrams/references/integration-services.md",
+        "mapping": "customizations"
+      },
+      "sha256": "4906c1d910fc6c949fab08ec0ffe42517aef4ab4f03e2c03cdec14a1237fac2a",
+      "bytes": 1847
+    },
+    {
+      "path": "customizations/.github/skills/apex-python-diagrams/references/migration-patterns.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-python-diagrams/references/migration-patterns.md",
+        "mapping": "customizations"
+      },
+      "sha256": "de248dcb60f2840495045de51ace7be161914c4bcad517166cc1d539d0decb36",
+      "bytes": 1851
+    },
+    {
+      "path": "customizations/.github/skills/apex-python-diagrams/references/python-charts.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-python-diagrams/references/python-charts.md",
+        "mapping": "customizations"
+      },
+      "sha256": "3f700ccc4d590b0a619f61c5d6418a6f320a69b6b9dcc528ffb0f77b62d8b819",
+      "bytes": 2827
+    },
+    {
+      "path": "customizations/.github/skills/apex-python-diagrams/references/sequence-auth-flows.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-python-diagrams/references/sequence-auth-flows.md",
+        "mapping": "customizations"
+      },
+      "sha256": "bb288a33d15ef0b02eb16ce937e25633c4121cd8aae7ad4977c8389f6fca0b14",
+      "bytes": 1818
+    },
+    {
+      "path": "customizations/.github/skills/apex-python-diagrams/references/timeline-gantt-diagrams.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-python-diagrams/references/timeline-gantt-diagrams.md",
+        "mapping": "customizations"
+      },
+      "sha256": "137ea12a972696e35e079a5ab2697c0c486fd51e85b4e27b95ddc81e7e7e2ed0",
+      "bytes": 1251
+    },
+    {
+      "path": "customizations/.github/skills/apex-python-diagrams/references/ui-wireframe-diagrams.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-python-diagrams/references/ui-wireframe-diagrams.md",
+        "mapping": "customizations"
+      },
+      "sha256": "60a631f17ca053c4d9f9025e3b4c77a8674cab0898c8df2991a7fac316068136",
+      "bytes": 1195
+    },
+    {
+      "path": "customizations/.github/skills/apex-python-diagrams/references/upstream-coverage.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-python-diagrams/references/upstream-coverage.md",
+        "mapping": "customizations"
+      },
+      "sha256": "36886ae3fa70cf9958dc6ec3cda03d9354a13e183f54ca2dc02c14d5d7fc62f3",
+      "bytes": 3462
+    },
+    {
+      "path": "customizations/.github/skills/apex-python-diagrams/references/waf-cost-charts.md",
+      "source": {
+        "kind": "repository-file",
+        "path": "customizations/.github/skills/apex-python-diagrams/references/waf-cost-charts.md",
+        "mapping": "customizations"
+      },
+      "sha256": "a80671bf4542f082a028064e2cc4774411d176ee8873956571e46fcd76b9f23e",
+      "bytes": 2693
     },
     {
       "path": "customizations/.github/skills/apex-requirements/SKILL.md",
@@ -5837,8 +6207,8 @@
         "path": "customizations/.github/skills/apex-requirements/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "33d229c91ca1820cc9b8529202bcee2cb75fe99dbab0a6e3c413a77d9377f889",
-      "bytes": 6570
+      "sha256": "ab8833ec094055565032d9d9731383cf2e8b8623970b8d5c73cee920823729e4",
+      "bytes": 9840
     },
     {
       "path": "customizations/.github/skills/apex-terraform-import/SKILL.md",
@@ -5847,8 +6217,8 @@
         "path": "customizations/.github/skills/apex-terraform-import/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "406c0159d1f536aece8b734e3066a77453bb35a4329615fe7f93d9d357b5dac2",
-      "bytes": 4742
+      "sha256": "6359f479efea5d190b9b3a6d6c2ccaa53c3925723ee759a56847f9262876236c",
+      "bytes": 4744
     },
     {
       "path": "customizations/.github/skills/apex-terraform-import/references/adoption-attestation.md",
@@ -5897,8 +6267,8 @@
         "path": "customizations/.github/skills/apex-terraform-import/references/manual-import.md",
         "mapping": "customizations"
       },
-      "sha256": "a69321bfe82a17734ecb86150afbf3ca95a037b6aadd54f4a4c22a8fa30744c3",
-      "bytes": 9573
+      "sha256": "c4aa1fe768916cce5f6a0d1479a8fade82f87619a623b0015ac450a023a416e5",
+      "bytes": 9771
     },
     {
       "path": "customizations/.github/skills/apex-terraform-import/references/mapping-and-adoption-attestation.md",
@@ -5927,8 +6297,8 @@
         "path": "customizations/.github/skills/apex-terraform-patterns/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "e8a2b5d38575f04aff52daa606012cc74eb8005b5c4ddd5091c6afd097b079e8",
-      "bytes": 5470
+      "sha256": "f1bbb1239b9f31707a59a97f3e4b44e2625ed161b60b4ebe7bbbabdb0e454459",
+      "bytes": 5472
     },
     {
       "path": "customizations/.github/skills/apex-terraform-patterns/references/avm-authoring-requirements.md",
@@ -5937,8 +6307,8 @@
         "path": "customizations/.github/skills/apex-terraform-patterns/references/avm-authoring-requirements.md",
         "mapping": "customizations"
       },
-      "sha256": "e630b67703cc198cc4abef3b097ae9fe4d54dc54b57b9efb964a75ba740db6c2",
-      "bytes": 7080
+      "sha256": "92a1746e7ec261a8e1103f0417265a5509a7411a85d37956809b0e5b2d700ae1",
+      "bytes": 7433
     },
     {
       "path": "customizations/.github/skills/apex-terraform-patterns/references/avm-pitfalls.md",
@@ -5947,8 +6317,8 @@
         "path": "customizations/.github/skills/apex-terraform-patterns/references/avm-pitfalls.md",
         "mapping": "customizations"
       },
-      "sha256": "b321803f79f6931cc97327f638c3bb381b35b79e8739df8c6222196b246cb243",
-      "bytes": 7650
+      "sha256": "e323466a5476dbe34b75137d063d5161b6d23c80fe1f401a70abb2f8b56a3a55",
+      "bytes": 8015
     },
     {
       "path": "customizations/.github/skills/apex-terraform-patterns/references/avm-provider-compatibility.md",
@@ -6007,8 +6377,8 @@
         "path": "customizations/.github/skills/apex-terraform-patterns/references/common-patterns.md",
         "mapping": "customizations"
       },
-      "sha256": "27df4634891037e2835a10d5802b8c5a618aa45d776d93c6289436cc51699c7f",
-      "bytes": 5855
+      "sha256": "cff4416ca0314159f992ac90503fbc3367dda5c8c7974e0ebca28925880d064d",
+      "bytes": 5958
     },
     {
       "path": "customizations/.github/skills/apex-terraform-patterns/references/deploy-script-template.md",
@@ -6127,8 +6497,8 @@
         "path": "customizations/.github/skills/apex-terraform-patterns/references/project-scaffold.md",
         "mapping": "customizations"
       },
-      "sha256": "00869060b44ec96f70a301768fb94bf0555fc7e1148c39748f9a3bfe3126e76d",
-      "bytes": 4701
+      "sha256": "8e904eaaed23830b5e8314994b38f87892e161cc8bedd040c6cae0e4577ca23d",
+      "bytes": 4809
     },
     {
       "path": "customizations/.github/skills/apex-terraform-patterns/references/refactor-module.md",
@@ -6137,8 +6507,8 @@
         "path": "customizations/.github/skills/apex-terraform-patterns/references/refactor-module.md",
         "mapping": "customizations"
       },
-      "sha256": "e7295c886d8594db50fe92f4db53cd250126db8fabb3a7cfea22c75b6de73a6c",
-      "bytes": 8863
+      "sha256": "f5ca8d2461db5157ac3aa55f811b3075da4f37d4b8278fde84281a1823564ad9",
+      "bytes": 9012
     },
     {
       "path": "customizations/.github/skills/apex-terraform-patterns/references/tf-best-practices-examples.md",
@@ -6147,8 +6517,8 @@
         "path": "customizations/.github/skills/apex-terraform-patterns/references/tf-best-practices-examples.md",
         "mapping": "customizations"
       },
-      "sha256": "4de080ff638d557b34ab9ebe04ef144fc32640720aae6db80dea55e1385379df",
-      "bytes": 8311
+      "sha256": "d06a430cc286b29001f4070aafc652065c432a1ddf4caf9c388fe604166e4b48",
+      "bytes": 8530
     },
     {
       "path": "customizations/.github/skills/apex-terraform-test/SKILL.md",
@@ -6157,8 +6527,8 @@
         "path": "customizations/.github/skills/apex-terraform-test/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "026554e908310bc6159c249437bb9fcf250cf96d052371546b895f7cd9d36237",
-      "bytes": 4572
+      "sha256": "a947ca686edcec6dcb89b84bf42ccd9cc7b090171c5690bfd2bf1232329e157d",
+      "bytes": 4573
     },
     {
       "path": "customizations/.github/skills/apex-terraform-test/references/evidence-acceptance.md",
@@ -6187,8 +6557,8 @@
         "path": "customizations/.github/skills/apex-terraform-test/references/mock-providers.md",
         "mapping": "customizations"
       },
-      "sha256": "8e5ae049a3ae02d6cbda792f130c138da6740fea7fb0a9034372c386365b759e",
-      "bytes": 4601
+      "sha256": "76546737f743a7a573f6f54864c4a47cb8fbe3d72f22ef7ff355f143793123ac",
+      "bytes": 4766
     },
     {
       "path": "customizations/.github/skills/apex-terraform-test/references/plan-mode-and-mock-design.md",
@@ -6227,8 +6597,8 @@
         "path": "customizations/.github/skills/apex-terraform-test/references/test-examples.md",
         "mapping": "customizations"
       },
-      "sha256": "c2be43dee493877de19188aee2da4fd5f6804cd994a45d1ec698cdae7237557c",
-      "bytes": 4709
+      "sha256": "50f9494916f2650ebe6858b822b00e7dc4d46b2c860f3756fd28ade373b752f3",
+      "bytes": 4798
     },
     {
       "path": "customizations/.github/skills/apex-terraform-test/references/test-execution.md",
@@ -6237,8 +6607,8 @@
         "path": "customizations/.github/skills/apex-terraform-test/references/test-execution.md",
         "mapping": "customizations"
       },
-      "sha256": "be02f51e59c972abb46ff78af0cc1f7f3e09ceb51b7fba48dade827696738c47",
-      "bytes": 5725
+      "sha256": "795592740cb5c5d404ccdfa32577011336625acbe81d2084d519f4b9ba74df6c",
+      "bytes": 5910
     },
     {
       "path": "customizations/.github/skills/apex-terraform-test/references/test-patterns.md",
@@ -6247,8 +6617,8 @@
         "path": "customizations/.github/skills/apex-terraform-test/references/test-patterns.md",
         "mapping": "customizations"
       },
-      "sha256": "aa92b18c5ec437275cf9d65fa1e16f8fad7990752a416efdce8ee4919897b84c",
-      "bytes": 6567
+      "sha256": "09393febe3a43ce119d9b6a98cba36f041d50417dd35305e3de2514f4bcbb610",
+      "bytes": 6699
     },
     {
       "path": "customizations/.github/skills/apex-unslop/LICENSE.txt",
@@ -6267,8 +6637,8 @@
         "path": "customizations/.github/skills/apex-unslop/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "5b369313fb63fd45f0dd1e5dda15a5d468174578448e2d2ffda3d83c3bff0da3",
-      "bytes": 6229
+      "sha256": "e216fc6cdcc5b4f595abae6e9a43c7a0233b1fb349b984b618a4c4097df53c3b",
+      "bytes": 6231
     },
     {
       "path": "customizations/.github/skills/apex-workflow/SKILL.md",
@@ -6277,8 +6647,8 @@
         "path": "customizations/.github/skills/apex-workflow/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "c6838dd750472e34b6ea910f07e7d0056c6df256297a7a2ba3eb3f2a6210d054",
-      "bytes": 2717
+      "sha256": "0fe2f7b641becd7c435a3cecf50fc2cdcb5101431c2fd382f936239fb0eb5c73",
+      "bytes": 4471
     },
     {
       "path": "customizations/.github/workflows/governance-policy-baseline.yml",
@@ -6307,8 +6677,8 @@
         "path": "customizations/manifest.json",
         "mapping": "customizations"
       },
-      "sha256": "9f17639679c2eadf5af420b1dadd1e8c6ad8767e7ff3cc0a0d5bbcfe71e4f90a",
-      "bytes": 50865
+      "sha256": "925a51a297ac07597bd0b19a77774e5a27991d408a835511c075981525080d56",
+      "bytes": 53628
     },
     {
       "path": "customizations/tools/schemas/governance-baseline.schema.json",
@@ -6327,8 +6697,8 @@
         "path": "tools/scripts/collect-governance-baseline.ps1",
         "mapping": "governance-shared-1"
       },
-      "sha256": "ff5642cb768f130c04aaace50549bfab156a563d1d4cdea4dfb40d92330f408e",
-      "bytes": 38498
+      "sha256": "b898dc3311f316824e5653b154b2474811cd4e63eaacf0e4354f8facd67c231d",
+      "bytes": 38704
     },
     {
       "path": "schemas/governance-baseline.schema.json",
@@ -6344,6 +6714,6 @@
   "lock": {
     "algorithm": "sha256",
     "canonicalization": "apex-bundled-assets-v1",
-    "digest": "3fe6da696ac41090ef21a76651a272c4c8a077150b84957c86ce9675ea571d7c"
+    "digest": "3a08e98c5e3984c3193c1cea82e882a4089690fecd9226f3b6201ea04d896953"
   }
 }

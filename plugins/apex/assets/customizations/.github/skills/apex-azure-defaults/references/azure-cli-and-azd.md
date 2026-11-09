@@ -1,5 +1,17 @@
 # Azure CLI and azd
 
+## Navigation
+
+- Command Routing
+- Azure CLI Token Validation
+- azd Authentication
+- Governance Diagnostics
+- Existing VNet Validation
+- Graph Permission Preflight
+- Module Version Lookups
+- Cost Monitoring Checks
+- Service Lifecycle Checks
+
 Azure CLI and Azure Developer CLI (azd) guidance ported from the upstream `azure-defaults` references
 (`azure-cli-auth-validation.md`, `governance-discovery.md`, `vnet-planning.md`, `identity-resolution.md`,
 `avm-modules.md`, `terraform-conventions.md`, `cost-alerts-baseline.md`, `cost-alerts-bicep.md` and
@@ -108,15 +120,17 @@ approval, never a direct run by the agent or the user.
 
 ### azd Commands
 
-azd is context for the planned Bicep-only executor (CP-26 #443); the runtime does not execute azd today.
+azd provision/preview/down is the implemented Bicep-only executor (CP-26 #443), with separate live qualification.
+Application-package deployment, pipeline setup and CI-owned production remain unavailable. This command inventory
+does not grant a direct agent shell, package a service, fetch secret-bearing environment values or approve execution.
 
 | Command | Class |
 | --- | --- |
 | `azd provision --preview` | Read: previews the infrastructure change |
 | `azd show`, `azd env list`, `azd env get-values` | Read |
 | `azd provision` | Changes Azure: only through the kernel operation, bound to its approved `azd provision --preview` |
-| `azd deploy` | Changes Azure: only through the kernel operation, after a separate approval that binds the service list and package digests |
-| `azd pipeline config` | Changes Entra ID, Azure RBAC and GitHub settings: only through the kernel operation after its own preview and approval |
+| `azd deploy` | Unsupported application-package operation: requires its own implemented preview/package binding and approval; do not run |
+| `azd pipeline config` | Unsupported Azure/Entra/GitHub setup mutation: requires a separately implemented approved setup path; do not run |
 | `azd down` | Changes Azure (deletes resources): only through a destroy preview with its own approval |
 | `azd up` | Not used by APEX: no single preview covers both provisioning and service deployment |
 

@@ -6,6 +6,17 @@
 
 # Cosmos DB Recipe
 
+## Navigation
+
+- Overview
+- Integration Type
+- Composition Steps
+- App Settings to Add
+- RBAC Roles Required
+- Networking (when VNET_ENABLED=true)
+- Resources Created
+- Files
+
 Adds Azure Cosmos DB trigger and bindings to an Azure Functions base template.
 
 ## Overview

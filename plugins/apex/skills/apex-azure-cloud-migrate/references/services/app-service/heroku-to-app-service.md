@@ -7,6 +7,19 @@
 
 # Heroku to Azure App Service Migration
 
+## Navigation
+
+- Service Mapping
+- Dyno → App Service Plan Mapping
+- Procfile → Startup Configuration
+- Add-ons → Azure Managed Services
+- Config Vars → App Configuration / Key Vault
+- Buildpacks → Docker
+- Heroku Pipelines → GitHub Actions
+- Review Apps → Deployment Slots
+- Reference Links
+- Port Source
+
 Detailed guidance for migrating Heroku applications to Azure App Service.
 
 ## Service Mapping

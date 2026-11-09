@@ -1,6 +1,6 @@
 ---
 name: apex-operations
-description: "Provides internal APEX guidance for governance import, previews, Gate 4, deployment handoff, inventory, diagnosis and quality."
+description: "Guides the foreground APEX agent during kernel-routed governance import, preview inspection, Gate 4 handoff, inventory, diagnosis, reconciliation and quality. Preserves operation receipts and stop points. Not direct Azure mutation, arbitrary incident mitigation or production setup."
 user-invocable: false
 ---
 
@@ -38,8 +38,12 @@ inventory, diagnosis, reconciliation or quality work.
 6. Use `apex/preview` only to read the current preview and explain recorded semantic changes, target, expiry,
    destructive actions, unevaluated items and uncertainty. Gate 4 is the final approval for a lab: summarize the
    architecture, cost estimate and accepted risks so it is informed, and require review of the exact preview, target,
-   expiry and approval recipient through the trusted terminal ceremony; never approve Gate 4 through chat. Each apply
+   expiry and approval recipient through the trusted terminal ceremony (`node .apex/bin/apex.mjs gate decide --gate 4 ...`);
+   never approve Gate 4 through chat or print `${PLUGIN_ROOT}` in user shells. Each apply
    and each destroy has its own preview and approval; a changed preview or intent needs a new one.
+   On source candidates containing immutable context binding (#466), preserve the returned `approvalContextHash`
+   and full source/risk references. Changed or renewed risk terms require a fresh preview; never repair review
+   files or their mutable bases to make approval pass.
 7. Use `apex/reconcile` only for an indeterminate operation authorized by the kernel. If no execution receipt exists,
    report that reconciliation cannot establish outcome and keep the blocker for operator or provider resolution. Do not
    repeat deployment or reconciliation.
@@ -56,9 +60,29 @@ inventory, diagnosis, reconciliation or quality work.
 
 ## Boundaries
 
+For an existing recorded lab delegation, use the narrow
+[delegated gate path](../apex-workflow/SKILL.md#delegated-lab-gates) instead of the human Gate 4 stop only for apply.
+It requires exact current preview/context hashes and native provider observations. Updates, deletes, replacements,
+unknowns, pre-existing creates, material no-ops and out-of-policy resources are blocked. Destroy still needs its own
+preview and normal human approval; `azd-env-name` tags and an external cleanup ledger are not run-creation proof.
+
 Required validation, authorization, freshness, writer epoch and approval checks are kernel-controlled. Do not invent
 operations, retry effects, mutate infrastructure, run shell/Git/Bicep/Terraform commands, or claim provider inspection
-that the current APEX MCP result does not contain. ARM MCP tools are read-only and support cost/pricing evidence only.
+that the current APEX MCP result does not contain. Retail pricing, supported cost-saving recommendations, and general
+guarded Azure reads use `apex-azure` under the foreground agent's verified grants. Actual billing, forecasts, budgets,
+alerts and commitment records are unavailable. Missing tools are blockers.
+
+For the active task's domain reasoning, use `apex-azure-reliability` for recovery/failure evidence,
+`apex-azure-kubernetes` for AKS sizing/identity recommendations, `apex-azure-upgrade` for lifecycle assessment and
+`apex-python-diagrams` for figure interpretation. These skills never authorize an unsupported remediation or render.
+
+## Examples
+
+| State or request | Required response |
+| --- | --- |
+| Reviewed baseline path on a subscription run | Import the path only; do not load the management-group baseline into model context |
+| Kernel shows pending Gate 4 | Explain the exact immutable preview/context and trusted terminal ceremony, then stop |
+| Provider outcome is indeterminate | Report the recorded operation and authorized reconciliation path; do not blind-retry apply |
 
 ## Output
 

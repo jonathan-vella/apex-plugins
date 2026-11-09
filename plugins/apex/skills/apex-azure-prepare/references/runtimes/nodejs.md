@@ -6,6 +6,14 @@
 
 # Node.js/Express Production Configuration for Azure
 
+## Navigation
+
+- Required Production Settings
+- Complete Production Configuration
+- Dockerfile for Azure
+- Common Issues
+- Environment Variables
+
 Configure Express/Node.js applications for production deployment on Azure Container Apps and App Service.
 
 ## Required Production Settings

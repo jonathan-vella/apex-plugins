@@ -44,11 +44,15 @@ az aks nodepool list -g <rg> --cluster-name <cluster> -o table
 For AI-powered diagnostics:
 
 ```text
-mcp_azure-mcp_applens
+apex-azure/applens
   intent: "diagnose AKS cluster issues"
-  command: "diagnose"
+  command: "applens_resource_diagnose"
   parameters:
-    resourceId: "/subscriptions/<sub>/resourceGroups/<rg>/providers/Microsoft.ContainerService/managedClusters/<cluster>"
+    question: "<bounded diagnostic question>"
+    resource: "<cluster-name>"
+    resource-group: "<rg>"
+    subscription: "<sub>"
+    resource-type: "Microsoft.ContainerService/managedClusters"
 ```
 
 > 💡 **Tip:** AppLens automatically detects common issues and provides remediation recommendations using the cluster

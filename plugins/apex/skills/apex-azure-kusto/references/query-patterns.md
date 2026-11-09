@@ -9,6 +9,16 @@
 
 # Kusto Query Patterns
 
+## Navigation
+
+- Pattern 1: Basic Data Retrieval
+- Pattern 2: Aggregation Analysis
+- Pattern 3: Time Series Analytics
+- Pattern 4: Join and Correlation
+- Pattern 5: Schema Discovery
+- KQL Best Practices
+- Port Source
+
 Detailed KQL query patterns with examples for common data analysis scenarios.
 
 ## Pattern 1: Basic Data Retrieval

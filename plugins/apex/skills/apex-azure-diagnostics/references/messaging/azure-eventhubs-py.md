@@ -7,6 +7,16 @@
 
 # Azure Event Hubs SDK — Python
 
+## Navigation
+
+- Common Errors
+- Retry Configuration
+- Consumer Client Retry Configuration
+- Enable Logging
+- Key Issues
+- Checkpointing (BlobCheckpointStore)
+- Port Source
+
 Package: `azure-eventhub` |
 [README](https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/eventhub/azure-eventhub) | [Full Troubleshooting
 Guide](https://github.com/Azure/azure-sdk-for-python/blob/main/sdk/eventhub/azure-eventhub/TROUBLESHOOTING.md)

@@ -6,6 +6,15 @@
 
 # Container Apps Networking
 
+## Navigation
+
+- Ingress Modes
+- VNet Integration
+- Custom Domains
+- TLS Configuration
+- IP Restrictions
+- Network Topology Summary
+
 VNet integration, ingress configuration, custom domains, and TLS for Container Apps.
 
 > **APEX baseline:** use internal ingress for APIs and back ends. Use external ingress only for public-facing

@@ -10,6 +10,13 @@
 
 # Python MCP Tools
 
+## Navigation
+
+- Dependencies
+- tools.py
+- function_app.py
+- Local SDK Host: sdk_server.py
+
 Use the official Azure Functions MCP extension, not an HTTP JSON-RPC handler.
 See [configuration and verification](../README.md#verification-gate).
 The extension owns initialization, notifications, schemas, results, errors and transport.

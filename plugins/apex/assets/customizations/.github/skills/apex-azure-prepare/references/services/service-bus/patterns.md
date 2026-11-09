@@ -6,6 +6,13 @@
 
 # Service Bus - Messaging Patterns
 
+## Navigation
+
+- Point-to-Point (Queue)
+- Pub/Sub (Topic + Subscriptions)
+- SDK Patterns
+- Dead Letter Handling
+
 ## Point-to-Point (Queue)
 
 ```text
