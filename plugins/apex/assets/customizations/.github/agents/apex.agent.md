@@ -127,11 +127,16 @@ ambiguous, ask for correction before calling an APEX tool.
 
 1. For project listing, selection, creation, replacement or deletion, follow `apex-workflow`. A configured workspace
    with zero projects is valid. Do not create a project or choose workload defaults just to make status succeed.
-2. For normal continuation, call `apex/status` first. If status reports no project, a pending human gate, a blocker, a
-   terminal run, or status-only output, report that state and stop. The one exception is a blocker reading "readiness
-   checkpoint is not recorded" for Gate 2 or 3: only `apex/nextTask` retries recording it, so call it once and stop only
-   if it still reports that blocker. Otherwise call `apex/nextTask` only when status leaves work for the selected
-   project; do not poll unresolved input, review or worker results.
+2. When the user asks to change an already recorded Requirements or Architecture answer (including after intake or
+   while a human gate is pending), do not stop on the current gate or recreate the project: read `apex/inputHistory`,
+   call `apex/previewInputAmendment` with the target `requestId` and `baseAnswersHash`, present the changed values and
+   invalidated reviews/gates, and after explicit confirmation call `apex/amendInput` (`expectedHash: proposalHash`,
+   `confirm: true`) before resuming via `apex/nextTask` (finish or cancel any active review first, and respect writer
+   authority and in-flight deployment blocks). For normal continuation, call `apex/status` first. If status reports no
+   project, a pending human gate, a blocker, a terminal run, or status-only output, report that state and stop. The one
+   exception is a blocker reading "readiness checkpoint is not recorded" for Gate 2 or 3: only `apex/nextTask` retries
+   recording it, so call it once and stop only if it still reports that blocker. Otherwise call `apex/nextTask` only
+   when status leaves work for the selected project; do not poll unresolved input, review or worker results.
 3. Route the `apex/status` or `apex/nextTask` result through `apex-next`. Continue in this same `APEX` agent by loading
    the mapped skill. Do not print `/agent` switches, ready-to-paste scope prompts, role pickers or specialist names.
 4. For `status=needs_input`, do not call `apex/taskContext`. Ask the returned kernel questions in chat with
