@@ -4,7 +4,15 @@ import { tmpdir } from "node:os";
 import { dirname, join, resolve } from "node:path";
 import test from "node:test";
 import { createHash } from "node:crypto";
-import { BUNDLED_DEPS_PATH, buildSbom, bundledPackages, generate, SBOM_PATH } from "./generate-sbom.mjs";
+import {
+  BUNDLED_DEPS_PATH,
+  buildSbom,
+  bundledPackages,
+  externalMcpPackages,
+  generate,
+  renderReadmeBlock,
+  SBOM_PATH,
+} from "./generate-sbom.mjs";
 import { MARKETPLACE_PATH, PROVENANCE_PATH, hashTree } from "./validate-marketplace.mjs";
 
 const repositoryRoot = resolve(import.meta.dirname, "..");
@@ -78,6 +86,34 @@ test("the committed SBOM and README block are current", async () => {
 test("bundledPackages reads esbuild markers, including scoped packages", () => {
   const text = "// node_modules/zod/a.js\n// node_modules/@scope/pkg/b.js\n// node_modules/zod/c.js\nconst x = '// node_modules/no/';";
   assert.deepEqual(bundledPackages(text), ["@scope/pkg", "zod"]);
+});
+
+test("externalMcpPackages extracts npx-launched MCP packages from mcp.json", () => {
+  const packages = externalMcpPackages({
+    mcpServers: {
+      apex: { type: "stdio", command: "node", args: ["${PLUGIN_ROOT}/mcp/apex.mjs"] },
+      "apex-azure": {
+        type: "stdio",
+        command: "npx",
+        args: ["--yes", "@azure/mcp@3.0.0", "server", "start", "--read-only"],
+      },
+    },
+  });
+  assert.equal(packages.length, 1);
+  assert.equal(packages[0].purl, "pkg:npm/%40azure/mcp@3.0.0");
+  assert.deepEqual(packages[0].properties, [
+    { name: "apex:mcp-server", value: "apex-azure" },
+    { name: "apex:mcp-transport", value: "stdio" },
+    { name: "apex:mcp-read-only", value: "true" },
+  ]);
+});
+
+test("renderReadmeBlock omits empty subgraphs and empty Mermaid class assignments", async (context) => {
+  const { root } = await fixture(context);
+  const { summary } = await buildSbom(root);
+  const block = renderReadmeBlock({ ...summary, mcpPackages: [], services: [] });
+  assert.doesNotMatch(block, /MCP servers/u);
+  assert.doesNotMatch(block, /class\s+service/u);
 });
 
 test("builds a deterministic CycloneDX document that matches the tree", async (context) => {

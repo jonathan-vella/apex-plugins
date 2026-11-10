@@ -80,6 +80,28 @@
       ]
     },
     {
+      "type": "application",
+      "bom-ref": "pkg:npm/%40azure/mcp@3.0.0",
+      "name": "@azure/mcp",
+      "version": "3.0.0",
+      "scope": "required",
+      "purl": "pkg:npm/%40azure/mcp@3.0.0",
+      "properties": [
+        {
+          "name": "apex:mcp-server",
+          "value": "apex-azure"
+        },
+        {
+          "name": "apex:mcp-transport",
+          "value": "stdio"
+        },
+        {
+          "name": "apex:mcp-read-only",
+          "value": "true"
+        }
+      ]
+    },
+    {
       "type": "library",
       "bom-ref": "pkg:npm/%40modelcontextprotocol/core@2.4.0",
       "name": "@modelcontextprotocol/core",
@@ -13334,6 +13356,7 @@
       "ref": "pkg:generic/apex@0.11.0-next.7",
       "dependsOn": [
         "pkg:npm/%40apexops/cli@0.11.0-next.7",
+        "pkg:npm/%40azure/mcp@3.0.0",
         "pkg:npm/%40modelcontextprotocol/core@2.4.0",
         "pkg:npm/%40modelcontextprotocol/server@2.4.0",
         "pkg:npm/%40sinclair/typebox@0.34.52",
