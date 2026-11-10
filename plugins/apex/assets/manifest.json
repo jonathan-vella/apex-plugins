@@ -1,7 +1,7 @@
 {
   "version": 1,
   "sources": {
-    "customizations": "0.11.0-next.7",
+    "customizations": "0.11.0-next.8",
     "config": "1.0.0"
   },
   "composition": {
@@ -113,7 +113,7 @@
         "client-projections/github-copilot-cli/tools/schemas/governance-baseline.schema.json",
         "client-projections/github-copilot-cli/tools/scripts/collect-governance-baseline.ps1"
       ],
-      "digest": "12743053695efbdd1413a8b1ad1658ebc1e3117f54a49d8e4fce4fb13ed97a98"
+      "digest": "6eaeffa8d5114599476d20b637521895f7532eddb23fba0bad9dbf23225e7b48"
     }
   ],
   "files": [
@@ -467,9 +467,9 @@
         "target": ".github/workflows/governance-policy-baseline.yml",
         "adapterVersion": "1.12.0",
         "sourcePath": ".github/workflows/governance-policy-baseline.yml",
-        "sourceHash": "b002b9b3371e23e903bb3fd33c4439269e916c670e3fd78b9da53e9fc6367a69"
+        "sourceHash": "d04372489baef9f8cb17834888e2de680674b8ef73cce3f2ab1e119d2cc399bd"
       },
-      "sha256": "b002b9b3371e23e903bb3fd33c4439269e916c670e3fd78b9da53e9fc6367a69",
+      "sha256": "d04372489baef9f8cb17834888e2de680674b8ef73cce3f2ab1e119d2cc399bd",
       "bytes": 4589
     },
     {
@@ -577,7 +577,7 @@
         "path": "config/runtime-bundle.v1.json",
         "mapping": "config"
       },
-      "sha256": "f9916c0c351e8da1b3251fd13921f7414bc15399dec8edc6685269f741aeeddf",
+      "sha256": "a121fed727bff7780b5f5f1e5886df1fbe7ba05a0ab643a1aa920f6b3809d3ae",
       "bytes": 2039
     },
     {
@@ -627,8 +627,8 @@
         "path": "customizations/.github/agents/apex.agent.md",
         "mapping": "customizations"
       },
-      "sha256": "535a7811f29ec5a18b23e30e3f776e0be36173214e6c7e816f50fcd956d6c847",
-      "bytes": 11497
+      "sha256": "d6bae3007746e14c48715d2ff8592fcb1ee35c7715b2119c69df293a55048daf",
+      "bytes": 12127
     },
     {
       "path": "customizations/.github/copilot-instructions.md",
@@ -6297,7 +6297,7 @@
         "path": ".github/workflows/governance-policy-baseline.yml",
         "mapping": "governance-shared-0"
       },
-      "sha256": "b002b9b3371e23e903bb3fd33c4439269e916c670e3fd78b9da53e9fc6367a69",
+      "sha256": "d04372489baef9f8cb17834888e2de680674b8ef73cce3f2ab1e119d2cc399bd",
       "bytes": 4589
     },
     {
@@ -6317,7 +6317,7 @@
         "path": "customizations/manifest.json",
         "mapping": "customizations"
       },
-      "sha256": "a7e2e75bfe6557c60b1302f9ce6054a21dd6f094087d56361f6d7875e3664c8f",
+      "sha256": "aa05509780a0c129ac23a77c64d2b7f5cc32a4a3c4b0cca8b3ccfcbdcfc5b6e3",
       "bytes": 51003
     },
     {
@@ -6354,6 +6354,6 @@
   "lock": {
     "algorithm": "sha256",
     "canonicalization": "apex-bundled-assets-v1",
-    "digest": "c929500f3459e93175ca10456c1530f69f482931ff23bb8a5f94622be20e4339"
+    "digest": "911bba7e9c9c1599d21a2b3efb496ddfcbdca7ca648bf9955685001281d213d6"
   }
 }
