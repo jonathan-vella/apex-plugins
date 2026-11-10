@@ -30954,7 +30954,7 @@ function renderArchitectureMermaid(architecture) {
 import { join as join26, resolve as resolve22 } from "node:path";
 
 // packages/cli/dist/version.js
-var APEX_VERSION = "0.11.0-next.9";
+var APEX_VERSION = "0.11.0-next.10";
 var MINIMUM_NODE_VERSION = "24.21.0";
 function meetsMinimumVersion(current, minimum) {
   const currentParts = current.split(".").map(Number);
@@ -67972,7 +67972,12 @@ var REQUIREMENTS_INTAKE = [
           "cross-region-disaster-recovery",
           "none"
         ],
-        multiSelect: true
+        multiSelect: true,
+        recommendation: {
+          value: ["single-region-availability"],
+          source: "default",
+          rationale: "Single-region availability baseline; select availability zones, backups, or cross-region DR when required."
+        }
       },
       {
         id: "recovery",
@@ -67983,7 +67988,12 @@ var REQUIREMENTS_INTAKE = [
         id: "operations",
         prompt: "Select operational capabilities required for the workload.",
         options: ["azure-monitor", "application-insights", "log-analytics", "managed-alerts", "24x7-support", "none"],
-        multiSelect: true
+        multiSelect: true,
+        recommendation: {
+          value: ["azure-monitor", "application-insights", "log-analytics"],
+          source: "default",
+          rationale: "Standard Azure observability baseline for application and platform diagnostics."
+        }
       }
     ]
   }
@@ -74195,6 +74205,28 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       ] : [];
       return [...questions, ...retained, ...migration];
     }
+    if (round.round === "security-compliance") {
+      const input2 = this.recordedRequirementsInput(events);
+      const workload = typeof input2?.workload === "string" ? input2.workload.toLowerCase() : "";
+      const compliancePatterns = [
+        ["gdpr", /\bgdpr\b/u],
+        ["hipaa", /\bhipaa\b/u],
+        ["pci-dss", /\bpci[\s-]*dss\b/u],
+        ["iso-27001", /\biso[\s/-]*27001\b/u],
+        ["soc-2", /\bsoc[\s-]*2\b/u]
+      ];
+      const scopes = compliancePatterns.filter(([, pattern]) => pattern.test(workload)).map(([id]) => id);
+      if (scopes.length === 0)
+        return round.questions;
+      return round.questions.map((question) => question.id === "compliance" ? {
+        ...question,
+        recommendation: {
+          value: scopes,
+          source: "prior-answer",
+          rationale: "Derived from compliance frameworks named in the confirmed workload description."
+        }
+      } : question);
+    }
     return round.questions;
   }
   recommendedWorkloadPattern(workload) {
@@ -74221,14 +74253,20 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   recommendedServiceCandidates(input2) {
     const pattern = input2?.["workload-pattern"];
+    const workload = typeof input2?.workload === "string" ? input2.workload.toLowerCase() : "";
     const budget = input2?.budget;
     const lowBudget = typeof budget === "object" && budget !== null && !Array.isArray(budget) && budget.kind === "budget" ? budget.amount < 1e3 : false;
+    const wantsContainers = /\b(container|containers|containerized|scale-to-zero|scale to zero|aca)\b/u.test(workload);
+    const wantsAks = /\b(aks|kubernetes)\b/u.test(workload) && !/\b(no|without)\s+(?:managing\s+)?(?:aks|kubernetes)\b/u.test(workload);
+    const noDatabase = /\b(no\s+database|without\s+(?:a\s+)?database)\b/u.test(workload);
+    const webCompute = wantsAks ? "aks" : wantsContainers ? "container-apps" : lowBudget ? "azure-functions" : "app-service";
+    const workerCompute = wantsAks ? "aks" : wantsContainers ? "container-apps" : "azure-functions";
     const candidates = {
-      "web-api": [lowBudget ? "azure-functions" : "app-service", "azure-sql", "storage", "service-bus"],
-      "event-driven": ["azure-functions", "service-bus", "storage"],
+      "web-api": noDatabase ? [webCompute] : [webCompute, "azure-sql", "storage", "service-bus"],
+      "event-driven": [workerCompute, "service-bus", "storage"],
       "data-analytics": ["azure-functions", "storage", "event-hubs"],
       iot: ["azure-functions", "event-hubs", "storage"],
-      batch: ["azure-functions", "storage", "service-bus"]
+      batch: [workerCompute, "storage", "service-bus"]
     };
     const selected = typeof pattern === "string" && pattern in candidates ? candidates[pattern] : candidates["web-api"];
     return [...selected, "azure-monitor", "application-insights"];

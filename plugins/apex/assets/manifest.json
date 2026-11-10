@@ -1,7 +1,7 @@
 {
   "version": 1,
   "sources": {
-    "customizations": "0.11.0-next.9",
+    "customizations": "0.11.0-next.10",
     "config": "1.0.0"
   },
   "composition": {
@@ -577,8 +577,8 @@
         "path": "config/runtime-bundle.v1.json",
         "mapping": "config"
       },
-      "sha256": "fd263efc037687d99a4e514d1cb2ba88a2a5cc82b04357403ca759ee17609505",
-      "bytes": 2039
+      "sha256": "ed6ddb1bb999de39c686497abd2255f8c27f5607bfcbbebfce6bb23067e66d87",
+      "bytes": 2046
     },
     {
       "path": "config/toolchain.v1.json",
@@ -627,8 +627,8 @@
         "path": "customizations/.github/agents/apex.agent.md",
         "mapping": "customizations"
       },
-      "sha256": "d6bae3007746e14c48715d2ff8592fcb1ee35c7715b2119c69df293a55048daf",
-      "bytes": 12127
+      "sha256": "600ebd39bb84340fefa6cae41dc1ecb9b02de27ba73572df6331ec6464dc0659",
+      "bytes": 12082
     },
     {
       "path": "customizations/.github/copilot-instructions.md",
@@ -5847,8 +5847,8 @@
         "path": "customizations/.github/skills/apex-requirements/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "ab8833ec094055565032d9d9731383cf2e8b8623970b8d5c73cee920823729e4",
-      "bytes": 9840
+      "sha256": "d51ad831b48995544e7d7716126c2f1357a3e500cd845e24210d97a0a95ed49a",
+      "bytes": 10287
     },
     {
       "path": "customizations/.github/skills/apex-terraform-import/SKILL.md",
@@ -6317,8 +6317,8 @@
         "path": "customizations/manifest.json",
         "mapping": "customizations"
       },
-      "sha256": "40c9ddd4d179e2b2026ffaae29dfc7d4385681e2bd60968712c1950ac3d49c17",
-      "bytes": 51003
+      "sha256": "d16df8c5565715a5b9869dd3143d510155c8e9b87e91c41726000fe0c58a8287",
+      "bytes": 51004
     },
     {
       "path": "customizations/tools/schemas/governance-baseline.schema.json",
@@ -6354,6 +6354,6 @@
   "lock": {
     "algorithm": "sha256",
     "canonicalization": "apex-bundled-assets-v1",
-    "digest": "7089cd61f4dba9ffb8fde5df1c12319d008640691f8d008818cda675cdee1e92"
+    "digest": "b9e926075432977ecc68aa6dfba48a81036908be9dd57a7e60575f60a55b4250"
   }
 }
