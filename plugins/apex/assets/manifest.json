@@ -1,7 +1,7 @@
 {
   "version": 1,
   "sources": {
-    "customizations": "0.11.0-next.8",
+    "customizations": "0.11.0-next.9",
     "config": "1.0.0"
   },
   "composition": {
@@ -577,7 +577,7 @@
         "path": "config/runtime-bundle.v1.json",
         "mapping": "config"
       },
-      "sha256": "a121fed727bff7780b5f5f1e5886df1fbe7ba05a0ab643a1aa920f6b3809d3ae",
+      "sha256": "fd263efc037687d99a4e514d1cb2ba88a2a5cc82b04357403ca759ee17609505",
       "bytes": 2039
     },
     {
@@ -5387,8 +5387,8 @@
         "path": "customizations/.github/skills/apex-bicep-patterns/references/app-service-entra-private-registry-pattern.md",
         "mapping": "customizations"
       },
-      "sha256": "f8b926e6929ee79809632c34c454fc6843379bb404dbda36b02ea2a5428c9cdc",
-      "bytes": 3042
+      "sha256": "505f308c7a5df736617d8751baf79a794d5ded3a1e93d6873d0010411ff5a5a7",
+      "bytes": 2991
     },
     {
       "path": "customizations/.github/skills/apex-bicep-patterns/references/avm-and-codegen-acceptance.md",
@@ -6317,7 +6317,7 @@
         "path": "customizations/manifest.json",
         "mapping": "customizations"
       },
-      "sha256": "aa05509780a0c129ac23a77c64d2b7f5cc32a4a3c4b0cca8b3ccfcbdcfc5b6e3",
+      "sha256": "40c9ddd4d179e2b2026ffaae29dfc7d4385681e2bd60968712c1950ac3d49c17",
       "bytes": 51003
     },
     {
@@ -6354,6 +6354,6 @@
   "lock": {
     "algorithm": "sha256",
     "canonicalization": "apex-bundled-assets-v1",
-    "digest": "911bba7e9c9c1599d21a2b3efb496ddfcbdca7ca648bf9955685001281d213d6"
+    "digest": "7089cd61f4dba9ffb8fde5df1c12319d008640691f8d008818cda675cdee1e92"
   }
 }
