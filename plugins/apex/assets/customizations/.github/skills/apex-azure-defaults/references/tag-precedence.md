@@ -8,22 +8,24 @@ exists.
 
 1. Confirm governance discovery is complete for inherited and target scopes.
 2. Apply required keys, casing, values, exclusions, inheritance, and enforcement behavior from accepted constraints.
-3. Resolve values only from projected workload, environment, ownership, finance, and operations inputs.
-4. If accepted evidence explicitly reports no applicable tag policy, apply the greenfield checklist below and record
-   that source.
-5. Return a blocker when a required owner, cost center, contact, or restricted value is unresolved.
+3. Always include the 9 lowercase resource-group tag keys (`environment`, `owner`, `costcenter`, `application`,
+   `workload`, `sla`, `backup-policy`, `maint-window`, `technical-contact`) from
+   [baseline fallbacks](baseline-fallbacks.md), using explicit user or governance values when provided and the
+   runtime-resolved defaults otherwise.
+4. Ensure `environment` is one of `alz`, `prod`, `test`, `dev` and `sla` is one of `critical`, `high`, `medium`, `low`
+   (never `development` or non-policy literals).
+5. Return a blocker only when an explicit live policy requires a custom key or restricted value that cannot be resolved
+   from the project inputs or baseline defaults.
 
 ## Greenfield Decision Checklist
 
-Apply this checklist only when complete governance evidence reports no tag policy at the target or any inherited scope.
+Apply this checklist when governance evidence reports no overriding tag policy at the target or any inherited scope:
 
-1. Treat "no tag policy" as a user-owned confirmation when the workload's compliance posture suggests one is expected,
-   for example regulated financial or health data. Raise it through the kernel input request; do not assume.
-2. Adopt the lowercase nine-key fallback in [baseline fallbacks](baseline-fallbacks.md), with values from projected
-   inputs only.
-3. Do not add a policy assignment to the design on the user's behalf. Record a recommendation to enact tag policy as a
+1. Automatically adopt the lowercase nine-key contract and default value rules in
+   [baseline fallbacks](baseline-fallbacks.md) without prompting the user to list tag keys.
+2. Do not add a policy assignment to the design on the user's behalf. Record a recommendation to enact tag policy as a
    decision or plan item for the user to accept.
-4. Record the fallback source, evidence identifier, and the recorded user decision in the typed artifact.
+3. Record the tag contract source and evidence identifier in the typed artifact.
 
 ## Casing And Inheritance
 

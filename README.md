@@ -42,8 +42,8 @@ CI checks [`.github/plugin/sbom.cdx.json`](.github/plugin/sbom.cdx.json) on ever
 <!-- sbom:start -->
 ```mermaid
 flowchart LR
-    n0(["apex 0.11.0-next.10<br/>1173 files · MIT"])
-    n1["@apexops/cli 0.11.0-next.10<br/>mcp/apex.mjs bundle"]
+    n0(["apex 0.11.0-next.11<br/>1173 files · MIT"])
+    n1["@apexops/cli 0.11.0-next.11<br/>mcp/apex.mjs bundle"]
     subgraph g0["Bundled libraries (9)"]
       n2["@modelcontextprotocol/core 2.4.0<br/>Apache-2.0"]
       n3["@modelcontextprotocol/server 2.4.0<br/>Apache-2.0"]
@@ -84,11 +84,11 @@ flowchart LR
 
 | Plugin | Version | Source Commit | Tree SHA-256 | CycloneDX 1.6 Inventory |
 | :--- | :--- | :--- | :--- | :--- |
-| **`apex`** (`MIT`) | `0.11.0-next.10` | [`308457246977`](https://github.com/jonathan-vella/apex-vnext/commit/308457246977788ab2c22492c63b7a159348f489) | `161eb33395108c43…` | [`.github/plugin/sbom.cdx.json`](.github/plugin/sbom.cdx.json) (1173 files) |
+| **`apex`** (`MIT`) | `0.11.0-next.11` | [`a09bc8ffa16e`](https://github.com/jonathan-vella/apex-vnext/commit/a09bc8ffa16ec13b62f79d40e679473d500561cc) | `8d5d733620cd90a2…` | [`.github/plugin/sbom.cdx.json`](.github/plugin/sbom.cdx.json) (1173 files) |
 
 | Component | Version | Kind | Licence | Digest |
 | :--- | :--- | :--- | :--- | :--- |
-| `@apexops/cli` | `0.11.0-next.10` | CLI & MCP bundle source | `MIT` | — |
+| `@apexops/cli` | `0.11.0-next.11` | CLI & MCP bundle source | `MIT` | — |
 | `@azure/mcp` | `3.0.0` | External MCP server (`apex-azure`, read-only) | — | — |
 | `@modelcontextprotocol/core` | `2.4.0` | Bundled library | `Apache-2.0` | `sha-512:cfc4012aa75f…` |
 | `@modelcontextprotocol/server` | `2.4.0` | Bundled library | `Apache-2.0` | `sha-512:ae047dcb149a…` |

@@ -25170,6 +25170,26 @@ var AzureCliReadAdapter = class {
       ]
     };
   }
+  /** Creates or updates a resource group with the required governance tags and azd environment tag. */
+  ensureResourceGroup(subscriptionId, resourceGroup, location, tags) {
+    const tagArgs = Object.entries(tags).sort(([left], [right]) => left.localeCompare(right)).map(([key, value]) => `${key}=${value}`);
+    return {
+      executable: "az",
+      args: [
+        "group",
+        "create",
+        "--subscription",
+        subscriptionId,
+        "--name",
+        resourceGroup,
+        "--location",
+        location,
+        ...tagArgs.length === 0 ? [] : ["--tags", ...tagArgs],
+        "--output",
+        "json"
+      ]
+    };
+  }
   resourceGroupResources(subscriptionId, resourceGroup) {
     return {
       executable: "az",
@@ -26444,6 +26464,45 @@ ${" ".repeat(indent)}}`;
   }
   throw new TypeError("HCL values must be JSON-compatible");
 }
+var RESOURCE_GROUP_ALLOWED_ENVIRONMENTS = ["alz", "prod", "test", "dev"];
+var RESOURCE_GROUP_ALLOWED_SLAS = ["critical", "high", "medium", "low"];
+function resolveResourceGroupTags(options) {
+  const rawOverrides = options.overrides !== null && typeof options.overrides === "object" && !Array.isArray(options.overrides) ? options.overrides : {};
+  const text5 = (value) => typeof value === "string" && value.trim().length > 0 ? value.trim() : void 0;
+  const allowedEnvs = options.allowedEnvironments ?? RESOURCE_GROUP_ALLOWED_ENVIRONMENTS;
+  const allowedSlas = options.allowedSlas ?? RESOURCE_GROUP_ALLOWED_SLAS;
+  const explicitEnv = text5(rawOverrides.environment);
+  const rawEnv = (explicitEnv ?? text5(options.environment) ?? "dev").toLowerCase();
+  const environment = options.liveGovernanceOverride === true && explicitEnv !== void 0 ? explicitEnv : allowedEnvs.includes(rawEnv) ? rawEnv : rawEnv === "staging" || rawEnv === "qa" || rawEnv === "uat" ? "test" : rawEnv === "production" ? "prod" : "dev";
+  const explicitSla = text5(rawOverrides.sla);
+  const rawSla = (explicitSla ?? text5(options.sla) ?? (environment === "prod" ? "medium" : "low")).toLowerCase();
+  const sla = options.liveGovernanceOverride === true && explicitSla !== void 0 ? explicitSla : allowedSlas.includes(rawSla) ? rawSla : environment === "prod" ? "medium" : "low";
+  const owner = text5(rawOverrides.owner) ?? text5(options.riskOwner) ?? "partner";
+  const base = {
+    environment,
+    owner,
+    costcenter: text5(rawOverrides.costcenter) ?? "platform-engineering",
+    application: text5(rawOverrides.application) ?? options.projectId,
+    workload: text5(rawOverrides.workload) ?? options.projectId,
+    sla,
+    "backup-policy": text5(rawOverrides["backup-policy"]) ?? text5(options.backupPolicy) ?? "none",
+    "maint-window": text5(rawOverrides["maint-window"]) ?? text5(options.maintWindow) ?? "none",
+    "technical-contact": text5(rawOverrides["technical-contact"]) ?? owner
+  };
+  for (const [key, value] of Object.entries(rawOverrides)) {
+    if (key === "tech-contact" && options.liveGovernanceOverride !== true || Object.hasOwn(base, key))
+      continue;
+    const str = text5(value);
+    if (str !== void 0)
+      base[key] = str;
+  }
+  return base;
+}
+function isResourceGroupContext(context) {
+  const type = context.resource.type.toLowerCase();
+  const source2 = context.parsed.source.toLowerCase();
+  return type === "microsoft.resources/resourcegroups" || type === "microsoft.resources/subscriptions/resourcegroups" || source2.includes("avm/res/resources/resource-group") || source2.includes("avm-res-resources-resourcegroup");
+}
 function secureStorageProperties(type, properties) {
   if (type.toLowerCase() !== "microsoft.storage/storageaccounts")
     return properties;
@@ -26455,22 +26514,36 @@ function secureStorageProperties(type, properties) {
     supportsHttpsTrafficOnly: true
   };
 }
-function secureBicepParameters(context) {
-  if (context.resource.type.toLowerCase() !== "microsoft.storage/storageaccounts")
-    return context.binding.parameters;
-  return {
+function secureBicepParameters(context, tagOptions) {
+  const parameters = isResourceGroupContext(context) ? {
     ...context.binding.parameters,
+    tags: resolveResourceGroupTags({
+      ...tagOptions,
+      overrides: context.binding.parameters.tags
+    })
+  } : context.binding.parameters;
+  if (context.resource.type.toLowerCase() !== "microsoft.storage/storageaccounts")
+    return parameters;
+  return {
+    ...parameters,
     allowBlobPublicAccess: false,
     allowSharedKeyAccess: false,
     minimumTlsVersion: "TLS1_2",
     supportsHttpsTrafficOnly: true
   };
 }
-function secureTerraformParameters(context) {
-  if (context.resource.type.toLowerCase() !== "microsoft.storage/storageaccounts")
-    return context.binding.parameters;
-  return {
+function secureTerraformParameters(context, tagOptions) {
+  const parameters = isResourceGroupContext(context) ? {
     ...context.binding.parameters,
+    tags: resolveResourceGroupTags({
+      ...tagOptions,
+      overrides: context.binding.parameters.tags
+    })
+  } : context.binding.parameters;
+  if (context.resource.type.toLowerCase() !== "microsoft.storage/storageaccounts")
+    return parameters;
+  return {
+    ...parameters,
     allow_nested_items_to_be_public: false,
     https_traffic_only_enabled: true,
     min_tls_version: "TLS1_2",
@@ -26517,6 +26590,12 @@ function generateBicepTree(intent, binding, options = {}) {
     if (!logicalIds.has(logicalId))
       throw new TypeError(`Existing resource '${logicalId}' is not present in the intent`);
   }
+  const tagOptions = {
+    projectId: intent.projectId,
+    environment: options.environment,
+    riskOwner: options.riskOwner,
+    liveGovernanceOverride: options.liveGovernanceOverride
+  };
   const blocks = contexts.map((context) => {
     if (context.parsed.kind === "native") {
       const parameters = requiredGenericParameters(context);
@@ -26533,7 +26612,14 @@ function generateBicepTree(intent, binding, options = {}) {
   dependsOn: [
 ${[...context.resource.dependsOn].sort().map((id) => `    ${symbolicName(id)}`).join("\n")}
   ]`;
-      const bodyFields = Object.entries(parameters.bodyFields).sort(([left], [right]) => left.localeCompare(right)).map(([name, value]) => `  ${bicepObjectKey(name)}: ${renderBicepValue(value, 2)}`).join("\n");
+      const rawBodyFields = isResourceGroupContext(context) ? {
+        ...parameters.bodyFields,
+        tags: resolveResourceGroupTags({
+          ...tagOptions,
+          overrides: parameters.bodyFields.tags
+        })
+      } : parameters.bodyFields;
+      const bodyFields = Object.entries(rawBodyFields).sort(([left], [right]) => left.localeCompare(right)).map(([name, value]) => `  ${bicepObjectKey(name)}: ${renderBicepValue(value, 2)}`).join("\n");
       const placement = scope2 === void 0 ? `location: ${bicepString(parameters.location)}` : `scope: ${symbolicName(scope2)}`;
       return `resource ${context.declaration} '${context.parsed.source}@${context.parsed.version}' = {
   name: ${bicepString(parameters.name)}
@@ -26547,7 +26633,7 @@ ${bodyFields}`}
     }
     const source2 = context.parsed.source;
     const moduleReference = source2.startsWith("br/") ? source2 : `br/public:${source2}`;
-    const renderedParameters = Object.entries(secureBicepParameters(context)).sort(([left], [right]) => left.localeCompare(right)).map(([name, value]) => {
+    const renderedParameters = Object.entries(secureBicepParameters(context, tagOptions)).sort(([left], [right]) => left.localeCompare(right)).map(([name, value]) => {
       assertIdentifier(name, "Bicep parameter name");
       return `    ${name}: ${renderBicepValue(value, 4)}`;
     });
@@ -26621,8 +26707,14 @@ function generateTerraformTree(intent, binding, options = {}) {
   }
 }
 `;
+  const tagOptions = {
+    projectId: intent.projectId,
+    environment: options.environment,
+    riskOwner: options.riskOwner,
+    liveGovernanceOverride: options.liveGovernanceOverride
+  };
   const variables = [
-    ...new Set(contexts.flatMap((context) => Object.keys(context.parsed.kind === "avm" ? secureTerraformParameters(context) : context.binding.parameters)))
+    ...new Set(contexts.flatMap((context) => Object.keys(context.parsed.kind === "avm" ? secureTerraformParameters(context, tagOptions) : context.binding.parameters)))
   ].sort().map((name) => {
     assertIdentifier(name, "Terraform variable name");
     return `variable "${name}" {
@@ -26641,8 +26733,15 @@ function generateTerraformTree(intent, binding, options = {}) {
   parent_id = ${JSON.stringify(parameters.parentId)}
 }`;
       }
-      const body = {
+      const rawBodyFields = isResourceGroupContext(context) ? {
         ...parameters.bodyFields,
+        tags: resolveResourceGroupTags({
+          ...tagOptions,
+          overrides: parameters.bodyFields.tags
+        })
+      } : parameters.bodyFields;
+      const body = {
+        ...rawBodyFields,
         properties: secureStorageProperties(context.resource.type, parameters.properties)
       };
       return `resource "azapi_resource" "${context.declaration}" {
@@ -26656,7 +26755,7 @@ function generateTerraformTree(intent, binding, options = {}) {
     if (existing.has(context.resource.id)) {
       throw new TypeError(`Existing AVM resource '${context.resource.id}' is unsupported; use a native binding`);
     }
-    const argumentsText = Object.entries(secureTerraformParameters(context)).sort(([left], [right]) => left.localeCompare(right)).map(([name, value]) => `  ${name} = ${renderHclValue(value, 2)}`).join("\n");
+    const argumentsText = Object.entries(secureTerraformParameters(context, tagOptions)).sort(([left], [right]) => left.localeCompare(right)).map(([name, value]) => `  ${name} = ${renderHclValue(value, 2)}`).join("\n");
     return `module "${context.declaration}" {
   source  = "${context.parsed.source}"
   version = "${context.parsed.version}"
@@ -28477,14 +28576,14 @@ var AzdBicepProvider = class extends NativeProviderBase {
     if (binding === void 0 || binding.preview.operation !== "apply" || binding.azdBinding.hooks.length !== 0 || binding.azdBinding.extensions.length !== 0 || binding.azdBinding.executionEnvelope.identityPreflight.cloud !== "AzureCloud")
       throw new IacProviderError("PREVIEW_BLOCKED", "Delegation needs a hook-free, extension-free AzureCloud azd apply binding");
     const preview = binding.preview;
-    if (preview.artifactHash !== binding.providerBindingHash || preview.artifactHash !== this.#providerBindingHash(binding.azdBinding.bindingHash, binding.ownedStateHash, binding))
+    if (preview.artifactHash !== binding.providerBindingHash || preview.artifactHash !== this.#providerBindingHash(binding.azdBinding.bindingHash, binding.ownedStateHash, binding, binding.resourceGroupTags))
       throw new IacProviderError("PREVIEW_HASH_MISMATCH", "Delegated preview binding is invalid");
     const target = this.#approvedTarget(preview);
     const azdVersion = await this.#assertAzd();
     const current = await this.#assertInputsUnchanged(binding.azdBinding, target, azdVersion);
     await this.#assertIdentity(current);
     const owned = await this.#ownedState(target);
-    if (owned.hash !== binding.ownedStateHash || this.#ownershipBlockers(target, owned).length > 0)
+    if (owned.groupMissing || owned.hash !== binding.ownedStateHash || this.#ownershipBlockers(target, owned).length > 0)
       throw new IacProviderError("PREVIEW_HASH_MISMATCH", "Resource-group state changed after the delegated preview");
     const ids = preview.changes.map(({ resourceId }) => resourceId);
     if (ids.length > 256 || ids.some((id) => !id.startsWith(`${target.scope}/providers/`)))
@@ -28528,7 +28627,7 @@ var AzdBicepProvider = class extends NativeProviderBase {
       this.#previewAzd(inspected, request.resources, target, azdVersion, source2),
       this.#ownedState(target)
     ]);
-    normalized.blockers.push(...this.#ownershipBlockers(target, owned));
+    normalized.blockers.push(...this.#ownershipBlockers(target, owned, "apply"));
     await this.#assertInputsUnchanged(inspected, target, azdVersion);
     if (source2 !== void 0)
       await readGeneratedSource(source2, source2);
@@ -28829,23 +28928,42 @@ var AzdBicepProvider = class extends NativeProviderBase {
     return {
       taggedGroups,
       resources: listed,
-      hash: sha2562({ taggedGroups: taggedGroups.map((name) => name.toLowerCase()), resources: listed })
+      groupMissing: resources === void 0,
+      hash: sha2562({
+        taggedGroups: taggedGroups.map((name) => name.toLowerCase()),
+        resources: listed,
+        ...resources === void 0 ? { groupMissing: true } : {}
+      })
     };
   }
   #isTagged(target, owned) {
     return owned.taggedGroups.some((name) => name.toLowerCase() === target.resourceGroup.toLowerCase());
   }
-  #ownershipBlockers(target, owned) {
+  #ownershipBlockers(target, owned, operation = "destroy") {
     const blockers = [];
-    if (!this.#isTagged(target, owned))
+    if (!this.#isTagged(target, owned) && !(operation === "apply" && owned.groupMissing))
       blockers.push(`The approved resource group is not tagged azd-env-name=${this.#target.environmentName}; azd finds an environment's resources through that tag`);
     const others = owned.taggedGroups.filter((name) => name.toLowerCase() !== target.resourceGroup.toLowerCase());
     if (others.length > 0)
       blockers.push(`Other resource groups carry azd-env-name=${this.#target.environmentName}: ${others.join(", ")}; the environment must own only the approved group`);
     return blockers;
   }
+  #resolvedResourceGroupTags(target, owned, operation) {
+    if (operation !== "apply" || !owned.groupMissing)
+      return void 0;
+    return {
+      ...resolveResourceGroupTags({
+        projectId: target.projectId,
+        environment: this.#target.environmentName,
+        riskOwner: this.#target.riskOwner,
+        overrides: this.#target.resourceGroupTags
+      }),
+      "azd-env-name": this.#target.environmentName
+    };
+  }
   async #bind(request, operation, target, normalized, azdBinding, owned, policy = {}) {
-    const providerBindingHash = this.#providerBindingHash(azdBinding.bindingHash, owned.hash, policy);
+    const resourceGroupTags = this.#resolvedResourceGroupTags(target, owned, operation);
+    const providerBindingHash = this.#providerBindingHash(azdBinding.bindingHash, owned.hash, policy, resourceGroupTags);
     const preview = this.createPreview(this.track, operation, request, normalized, {
       artifactHash: providerBindingHash
     });
@@ -28855,6 +28973,7 @@ var AzdBicepProvider = class extends NativeProviderBase {
       providerBindingHash,
       azdBinding,
       ownedStateHash: owned.hash,
+      ...resourceGroupTags === void 0 ? {} : { resourceGroupTags },
       ...policy
     };
     this.#targets.set(`${target.projectId}\0${target.runId}`, target);
@@ -28863,10 +28982,11 @@ var AzdBicepProvider = class extends NativeProviderBase {
     this.rememberPolicy(preview, binding);
     return preview;
   }
-  #providerBindingHash(azdBindingHash, ownedStateHash, policy) {
+  #providerBindingHash(azdBindingHash, ownedStateHash, policy, resourceGroupTags) {
     return sha2562({
       azdBindingHash,
       ownedStateHash,
+      ...resourceGroupTags === void 0 ? {} : { resourceGroupTags },
       ...policy.policyValidationBinding === void 0 ? {} : { policyValidation: policy.policyValidationBinding }
     });
   }
@@ -28913,7 +29033,7 @@ var AzdBicepProvider = class extends NativeProviderBase {
     }
     const accepted = binding.azdBinding;
     const environment = accepted.environment;
-    if (preview.artifactHash !== binding.providerBindingHash || preview.artifactHash !== this.#providerBindingHash(accepted.bindingHash, binding.ownedStateHash, binding) || accepted.projectId !== preview.projectId || accepted.runId !== preview.runId || environment.name !== this.#target.environmentName || environment.target.resourceGroup === void 0) {
+    if (preview.artifactHash !== binding.providerBindingHash || preview.artifactHash !== this.#providerBindingHash(accepted.bindingHash, binding.ownedStateHash, binding, binding.resourceGroupTags) || accepted.projectId !== preview.projectId || accepted.runId !== preview.runId || environment.name !== this.#target.environmentName || environment.target.resourceGroup === void 0) {
       throw new IacProviderError("PREVIEW_HASH_MISMATCH", "The azd binding does not match the approved preview");
     }
     const target = {
@@ -28931,12 +29051,13 @@ var AzdBicepProvider = class extends NativeProviderBase {
     const current = await this.#assertInputsUnchanged(accepted, target, azdVersion);
     await this.#assertIdentity(current);
     const owned = await this.#ownedState(target);
-    if (owned.hash !== binding.ownedStateHash) {
+    const currentTags = this.#resolvedResourceGroupTags(target, owned, operation);
+    if (owned.hash !== binding.ownedStateHash || this.#ownershipBlockers(target, owned, operation).length > 0 || sha2562(currentTags ?? null) !== sha2562(binding.resourceGroupTags ?? null)) {
       throw new IacProviderError("PREVIEW_HASH_MISMATCH", "The azd environment's resource group or resources changed after preview");
     }
     if (approval.mechanism === "lab-delegation") {
-      if (operation !== "apply")
-        throw new IacProviderError("PREVIEW_BLOCKED", "Delegated destroy is unsupported");
+      if (operation !== "apply" || owned.groupMissing)
+        throw new IacProviderError("PREVIEW_BLOCKED", "Delegated destroy or missing resource group is unsupported");
       const scope2 = await this.labApplyScope(preview.previewHash);
       if (approval.scopeEvidenceHash !== sha2562(scope2))
         throw new IacProviderError("PREVIEW_HASH_MISMATCH", "Delegated resource observations changed before execution");
@@ -28944,6 +29065,9 @@ var AzdBicepProvider = class extends NativeProviderBase {
     }
     this.#targets.set(`${target.projectId}\0${target.runId}`, target);
     this.rememberPolicy(preview, binding);
+    if (operation === "apply" && owned.groupMissing && binding.resourceGroupTags !== void 0) {
+      await this.run(this.#reads.ensureResourceGroup(target.subscriptionId, target.resourceGroup, this.#target.location, binding.resourceGroupTags));
+    }
     const completed = [];
     for (const { layer, plan } of this.#azdPlans(operation === "apply" ? "provision" : "down", current)) {
       if (completed.length > 0) {
@@ -30954,7 +31078,7 @@ function renderArchitectureMermaid(architecture) {
 import { join as join26, resolve as resolve22 } from "node:path";
 
 // packages/cli/dist/version.js
-var APEX_VERSION = "0.11.0-next.10";
+var APEX_VERSION = "0.11.0-next.11";
 var MINIMUM_NODE_VERSION = "24.21.0";
 function meetsMinimumVersion(current, minimum) {
   const currentParts = current.split(".").map(Number);
@@ -70700,8 +70824,14 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
   generateIacTree(run, intent, binding, options = {}) {
     try {
       return run.iacTool === "bicep" ? generateBicepTree(intent, binding, {
+        environment: run.environment,
+        ...options.riskOwner === void 0 ? {} : { riskOwner: options.riskOwner },
+        ...options.liveGovernanceOverride === void 0 ? {} : { liveGovernanceOverride: options.liveGovernanceOverride },
         ...options.existingResources === void 0 ? {} : { existingResources: options.existingResources }
       }) : generateTerraformTree(intent, binding, {
+        environment: run.environment,
+        ...options.riskOwner === void 0 ? {} : { riskOwner: options.riskOwner },
+        ...options.liveGovernanceOverride === void 0 ? {} : { liveGovernanceOverride: options.liveGovernanceOverride },
         ...options.existingResources === void 0 ? {} : { existingResources: options.existingResources },
         ...options.azurermProviderConstraint === void 0 ? {} : { azurermProviderConstraint: options.azurermProviderConstraint },
         ...options.azapiProviderConstraint === void 0 ? {} : { azapiProviderConstraint: options.azapiProviderConstraint },
@@ -70718,8 +70848,8 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
    * rejects is refused here instead of after the review gates. For Bicep, ownership is also resolved when the run
    * targets an exact resource group; without one, only AVM bindings with no physical resource map are refused here.
    */
-  assertPlanGeneratable(run, intent, binding) {
-    const tree = this.generateIacTree(run, intent, binding);
+  assertPlanGeneratable(run, intent, binding, options = {}) {
+    const tree = this.generateIacTree(run, intent, binding, options);
     if (run.iacTool !== "bicep")
       return;
     const issues = bicepResourceGroupScopePattern.test(run.targetScope) ? resolveNativeBicepResourceOwnership({
@@ -70749,7 +70879,14 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     if (intent === void 0 || binding === void 0 || environmentInputs === void 0) {
       throw new ApexError("APEX_VALIDATION", "Code generation requires accepted intent, binding, and environment inputs", EXIT_CODES.validation);
     }
-    const tree = this.generateIacTree(run, intent, binding, options);
+    const project = await this.projects.getProject(run.projectId);
+    const governanceHash = this.artifactHash(events, "governance-constraints");
+    const governance = governanceHash === void 0 ? void 0 : await this.objects.getJson(governanceHash);
+    const tree = this.generateIacTree(run, intent, binding, {
+      ...options,
+      riskOwner: project.riskOwner,
+      liveGovernanceOverride: governance?.source === "collected"
+    });
     const files2 = [];
     const sourceRoot = previousHandoff?.treeHash === tree.treeHash ? resolve17(this.root, previousHandoff.rootPath) : resolve17(this.root, ".apex", "work", run.runId, taskId, "code");
     if (previousHandoff?.treeHash === tree.treeHash) {
@@ -75233,7 +75370,13 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       if (binding.track !== run.iacTool || binding.intentHash !== sha256Json(intent) || bindingIds.length !== resourceIds.size || bindingIds.some((id) => !resourceIds.has(id))) {
         throw new ApexError("APEX_VALIDATION", "IaC binding track, intent hash, or resource coverage is invalid", EXIT_CODES.validation);
       }
-      this.assertPlanGeneratable(run, intent, binding);
+      const project = await this.projects.getProject(run.projectId);
+      const governanceHash = this.artifactHash(events, "governance-constraints");
+      const governance = governanceHash === void 0 ? void 0 : await this.objects.getJson(governanceHash);
+      this.assertPlanGeneratable(run, intent, binding, {
+        riskOwner: project.riskOwner,
+        liveGovernanceOverride: governance?.source === "collected"
+      });
     }
     if (descriptor.id.startsWith("codegen-")) {
       const manifest2 = byKind["logical-resource-manifest"];
@@ -79757,7 +79900,7 @@ async function configuredProviders(root, flags) {
   if (config2.bicep !== void 0) {
     const value = config2.bicep;
     for (const key of Object.keys(value)) {
-      if (!["cwd", "environmentName", "tenantId", "location", "cloud"].includes(key))
+      if (!["cwd", "environmentName", "tenantId", "location", "cloud", "riskOwner", "resourceGroupTags"].includes(key))
         throw new ApexError("APEX_USAGE", `Bicep provider config does not support '${key}'; azd is the only Bicep executor and Deployment Stacks are not supported`, EXIT_CODES.usage);
     }
     for (const key of ["cwd", "environmentName", "tenantId", "location"]) {
@@ -79775,7 +79918,9 @@ async function configuredProviders(root, flags) {
         tenantId: value.tenantId,
         location: value.location,
         azdVersion: (await bundledToolchainMinimums()).azd,
-        ...value.cloud === void 0 ? {} : { cloud: value.cloud }
+        ...value.cloud === void 0 ? {} : { cloud: value.cloud },
+        ...value.riskOwner === void 0 ? {} : { riskOwner: value.riskOwner },
+        ...value.resourceGroupTags === void 0 ? {} : { resourceGroupTags: value.resourceGroupTags }
       }
     });
   }
