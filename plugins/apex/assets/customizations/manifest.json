@@ -1,5 +1,5 @@
 {
-  "version": "0.11.0-next.9",
+  "version": "0.11.0-next.10",
   "bundle": {
     "id": "apex-managed-workspace",
     "authority": "npm:@apexops/cli",

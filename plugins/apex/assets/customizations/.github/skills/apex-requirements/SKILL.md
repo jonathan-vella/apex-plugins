@@ -27,14 +27,18 @@ or task.
    confirmations when the kernel asks for them; do not make the user retype them, and do not record them until the user
    confirms or corrects them. Ask only for missing values. Never invent a project value, target, environment, IaC tool,
    service preference, budget posture, unknown, deferral, owner, risk acceptance or approval.
-2. For `status=needs_input`, ask every returned question through `ask_user` in chat. Use single-select controls without
-   adding or reordering kernel options. For a multi-value question that carries a recommendation, first ask one
-   single-choice question offering to accept the recommended set (name its values) or customize. Accept maps exactly,
-   so record it without a second confirmation. To customize, or when there is no recommendation, use native
-   multi-select if the tool offers it; otherwise show the exact kernel options numbered in kernel order, collect the
-   numbers, resolve them back to option values, and confirm the complete selection before recording. Name each
-   invalid, duplicate, empty, ambiguous or out-of-range entry and why before asking again. `none` is exclusive.
-   Recommendations are proposals only; never submit them without the accept answer.
+2. For `status=needs_input`, ask every returned question through `ask_user` in chat (when user-supplied facts and
+   kernel recommendations cover a round's questions, you may present the round's proposed answers in a compact table
+   first and offer a single-choice confirmation to accept the round's proposed answers or customize individual
+   questions). Use single-select controls without adding or reordering kernel options. For a multi-value question that
+   carries a recommendation or matches user-stated facts, first ask one single-choice question offering to accept the
+   recommended set (name its values), select `none` when allowed, or customize. Accept maps exactly, so record it
+   without a second confirmation. To customize, or when there is no recommendation, use native multi-select if the tool
+   offers it; otherwise always include selectable single-choice options (so `ask_user` never renders an optionless
+   Skip-only prompt) alongside the exact kernel options numbered in kernel order, collect the numbers, resolve them back
+   to option values, and confirm the complete selection before recording. Name each invalid, duplicate, empty,
+   ambiguous or out-of-range entry and why before asking again. `none` is exclusive. Recommendations are proposals only;
+   never submit them without the accept answer.
    When the request includes intake metadata, report the round as `request.intake.ordinal` of
    `request.intake.total` and continue through each remaining intake round only up to the user's requested stop point;
    each round has its own request ID and must be recorded separately.

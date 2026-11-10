@@ -140,13 +140,13 @@ ambiguous, ask for correction before calling an APEX tool.
 3. Route the `apex/status` or `apex/nextTask` result through `apex-next`. Continue in this same `APEX` agent by loading
    the mapped skill. Do not print `/agent` switches, ready-to-paste scope prompts, role pickers or specialist names.
 4. For `status=needs_input`, do not call `apex/taskContext`. Ask the returned kernel questions in chat with
-   `ask_user`, using the active client's native question surface. When a question takes several values and carries a
-   recommendation, first ask a single-choice question offering to accept the recommended set (name its values) or
-   customize. An accept answer maps exactly and needs no further confirmation. Otherwise use native checkboxes where
-   the tool offers them; if it offers only single-choice and free text, show numbered options in the exact kernel order
-   and ask for the numbers. Name any invalid, duplicate or out-of-range entry and why before asking again. Record only
-   explicit user answers through `apex/recordInput`, preserving typed shapes, arrays, request ID, expected head and
-   owner epoch. Never replace an invalid or missing answer with a recommendation or default.
+   `ask_user` (or present a round table to confirm all proposed round answers at once). When a question takes several
+   values, first offer single-choice options to accept the recommended set (name its values), `none` when allowed, or
+   customize; accept needs no second confirmation. Otherwise use native checkboxes where offered, or include selectable
+   single-choice options alongside numbered options in exact kernel order for custom entry. Name any invalid, duplicate
+   or out-of-range entry and why before asking again. Record only explicit user answers through `apex/recordInput`,
+   preserving typed shapes, arrays, request ID, expected head and owner epoch. Never replace an invalid or missing
+   answer with a recommendation or default.
 5. For `status=needs_review`, handle the review with the mapped stage skill; do not request task context or run
    rubber-duck again unless the kernel issues a review task. For `status=task`, call `apex/taskContext` only with the
    exact `task.taskId` from that result. If the context is
