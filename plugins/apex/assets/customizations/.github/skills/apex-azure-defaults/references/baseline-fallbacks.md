@@ -20,23 +20,25 @@ copy a region literal from guidance or silently move one service without documen
 
 ## Tag Fallback
 
-When the runtime explicitly authorizes the greenfield tag fallback, use these lowercase semantic keys. Every key must
-be present on the resource group, matching the organization resource-group tag-deny pattern this set mirrors.
+Always apply these 9 lowercase keys when creating or tagging a resource group unless an accepted live policy contract
+explicitly overrides them, matching the organization resource-group tag-deny policy
+(`enforce-resource-group-tags-exclude-resource-groups-based-on-name.json`).
 
-| Key | Purpose |
-| --- | --- |
-| `environment` | Lifecycle stage; drives policy scoping and service level. |
-| `owner` | Accountable team or individual. |
-| `costcenter` | Finance attribution for showback or chargeback. |
-| `application` | Application identifier. |
-| `workload` | Workload identifier that groups related resources. |
-| `sla` | Service-level tier. |
-| `backup-policy` | Backup policy descriptor, including an explicit `none`. |
-| `maint-window` | Agreed maintenance window. |
-| `technical-contact` | Technical escalation contact. |
+| Key | Purpose | Allowed Values / Default Resolution |
+| --- | --- | --- |
+| `environment` | Lifecycle stage; drives policy scoping and service level. | Policy allows only `alz`, `prod`, `test`, `dev` (map `staging`/`qa`/`uat` to `test`; default from run environment). |
+| `owner` | Accountable team or individual. | Non-empty string; defaults to project `riskOwner` (`partner` or `customer`). |
+| `costcenter` | Finance attribution for showback or chargeback. | Non-empty string; defaults to `platform-engineering`. |
+| `application` | Application identifier. | Non-empty string; defaults to `projectId`. |
+| `workload` | Workload identifier that groups related resources. | Non-empty string; defaults to `projectId`. |
+| `sla` | Service-level tier. | Policy allows only `critical`, `high`, `medium`, `low` (never `development`; default `low` for dev/test, `medium` for prod/zone-redundant, `high` for cross-region DR). |
+| `backup-policy` | Backup policy descriptor, including an explicit `none`. | Non-empty string; defaults to `automated` when backups are enabled, otherwise `none`. |
+| `maint-window` | Agreed maintenance window. | Non-empty string; defaults to `none`. |
+| `technical-contact` | Technical escalation contact. | Non-empty string; defaults to `owner` / `riskOwner` (do not emit redundant `tech-contact`). |
 
-Values still require projected inputs. Missing ownership, finance, or contact values are blockers. Optional provenance
-tags remain optional and must not be represented as policy requirements.
+Apply explicit user or governance values when provided; otherwise populate the runtime defaults above automatically so
+resource-group creation never blocks or prompts the user to list the 9 tag keys. Optional provenance tags remain
+optional and must not be represented as policy requirements.
 
 ## Naming And Uniqueness Fallback
 

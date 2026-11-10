@@ -31,7 +31,40 @@
   "azureDefaults": {
     "regionReference": ".github/copilot-instructions.md#default-regions",
     "tagContractReference": ".github/copilot-instructions.md#required-tags-azure-policy-enforced",
-    "liveGovernanceOverridesFallbacks": true
+    "liveGovernanceOverridesFallbacks": true,
+    "resourceGroupTagContract": {
+      "requiredKeys": [
+        "environment",
+        "owner",
+        "costcenter",
+        "application",
+        "workload",
+        "sla",
+        "backup-policy",
+        "maint-window",
+        "technical-contact"
+      ],
+      "allowedValues": {
+        "environment": ["alz", "prod", "test", "dev"],
+        "sla": ["critical", "high", "medium", "low"]
+      },
+      "defaults": {
+        "costcenter": "platform-engineering",
+        "backup-policy": "none",
+        "maint-window": "none"
+      },
+      "excludedResourceGroupPatterns": [
+        "AzureBackupRG*",
+        "ResourceMover*",
+        "databricks-rg*",
+        "NetworkWatcherRG",
+        "microsoft-network",
+        "LogAnalyticsDefaultResources",
+        "rg-amba-*",
+        "DynamicsDeployments*",
+        "MC_myResourceGroup*"
+      ]
+    }
   },
   "evidence": {
     "repositoryBoundary": "private-repository",

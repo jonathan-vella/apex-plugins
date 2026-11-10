@@ -1,7 +1,7 @@
 {
   "version": 1,
   "sources": {
-    "customizations": "0.11.0-next.10",
+    "customizations": "0.11.0-next.11",
     "config": "1.0.0"
   },
   "composition": {
@@ -527,8 +527,8 @@
         "path": "config/defaults.v1.json",
         "mapping": "config"
       },
-      "sha256": "ed8adc8415d8cd3ce290dc195dbe186b758291079d840802fef3e6674aca2036",
-      "bytes": 3144
+      "sha256": "02d62d0868d4f129e0f67e339434172f445d7d04b4d123e87ce3c0a4413892ce",
+      "bytes": 4003
     },
     {
       "path": "config/governance-reference.v1.json",
@@ -577,7 +577,7 @@
         "path": "config/runtime-bundle.v1.json",
         "mapping": "config"
       },
-      "sha256": "ed6ddb1bb999de39c686497abd2255f8c27f5607bfcbbebfce6bb23067e66d87",
+      "sha256": "12b6761372599f8f8c8be06bf9f5eec6eb926c1d98b9b193770441af453ebacf",
       "bytes": 2046
     },
     {
@@ -1587,8 +1587,8 @@
         "path": "customizations/.github/skills/apex-azure-defaults/references/baseline-fallbacks.md",
         "mapping": "customizations"
       },
-      "sha256": "151c54b423051658afee07bf3c388acc45afd9a395225a6b9f5a9b67022608ca",
-      "bytes": 3016
+      "sha256": "a86b5a7e48e4c659259507ec607f03d5f54ec7fd53d0dcf313e7dc65abf62365",
+      "bytes": 3946
     },
     {
       "path": "customizations/.github/skills/apex-azure-defaults/references/cost-monitoring.md",
@@ -1677,8 +1677,8 @@
         "path": "customizations/.github/skills/apex-azure-defaults/references/tag-precedence.md",
         "mapping": "customizations"
       },
-      "sha256": "2745f6969bdbcd86e1ade0b61d61451b413f4a27a7f06c47b35546d654fa57e2",
-      "bytes": 2911
+      "sha256": "2a351f07fe16320b6635b4766b772b1cd10cffceef5134e0c49e9355a8be650e",
+      "bytes": 3041
     },
     {
       "path": "customizations/.github/skills/apex-azure-deploy/SKILL.md",
@@ -6317,7 +6317,7 @@
         "path": "customizations/manifest.json",
         "mapping": "customizations"
       },
-      "sha256": "d16df8c5565715a5b9869dd3143d510155c8e9b87e91c41726000fe0c58a8287",
+      "sha256": "1b262a05b2a1d8bc2747de696b2548170359836b9e5bebd62248a036fe8f087e",
       "bytes": 51004
     },
     {
@@ -6354,6 +6354,6 @@
   "lock": {
     "algorithm": "sha256",
     "canonicalization": "apex-bundled-assets-v1",
-    "digest": "b9e926075432977ecc68aa6dfba48a81036908be9dd57a7e60575f60a55b4250"
+    "digest": "5bef566b28aa9e1acf359eb9ec7fef881c67c96b4cd074711a954d63b8d06b29"
   }
 }
