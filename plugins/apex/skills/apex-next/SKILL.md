@@ -101,7 +101,9 @@ output and the kernel derives the findings from that capture; this agent never w
 - Delegate only `APEX CodeGen` and `APEX Validator`. Run built-in `rubber-duck` only for a kernel `rubber-duck-review`
   task, with the exact kernel prompt; any other rubber-duck answer is advice and never kernel evidence.
 - Never delegate intake, user questions, gate decisions, governance selection, or any other interactive work.
-- Never collect, answer, summarize or record a question unless the kernel returned it to the active `APEX` agent.
+- Never collect, answer, summarize or record a `recordInput` question unless the kernel returned it to the active
+  `APEX` agent; for `governance-discovery` or `governance-refresh` tasks without a reviewed local baseline, follow the
+  `ask_user` baseline-source prompt in `apex-operations`.
 - Never replace invalid choices with defaults or recommendations.
 - Never use `session_store_sql`, SQL, session-history searches or tool discovery to route work.
 

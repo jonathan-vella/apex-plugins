@@ -11133,7 +11133,15 @@ var IacToolSchema = Type.Union([Type.Literal("bicep"), Type.Literal("terraform")
 var OperationSchema = Type.Union([Type.Literal("apply"), Type.Literal("destroy")]);
 var RiskOwnerSchema = Type.Union([Type.Literal("partner"), Type.Literal("customer")]);
 var SECRET_FIELD_PATTERN = /(?:secret|password|passphrase|token|authorization|auth[-_]?header|api[-_]?key|private[-_]?key|connection[-_]?string|credential(?:s)?(?:$|[-_]|value|data)|session[-_]?cookie|sas[-_]?token)/i;
+var NON_SECRET_METADATA_FIELD_PATTERN = /^(?:enable[-_]?rbac[-_]?authorization|enable[-_]?token[-_]?auth(?:entication)?|token[-_]?store[-_]?enabled|token[-_]?lifetime|secret[-_]?(?:name|ref|reference|uri|url|id|identifier|version|permissions)|key[-_]?vault[-_]?secret[-_]?(?:name|uri|id))$/i;
 var SECRET_VALUE_PATTERN = /-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----|\bBearer\s+[A-Za-z0-9._~+\/-]{16,}|\b(?:gh[pousr]_[A-Za-z0-9]{20,}|github_pat_[A-Za-z0-9_]{20,})\b|\beyJ[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\.[A-Za-z0-9_-]{8,}\b|(?:AccountKey|SharedAccessSignature|ClientSecret)=|[?&](?:sig|signature|access_token)=[^&\s]{8,}|https?:\/\/[^/\s:@]+:[^@\s/]+@/i;
+function isSecretBearingField(key, _value) {
+  if (!SECRET_FIELD_PATTERN.test(key))
+    return false;
+  if (NON_SECRET_METADATA_FIELD_PATTERN.test(key))
+    return false;
+  return true;
+}
 function registerContractFormats() {
   if (!format_exports.Has("date-time")) {
     format_exports.Set("date-time", (value) => Number.isFinite(Date.parse(value)));
@@ -16274,7 +16282,10 @@ var NativeValidationReceiptV1Schema = Type.Object({
   inputHash: Sha256Schema,
   policyValidation: Type.Optional(PolicyValidationV1Schema),
   securityBaseline: Type.Optional(Type.Object({
-    coverage: Type.Literal("bicep-storage-only-baseline-v1"),
+    coverage: Type.Union([
+      Type.Literal("bicep-storage-only-baseline-v1"),
+      Type.Literal("terraform-source-baseline-v1")
+    ]),
     sourceHash: Sha256Schema,
     inputHash: Sha256Schema,
     manifestHash: Sha256Schema,
@@ -16290,7 +16301,10 @@ var NativeValidationReceiptV1Schema = Type.Object({
     ].map((reason) => Type.Literal(reason)))
   }, { additionalProperties: false })),
   resourceParity: Type.Optional(Type.Object({
-    coverage: Type.Literal("bicep-symbolic-resource-parity-v1"),
+    coverage: Type.Union([
+      Type.Literal("bicep-symbolic-resource-parity-v1"),
+      Type.Literal("terraform-symbolic-resource-parity-v1")
+    ]),
     sourceHash: Sha256Schema,
     manifestHash: Sha256Schema,
     bindingHash: Type.Optional(Sha256Schema),
@@ -16368,7 +16382,9 @@ function hasValidNativeValidationReceipt(value, binding) {
     const storageInputHash = receipt.storageSecurity === void 0 ? void 0 : Object.values(receipt.storageSecurity)[0]?.inputHash;
     const parity = receipt.resourceParity;
     const baseline = receipt.securityBaseline;
-    if (baseline !== void 0 && (receipt.track !== "bicep" || parity === void 0 || baseline.sourceHash !== receipt.sourceHash || baseline.inputHash !== parity.inputHash || baseline.manifestHash !== parity.manifestHash || baseline.bindingHash !== parity.bindingHash || baseline.outcome === "pass" && (baseline.reason !== "matched" || parity.outcome !== "pass") || baseline.reason === "matched" && baseline.outcome !== "pass" || baseline.reason === "resource-parity" && (parity.outcome === "pass" || baseline.outcome !== parity.outcome) || baseline.reason === "unsupported-resource" && baseline.outcome !== "unsupported" || ["credential-content", "storage-controls"].includes(baseline.reason) && baseline.outcome !== "fail" || baseline.reason === "diagnostic-routing" && baseline.outcome === "pass"))
+    const expectedBaselineCoverage = receipt.track === "bicep" ? "bicep-storage-only-baseline-v1" : "terraform-source-baseline-v1";
+    const expectedParityCoverage = receipt.track === "bicep" ? "bicep-symbolic-resource-parity-v1" : "terraform-symbolic-resource-parity-v1";
+    if (baseline !== void 0 && (baseline.coverage !== expectedBaselineCoverage || parity === void 0 || baseline.sourceHash !== receipt.sourceHash || baseline.inputHash !== parity.inputHash || baseline.manifestHash !== parity.manifestHash || baseline.bindingHash !== parity.bindingHash || baseline.outcome === "pass" && (baseline.reason !== "matched" || parity.outcome !== "pass") || baseline.reason === "matched" && baseline.outcome !== "pass" || baseline.reason === "resource-parity" && (parity.outcome === "pass" || baseline.outcome !== parity.outcome) || baseline.reason === "unsupported-resource" && baseline.outcome !== "unsupported" || ["credential-content", "storage-controls"].includes(baseline.reason) && baseline.outcome !== "fail" || baseline.reason === "diagnostic-routing" && baseline.outcome === "pass"))
       return false;
     if (receipt.storageDiagnostics !== void 0) {
       const observations = Object.values(receipt.storageDiagnostics);
@@ -16382,7 +16398,7 @@ function hasValidNativeValidationReceipt(value, binding) {
       ].includes(observation.reason) ? "unsupported" : "fail")))
         return false;
     }
-    if (parity !== void 0 && (receipt.track !== "bicep" || parity.sourceHash !== receipt.sourceHash || storageInputHash !== void 0 && parity.inputHash !== storageInputHash || receipt.policyValidation !== void 0 && parity.inputHash !== receipt.policyValidation.inputHash || parity.outcome !== (parity.reason === "matched" ? "pass" : ["unsupported-resource", "invalid-source"].includes(parity.reason) ? "unsupported" : "fail")))
+    if (parity !== void 0 && (parity.coverage !== expectedParityCoverage || parity.sourceHash !== receipt.sourceHash || storageInputHash !== void 0 && parity.inputHash !== storageInputHash || receipt.policyValidation !== void 0 && parity.inputHash !== receipt.policyValidation.inputHash || parity.outcome !== (parity.reason === "matched" ? "pass" : ["unsupported-resource", "invalid-source"].includes(parity.reason) ? "unsupported" : "fail")))
       return false;
     if (receipt.storageSecurity !== void 0 && (receipt.track !== "bicep" || Object.values(receipt.storageSecurity).some((observation) => observation.sourceHash !== receipt.sourceHash || observation.inputHash !== storageInputHash || receipt.policyValidation !== void 0 && observation.inputHash !== receipt.policyValidation.inputHash || observation.outcome !== (observation.results.some(({ outcome }) => outcome === "fail") ? "fail" : observation.results.some(({ outcome }) => outcome === "unsupported") ? "unsupported" : "pass") || observation.results.some((result, index) => {
       const control = STORAGE_PROPERTY_HARDENING_CONTROLS.bicep[index];
@@ -20912,7 +20928,7 @@ async function resolveBundledAssets() {
 }
 
 // packages/cli/dist/cli.js
-import { mkdir as mkdir14, readFile as readFile20, realpath as realpath11, writeFile as writeFile4 } from "node:fs/promises";
+import { lstat as lstat20, mkdir as mkdir14, readFile as readFile20, realpath as realpath11, writeFile as writeFile4 } from "node:fs/promises";
 import { userInfo as userInfo2 } from "node:os";
 import { createInterface as createInterface2 } from "node:readline/promises";
 
@@ -21123,7 +21139,7 @@ function hasSecretObject(value) {
   if (Array.isArray(value))
     return value.some(hasSecretObject);
   if (value !== null && typeof value === "object")
-    return Object.entries(value).some(([key, child]) => SECRET_FIELD_PATTERN.test(key) && typeof child === "string" && child.length > 0 || hasSecretObject(child));
+    return Object.entries(value).some(([key, child]) => isSecretBearingField(key, child) && typeof child === "string" && child.length > 0 || hasSecretObject(child));
   return false;
 }
 function hasRuntimeAuthority(value) {
@@ -24581,7 +24597,7 @@ function resolveParameters(bytes, values) {
     onlyKeys(parameter, ["value", "reference"], `Bicep parameter ${name}`, "AZD_PARAMETERS_UNSUPPORTED");
     if (parameter.value === void 0 === (parameter.reference === void 0))
       fail("AZD_PARAMETERS_UNSUPPORTED", `Bicep parameter ${name} must declare exactly one of value or reference`);
-    if (parameter.value !== void 0 && SECRET_FIELD_PATTERN.test(name))
+    if (parameter.value !== void 0 && isSecretBearingField(name, parameter.value))
       fail("AZD_PARAMETERS_SECRET", `Bicep parameter ${name} carries a secret-named literal; use a Key Vault reference`);
     if (SECRET_VALUE_PATTERN.test(JSON.stringify(parameter)))
       fail("AZD_PARAMETERS_SECRET", `Bicep parameter ${name} holds a secret-like value; use a Key Vault reference`);
@@ -25128,7 +25144,7 @@ var TerraformCommandAdapter = class {
   }
   showJson(cwd, savedPlanPath) {
     this.#requirePlanPath(savedPlanPath);
-    return { executable: "terraform", args: ["show", "-json", savedPlanPath], cwd };
+    return { executable: "terraform", args: ["show", "-json", savedPlanPath], cwd, rawOutput: true };
   }
   statePull(cwd) {
     return { executable: "terraform", args: ["state", "pull"], cwd };
@@ -26377,7 +26393,9 @@ function resourceContexts(intent, binding) {
     const resourceBinding = binding.resourceBindings[resource.id];
     if (resourceBinding.scopeLogicalId !== void 0) {
       const target = binding.resourceBindings[resourceBinding.scopeLogicalId];
-      if (binding.track !== "bicep" || resource.type.toLowerCase() !== "microsoft.insights/diagnosticsettings" || !resourceBinding.implementation.startsWith("native:Microsoft.Insights/diagnosticSettings@") || target === void 0 || !target.implementation.startsWith("native:") || target.scopeLogicalId !== void 0 || resourceBinding.scopeLogicalId === resource.id || !resource.dependsOn.includes(resourceBinding.scopeLogicalId) || Object.hasOwn(resourceBinding.parameters, "scope") || Object.hasOwn(resourceBinding.parameters, "parent"))
+      const lowerType = resource.type.toLowerCase();
+      const validScopedExtension = lowerType === "microsoft.insights/diagnosticsettings" && resourceBinding.implementation.startsWith("native:Microsoft.Insights/diagnosticSettings@") || lowerType === "microsoft.authorization/roleassignments" && resourceBinding.implementation.startsWith("native:Microsoft.Authorization/roleAssignments@");
+      if (binding.track !== "bicep" || !validScopedExtension || target === void 0 || !target.implementation.startsWith("native:") || target.scopeLogicalId !== void 0 || resourceBinding.scopeLogicalId === resource.id || !resource.dependsOn.includes(resourceBinding.scopeLogicalId) || Object.hasOwn(resourceBinding.parameters, "scope") || Object.hasOwn(resourceBinding.parameters, "parent"))
         throw new TypeError("Diagnostic scope requires an explicit native Bicep dependency without chained scopes");
     }
     return {
@@ -26403,7 +26421,7 @@ function requiredGenericParameters(context) {
   return { name, location, parentId, properties, bodyFields };
 }
 function bicepString(value) {
-  return `'${value.replaceAll("'", "''")}'`;
+  return `'${value.replaceAll("\\", "\\\\").replaceAll("'", "\\'").replaceAll("\r", "\\r").replaceAll("\n", "\\n").replaceAll("	", "\\t").replaceAll("${", "\\${")}'`;
 }
 function bicepObjectKey(value) {
   return IDENTIFIER.test(value) ? value : bicepString(value);
@@ -26648,7 +26666,16 @@ ${renderedParameters.join("\n")}
   }${dependencies}
 }`;
   });
-  const content = ["targetScope = 'resourceGroup'", blocks.join("\n\n")].filter((part) => part.length > 0).join("\n\n") + "\n";
+  const rgCount = contexts.filter(isResourceGroupContext).length;
+  if (rgCount > 0 && rgCount < contexts.length) {
+    throw new TypeError("Bicep generation cannot mix subscription-scoped Microsoft.Resources/resourceGroups with resource-group-scoped resources in one template; AzdBicepProvider owns the target resource group");
+  }
+  const bicepOutputs = [...intent.outputs].sort().map((name) => {
+    assertIdentifier(name, "Bicep output name");
+    return `output ${name} string = ''`;
+  }).join("\n\n");
+  const targetScopeLine = rgCount > 0 && contexts.length > 0 ? "targetScope = 'subscription'" : "targetScope = 'resourceGroup'";
+  const content = [targetScopeLine, blocks.join("\n\n"), bicepOutputs].filter((part) => part.length > 0).join("\n\n") + "\n";
   return virtualTree([
     {
       path: "azure.yaml",
@@ -27392,12 +27419,13 @@ function resourcesFromJson(json2, track) {
         const resource = object3(entry);
         if (resource === void 0)
           throw new Error("POLICY_VALIDATION_INVALID_SOURCE");
-        const unsupported = inheritedUnsupported || Object.hasOwn(resource, "copy") || Object.hasOwn(resource, "condition") && resource.condition !== true || resource.existing === true;
+        const unsupported = inheritedUnsupported || Object.hasOwn(resource, "copy") || Object.hasOwn(resource, "condition") && resource.condition !== true;
         const physicalId = text4(own(resource, "id"));
         const symbols = parentSymbols !== null && symbol2 !== void 0 ? [...parentSymbols, symbol2] : null;
         resources.push({
           value: resource,
           unsupported,
+          ...resource.existing === true ? { existing: true } : {},
           ...text4(resource.type) === void 0 ? {} : { resourceType: text4(resource.type) },
           ...physicalId === void 0 ? {} : { physicalId },
           ...symbols === null ? {} : { codeSymbol: symbols.join("::") }
@@ -27492,29 +27520,80 @@ function observeBoundProperty(mapping, request, resources) {
   if (codeSymbol === void 0 && (request.track === "terraform" || physicalId === void 0)) {
     return { outcome: "unsupported", reason: "resource-not-bound" };
   }
-  const matches = resources.filter((resource2) => request.track === "terraform" ? resource2.codeSymbol === codeSymbol : physicalId !== void 0 && resource2.physicalId === physicalId || codeSymbol !== void 0 && resource2.codeSymbol === codeSymbol);
+  let matches = resources.filter((resource2) => request.track === "terraform" ? resource2.codeSymbol === codeSymbol : physicalId !== void 0 && resource2.physicalId === physicalId || codeSymbol !== void 0 && resource2.codeSymbol === codeSymbol);
+  if (matches.length === 0 && request.track === "terraform" && codeSymbol?.startsWith("module.")) {
+    const prefix = `${codeSymbol}.`;
+    matches = resources.filter((resource2) => resource2.codeSymbol !== void 0 && resource2.codeSymbol.startsWith(prefix) && !resource2.codeSymbol.slice(prefix.length).includes(".module.") && !resource2.unsupported && own(resource2.value, segments[0]) !== void 0);
+  }
   if (matches.length === 0)
     return { outcome: "unsupported", reason: "resource-not-found" };
   if (matches.length !== 1)
     return { outcome: "unsupported", reason: "ambiguous-resource" };
   const resource = matches[0];
-  if (resource.unsupported || physicalId !== void 0 && physicalId !== resource.physicalId) {
+  if (resource.unsupported || resource.existing === true || physicalId !== void 0 && physicalId !== resource.physicalId) {
     return { outcome: "unsupported", reason: "unsupported-resource" };
   }
-  let observed = resource.value;
-  let unknown2 = resource.unknown;
-  for (const segment of segments) {
-    if (unknown2 === true || typeof observed === "string" && expression(observed, request.track)) {
-      return { outcome: "unsupported", reason: "unsupported-expression" };
+  const walkPath = (startValue, startUnknown, pathSegments) => {
+    let currentObserved = startValue;
+    let currentUnknown = startUnknown;
+    for (const segment of pathSegments) {
+      if (currentUnknown === true || typeof currentObserved === "string" && expression(currentObserved, request.track)) {
+        return { observed: void 0, unknown: void 0, expressionHit: true };
+      }
+      currentObserved = own(currentObserved, segment);
+      currentUnknown = own(currentUnknown, segment);
     }
-    observed = own(observed, segment);
-    unknown2 = own(unknown2, segment);
+    return { observed: currentObserved, unknown: currentUnknown, expressionHit: false };
+  };
+  let walked = walkPath(resource.value, resource.unknown, segments);
+  if (walked.observed === void 0 && !walked.expressionHit && request.track === "bicep" && resource.resourceType?.toLowerCase() === "microsoft.resources/deployments" && segments[0] === "properties" && segments.length >= 2 && segments[1] !== "parameters" && segments[1] !== "template" && codeSymbol !== void 0) {
+    const prefix = `${codeSymbol}::`;
+    const innerCandidates = resources.filter((candidate) => candidate.codeSymbol !== void 0 && candidate.codeSymbol.startsWith(prefix) && !candidate.codeSymbol.slice(prefix.length).includes("::") && candidate.resourceType?.toLowerCase() !== "microsoft.resources/deployments" && !candidate.unsupported && candidate.existing !== true);
+    if (innerCandidates.length !== 1) {
+      return { outcome: "unsupported", reason: "unsupported-resource" };
+    }
+    const innerResource = innerCandidates[0];
+    const parametersObj = object3(own(resource.value.properties, "parameters"));
+    let currentObserved = innerResource.value;
+    let currentUnknown = innerResource.unknown;
+    let resolvedViaInner = true;
+    for (let idx = 0; idx < segments.length; idx += 1) {
+      if (currentUnknown === true)
+        return { outcome: "unsupported", reason: "unsupported-expression" };
+      if (typeof currentObserved === "string") {
+        const paramRef = /^\[parameters\('([A-Za-z_][A-Za-z0-9_]*)'\)\]$/u.exec(currentObserved.trim());
+        if (paramRef === null)
+          return { outcome: "unsupported", reason: "unsupported-expression" };
+        const paramDef = object3(own(parametersObj, paramRef[1]));
+        if (paramDef === void 0 || !Object.hasOwn(paramDef, "value")) {
+          return { outcome: "unsupported", reason: "unsupported-expression" };
+        }
+        currentObserved = paramDef.value;
+        currentUnknown = void 0;
+      }
+      currentObserved = own(currentObserved, segments[idx]);
+      currentUnknown = own(currentUnknown, segments[idx]);
+    }
+    if (typeof currentObserved === "string") {
+      const paramRef = /^\[parameters\('([A-Za-z_][A-Za-z0-9_]*)'\)\]$/u.exec(currentObserved.trim());
+      if (paramRef !== null) {
+        const paramDef = object3(own(parametersObj, paramRef[1]));
+        if (paramDef === void 0 || !Object.hasOwn(paramDef, "value")) {
+          return { outcome: "unsupported", reason: "unsupported-expression" };
+        }
+        currentObserved = paramDef.value;
+        currentUnknown = void 0;
+      }
+    }
+    if (resolvedViaInner) {
+      walked = { observed: currentObserved, unknown: currentUnknown, expressionHit: false };
+    }
   }
-  if (hasUnknown(unknown2) || expression(observed, request.track))
+  if (walked.expressionHit || hasUnknown(walked.unknown) || expression(walked.observed, request.track))
     return { outcome: "unsupported", reason: "unsupported-expression" };
-  if (observed === void 0)
+  if (walked.observed === void 0)
     return { outcome: "fail", reason: "missing-property" };
-  const observedValueDigest = calculatePolicyValidationDigest(observed);
+  const observedValueDigest = calculatePolicyValidationDigest(walked.observed);
   const matched = observedValueDigest === calculatePolicyValidationDigest(mapping.expectedValue);
   return { outcome: matched ? "pass" : "fail", reason: matched ? "matched" : "value-mismatch", observedValueDigest };
 }
@@ -27528,7 +27607,7 @@ function validateStorageSecurityBindings(request) {
   try {
     resources = resourcesFromJson(request.json, request.track).map((resource) => ({
       ...resource,
-      unsupported: resource.unsupported || resource.resourceType?.toLowerCase() !== expectedType
+      unsupported: resource.unsupported || resource.existing === true || resource.resourceType?.toLowerCase() !== expectedType
     }));
   } catch {
     resources = void 0;
@@ -27600,8 +27679,21 @@ function validateBicepStorageDiagnostics(request) {
     if (setting.unsupported || setting.codeSymbol === void 0 || setting.codeSymbol.includes("::") || Object.hasOwn(setting.value, "condition") || !Array.isArray(setting.value.dependsOn) || !setting.value.dependsOn.includes(target.codeSymbol))
       return result("unsupported", "unsupported-diagnostics");
     const properties = object3(setting.value.properties);
-    if (properties === void 0 || typeof properties.workspaceId !== "string" || properties.workspaceId.toLowerCase() !== request.workspaceResourceId.toLowerCase())
+    if (properties === void 0 || typeof properties.workspaceId !== "string") {
       return result("fail", "workspace-mismatch");
+    }
+    const workspaceExprMatch = /^\[resourceId\('Microsoft\.OperationalInsights\/workspaces',\s*'([A-Za-z0-9][A-Za-z0-9-]*)'\)\]$/iu.exec(properties.workspaceId.trim());
+    if (workspaceExprMatch !== null) {
+      if (request.targetScope === void 0 || !/^\/subscriptions\/[a-f0-9-]{36}\/resourceGroups\/[^/]+$/i.test(request.targetScope)) {
+        return result("unsupported", "unsupported-diagnostics");
+      }
+      const resolvedId = `${request.targetScope}/providers/Microsoft.OperationalInsights/workspaces/${workspaceExprMatch[1]}`;
+      if (resolvedId.toLowerCase() !== request.workspaceResourceId.toLowerCase()) {
+        return result("fail", "workspace-mismatch");
+      }
+    } else if (properties.workspaceId.toLowerCase() !== request.workspaceResourceId.toLowerCase()) {
+      return result("fail", "workspace-mismatch");
+    }
     const logs = properties.logs;
     const metrics = properties.metrics;
     if (!Array.isArray(logs) || !Array.isArray(metrics))
@@ -27633,7 +27725,7 @@ function validateBicepResourceParity(request) {
   });
   const expected = request.manifest.resources;
   const byId = new Map(expected.map((resource) => [resource.logicalId, resource]));
-  if (byId.size !== expected.length || new Set(expected.map(({ executionAddress }) => executionAddress)).size !== expected.length || expected.some((resource) => resource.ownership !== "managed" || resource.implementationKind !== "resource" && resource.implementationKind !== "module" || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(resource.executionAddress ?? "") || resource.dependsOn.some((id) => !byId.has(id)) || JSON.stringify([...resource.dependsOn].sort()) !== JSON.stringify([...resource.generatedDependencies].sort())))
+  if (byId.size !== expected.length || new Set(expected.map(({ executionAddress }) => executionAddress)).size !== expected.length || expected.some((resource) => !(resource.ownership === "managed" && (resource.implementationKind === "resource" || resource.implementationKind === "module") || resource.ownership === "existing" && resource.implementationKind === "existing") || !/^[A-Za-z_][A-Za-z0-9_]*$/.test(resource.executionAddress ?? "") || resource.dependsOn.some((id) => !byId.has(id)) || JSON.stringify([...resource.dependsOn].sort()) !== JSON.stringify([...resource.generatedDependencies].sort())))
     return result("unsupported", "unsupported-resource");
   let allObserved;
   try {
@@ -27652,9 +27744,18 @@ function validateBicepResourceParity(request) {
     return result("fail", "coverage-mismatch");
   for (const resource of expected) {
     const compiled = observed.find(({ codeSymbol }) => codeSymbol === resource.executionAddress);
+    if (compiled.existing === true !== (resource.ownership === "existing")) {
+      return result("unsupported", "unsupported-resource");
+    }
     const expectedType = resource.implementationKind === "module" ? "microsoft.resources/deployments" : resource.type.toLowerCase();
     if (compiled.resourceType?.toLowerCase() !== expectedType)
       return result("fail", "type-mismatch");
+    if (resource.ownership === "existing") {
+      if (Object.hasOwn(compiled.value, "scope") || Array.isArray(compiled.value.dependsOn) && compiled.value.dependsOn.length > 0) {
+        return result("unsupported", "unsupported-resource");
+      }
+      continue;
+    }
     const selected = request.binding?.resourceBindings[resource.logicalId];
     const scopeId = selected?.scopeLogicalId;
     if (resource.implementationKind === "module") {
@@ -27665,7 +27766,9 @@ function validateBicepResourceParity(request) {
       const targetBinding = scopeId === void 0 ? void 0 : request.binding?.resourceBindings[scopeId];
       const targetCompiled = target === void 0 ? void 0 : observed.find(({ codeSymbol }) => codeSymbol === target.executionAddress);
       const targetName = targetBinding?.parameters.name;
-      if (resource.type.toLowerCase() !== "microsoft.insights/diagnosticsettings" || target === void 0 || targetBinding === void 0 || targetBinding.scopeLogicalId !== void 0 || scopeId === resource.logicalId || !resource.dependsOn.includes(scopeId) || typeof targetName !== "string" || !/^Microsoft\.[A-Za-z0-9.]+(?:\/[A-Za-z][A-Za-z0-9]*)+$/.test(target.type) || targetName.split("/").length !== target.type.split("/").length - 1 || targetName.split("/").some((name) => !/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(name)) || targetCompiled?.value.name !== targetName || compiled.value.name !== selected?.parameters.name || target.implementationAddress !== targetBinding.implementation || resource.implementationAddress !== selected?.implementation)
+      const lowerType = resource.type.toLowerCase();
+      const allowedScopedType = lowerType === "microsoft.insights/diagnosticsettings" || lowerType === "microsoft.authorization/roleassignments";
+      if (!allowedScopedType || target === void 0 || targetBinding === void 0 || targetBinding.scopeLogicalId !== void 0 || scopeId === resource.logicalId || !resource.dependsOn.includes(scopeId) || typeof targetName !== "string" || !/^Microsoft\.[A-Za-z0-9.]+(?:\/[A-Za-z][A-Za-z0-9]*)+$/.test(target.type) || targetName.split("/").length !== target.type.split("/").length - 1 || targetName.split("/").some((name) => !/^[A-Za-z0-9][A-Za-z0-9_.-]*$/.test(name)) || targetCompiled?.value.name !== targetName || compiled.value.name !== selected?.parameters.name || target.implementationAddress !== targetBinding.implementation || resource.implementationAddress !== selected?.implementation)
         return result("unsupported", "unsupported-resource");
       const names = targetName.split("/");
       const literalScope = `[resourceId('${target.type}', ${names.map((name) => `'${name}'`).join(", ")})]`;
@@ -27716,9 +27819,9 @@ function validateBicepStorageBaseline(request) {
     return Object.entries(record6).some(([key, child]) => {
       const nextInDeploymentProperties = isDeployment && key === "properties";
       const nextInsideTemplate = insideModuleTemplate || inDeploymentProperties && key === "template";
-      if (SECRET_FIELD_PATTERN.test(key)) {
-        const paramValue = !insideModuleTemplate ? object3(child)?.value : void 0;
-        const candidate = typeof child === "string" ? child : typeof paramValue === "string" ? paramValue : void 0;
+      const paramValue = !insideModuleTemplate ? object3(child)?.value : void 0;
+      const candidate = typeof child === "string" ? child : typeof paramValue === "string" ? paramValue : void 0;
+      if (isSecretBearingField(key, candidate ?? child)) {
         if (candidate !== void 0 && candidate.length > 0 && !(insideModuleTemplate && isSafeModuleFieldExpression(candidate))) {
           return true;
         }
@@ -27744,11 +27847,12 @@ function validateBicepStorageBaseline(request) {
   ]) || ["parameters", "variables", "outputs", "definitions"].some((key) => Object.hasOwn(template, key) && object3(template[key]) === void 0) || Object.hasOwn(template, "functions") && !Array.isArray(template.functions) && object3(template.functions) === void 0)
     return result("unsupported", "unsupported-resource");
   const resources = resourcesFromJson(request.json, "bicep").filter((resource) => !resource.codeSymbol?.includes("::"));
-  const accounts = resources.filter(({ resourceType }) => resourceType?.toLowerCase() === "microsoft.storage/storageaccounts");
+  const accounts = resources.filter((resource) => resource.existing !== true && resource.resourceType?.toLowerCase() === "microsoft.storage/storageaccounts");
   if (accounts.length > 0 && new Set(accounts.map(({ value }) => value.name)).size !== accounts.length)
     return result("unsupported", "unsupported-resource");
   for (const resource of resources) {
     if (!onlyKeys2(resource.value, [
+      "existing",
       "type",
       "apiVersion",
       "name",
@@ -27770,8 +27874,35 @@ function validateBicepStorageBaseline(request) {
     if (resource.resourceType?.toLowerCase() === "microsoft.insights/diagnosticsettings") {
       if (!onlyKeys2(resource.value.properties, ["workspaceId", "logs", "metrics", "logAnalyticsDestinationType"]))
         return result("unsupported", "unsupported-resource");
-    } else if (resource.resourceType?.toLowerCase().startsWith("microsoft.storage/storageaccounts/") && resource.value.properties !== void 0 && !onlyKeys2(resource.value.properties, []))
+    } else if (resource.resourceType?.toLowerCase().startsWith("microsoft.storage/storageaccounts/") && resource.value.properties !== void 0 && !onlyKeys2(resource.value.properties, [
+      "deleteRetentionPolicy",
+      "containerDeleteRetentionPolicy",
+      "isVersioningEnabled",
+      "changeFeed"
+    ]))
       return result("unsupported", "unsupported-resource");
+  }
+  for (const moduleStorage of request.manifest.resources.filter((entry) => entry.ownership === "managed" && entry.implementationKind === "module" && entry.type.toLowerCase() === "microsoft.storage/storageaccounts")) {
+    const deployment = resources.find(({ codeSymbol }) => codeSymbol === moduleStorage.executionAddress);
+    const params = object3(own(deployment?.value.properties, "parameters"));
+    if (params === void 0)
+      return result("unsupported", "unsupported-resource");
+    const requiredControls = [
+      ["allowBlobPublicAccess", false],
+      ["allowSharedKeyAccess", false],
+      ["minimumTlsVersion", "TLS1_2"],
+      ["supportsHttpsTrafficOnly", true],
+      ["publicNetworkAccess", "Disabled"]
+    ];
+    for (const [paramKey, expectedVal] of requiredControls) {
+      const entryObj = object3(params[paramKey]);
+      if (entryObj === void 0 || !Object.hasOwn(entryObj, "value") || expression(entryObj.value, "bicep")) {
+        return result("unsupported", "unsupported-resource");
+      }
+      if (entryObj.value !== expectedVal) {
+        return result("fail", "storage-controls");
+      }
+    }
   }
   for (const account of accounts) {
     const properties = object3(account.value.properties);
@@ -27788,17 +27919,56 @@ function validateBicepStorageBaseline(request) {
       "defaultToOAuthAuthentication",
       "networkAcls",
       "encryption",
-      "accessTier"
-    ]) || !onlyKeys2(network, ["defaultAction", "bypass", "ipRules", "virtualNetworkRules"]) || !onlyKeys2(identity, ["type"]) || !onlyKeys2(encryption, ["keySource", "requireInfrastructureEncryption", "services"]) || !onlyKeys2(encryptionServices, ["blob", "file"]) || !["blob", "file"].every((service) => onlyKeys2(own(encryptionServices, service), ["enabled", "keyType"])))
+      "accessTier",
+      "isHnsEnabled",
+      "allowCrossTenantReplication",
+      "allowedCopyScope",
+      "routing",
+      "sasPolicy",
+      "keyPolicy",
+      "largeFileSharesState",
+      "azureFilesIdentityBasedAuthentication",
+      "immutableStorageWithVersioning",
+      "customDomain"
+    ]) || !onlyKeys2(network, ["defaultAction", "bypass", "ipRules", "virtualNetworkRules", "resourceAccessRules"]) || !onlyKeys2(identity, ["type", "userAssignedIdentities"]) || !onlyKeys2(encryption, [
+      "keySource",
+      "requireInfrastructureEncryption",
+      "services",
+      "identity",
+      "keyvaultproperties"
+    ]) || !onlyKeys2(encryptionServices, ["blob", "file", "table", "queue"]) || !["blob", "file"].every((service) => onlyKeys2(own(encryptionServices, service), ["enabled", "keyType"])))
       return result("unsupported", "unsupported-resource");
-    if (properties === void 0 || !STORAGE_PROPERTY_HARDENING_CONTROLS.bicep.every(([path2, expected]) => properties[path2.slice("properties.".length)] === expected) || properties.publicNetworkAccess !== "Disabled" || properties.defaultToOAuthAuthentication !== true || network?.defaultAction !== "Deny" || network.bypass !== "None" || !Array.isArray(network.ipRules) || network.ipRules.length !== 0 || !Array.isArray(network.virtualNetworkRules) || network.virtualNetworkRules.length !== 0 || encryption?.keySource !== "Microsoft.Storage" || encryption.requireInfrastructureEncryption !== true || !["blob", "file"].every((service) => own(own(encryptionServices, service), "enabled") === true) || identity?.type !== "SystemAssigned")
+    if (properties === void 0 || !STORAGE_PROPERTY_HARDENING_CONTROLS.bicep.every(([path2, expected]) => properties[path2.slice("properties.".length)] === expected) || properties.publicNetworkAccess !== "Disabled" || properties.defaultToOAuthAuthentication !== true || network?.defaultAction !== "Deny" || network.bypass !== "None" || !Array.isArray(network.ipRules) || network.ipRules.length !== 0 || !Array.isArray(network.virtualNetworkRules) || network.virtualNetworkRules.length !== 0 || encryption?.keySource !== "Microsoft.Storage" && encryption?.keySource !== "Microsoft.Keyvault" || encryption.requireInfrastructureEncryption !== true || !["blob", "file"].every((service) => own(own(encryptionServices, service), "enabled") === true) || !["SystemAssigned", "UserAssigned", "SystemAssigned, UserAssigned"].includes(String(identity?.type ?? "")))
       return result("fail", "storage-controls");
     const manifestAccount = request.manifest.resources.find(({ executionAddress }) => executionAddress === account.codeSymbol);
     const services = request.manifest.resources.filter((resource) => resource.type.toLowerCase().startsWith("microsoft.storage/storageaccounts/") && resource.dependsOn.includes(manifestAccount.logicalId));
     const settings = request.manifest.resources.filter(({ logicalId }) => services.some((service) => request.binding.resourceBindings[logicalId]?.scopeLogicalId === service.logicalId));
     if (services.length > 0 || settings.length > 0) {
-      const workspaceIds = settings.map(({ logicalId }) => own(request.binding.resourceBindings[logicalId]?.parameters.properties, "workspaceId"));
-      if (services.length !== 4 || settings.length !== 4 || workspaceIds.some((id) => typeof id !== "string") || new Set(workspaceIds).size !== 1)
+      const sameRunWorkspaces = /* @__PURE__ */ new Map();
+      if (request.targetScope !== void 0 && /^\/subscriptions\/[a-f0-9-]{36}\/resourceGroups\/[^/]+$/i.test(request.targetScope)) {
+        for (const entry of request.manifest.resources) {
+          if (entry.type.toLowerCase() !== "microsoft.operationalinsights/workspaces")
+            continue;
+          const wsName = request.binding.resourceBindings[entry.logicalId]?.parameters.name;
+          if (typeof wsName === "string" && wsName.length > 0) {
+            const fullId = `${request.targetScope}/providers/Microsoft.OperationalInsights/workspaces/${wsName}`;
+            sameRunWorkspaces.set(entry.logicalId, fullId);
+            if (entry.executionAddress !== void 0)
+              sameRunWorkspaces.set(entry.executionAddress, fullId);
+            sameRunWorkspaces.set(`[resourceId('Microsoft.OperationalInsights/workspaces', '${wsName}')]`, fullId);
+          }
+        }
+      }
+      const resolveBaselineWorkspace = (raw) => {
+        if (typeof raw !== "string")
+          return void 0;
+        if (/^\/subscriptions\/[a-f0-9-]{36}\/resourceGroups\/[^/]+\/providers\/Microsoft\.OperationalInsights\/workspaces\/[^/]+$/i.test(raw)) {
+          return raw;
+        }
+        return sameRunWorkspaces.get(raw);
+      };
+      const workspaceIds = settings.map(({ logicalId }) => resolveBaselineWorkspace(own(request.binding.resourceBindings[logicalId]?.parameters.properties, "workspaceId")));
+      if (services.length !== 4 || settings.length !== 4 || workspaceIds.some((id) => typeof id !== "string") || new Set(workspaceIds.map((id) => id.toLowerCase())).size !== 1)
         return result("unsupported", "diagnostic-routing");
       let routing;
       try {
@@ -27806,7 +27976,8 @@ function validateBicepStorageBaseline(request) {
           sourceHash: request.sourceHash,
           binding: { codeSymbol: account.codeSymbol },
           workspaceResourceId: workspaceIds[0],
-          json: request.json
+          json: request.json,
+          ...request.targetScope === void 0 ? {} : { targetScope: request.targetScope }
         });
       } catch {
         return result("unsupported", "diagnostic-routing");
@@ -27860,6 +28031,436 @@ function validatePolicyProperties(request) {
     Object.freeze(result);
   Object.freeze(results);
   return Object.freeze({ ...receipt, receiptHash: calculatePolicyValidationHash(receipt) });
+}
+function stripHclComments(hcl) {
+  let out = "";
+  let idx = 0;
+  let inString = false;
+  while (idx < hcl.length) {
+    const ch = hcl[idx];
+    if (inString) {
+      if (ch === "\\" && idx + 1 < hcl.length) {
+        out += hcl.slice(idx, idx + 2);
+        idx += 2;
+      } else {
+        if (ch === '"')
+          inString = false;
+        out += ch;
+        idx += 1;
+      }
+      continue;
+    }
+    if (ch === '"') {
+      inString = true;
+      out += ch;
+      idx += 1;
+      continue;
+    }
+    if (ch === "#" || hcl.startsWith("//", idx)) {
+      while (idx < hcl.length && hcl[idx] !== "\n")
+        idx += 1;
+      continue;
+    }
+    if (hcl.startsWith("/*", idx)) {
+      const end = hcl.indexOf("*/", idx + 2);
+      idx = end === -1 ? hcl.length : end + 2;
+      continue;
+    }
+    out += ch;
+    idx += 1;
+  }
+  return out;
+}
+function parseTopLevelHclAttributes(body) {
+  const clean = stripHclComments(body);
+  const attrs = /* @__PURE__ */ new Map();
+  let idx = 0;
+  while (idx < clean.length) {
+    while (idx < clean.length && /[\s,]/u.test(clean[idx]))
+      idx += 1;
+    if (idx >= clean.length)
+      break;
+    const keyMatch = /^(?:"([^"]+)"|([A-Za-z_][A-Za-z0-9_-]*))\s*(=|\{)/u.exec(clean.slice(idx));
+    if (keyMatch === null)
+      return void 0;
+    const key = keyMatch[1] ?? keyMatch[2];
+    const separator = keyMatch[3];
+    idx += keyMatch[0].length;
+    if (separator === "{") {
+      let depth = 1;
+      let inStr2 = false;
+      while (idx < clean.length && depth > 0) {
+        const ch = clean[idx];
+        if (inStr2) {
+          if (ch === "\\")
+            idx += 2;
+          else {
+            if (ch === '"')
+              inStr2 = false;
+            idx += 1;
+          }
+          continue;
+        }
+        if (ch === '"')
+          inStr2 = true;
+        else if (ch === "{")
+          depth += 1;
+        else if (ch === "}")
+          depth -= 1;
+        idx += 1;
+      }
+      if (depth !== 0)
+        return void 0;
+      continue;
+    }
+    while (idx < clean.length && (clean[idx] === " " || clean[idx] === "	"))
+      idx += 1;
+    const valueStart = idx;
+    let braceDepth = 0;
+    let bracketDepth = 0;
+    let parenDepth = 0;
+    let inStr = false;
+    while (idx < clean.length) {
+      const ch = clean[idx];
+      if (inStr) {
+        if (ch === "\\")
+          idx += 2;
+        else {
+          if (ch === '"')
+            inStr = false;
+          idx += 1;
+        }
+        continue;
+      }
+      if (ch === '"') {
+        inStr = true;
+        idx += 1;
+        continue;
+      }
+      if (ch === "{")
+        braceDepth += 1;
+      else if (ch === "}")
+        braceDepth -= 1;
+      else if (ch === "[")
+        bracketDepth += 1;
+      else if (ch === "]")
+        bracketDepth -= 1;
+      else if (ch === "(")
+        parenDepth += 1;
+      else if (ch === ")")
+        parenDepth -= 1;
+      else if ((ch === "\n" || ch === ",") && braceDepth === 0 && bracketDepth === 0 && parenDepth === 0) {
+        break;
+      }
+      if (braceDepth < 0 || bracketDepth < 0 || parenDepth < 0)
+        return void 0;
+      idx += 1;
+    }
+    if (inStr || braceDepth !== 0 || bracketDepth !== 0 || parenDepth !== 0)
+      return void 0;
+    if (attrs.has(key))
+      return void 0;
+    attrs.set(key, clean.slice(valueStart, idx).trim());
+    if (idx < clean.length && (clean[idx] === "\n" || clean[idx] === ","))
+      idx += 1;
+  }
+  return attrs;
+}
+function parseHclStringLiteral(raw) {
+  if (raw === void 0 || !raw.startsWith('"') || !raw.endsWith('"') || /\$\{|%\{/u.test(raw))
+    return void 0;
+  try {
+    const parsed = JSON.parse(raw);
+    return typeof parsed === "string" ? parsed : void 0;
+  } catch {
+    return void 0;
+  }
+}
+function parseTerraformBlocks(hcl) {
+  const clean = stripHclComments(hcl);
+  const blocks = [];
+  let index = 0;
+  const length = clean.length;
+  while (index < length) {
+    while (index < length && /\s/u.test(clean[index]))
+      index += 1;
+    if (index >= length)
+      break;
+    const twoLabel = /^(resource|data)\s+"([^"]+)"\s+"([^"]+)"\s*\{/u.exec(clean.slice(index));
+    const oneLabel = twoLabel === null ? /^(module|variable|output|provider)\s+"([^"]+)"\s*\{/u.exec(clean.slice(index)) : null;
+    const zeroLabel = twoLabel === null && oneLabel === null ? /^(terraform)\s*\{/u.exec(clean.slice(index)) : null;
+    const headerMatch = twoLabel ?? oneLabel ?? zeroLabel;
+    if (headerMatch === null)
+      return void 0;
+    const openBraceOffset = index + headerMatch[0].length - 1;
+    let depth = 1;
+    let cursor = openBraceOffset + 1;
+    let inString = false;
+    while (cursor < length && depth > 0) {
+      const ch = clean[cursor];
+      if (inString) {
+        if (ch === "\\")
+          cursor += 2;
+        else {
+          if (ch === '"')
+            inString = false;
+          cursor += 1;
+        }
+        continue;
+      }
+      if (ch === '"') {
+        inString = true;
+        cursor += 1;
+        continue;
+      }
+      if (ch === "{")
+        depth += 1;
+      else if (ch === "}")
+        depth -= 1;
+      cursor += 1;
+    }
+    if (depth !== 0)
+      return void 0;
+    const body = clean.slice(openBraceOffset + 1, cursor - 1);
+    const attrs = parseTopLevelHclAttributes(body);
+    let dependsOn = [];
+    const rawDeps = attrs?.get("depends_on");
+    if (rawDeps !== void 0) {
+      if (!rawDeps.startsWith("[") || !rawDeps.endsWith("]"))
+        return void 0;
+      dependsOn = rawDeps.slice(1, -1).split(",").map((token) => token.trim()).filter((token) => token.length > 0);
+    }
+    if (twoLabel !== null) {
+      const kind = twoLabel[1];
+      blocks.push({
+        address: kind === "data" ? `data.${twoLabel[2]}.${twoLabel[3]}` : `${twoLabel[2]}.${twoLabel[3]}`,
+        kind,
+        blockType: twoLabel[2],
+        body,
+        dependsOn
+      });
+    } else if (oneLabel !== null) {
+      const kind = oneLabel[1];
+      blocks.push({
+        address: `${kind}.${oneLabel[2]}`,
+        kind,
+        body,
+        dependsOn
+      });
+    } else {
+      blocks.push({
+        address: "terraform",
+        kind: "terraform",
+        body,
+        dependsOn: []
+      });
+    }
+    index = cursor;
+  }
+  return blocks;
+}
+var ALLOWED_TERRAFORM_ROOT_FILES = /* @__PURE__ */ new Map([
+  ["outputs.tf", "output"],
+  ["provider.tf", "provider"],
+  ["variables.tf", "variable"],
+  ["versions.tf", "terraform"]
+]);
+function normalizeTerraformSourceFiles(request) {
+  const files2 = request.files !== void 0 ? Object.fromEntries(Object.entries(request.files).sort(([a], [b]) => a.localeCompare(b))) : { "main.tf": request.hcl ?? "" };
+  const inputDigest = request.files !== void 0 ? calculatePolicyValidationDigest(files2) : createHash10("sha256").update(request.hcl ?? "").digest("hex");
+  let validLayout = Object.hasOwn(files2, "main.tf");
+  for (const [path2, content] of Object.entries(files2)) {
+    if (path2 === ".terraform.lock.hcl" || path2 === "main.tf")
+      continue;
+    if (/\.tf\.json$/iu.test(path2) || /(?:^|\/)override\.tf$/iu.test(path2) || /_override\.tf$/iu.test(path2)) {
+      validLayout = false;
+      break;
+    }
+    const expectedBlockKind = ALLOWED_TERRAFORM_ROOT_FILES.get(path2);
+    if (expectedBlockKind === void 0) {
+      validLayout = false;
+      break;
+    }
+    const auxBlocks = parseTerraformBlocks(content);
+    if (auxBlocks === void 0 || auxBlocks.some(({ kind }) => kind !== expectedBlockKind)) {
+      validLayout = false;
+      break;
+    }
+  }
+  return { inputDigest, files: files2, validLayout };
+}
+function validateTerraformResourceParity(request) {
+  assertPolicyValidationJson(request.manifest);
+  if (request.binding !== void 0) {
+    assertPolicyValidationJson(request.binding);
+    if (!value_exports2.Check(IacBindingV1Schema, request.binding) || request.binding.track !== "terraform" || request.binding.projectId !== request.manifest.projectId || request.binding.runId !== request.manifest.runId)
+      throw new TypeError("RESOURCE_PARITY_INVALID_INPUT");
+  }
+  const totalBytes = request.files !== void 0 ? Object.values(request.files).reduce((sum, text5) => sum + Buffer.byteLength(text5), 0) : typeof request.hcl === "string" ? Buffer.byteLength(request.hcl) : POLICY_VALIDATION_LIMITS.bytes + 1;
+  if (!value_exports2.Check(LogicalResourceManifestV1Schema, request.manifest) || request.manifest.track !== "terraform" || request.manifest.resources.length > 1e3 || !/^[a-f0-9]{64}$/.test(request.sourceHash) || request.files === void 0 && typeof request.hcl !== "string" || totalBytes > POLICY_VALIDATION_LIMITS.bytes)
+    throw new TypeError("RESOURCE_PARITY_INVALID_INPUT");
+  const sourceSet = normalizeTerraformSourceFiles(request);
+  const result = (outcome, reason) => ({
+    coverage: "terraform-symbolic-resource-parity-v1",
+    sourceHash: request.sourceHash,
+    manifestHash: calculatePolicyValidationDigest(request.manifest),
+    ...request.binding === void 0 ? {} : { bindingHash: calculatePolicyValidationDigest(request.binding) },
+    inputHash: sourceSet.inputDigest,
+    outcome,
+    reason
+  });
+  if (!sourceSet.validLayout)
+    return result("unsupported", "unsupported-resource");
+  const expected = request.manifest.resources;
+  const byId = new Map(expected.map((resource) => [resource.logicalId, resource]));
+  if (byId.size !== expected.length || new Set(expected.map(({ executionAddress }) => executionAddress)).size !== expected.length || expected.some((resource) => resource.executionAddress === void 0 || resource.dependsOn.some((id) => !byId.has(id)) || JSON.stringify([...resource.dependsOn].sort()) !== JSON.stringify([...resource.generatedDependencies].sort()))) {
+    return result("unsupported", "unsupported-resource");
+  }
+  const blocks = parseTerraformBlocks(sourceSet.files["main.tf"] ?? "");
+  if (blocks === void 0)
+    return result("unsupported", "invalid-source");
+  if (blocks.some(({ kind }) => kind !== "resource" && kind !== "data" && kind !== "module")) {
+    return result("unsupported", "unsupported-resource");
+  }
+  if (blocks.length !== expected.length || expected.some((resource) => blocks.filter(({ address }) => address === resource.executionAddress).length !== 1)) {
+    return result("fail", "coverage-mismatch");
+  }
+  for (const resource of expected) {
+    const block = blocks.find(({ address }) => address === resource.executionAddress);
+    const expectedKind = resource.ownership === "existing" ? "data" : resource.implementationKind === "module" ? "module" : "resource";
+    if (block.kind !== expectedKind)
+      return result("fail", "type-mismatch");
+    const attrs = parseTopLevelHclAttributes(block.body);
+    if (attrs === void 0)
+      return result("unsupported", "unsupported-resource");
+    const bound = request.binding?.resourceBindings[resource.logicalId];
+    if (bound !== void 0 && bound.implementation !== resource.implementationAddress) {
+      return result("fail", "type-mismatch");
+    }
+    if (block.kind === "module") {
+      const avmMatch = /^avm:([^@\s]+)@([^@\s]+)$/u.exec(resource.implementationAddress);
+      if (avmMatch === null)
+        return result("unsupported", "unsupported-resource");
+      const sourceAttr = parseHclStringLiteral(attrs.get("source"));
+      const versionAttr = parseHclStringLiteral(attrs.get("version"));
+      if (sourceAttr === void 0 || versionAttr === void 0)
+        return result("unsupported", "unsupported-resource");
+      if (sourceAttr !== avmMatch[1] || versionAttr.replace(/^=\s*/u, "") !== avmMatch[2].replace(/^=\s*/u, "") || bound !== void 0 && bound.version !== avmMatch[2]) {
+        return result("fail", "type-mismatch");
+      }
+    } else if (block.blockType === "azapi_resource") {
+      const nativeMatch = /^native:([^@\s]+)@([^@\s]+)$/u.exec(resource.implementationAddress);
+      if (nativeMatch === null)
+        return result("unsupported", "unsupported-resource");
+      const typeAttr = parseHclStringLiteral(attrs.get("type"));
+      if (typeAttr === void 0)
+        return result("unsupported", "unsupported-resource");
+      if (typeAttr.toLowerCase() !== `${nativeMatch[1]}@${nativeMatch[2]}`.toLowerCase() || nativeMatch[1].toLowerCase() !== resource.type.toLowerCase() || bound !== void 0 && bound.version !== nativeMatch[2]) {
+        return result("fail", "type-mismatch");
+      }
+    } else {
+      return result("unsupported", "unsupported-resource");
+    }
+    if (resource.ownership !== "existing") {
+      const expectedDeps = resource.dependsOn.map((id) => byId.get(id).executionAddress).sort();
+      if (JSON.stringify([...block.dependsOn].sort()) !== JSON.stringify(expectedDeps)) {
+        return result("fail", "dependency-mismatch");
+      }
+    }
+  }
+  return result("pass", "matched");
+}
+function validateTerraformStorageBaseline(request) {
+  const parity = validateTerraformResourceParity(request);
+  const result = (outcome, reason) => ({
+    coverage: "terraform-source-baseline-v1",
+    sourceHash: request.sourceHash,
+    inputHash: parity.inputHash,
+    manifestHash: parity.manifestHash,
+    bindingHash: calculatePolicyValidationDigest(request.binding),
+    outcome,
+    reason
+  });
+  if (parity.outcome !== "pass")
+    return result(parity.outcome, "resource-parity");
+  const sourceSet = normalizeTerraformSourceFiles(request);
+  for (const [path2, fileText] of Object.entries(sourceSet.files)) {
+    if (path2 === ".terraform.lock.hcl")
+      continue;
+    if (SECRET_VALUE_PATTERN.test(fileText))
+      return result("fail", "credential-content");
+    for (const rawLine of stripHclComments(fileText).split(/\r?\n/u)) {
+      const line = rawLine.trim();
+      if (line.length === 0)
+        continue;
+      const match = /^"?([A-Za-z_][A-Za-z0-9_-]*)"?\s*=\s*"([^"]+)"\s*,?$/u.exec(line);
+      if (match !== null && isSecretBearingField(match[1], match[2])) {
+        return result("fail", "credential-content");
+      }
+    }
+  }
+  const blocks = parseTerraformBlocks(sourceSet.files["main.tf"] ?? "");
+  if (blocks === void 0)
+    return result("unsupported", "unsupported-resource");
+  for (const resource of request.manifest.resources) {
+    if (resource.ownership !== "managed" || resource.type.toLowerCase() !== "microsoft.storage/storageaccounts") {
+      continue;
+    }
+    const block = blocks.find(({ address }) => address === resource.executionAddress);
+    if (block === void 0)
+      return result("fail", "storage-controls");
+    const attrs = parseTopLevelHclAttributes(block.body);
+    if (attrs === void 0)
+      return result("unsupported", "unsupported-resource");
+    if (block.kind === "module") {
+      const expectedModuleControls = [
+        ["allow_nested_items_to_be_public", "false"],
+        ["https_traffic_only_enabled", "true"],
+        ["min_tls_version", '"TLS1_2"'],
+        ["shared_access_key_enabled", "false"]
+      ];
+      for (const [key, expectedRaw] of expectedModuleControls) {
+        const raw = attrs.get(key);
+        if (raw === void 0)
+          return result("fail", "storage-controls");
+        if (raw !== "true" && raw !== "false" && parseHclStringLiteral(raw) === void 0) {
+          return result("unsupported", "unsupported-resource");
+        }
+        if (raw !== expectedRaw)
+          return result("fail", "storage-controls");
+      }
+    } else if (block.blockType === "azapi_resource") {
+      const rawBody = attrs.get("body");
+      if (rawBody === void 0 || !rawBody.startsWith("{") || !rawBody.endsWith("}")) {
+        return result("unsupported", "unsupported-resource");
+      }
+      const bodyAttrs = parseTopLevelHclAttributes(rawBody.slice(1, -1));
+      const rawProps = bodyAttrs?.get("properties");
+      if (rawProps === void 0 || !rawProps.startsWith("{") || !rawProps.endsWith("}")) {
+        return result("unsupported", "unsupported-resource");
+      }
+      const propAttrs = parseTopLevelHclAttributes(rawProps.slice(1, -1));
+      if (propAttrs === void 0)
+        return result("unsupported", "unsupported-resource");
+      const expectedAzapiControls = [
+        ["allowBlobPublicAccess", "false"],
+        ["allowSharedKeyAccess", "false"],
+        ["minimumTlsVersion", '"TLS1_2"'],
+        ["supportsHttpsTrafficOnly", "true"]
+      ];
+      for (const [key, expectedRaw] of expectedAzapiControls) {
+        const raw = propAttrs.get(key);
+        if (raw === void 0)
+          return result("fail", "storage-controls");
+        if (raw !== "true" && raw !== "false" && parseHclStringLiteral(raw) === void 0) {
+          return result("unsupported", "unsupported-resource");
+        }
+        if (raw !== expectedRaw)
+          return result("fail", "storage-controls");
+      }
+    }
+  }
+  return result("pass", "matched");
 }
 
 // packages/capabilities/dist/native-iac-providers.js
@@ -28134,7 +28735,7 @@ ${result.stderr}`;
     let parityBinding;
     let diagnosticsTargets;
     try {
-      if (track === "bicep" && request.resourceParityBinding !== void 0) {
+      if (request.resourceParityBinding !== void 0) {
         calculatePolicyValidationDigest(request.resourceParityBinding);
         parityBinding = structuredClone(request.resourceParityBinding);
         if (!value_exports2.Check(IacBindingV1Schema, parityBinding) || request.resourceParityManifest === void 0 || parityBinding.track !== track || parityBinding.projectId !== request.projectId || parityBinding.runId !== request.runId || parityBinding.intentHash !== request.inputHash)
@@ -28146,7 +28747,7 @@ ${result.stderr}`;
         if (Object.keys(diagnosticsTargets).length > 1e3)
           throw new Error();
       }
-      if (track === "bicep" && request.resourceParityManifest !== void 0) {
+      if (request.resourceParityManifest !== void 0) {
         calculatePolicyValidationDigest(request.resourceParityManifest);
         parityManifest = structuredClone(request.resourceParityManifest);
         if (!value_exports2.Check(LogicalResourceManifestV1Schema, parityManifest) || parityManifest.track !== track || parityManifest.projectId !== request.projectId || parityManifest.runId !== request.runId || parityManifest.resources.length > 1e3)
@@ -28311,12 +28912,18 @@ ${result.stderr}`;
           await verify();
         }
       }
+      const terraformFiles = track === "terraform" ? Object.fromEntries([...source2.paths].sort().map((path2) => [path2, source2.fileContents.get(path2)?.toString("utf8") ?? ""])) : {};
       if (parityManifest !== void 0) {
-        receipt.resourceParity = validateBicepResourceParity({
+        receipt.resourceParity = track === "bicep" ? validateBicepResourceParity({
           sourceHash: receipt.sourceHash,
           manifest: parityManifest,
           ...parityBinding === void 0 ? {} : { binding: parityBinding },
           json: compiledTemplate ?? ""
+        }) : validateTerraformResourceParity({
+          sourceHash: receipt.sourceHash,
+          manifest: parityManifest,
+          ...parityBinding === void 0 ? {} : { binding: parityBinding },
+          files: terraformFiles
         });
         const { receiptHash: previousHash, ...updated } = receipt;
         if (!previousHash)
@@ -28324,11 +28931,17 @@ ${result.stderr}`;
         receipt.receiptHash = calculateNativeValidationReceiptHash(updated);
       }
       if (parityManifest !== void 0 && parityBinding !== void 0) {
-        receipt.securityBaseline = validateBicepStorageBaseline({
+        receipt.securityBaseline = track === "bicep" ? validateBicepStorageBaseline({
           sourceHash: receipt.sourceHash,
           manifest: parityManifest,
           binding: parityBinding,
-          json: compiledTemplate ?? ""
+          json: compiledTemplate ?? "",
+          ...request.targetScope === void 0 ? {} : { targetScope: request.targetScope }
+        }) : validateTerraformStorageBaseline({
+          sourceHash: receipt.sourceHash,
+          manifest: parityManifest,
+          binding: parityBinding,
+          files: terraformFiles
         });
         const { receiptHash: previousHash, ...updated } = receipt;
         if (!previousHash)
@@ -28341,7 +28954,8 @@ ${result.stderr}`;
           validateBicepStorageDiagnostics({
             ...target,
             sourceHash: receipt.sourceHash,
-            json: compiledTemplate ?? ""
+            json: compiledTemplate ?? "",
+            ...request.targetScope === void 0 ? {} : { targetScope: request.targetScope }
           })
         ]));
         const { receiptHash: previousHash, ...updated } = receipt;
@@ -29128,7 +29742,12 @@ var NativeTerraformProvider = class extends NativeProviderBase {
     return await this.#execute("destroy", preview, approval, authority);
   }
   async inventory(projectId, runId) {
-    const stdout2 = await this.run({ executable: "terraform", args: ["show", "-json"], cwd: this.#target.cwd });
+    const stdout2 = await this.run({
+      executable: "terraform",
+      args: ["show", "-json"],
+      cwd: this.#target.cwd,
+      rawOutput: true
+    });
     const root = parseJsonProcessOutput("terraform-plan", stdout2);
     const values = root.values;
     const rootModule = values?.root_module;
@@ -31078,7 +31697,7 @@ function renderArchitectureMermaid(architecture) {
 import { join as join26, resolve as resolve22 } from "node:path";
 
 // packages/cli/dist/version.js
-var APEX_VERSION = "0.11.0-next.11";
+var APEX_VERSION = "0.11.0-next.12";
 var MINIMUM_NODE_VERSION = "24.21.0";
 function meetsMinimumVersion(current, minimum) {
   const currentParts = current.split(".").map(Number);
@@ -66374,9 +66993,9 @@ import { isAbsolute as isAbsolute11, resolve as resolve19 } from "node:path";
 var import__ = __toESM(require__(), 1);
 import { AsyncLocalStorage as AsyncLocalStorage3 } from "node:async_hooks";
 import { constants as constants15, realpathSync as realpathSync2 } from "node:fs";
-import { cp as cp2, lstat as lstat14, mkdir as mkdir11, open as open14, readFile as readFile14, readdir as readdir9, realpath as realpath8, rm as rm12, stat as stat2 } from "node:fs/promises";
+import { cp as cp2, lstat as lstat15, mkdir as mkdir11, open as open14, readFile as readFile15, readdir as readdir9, realpath as realpath8, rm as rm12, stat as stat2 } from "node:fs/promises";
 import { userInfo } from "node:os";
-import { basename as basename4, dirname as dirname11, isAbsolute as isAbsolute9, join as join19, relative as relative8, resolve as resolve17, sep as sep6 } from "node:path";
+import { basename as basename4, dirname as dirname11, isAbsolute as isAbsolute9, join as join20, relative as relative8, resolve as resolve17, sep as sep6 } from "node:path";
 import { fileURLToPath as fileURLToPath3 } from "node:url";
 
 // packages/cli/dist/host-profile.js
@@ -66700,6 +67319,118 @@ function mcpResultEnvelopeBytes(structuredContent) {
   }), "utf8");
 }
 
+// packages/cli/dist/runtime-binding.js
+import { lstat as lstat14, readFile as readFile14 } from "node:fs/promises";
+import { join as join19 } from "node:path";
+var WORKSPACE_RUNTIME_LOCK = ".apex/apex.lock.json";
+var MAX_LOCK_BYTES = 64 * 1024;
+var MAX_VERSION_LENGTH = 128;
+var IDENTIFIER2 = String.raw`(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)`;
+var SEMVER = new RegExp(String.raw`^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(${IDENTIFIER2}(?:\.${IDENTIFIER2})*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$`, "u");
+function parseVersion(version2) {
+  if (version2.length > MAX_VERSION_LENGTH)
+    return void 0;
+  const match = SEMVER.exec(version2);
+  if (match === null)
+    return void 0;
+  return {
+    core: [match[1], match[2], match[3]],
+    prerelease: match[4] === void 0 ? [] : match[4].split(".")
+  };
+}
+function compareNumeric(left, right) {
+  if (left.length !== right.length)
+    return left.length < right.length ? -1 : 1;
+  return left === right ? 0 : left < right ? -1 : 1;
+}
+function compareRuntimeVersions(left, right) {
+  const a = parseVersion(left);
+  const b = parseVersion(right);
+  if (a === void 0 || b === void 0)
+    throw new Error("Runtime versions must be SemVer");
+  for (let index = 0; index < 3; index += 1) {
+    const order = compareNumeric(a.core[index], b.core[index]);
+    if (order !== 0)
+      return order;
+  }
+  if (a.prerelease.length === 0 || b.prerelease.length === 0)
+    return a.prerelease.length === b.prerelease.length ? 0 : a.prerelease.length === 0 ? 1 : -1;
+  for (let index = 0; index < Math.max(a.prerelease.length, b.prerelease.length); index += 1) {
+    const x = a.prerelease[index];
+    const y = b.prerelease[index];
+    if (x === void 0)
+      return -1;
+    if (y === void 0)
+      return 1;
+    if (x === y)
+      continue;
+    const xNumeric = /^\d+$/u.test(x);
+    const yNumeric = /^\d+$/u.test(y);
+    if (xNumeric && yNumeric)
+      return compareNumeric(x, y);
+    if (xNumeric !== yNumeric)
+      return xNumeric ? -1 : 1;
+    return x < y ? -1 : 1;
+  }
+  return 0;
+}
+async function lockedRuntimeVersion(path2) {
+  let stats;
+  try {
+    stats = await lstat14(path2);
+  } catch (error62) {
+    if (error62.code === "ENOENT")
+      return void 0;
+    return null;
+  }
+  if (!stats.isFile() || stats.size > MAX_LOCK_BYTES)
+    return null;
+  try {
+    const lock = JSON.parse(await readFile14(path2, "utf8"));
+    if (lock === null || typeof lock !== "object" || Array.isArray(lock))
+      return null;
+    const version2 = lock.cliVersion;
+    return typeof version2 === "string" && parseVersion(version2) !== void 0 ? version2 : null;
+  } catch {
+    return null;
+  }
+}
+async function workspaceRuntimeBinding(root, runtimeVersion = APEX_VERSION) {
+  const workspaceRuntimeVersion = await lockedRuntimeVersion(join19(root, WORKSPACE_RUNTIME_LOCK));
+  if (workspaceRuntimeVersion === void 0)
+    return { state: "uninitialized" };
+  if (workspaceRuntimeVersion === runtimeVersion)
+    return { state: "match", runtimeVersion };
+  if (workspaceRuntimeVersion === null)
+    return { state: "mismatch", reason: "RUNTIME_LOCK_INVALID", runtimeVersion, workspaceRuntimeVersion };
+  return {
+    state: "mismatch",
+    // Versions that differ only in build metadata have equal precedence; neither side is older, so the workspace
+    // keeps its version and the runtime must match it.
+    reason: compareRuntimeVersions(workspaceRuntimeVersion, runtimeVersion) < 0 ? "RUNTIME_WORKSPACE_OLDER" : "RUNTIME_WORKSPACE_NEWER",
+    runtimeVersion,
+    workspaceRuntimeVersion
+  };
+}
+function runtimeMismatchError(binding) {
+  const { reason, runtimeVersion, workspaceRuntimeVersion } = binding;
+  const message = workspaceRuntimeVersion === null ? `The workspace runtime lock ${WORKSPACE_RUNTIME_LOCK} has no valid cliVersion; this APEX runtime is @apexops/cli@${runtimeVersion}` : `The workspace runtime lock names @apexops/cli@${workspaceRuntimeVersion}, ${reason === "RUNTIME_WORKSPACE_OLDER" ? "older" : "newer"} than this APEX runtime @apexops/cli@${runtimeVersion}`;
+  return new ApexError("APEX_RUNTIME_MISMATCH", message, EXIT_CODES.conflict, {
+    reason,
+    runtimeVersion,
+    workspaceRuntimeVersion
+  });
+}
+function runtimeMismatchStatus(binding) {
+  return {
+    status: "runtime_mismatch",
+    reason: binding.reason,
+    runtimeVersion: binding.runtimeVersion,
+    workspaceRuntimeVersion: binding.workspaceRuntimeVersion,
+    nextAction: remediationForApexError(runtimeMismatchError(binding))
+  };
+}
+
 // packages/cli/dist/workflow-validators.js
 var bicepResourceGroupScopePattern = /^\/subscriptions\/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\/resourceGroups\/[A-Za-z0-9_()-][A-Za-z0-9_.()-]*$(?![\s\S])/i;
 var bicepPhysicalResourcesSchema = IacBindingV1Schema.properties.resourceBindings.patternProperties["^(.*)$"].properties.physicalResources;
@@ -66791,7 +67522,8 @@ function resolveNativeBicepResourceOwnership(context) {
       continue;
     }
     const scopeId = resourceBinding.scopeLogicalId;
-    if (scopeId !== void 0 && (resource.type.toLowerCase() !== "microsoft.insights/diagnosticsettings" || !resourceBinding.implementation.startsWith("native:Microsoft.Insights/diagnosticSettings@") || !resource.dependsOn.includes(scopeId) || scopeId === resource.id || binding.resourceBindings[scopeId]?.scopeLogicalId !== void 0 || !binding.resourceBindings[scopeId]?.implementation.startsWith("native:") || manifestResources.get(scopeId)?.ownership !== "managed" || entry.ownership !== "managed" || !Object.hasOwn(resourceIdsByLogicalId, scopeId) || Object.hasOwn(resourceBinding.parameters, "scope") || Object.hasOwn(resourceBinding.parameters, "parent"))) {
+    const validScopedExtension = resource.type.toLowerCase() === "microsoft.insights/diagnosticsettings" && resourceBinding.implementation.startsWith("native:Microsoft.Insights/diagnosticSettings@") || resource.type.toLowerCase() === "microsoft.authorization/roleassignments" && resourceBinding.implementation.startsWith("native:Microsoft.Authorization/roleAssignments@");
+    if (scopeId !== void 0 && (!validScopedExtension || !resource.dependsOn.includes(scopeId) || scopeId === resource.id || binding.resourceBindings[scopeId]?.scopeLogicalId !== void 0 || !binding.resourceBindings[scopeId]?.implementation.startsWith("native:") || manifestResources.get(scopeId)?.ownership !== "managed" || entry.ownership !== "managed" || !Object.hasOwn(resourceIdsByLogicalId, scopeId) || Object.hasOwn(resourceBinding.parameters, "scope") || Object.hasOwn(resourceBinding.parameters, "parent"))) {
       issues.push({ path: path2, message: "Diagnostic scope requires an exactly resolved managed native dependency" });
       continue;
     }
@@ -66879,7 +67611,7 @@ function secretIssues(value, path2 = "") {
     return value.flatMap((item, index) => secretIssues(item, `${path2}/${index}`));
   if (value !== null && typeof value === "object") {
     return Object.entries(value).sort(([left], [right]) => left.localeCompare(right)).flatMap(([key, item]) => [
-      ...SECRET_FIELD_PATTERN.test(key) ? [{ path: `${path2}/${key}`, message: "Secret-bearing field is not allowed" }] : [],
+      ...isSecretBearingField(key, item) ? [{ path: `${path2}/${key}`, message: "Secret-bearing field is not allowed" }] : [],
       ...secretIssues(item, `${path2}/${key}`)
     ]);
   }
@@ -67354,7 +68086,9 @@ function previewCoverage(value) {
   }
   if (context.provider === "terraform") {
     const managedAddresses = new Set(context.expectedResourceIds);
-    if (changes.some(({ resourceId, action, material }) => (action !== "no-op" || material) && !managedAddresses.has(resourceId))) {
+    const modulePrefixes = [...managedAddresses].filter((address) => address.startsWith("module.")).map((address) => `${address}.`);
+    const isOwnedAddress = (resourceId) => managedAddresses.has(resourceId) || modulePrefixes.some((prefix) => resourceId.startsWith(prefix));
+    if (changes.some(({ resourceId, action, material }) => (action !== "no-op" || material) && !isOwnedAddress(resourceId))) {
       issues.push({
         path: "/changes",
         message: "Terraform preview would modify a resource outside accepted managed ownership"
@@ -68157,6 +68891,7 @@ var ApexService = class _ApexService {
   cache;
   validators = new ValidatorRegistry();
   providers;
+  providerResolver;
   architectureAvailabilityAdapter;
   executableChecker;
   azureAuthStatus;
@@ -68203,6 +68938,7 @@ var ApexService = class _ApexService {
       fake: new FakeIaCProvider({ track: "bicep", now: this.clock, nextId: this.idSource }),
       ...options.providers
     };
+    this.providerResolver = options.providerResolver;
     this.architectureAvailabilityAdapter = options.architectureAvailabilityAdapter;
     this.executableChecker = options.executableChecker ?? (async (executable) => this.pathExecutableExists(executable));
     this.azureAuthStatus = options.azureAuthStatus ?? (async () => ({ authenticated: false, detail: "not-checked; run setup --live" }));
@@ -68212,6 +68948,15 @@ var ApexService = class _ApexService {
   }
   setWorkspacePath(workspacePath) {
     this.workspacePath = canonicalWorkspacePath(workspacePath);
+  }
+  currentWorkspacePath() {
+    return this.workspacePath;
+  }
+  async resolveProvider(track, context) {
+    const explicit = this.providers[track];
+    if (explicit !== void 0)
+      return explicit;
+    return this.providerResolver?.(track, context);
   }
   /**
    * Other workspaces served by the same process (the MCP server resolves each caller-supplied workspace to its own
@@ -68291,7 +69036,7 @@ var ApexService = class _ApexService {
     if (await this.retiredProjectionInstalled())
       throw retiredProjectionError();
     await this.assertCleanInitialization();
-    await mkdir11(join19(this.root, ".apex"), { recursive: true });
+    await mkdir11(join20(this.root, ".apex"), { recursive: true });
     try {
       await this.ensureLocalGitBoundary();
       await this.ensureWorkspaceLauncher();
@@ -68303,19 +69048,19 @@ var ApexService = class _ApexService {
         sourceMode: input2.customizationsSource === void 0 ? "bundled-projection" : "custom-source",
         ...input2.customizationsSource === void 0 ? {} : { customSource: resolve17(input2.customizationsSource) }
       };
-      await atomicWriteJson(join19(this.root, ".apex", "customizations.selection.json"), selection2);
+      await atomicWriteJson(join20(this.root, ".apex", "customizations.selection.json"), selection2);
       await this.installCustomizations(input2.customizationsSource ?? assets.clientProjections[clientId2], false, assets.config, false, clientId2, assets.plugin);
       await this.installCapabilityAssets(assets);
       const runtimeLock = await this.createRuntimeLock(assets);
-      await atomicWriteJson(join19(this.root, ".apex", "apex.lock.json"), runtimeLock);
-      await atomicWriteJson(join19(this.root, ".apex", "runtime", "apex.lock.json"), runtimeLock);
+      await atomicWriteJson(join20(this.root, ".apex", "apex.lock.json"), runtimeLock);
+      await atomicWriteJson(join20(this.root, ".apex", "runtime", "apex.lock.json"), runtimeLock);
       await this.installRuntimeGeneration(runtimeLock);
       return { workspaceReady: true, projectCreated: false };
     } catch (error62) {
-      if (await this.pathExistsLstat(join19(this.root, ".apex", "customizations.lock.json"))) {
+      if (await this.pathExistsLstat(join20(this.root, ".apex", "customizations.lock.json"))) {
         await this.uninstallCustomizations();
       }
-      await rm12(join19(this.root, ".apex"), { recursive: true, force: true });
+      await rm12(join20(this.root, ".apex"), { recursive: true, force: true });
       throw error62;
     }
   }
@@ -68477,12 +69222,12 @@ var ApexService = class _ApexService {
       throw new ApexError("APEX_STALE", "Governance provisioning plan changed; review a fresh plan", EXIT_CODES.stale);
     if (initial.status !== "ready" || config2.identity.mode !== "reuse" || !initial.setup.federation || !initial.applicationObjectId)
       throw new ApexError("APEX_AUTHORIZATION", "Governance provisioning prerequisites are blocked", EXIT_CODES.authorization);
-    const lockPath = join19(this.root, ".apex-governance-setup.lock");
+    const lockPath = join20(this.root, ".apex-governance-setup.lock");
     await this.assertSafeDestination(this.root, lockPath);
     const lock = await open14(lockPath, "wx", 384).catch(() => {
       throw new ApexError("APEX_CONFLICT", "A governance setup lock exists; inspect interrupted work before retrying", EXIT_CODES.conflict);
     });
-    const receiptPath = join19(this.root, `.apex-governance-setup-${this.idSource()}.json`);
+    const receiptPath = join20(this.root, `.apex-governance-setup-${this.idSource()}.json`);
     const payloadPath = `${receiptPath}.federation.json`;
     const actions = [];
     const receipt = () => ({
@@ -68675,12 +69420,12 @@ var ApexService = class _ApexService {
       throw new ApexError("APEX_STALE", "Repository publish plan changed; review a fresh plan", EXIT_CODES.stale);
     if (initial.status === "blocked")
       throw new ApexError("APEX_AUTHORIZATION", "Repository publication prerequisites are blocked", EXIT_CODES.authorization);
-    const lockPath = join19(this.root, ".apex-repository-publish.lock");
+    const lockPath = join20(this.root, ".apex-repository-publish.lock");
     await this.assertSafeDestination(this.root, lockPath);
     const lock = await open14(lockPath, "wx", 384).catch(() => {
       throw new ApexError("APEX_CONFLICT", "A repository publish lock exists; inspect interrupted work before retrying", EXIT_CODES.conflict);
     });
-    const receiptPath = join19(this.root, `.apex-repository-publish-${this.idSource()}.json`);
+    const receiptPath = join20(this.root, `.apex-repository-publish-${this.idSource()}.json`);
     const actions = [];
     const receipt = () => ({
       schemaVersion: CONTRACT_VERSION,
@@ -68769,21 +69514,21 @@ var ApexService = class _ApexService {
     const checks = [];
     const inspect = async (path2) => {
       await this.assertSafeDestination(this.root, path2);
-      return await this.pathExistsLstat(path2) ? lstat14(path2) : void 0;
+      return await this.pathExistsLstat(path2) ? lstat15(path2) : void 0;
     };
-    const repository = await inspect(join19(this.root, ".git"));
+    const repository = await inspect(join20(this.root, ".git"));
     checks.push({
       id: "repository",
       status: repository === void 0 ? config2.createRepository === true ? "pending" : "blocked" : repository.isDirectory() || repository.isFile() ? "ready" : "blocked",
       reason: repository === void 0 ? "Git boundary is missing; repository creation requires confirmation." : "Git boundary exists; remote identity and repository integrity are not assessed."
     });
-    const packagePath = join19(this.root, "node_modules", "@apexops", "cli", "package.json");
+    const packagePath = join20(this.root, "node_modules", "@apexops", "cli", "package.json");
     const runtime = await inspect(packagePath);
-    const launcher = runtime === void 0 ? await inspect(join19(this.root, ".apex", "bin", "apex.mjs")) : void 0;
+    const launcher = runtime === void 0 ? await inspect(join20(this.root, ".apex", "bin", "apex.mjs")) : void 0;
     let exactRuntime = launcher !== void 0 && launcher.isFile();
     if (runtime !== void 0 && runtime.isFile() && runtime.size <= 65536) {
       try {
-        const descriptor = JSON.parse(await readFile14(packagePath, "utf8"));
+        const descriptor = JSON.parse(await readFile15(packagePath, "utf8"));
         exactRuntime = descriptor !== null && descriptor.version === APEX_VERSION;
       } catch (error62) {
         if (!(error62 instanceof SyntaxError))
@@ -68795,7 +69540,7 @@ var ApexService = class _ApexService {
       status: runtime === void 0 && !exactRuntime ? "pending" : exactRuntime ? "ready" : "blocked",
       reason: runtime === void 0 && !exactRuntime ? "Exact workspace APEX runtime must be installed after confirmation." : exactRuntime ? "Workspace package declares the exact runtime version; package integrity is not assessed." : "Workspace runtime version or package metadata conflicts with this installer; preserve it for review."
     });
-    const state = await inspect(join19(this.root, ".apex"));
+    const state = await inspect(join20(this.root, ".apex"));
     let resumable = false;
     if (state?.isDirectory()) {
       try {
@@ -68840,7 +69585,7 @@ var ApexService = class _ApexService {
       ".apex/customizations.lock.json",
       ".apex/apex.lock.json"
     ])
-      await this.assertSafeDestination(this.root, join19(this.root, path2));
+      await this.assertSafeDestination(this.root, join20(this.root, path2));
     if (config2.projectId === void 0) {
       const customization2 = await this.customizationSelection();
       if (!await this.workspaceHasNoProjects()) {
@@ -68859,7 +69604,7 @@ var ApexService = class _ApexService {
         throw new ApexError("APEX_CONFLICT", "Workspace setup differs or requires repair", EXIT_CODES.conflict);
       return void 0;
     }
-    const selection2 = await this.selection();
+    const selection2 = await this.readValidSelection();
     if (selection2?.projectId !== config2.projectId || !value_exports2.Check(RunIdSchema, selection2.runId))
       throw new ApexError("APEX_CONFLICT", "Bootstrap selection does not match the requested project", EXIT_CODES.conflict);
     await this.assertSafeDestination(this.root, this.projects.runDirectory(selection2.projectId, selection2.runId));
@@ -68888,7 +69633,7 @@ var ApexService = class _ApexService {
     if (input2.purpose !== void 0)
       assertDeploymentPurposeUsable(input2.purpose);
     const riskOwner2 = input2.riskOwner;
-    if (await this.pathExistsLstat(join19(this.root, ".apex"))) {
+    if (await this.pathExistsLstat(join20(this.root, ".apex"))) {
       const { clientId: clientId2, ...settings } = input2;
       const config2 = {
         schemaVersion: CONTRACT_VERSION,
@@ -68928,12 +69673,12 @@ var ApexService = class _ApexService {
     }
     let runtimeLock;
     try {
-      runtimeLock = JSON.parse(await readFile14(join19(this.root, ".apex", "apex.lock.json"), "utf8"));
+      runtimeLock = JSON.parse(await readFile15(join20(this.root, ".apex", "apex.lock.json"), "utf8"));
     } catch (error62) {
       if (error62.code === "ENOENT") {
-        if (await this.pathExistsLstat(join19(this.root, ".git")) && !await this.pathExistsLstat(join19(this.root, ".apex"))) {
+        if (await this.pathExistsLstat(join20(this.root, ".git")) && !await this.pathExistsLstat(join20(this.root, ".apex"))) {
           await this.initializeWorkspace({});
-          runtimeLock = JSON.parse(await readFile14(join19(this.root, ".apex", "apex.lock.json"), "utf8"));
+          runtimeLock = JSON.parse(await readFile15(join20(this.root, ".apex", "apex.lock.json"), "utf8"));
         } else {
           throw new ApexError("APEX_NOT_FOUND", "Initialize the workspace with apex init before creating a project", EXIT_CODES.notFound);
         }
@@ -68959,25 +69704,29 @@ var ApexService = class _ApexService {
     return { projectId: input2.projectId, runId: run.runId };
   }
   async update(customizationsSource) {
+    const binding = await workspaceRuntimeBinding(this.root);
+    if (binding.state === "mismatch" && binding.reason === "RUNTIME_WORKSPACE_NEWER") {
+      throw runtimeMismatchError(binding);
+    }
+    const previousRuntimeLock = JSON.parse(await readFile15(join20(this.root, ".apex", "apex.lock.json"), "utf8"));
+    const persisted = await this.customizationSelection();
+    const clientId2 = persisted.clientId;
+    if (persisted.sourceMode === "custom-source" && customizationsSource === void 0) {
+      throw new ApexError("APEX_USAGE", "Custom-source updates require --customizations-source", EXIT_CODES.usage);
+    }
     const selection2 = await this.workspaceHasNoProjects() ? void 0 : await this.selection();
     if (selection2 !== void 0)
       await this.acquireRunWriterLease(await this.run(selection2, { readOnly: true }));
     await this.ensureLocalGitBoundary();
     await this.ensureWorkspaceLauncher();
     const assets = await resolveBundledAssets();
-    const previousRuntimeLock = JSON.parse(await readFile14(join19(this.root, ".apex", "apex.lock.json"), "utf8"));
     await this.installRuntimeGeneration(previousRuntimeLock);
-    const persisted = await this.customizationSelection();
-    const clientId2 = persisted.clientId;
-    if (persisted.sourceMode === "custom-source" && customizationsSource === void 0) {
-      throw new ApexError("APEX_USAGE", "Custom-source updates require --customizations-source", EXIT_CODES.usage);
-    }
     const source2 = customizationsSource ?? assets.clientProjections[clientId2];
     const { installed: updated, retired, conflicts } = await this.installCustomizations(source2, true, assets.config, false, clientId2, assets.plugin);
     await this.installCapabilityAssets(assets);
     const runtimeLock = await this.createRuntimeLock(assets);
-    await atomicWriteJson(join19(this.root, ".apex", "apex.lock.json"), runtimeLock);
-    await atomicWriteJson(join19(this.root, ".apex", "runtime", "apex.lock.json"), runtimeLock);
+    await atomicWriteJson(join20(this.root, ".apex", "apex.lock.json"), runtimeLock);
+    await atomicWriteJson(join20(this.root, ".apex", "runtime", "apex.lock.json"), runtimeLock);
     await this.installRuntimeGeneration(runtimeLock);
     if (selection2 !== void 0)
       await this.append(await this.run(selection2), "customizations.updated", { source: resolve17(source2), updated });
@@ -68985,8 +69734,8 @@ var ApexService = class _ApexService {
   }
   async rollbackCustomizations() {
     await this.recoverCustomizationTransaction();
-    const lockPath = join19(this.root, ".apex", "customizations.lock.json");
-    const current = JSON.parse(await readFile14(lockPath, "utf8"));
+    const lockPath = join20(this.root, ".apex", "customizations.lock.json");
+    const current = JSON.parse(await readFile15(lockPath, "utf8"));
     if (current.previousLockRef === void 0)
       throw new ApexError("APEX_NOT_FOUND", "No prior customization bundle is available", EXIT_CODES.notFound);
     if (!this.safeManagedRelativePath(current.previousLockRef)) {
@@ -68994,14 +69743,14 @@ var ApexService = class _ApexService {
     }
     const previousPath = resolve17(this.root, current.previousLockRef);
     await this.assertSafeExistingPath(this.root, previousPath);
-    const previous = JSON.parse(await readFile14(previousPath, "utf8"));
+    const previous = JSON.parse(await readFile15(previousPath, "utf8"));
     const restored = [];
     const removed = [];
     const conflicts = [];
     const retained = new Set((current.externallyManaged?.retained ?? []).map(({ path: path2 }) => path2));
     for (const [root, desired, installed] of [
       [this.root, previous.files, current.files],
-      [join19(this.root, ".apex", "runtime"), previous.runtime, current.runtime]
+      [join20(this.root, ".apex", "runtime"), previous.runtime, current.runtime]
     ]) {
       for (const file2 of desired) {
         if (!this.safeManagedRelativePath(file2.path)) {
@@ -69020,7 +69769,7 @@ var ApexService = class _ApexService {
           continue;
         }
         if (await this.pathExistsLstat(destination)) {
-          const local = await readFile14(destination);
+          const local = await readFile15(destination);
           const localHash = sha256Bytes(local);
           if (installedFile !== void 0 && localHash !== installedFile.currentHash && localHash !== installedFile.baseHash) {
             const base = await this.readManagedBase(installedFile.baseRef);
@@ -69044,7 +69793,7 @@ var ApexService = class _ApexService {
         await this.assertSafeDestination(root, destination);
         if (!await this.pathExistsLstat(destination))
           continue;
-        const localHash = sha256Bytes(await readFile14(destination));
+        const localHash = sha256Bytes(await readFile15(destination));
         if (localHash !== file2.currentHash && localHash !== file2.baseHash) {
           conflicts.push(file2.path);
           continue;
@@ -69059,16 +69808,16 @@ var ApexService = class _ApexService {
   }
   async uninstallCustomizations() {
     await this.recoverCustomizationTransaction();
-    const lockPath = join19(this.root, ".apex", "customizations.lock.json");
-    const lock = JSON.parse(await readFile14(lockPath, "utf8"));
+    const lockPath = join20(this.root, ".apex", "customizations.lock.json");
+    const lock = JSON.parse(await readFile15(lockPath, "utf8"));
     const removed = [];
     const conflicts = [];
     for (const file2 of lock.files) {
-      const destination = join19(this.root, file2.path);
+      const destination = join20(this.root, file2.path);
       if (!await this.pathExistsLstat(destination))
         continue;
       await this.assertSafeDestination(this.root, destination);
-      if (sha256Bytes(await readFile14(destination)) !== file2.sourceHash) {
+      if (sha256Bytes(await readFile15(destination)) !== file2.sourceHash) {
         conflicts.push(file2.path);
         continue;
       }
@@ -69076,7 +69825,7 @@ var ApexService = class _ApexService {
       removed.push(file2.path);
     }
     for (const { path: path2 } of lock.externallyManaged?.retained ?? []) {
-      if (this.safeManagedRelativePath(path2) && await this.pathExistsLstat(join19(this.root, path2)))
+      if (this.safeManagedRelativePath(path2) && await this.pathExistsLstat(join20(this.root, path2)))
         conflicts.push(path2);
     }
     await rm12(lockPath, { force: true });
@@ -69084,7 +69833,7 @@ var ApexService = class _ApexService {
   }
   async retiredProjectionInstalled() {
     try {
-      const value = JSON.parse(await readFile14(join19(this.root, ".apex", "customizations.selection.json"), "utf8"));
+      const value = JSON.parse(await readFile15(join20(this.root, ".apex", "customizations.selection.json"), "utf8"));
       return value.clientId === "github-copilot-vscode";
     } catch (error62) {
       if (error62.code === "ENOENT")
@@ -69096,7 +69845,7 @@ var ApexService = class _ApexService {
   async replaceRetiredProjection() {
     if (!await this.retiredProjectionInstalled())
       throw new ApexError("APEX_CONFLICT", "Workspace is already initialized", EXIT_CODES.conflict);
-    const lockPath = join19(this.root, ".apex", "customizations.lock.json");
+    const lockPath = join20(this.root, ".apex", "customizations.lock.json");
     const { removed, conflicts } = await this.exists(lockPath) ? await this.uninstallCustomizations() : { removed: [], conflicts: [] };
     if (conflicts.length > 0)
       throw new ApexError("APEX_CONFLICT", "Edited VS Code projection files remain; move them, then run `apex init --client github-copilot-cli` again", EXIT_CODES.conflict, { removed, conflicts });
@@ -69105,14 +69854,14 @@ var ApexService = class _ApexService {
       clientId: "github-copilot-cli",
       sourceMode: "bundled-projection"
     };
-    await atomicWriteJson(join19(this.root, ".apex", "customizations.selection.json"), selection2);
+    await atomicWriteJson(join20(this.root, ".apex", "customizations.selection.json"), selection2);
     const { installed, clientId: clientId2 } = await this.reinstallCustomizations();
     return { removed, installed, clientId: clientId2 };
   }
   async reinstallCustomizations(customizationsSource) {
     await this.recoverCustomizationTransaction();
     const selection2 = await this.customizationSelection();
-    const lockPath = join19(this.root, ".apex", "customizations.lock.json");
+    const lockPath = join20(this.root, ".apex", "customizations.lock.json");
     if (await this.exists(lockPath)) {
       throw new ApexError("APEX_CONFLICT", "Managed customizations are already installed", EXIT_CODES.conflict);
     }
@@ -69125,7 +69874,7 @@ var ApexService = class _ApexService {
     return { installed, clientId: selection2.clientId };
   }
   async listProjects() {
-    const directory = join19(this.root, ".apex", "projects");
+    const directory = join20(this.root, ".apex", "projects");
     let names;
     try {
       names = await readdir9(directory);
@@ -69137,8 +69886,21 @@ var ApexService = class _ApexService {
     const projects = await Promise.all(names.sort().map(async (projectId) => this.projects.getProject(projectId)));
     return projects.map(({ projectId, displayName }) => ({ projectId, displayName }));
   }
+  async readValidSelection() {
+    try {
+      const parsed = JSON.parse(await readFile15(join20(this.root, ".apex", "config.json"), "utf8"));
+      if (parsed !== null && typeof parsed === "object" && typeof parsed.projectId === "string" && parsed.projectId.length > 0 && typeof parsed.runId === "string" && parsed.runId.length > 0) {
+        return { projectId: parsed.projectId, runId: parsed.runId };
+      }
+      return void 0;
+    } catch (error62) {
+      if (error62.code === "ENOENT")
+        return void 0;
+      throw error62;
+    }
+  }
   async workspaceHasNoProjects() {
-    if (await this.pathExistsLstat(join19(this.root, ".apex/config.json")))
+    if (await this.readValidSelection() !== void 0)
       return false;
     if ((await this.listProjects()).length > 0)
       throw new ApexError("APEX_CONFLICT", "Projects exist but selection is missing; select an existing project", EXIT_CODES.conflict);
@@ -69164,8 +69926,8 @@ var ApexService = class _ApexService {
       return { projectId: replacementProjectId, runId };
     })();
     const projectDirectory = this.projects.projectDirectory(projectId);
-    await this.assertSafeExistingPath(join19(this.root, ".apex"), projectDirectory);
-    const runDirectory = join19(projectDirectory, "runs");
+    await this.assertSafeExistingPath(join20(this.root, ".apex"), projectDirectory);
+    const runDirectory = join20(projectDirectory, "runs");
     await this.assertSafeExistingPath(projectDirectory, runDirectory);
     const runIds = await readdir9(runDirectory);
     for (const runId of runIds) {
@@ -69174,9 +69936,9 @@ var ApexService = class _ApexService {
       }
     }
     for (const runId of runIds) {
-      const workDirectory = join19(this.root, ".apex", "work", runId);
+      const workDirectory = join20(this.root, ".apex", "work", runId);
       if (await this.pathExistsLstat(workDirectory)) {
-        await this.assertSafeExistingPath(join19(this.root, ".apex"), workDirectory);
+        await this.assertSafeExistingPath(join20(this.root, ".apex"), workDirectory);
         await rm12(workDirectory, { recursive: true, force: true });
         this.repeatWrites.getStore()?.removed(workDirectory);
       }
@@ -69209,7 +69971,7 @@ var ApexService = class _ApexService {
     const results = [];
     for (const project of await this.listProjects()) {
       const matches = [];
-      const runNames = await readdir9(join19(this.projects.projectDirectory(project.projectId), "runs"));
+      const runNames = await readdir9(join20(this.projects.projectDirectory(project.projectId), "runs"));
       for (const runName of runNames.sort()) {
         const run = await this.projects.getRun(project.projectId, runName);
         for (const event of await this.journal(run).replay()) {
@@ -69259,16 +70021,16 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     }
   }
   async copiedArchetypeMatches(destination, proposal) {
-    const target = join19(this.root, destination);
+    const target = join20(this.root, destination);
     await this.assertSafeDestination(this.root, target);
     if (!await this.pathExistsLstat(target))
       return false;
     const conflict = () => new ApexError("APEX_CONFLICT", `Archetype destination ${destination} is modified or incomplete; preserve it for review`, EXIT_CODES.conflict);
-    if (!(await lstat14(target)).isDirectory())
+    if (!(await lstat15(target)).isDirectory())
       throw conflict();
-    if (await this.pathExistsLstat(join19(target, ".apex"))) {
+    if (await this.pathExistsLstat(join20(target, ".apex"))) {
       const child = new _ApexService(target);
-      await child.assertSafeDestination(target, join19(target, ".apex/config.json"));
+      await child.assertSafeDestination(target, join20(target, ".apex/config.json"));
       try {
         const readiness = await child.planBootstrap({ schemaVersion: CONTRACT_VERSION });
         if (readiness.status !== "ready")
@@ -69277,19 +70039,19 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         throw conflict();
       }
       for (const file2 of proposal.files) {
-        const path2 = join19(target, file2.path);
+        const path2 = join20(target, file2.path);
         await child.assertSafeDestination(target, path2);
-        const info2 = await lstat14(path2);
-        if (!info2.isFile() || info2.nlink !== 1 || info2.size !== file2.bytes || sha256Bytes(await readFile14(path2)) !== file2.hash)
+        const info2 = await lstat15(path2);
+        if (!info2.isFile() || info2.nlink !== 1 || info2.size !== file2.bytes || sha256Bytes(await readFile15(path2)) !== file2.hash)
           throw conflict();
       }
-      const origin = join19(target, ".apex-origin.json");
+      const origin = join20(target, ".apex-origin.json");
       await child.assertSafeDestination(target, origin);
-      const info = await lstat14(origin);
+      const info = await lstat15(origin);
       if (!info.isFile() || info.nlink !== 1 || info.size > 262144)
         throw conflict();
       try {
-        if (sha256Json(JSON.parse(await readFile14(origin, "utf8"))) !== sha256Json(proposal))
+        if (sha256Json(JSON.parse(await readFile15(origin, "utf8"))) !== sha256Json(proposal))
           throw conflict();
       } catch {
         throw conflict();
@@ -69305,9 +70067,9 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const seen = /* @__PURE__ */ new Set();
     const inspect = async (directory) => {
       for (const entry of await readdir9(directory, { withFileTypes: true })) {
-        const absolute = join19(directory, entry.name);
+        const absolute = join20(directory, entry.name);
         const path2 = relative8(target, absolute).split(sep6).join("/");
-        const info = await lstat14(absolute);
+        const info = await lstat15(absolute);
         if (info.isSymbolicLink())
           throw conflict();
         if (info.isDirectory()) {
@@ -69318,7 +70080,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
           const file2 = expected.get(path2);
           if (!file2 || !info.isFile() || info.nlink !== 1 || info.size > (path2 === ".apex-origin.json" ? 262144 : file2.bytes))
             throw conflict();
-          const bytes = await readFile14(absolute);
+          const bytes = await readFile15(absolute);
           if (path2 === ".apex-origin.json") {
             try {
               if (sha256Json(JSON.parse(bytes.toString("utf8"))) !== sha256Json(proposal))
@@ -69423,7 +70185,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const { proposal, contents } = await this.readArchetypeSelection(request.repositoryPath, request.revision, request.selectedPath);
     if (proposal.contentHash !== request.expectedHash)
       throw new ApexError("APEX_STALE", "Archetype proposal does not match the confirmed selection", EXIT_CODES.stale);
-    const lockPath = join19(this.root, ".apex-archetype-import.lock");
+    const lockPath = join20(this.root, ".apex-archetype-import.lock");
     const lock = await open14(lockPath, "wx", 384).catch(() => {
       throw new ApexError("APEX_CONFLICT", "An archetype import lock exists; inspect the interrupted import before retrying", EXIT_CODES.conflict);
     });
@@ -69438,11 +70200,11 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         const bytes = Buffer.from(contents.get(file2.path), "utf8");
         if (bytes.length !== file2.bytes || sha256Bytes(bytes) !== file2.hash)
           throw new ApexError("APEX_STALE", "Archetype content changed before import", EXIT_CODES.stale);
-        const path2 = join19(target, file2.path);
+        const path2 = join20(target, file2.path);
         await mkdir11(dirname11(path2), { recursive: true });
         await atomicWriteBytes(path2, bytes, { refuseOverwrite: true });
       }
-      await atomicWriteJson(join19(target, ".apex-origin.json"), proposal, { refuseOverwrite: true });
+      await atomicWriteJson(join20(target, ".apex-origin.json"), proposal, { refuseOverwrite: true });
       return {
         destination: request.destination,
         contentHash: proposal.contentHash,
@@ -69475,7 +70237,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     return repositoryPath.startsWith("https://") ? inspectRemoteArchetype({ repositoryPath, revision, selectedPath }, this.readArchetypeRemoteJson.bind(this)) : inspectArchetypeSource({ repositoryPath: resolve17(this.root, repositoryPath), revision, selectedPath });
   }
   async workspaceStatus() {
-    if (await this.pathExistsLstat(join19(this.root, ".apex/apex.lock.json")) && await this.workspaceHasNoProjects()) {
+    if (await this.pathExistsLstat(join20(this.root, ".apex/apex.lock.json")) && await this.workspaceHasNoProjects()) {
       await this.inspectBootstrapResume({ schemaVersion: CONTRACT_VERSION });
       return {
         status: "needs_project",
@@ -69546,7 +70308,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
   async workspaceStateToken() {
     const files2 = {};
     for (const path2 of WORKSPACE_STATE_FILES)
-      files2[path2] = await readFile14(join19(this.root, path2)).then(sha256Bytes, (error62) => {
+      files2[path2] = await readFile15(join20(this.root, path2)).then(sha256Bytes, (error62) => {
         if (error62.code === "ENOENT")
           return null;
         throw error62;
@@ -69554,7 +70316,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     return sha256Json({ version: 1, run: (await this.repeatScope())?.state ?? null, files: files2 });
   }
   repeatLockDirectory() {
-    return join19(this.root, ".apex", "local");
+    return join20(this.root, ".apex", "local");
   }
   /**
    * Runs one state-changing call through the kernel repeat guard. An identical call from the same worktree while the
@@ -69603,19 +70365,14 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     return outcome.value;
   }
   async repeatScope() {
-    let selection2;
-    try {
-      selection2 = await this.selection();
-    } catch (error62) {
-      if (error62.code === "ENOENT")
-        return void 0;
-      throw error62;
-    }
+    const selection2 = await this.readValidSelection();
+    if (selection2 === void 0)
+      return void 0;
     const state = await this.runRepository(selection2).repeatState();
     const files2 = await snapshotRepeatFiles(await this.repeatFileRoots(selection2));
     let projects;
     try {
-      projects = await readdir9(join19(this.root, ".apex", "projects"));
+      projects = await readdir9(join20(this.root, ".apex", "projects"));
     } catch (error62) {
       if (error62.code !== "ENOENT")
         throw error62;
@@ -69639,7 +70396,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const events = await this.journal(selection2).replay();
     const generated = events.findLast((event) => event.type === "task.completed" && typeof event.payload.artifactHashes?.["iac-handoff"] === "string");
     const handoffHash = generated?.payload?.artifactHashes?.["iac-handoff"];
-    const roots = [join19(this.root, ".apex", "work", selection2.runId)];
+    const roots = [join20(this.root, ".apex", "work", selection2.runId)];
     if (handoffHash !== void 0)
       roots.push(resolve17(this.root, (await this.objects.getJson(handoffHash)).rootPath));
     return roots;
@@ -69648,7 +70405,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
   async repeatFileBinding(path2) {
     try {
       const target = resolve17(this.root, path2);
-      const metadata2 = await lstat14(target, { bigint: true });
+      const metadata2 = await lstat15(target, { bigint: true });
       if (!metadata2.isFile() || metadata2.isSymbolicLink() || metadata2.size > 20000000n)
         return null;
       const handle = await open14(target, constants15.O_RDONLY | constants15.O_NOFOLLOW);
@@ -70107,7 +70864,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         }
       },
       ...reviewRequest === void 0 ? {} : { reviewRequest },
-      outputRoot: join19(this.root, ".apex", "work", run.runId, taskId),
+      outputRoot: join20(this.root, ".apex", "work", run.runId, taskId),
       status: this.completedNodeIds(events).has(task.taskType) ? "completed" : "active",
       blockers: route.blockers
     };
@@ -70215,17 +70972,17 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       throw new ApexError("APEX_VALIDATION", "Task output exceeds its size limit", EXIT_CODES.validation);
     }
     await this.acquireRunWriterLease(run);
-    const directory = join19(this.root, ".apex", "work", run.runId, taskId);
-    const path2 = join19(directory, `${output2.kind}.json`);
+    const directory = join20(this.root, ".apex", "work", run.runId, taskId);
+    const path2 = join20(directory, `${output2.kind}.json`);
     await mkdir11(directory, { recursive: true });
     await atomicWriteJson(path2, output2.value);
-    const hash2 = sha256Bytes(await readFile14(path2));
+    const hash2 = sha256Bytes(await readFile15(path2));
     this.repeatWrites.getStore()?.file(path2, hash2);
     await this.append(run, "artifact.staged", { taskId, kind: output2.kind, hash: hash2, bytes: bytes.byteLength });
     const expectedHead = await this.journal(run).head();
     if (expectedHead === null)
       throw new ApexError("APEX_STALE", "Staging event was not recorded", EXIT_CODES.stale);
-    await atomicWriteJson(join19(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${taskId}.json`), {
+    await atomicWriteJson(join20(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${taskId}.json`), {
       ...task,
       expectedHead
     });
@@ -70236,7 +70993,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     await this.assertSafeDestination(this.root, sourcePath);
     const canonicalRoot = await realpath8(this.root);
     const canonicalSource = await realpath8(sourcePath);
-    const metadata2 = await lstat14(sourcePath);
+    const metadata2 = await lstat15(sourcePath);
     if (!metadata2.isFile() || metadata2.isSymbolicLink() || metadata2.size > 2e7)
       throw new ApexError("APEX_VALIDATION", "Baseline must be a regular JSON file within the size limit", EXIT_CODES.validation);
     const handle = await open14(sourcePath, constants15.O_RDONLY | constants15.O_NOFOLLOW);
@@ -70245,7 +71002,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       const assertUnchanged = async () => {
         await this.assertSafeDestination(this.root, sourcePath);
         const actual = await realpath8(sourcePath);
-        const currentPath = await lstat14(sourcePath);
+        const currentPath = await lstat15(sourcePath);
         const current = await handle.stat();
         if (!sameResolvedPath(actual, canonicalSource) || !isContainedPath(canonicalRoot, actual) || [currentPath, current].some((entry) => !entry.isFile() || entry.isSymbolicLink() || entry.dev !== metadata2.dev || entry.ino !== metadata2.ino || entry.size !== metadata2.size || entry.mtimeMs !== metadata2.mtimeMs || // NTFS flushes ChangeTime lazily, so a file that was just written reports a later value without any
         // content change; the other fields still detect replacement or modification there.
@@ -70272,7 +71029,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
   }
   async governanceBaselineValidator() {
     const assets = await resolveBundledAssets();
-    const schema = JSON.parse(await readFile14(join19(assets.root, "schemas", "governance-baseline.schema.json"), "utf8"));
+    const schema = JSON.parse(await readFile15(join20(assets.root, "schemas", "governance-baseline.schema.json"), "utf8"));
     return new import__.Ajv2020({ strict: false }).compile(schema);
   }
   governanceBaselineOptions(run) {
@@ -70803,10 +71560,10 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     await this.acquireRunWriterLease(run);
     let idempotent = false;
     if (await this.exists(path2)) {
-      const entry = await lstat14(path2);
+      const entry = await lstat15(path2);
       if (!entry.isFile() || entry.isSymbolicLink())
         throw new ApexError("APEX_VALIDATION", "Staged destination must be a regular file", EXIT_CODES.validation);
-      if (sha256Bytes(await readFile14(path2)) !== hash2)
+      if (sha256Bytes(await readFile15(path2)) !== hash2)
         throw new ApexError("APEX_CONFLICT", `Refusing to overwrite staged file: ${normalized}`, EXIT_CODES.conflict);
       idempotent = true;
     } else {
@@ -70897,7 +71654,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         const bytes = Buffer.from(file2.content, "utf8");
         files2.push({
           taskId,
-          path: join19(sourceRoot, file2.path),
+          path: join20(sourceRoot, file2.path),
           bytes: bytes.length,
           hash: sha256Bytes(bytes),
           idempotent: true
@@ -70905,8 +71662,8 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       }
     } else {
       for (const file2 of tree.files) {
-        const staged = join19(sourceRoot, file2.path);
-        if (await this.exists(staged) && sha256Bytes(await readFile14(staged)) !== sha256Bytes(Buffer.from(file2.content, "utf8")))
+        const staged = join20(sourceRoot, file2.path);
+        if (await this.exists(staged) && sha256Bytes(await readFile15(staged)) !== sha256Bytes(Buffer.from(file2.content, "utf8")))
           throw new ApexError("APEX_CONFLICT", `Refusing to overwrite staged file: ${file2.path}`, EXIT_CODES.conflict);
       }
       for (const file2 of tree.files)
@@ -70968,23 +71725,28 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       throw new ApexError("APEX_STALE", "Task journal is empty", EXIT_CODES.stale);
     assertTaskCurrent(task, head, run.ownerEpoch, this.clock);
     if (output2 === void 0 && task.taskType === `validation-${run.iacTool}`) {
-      const provider = this.providers[run.iacTool];
+      const events = await this.journal(run).replay();
+      const hashes = this.acceptedArtifactHashes(events);
+      const sourceHash = hashes["iac-handoff"];
+      const preloadedHandoff = sourceHash !== void 0 && task.inputRefs.includes(sourceHash) ? await this.objects.getJson(sourceHash) : void 0;
+      const provider = await this.resolveProvider(run.iacTool, {
+        run,
+        ...preloadedHandoff === void 0 ? {} : { handoffRootPath: preloadedHandoff.rootPath },
+        sourceValidationOnly: true
+      });
       if (provider?.validateSource === void 0)
         throw new ApexError("APEX_VALIDATION", "A native source validation provider is required", EXIT_CODES.validation);
-      const events = await this.journal(run).replay();
       const workflow = await this.lockedWorkflowEngine(run);
       const node2 = workflow.manifest.nodes.find(({ id }) => id === task.taskType);
       if (node2 === void 0)
         throw new ApexError("APEX_STALE", "Validation workflow is unavailable", EXIT_CODES.stale);
       const required3 = node2.validators.filter((id) => workflowValidatorOwnership(id)?.boundary === "validation");
-      const hashes = this.acceptedArtifactHashes(events);
-      const sourceHash = hashes["iac-handoff"];
       const inputHash = hashes["implementation-intent"];
       const policyHash = hashes["policy-property-map"];
       const manifestHash = hashes["logical-resource-manifest"];
       if (inputHash === void 0 || [sourceHash, policyHash, manifestHash].some((hash2) => hash2 === void 0 || !task.inputRefs.includes(hash2)))
         throw new ApexError("APEX_STALE", "Validation requires current accepted task inputs", EXIT_CODES.stale);
-      const handoff2 = await this.objects.getJson(sourceHash);
+      const handoff2 = preloadedHandoff ?? await this.objects.getJson(sourceHash);
       if (handoff2.intentHash !== inputHash || handoff2.logicalResourceManifestHash !== manifestHash)
         throw new ApexError("APEX_STALE", "Validation handoff does not bind accepted inputs", EXIT_CODES.stale);
       const policy = await this.objects.getJson(policyHash);
@@ -71003,16 +71765,17 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         inputHash
       };
       const policyValidation = this.policyValidationInput(run.iacTool, policy, manifest2, true);
-      const diagnosticsTargets = await this.storageDiagnosticsTargets(manifest2, handoff2);
+      const diagnosticsTargets = await this.storageDiagnosticsTargets(manifest2, handoff2, run.targetScope);
       const validationRequest = {
         ...binding,
         generatedSource: { rootPath, treeHash: handoff2.treeHash },
         policyValidation: structuredClone(policyValidation),
+        resourceParityManifest: structuredClone(manifest2),
+        resourceParityBinding: await this.objects.getJson(handoff2.bindingHash),
         ...run.iacTool === "bicep" ? {
           storageSecurityBindings: this.storageSecurityBindings(manifest2),
-          resourceParityManifest: structuredClone(manifest2),
-          resourceParityBinding: await this.objects.getJson(handoff2.bindingHash),
-          storageDiagnosticsTargets: diagnosticsTargets
+          storageDiagnosticsTargets: diagnosticsTargets,
+          targetScope: run.targetScope
         } : {}
       };
       const validateSource = provider.validateSource.bind(provider);
@@ -71491,14 +72254,14 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
    */
   async pendingReviews() {
     const pending = [];
-    const projectsDirectory = join19(this.root, ".apex", "projects");
+    const projectsDirectory = join20(this.root, ".apex", "projects");
     const projectIds = await readdir9(projectsDirectory).catch((error62) => {
       if (error62.code === "ENOENT")
         return [];
       throw error62;
     });
     for (const projectId of projectIds.sort()) {
-      const runIds = await readdir9(join19(projectsDirectory, projectId, "runs")).catch((error62) => {
+      const runIds = await readdir9(join20(projectsDirectory, projectId, "runs")).catch((error62) => {
         if (["ENOENT", "ENOTDIR"].includes(error62.code ?? ""))
           return [];
         throw error62;
@@ -71506,15 +72269,15 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       for (const runId of runIds.sort()) {
         if (!value_exports2.Check(RunIdSchema, runId))
           continue;
-        const runDirectory = join19(projectsDirectory, projectId, "runs", runId);
-        const events = await new EventJournal(join19(runDirectory, "journal")).replay();
+        const runDirectory = join20(projectsDirectory, projectId, "runs", runId);
+        const events = await new EventJournal(join20(runDirectory, "journal")).replay();
         const issued = events.findLast(({ type }) => type === "task.issued")?.payload;
         if (typeof issued?.taskId !== "string" || typeof issued.review?.nonce !== "string")
           continue;
         const taskId = issued.taskId;
         if (events.some(({ type, payload }) => (type === "task.completed" || type === "task.cancelled") && payload?.taskId === taskId))
           continue;
-        const task = await readFile14(join19(runDirectory, "tasks", `${taskId}.json`), "utf8").then((text5) => JSON.parse(text5)).catch(() => void 0);
+        const task = await readFile15(join20(runDirectory, "tasks", `${taskId}.json`), "utf8").then((text5) => JSON.parse(text5)).catch(() => void 0);
         const expiresAt = typeof task?.expiresAt === "string" ? Date.parse(task.expiresAt) : Number.NaN;
         if (Number.isFinite(expiresAt) && expiresAt <= this.clock().getTime())
           continue;
@@ -71632,10 +72395,10 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     if (subjectHash === void 0 || !inputRefs.includes(subjectHash))
       throw new ApexError("APEX_STALE", "Review subject is unavailable", EXIT_CODES.stale);
     const kinds = new Map(Object.entries(this.acceptedArtifactHashes(events)).map(([kind, hash2]) => [hash2, kind]));
-    const directory = join19(this.root, ".apex", "work", run.runId, taskId, "review");
+    const directory = join20(this.root, ".apex", "work", run.runId, taskId, "review");
     const write = async (name, content) => {
       const bytes = Buffer.from(content, "utf8");
-      const path2 = join19(directory, name);
+      const path2 = join20(directory, name);
       await atomicWriteBytes(path2, bytes, { refuseOverwrite: true });
       const sha2563 = sha256Bytes(bytes);
       this.repeatWrites.getStore()?.file(path2, sha2563);
@@ -71816,7 +72579,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     if (descriptor.id === "diagnosis") {
       const diagnosis = outputs.find(({ kind }) => kind === "diagnosis").value;
       if (diagnosis.operationalHandoff !== void 0)
-        await this.writeGeneratedReview(join19(this.operationsReviewDirectory(run), "operations-runbook.md"), Buffer.from(renderOperationsRunbook(diagnosis, outputHashes.diagnosis), "utf8"));
+        await this.writeGeneratedReview(join20(this.operationsReviewDirectory(run), "operations-runbook.md"), Buffer.from(renderOperationsRunbook(diagnosis, outputHashes.diagnosis), "utf8"));
       await this.materializeOperationalIndex(run, events, diagnosis, outputHashes.diagnosis);
     }
     if (descriptor.id === "validation-bicep" || descriptor.id === "validation-terraform") {
@@ -71847,27 +72610,53 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
   }
   /** Run root under `agent-output/`; it holds `00-index.md` and one numbered folder per stage. */
   runOutputDirectory(run) {
-    return join19(this.root, "agent-output", run.projectId, run.runId);
+    return join20(this.root, "agent-output", run.projectId, run.runId);
   }
   stageDirectory(run, stage) {
-    return join19(this.runOutputDirectory(run), STAGE_FOLDERS[stage]);
+    return join20(this.runOutputDirectory(run), STAGE_FOLDERS[stage]);
   }
   requirementsReviewDirectory(run) {
     return this.stageDirectory(run, "requirements");
   }
   generatedReviewBase(path2) {
-    return join19(this.root, ".apex", "generated-review-bases", sha256Bytes(Buffer.from(relative8(this.root, path2))));
+    return join20(this.root, ".apex", "generated-review-bases", sha256Bytes(Buffer.from(relative8(this.root, path2))));
+  }
+  generatedReviewMirrorBase(mirrorPath) {
+    return join20(this.root, ".apex", "generated-review-bases", sha256Bytes(Buffer.from(`mirror:${mirrorPath}`)));
+  }
+  async workspaceMirrorPath(path2) {
+    const canonicalRoot = await realpath8(this.root).catch(() => this.root);
+    const canonicalWorkspace = await realpath8(this.workspacePath).catch(() => this.workspacePath);
+    if (canonicalWorkspace === canonicalRoot || !await this.exists(canonicalWorkspace))
+      return void 0;
+    const rel = relative8(this.root, path2);
+    if (isAbsolute9(rel) || rel === "" || rel.startsWith(".."))
+      return void 0;
+    const mirror = join20(canonicalWorkspace, rel);
+    await this.assertSafeDestination(canonicalWorkspace, mirror);
+    return mirror;
   }
   async assertGeneratedReviewUnmodified(path2) {
     await this.assertSafeDestination(this.root, path2);
-    const current = await this.readOptional(path2);
-    if (current === void 0)
-      return;
     const basePath = this.generatedReviewBase(path2);
     await this.assertSafeDestination(this.root, basePath);
-    const base = await this.readOptional(basePath);
-    if (base === void 0 || !current.equals(base))
-      throw new ApexError("APEX_CONFLICT", `Generated review file has manual edits: ${relative8(this.root, path2)}`, EXIT_CODES.conflict);
+    const current = await this.readOptional(path2);
+    const mirror = await this.workspaceMirrorPath(path2);
+    const mirrorCurrent = mirror === void 0 ? void 0 : await this.readOptional(mirror);
+    if (current === void 0 && mirrorCurrent === void 0)
+      return;
+    if (current !== void 0) {
+      const base = await this.readOptional(basePath);
+      if (base === void 0 || !current.equals(base))
+        throw new ApexError("APEX_CONFLICT", `Generated review file has manual edits: ${relative8(this.root, path2)}`, EXIT_CODES.conflict);
+    }
+    if (mirror !== void 0 && mirrorCurrent !== void 0) {
+      const mirrorBasePath = this.generatedReviewMirrorBase(mirror);
+      await this.assertSafeDestination(this.root, mirrorBasePath);
+      const mirrorBase = await this.readOptional(mirrorBasePath);
+      if (mirrorBase === void 0 || !mirrorCurrent.equals(mirrorBase))
+        throw new ApexError("APEX_CONFLICT", `Generated review file has manual edits: ${relative8(this.root, path2)}`, EXIT_CODES.conflict);
+    }
   }
   async assertTaskReviewFilesUnmodified(run, descriptor) {
     const root = this.runOutputDirectory(run);
@@ -71918,18 +72707,25 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       files2.push(...inStage(stage, ["challenger-findings.md"]));
     }
     for (const name of ["00-index.md", ...new Set(files2)])
-      await this.assertGeneratedReviewUnmodified(join19(root, name));
+      await this.assertGeneratedReviewUnmodified(join20(root, name));
   }
   // Drops a previously generated file that the current render no longer produces, unless it has manual edits.
   async removeGeneratedReview(path2) {
     await this.assertGeneratedReviewUnmodified(path2);
+    const mirror = await this.workspaceMirrorPath(path2);
     await rm12(path2, { force: true });
+    if (mirror !== void 0) {
+      await rm12(mirror, { force: true });
+      const mirrorBasePath = this.generatedReviewMirrorBase(mirror);
+      await this.assertSafeDestination(this.root, mirrorBasePath);
+      await rm12(mirrorBasePath, { force: true });
+    }
     const basePath = this.generatedReviewBase(path2);
     await this.assertSafeDestination(this.root, basePath);
     await rm12(basePath, { force: true });
   }
   async assertRunIndexUnmodified(run) {
-    await this.assertGeneratedReviewUnmodified(join19(this.runOutputDirectory(run), "00-index.md"));
+    await this.assertGeneratedReviewUnmodified(join20(this.runOutputDirectory(run), "00-index.md"));
   }
   /**
    * Writes `00-index.md`, the entry point of a run's generated review packages. It links only files that exist, in
@@ -71999,7 +72795,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     for (const [title, summary, files2] of stages) {
       const present = [];
       for (const [path2, description] of files2)
-        if (await this.readOptional(join19(root, path2)) !== void 0)
+        if (await this.readOptional(join20(root, path2)) !== void 0)
           present.push(`- [${description}](${path2})`);
       sections.push(`## ${title}
 
@@ -72023,17 +72819,26 @@ ${present.length === 0 ? "Not generated yet." : present.join("\n")}`);
       ""
     ].join("\n");
     await mkdir11(root, { recursive: true });
-    await this.writeGeneratedReview(join19(root, "00-index.md"), Buffer.from(text5, "utf8"));
+    await this.writeGeneratedReview(join20(root, "00-index.md"), Buffer.from(text5, "utf8"));
   }
   async writeGeneratedReview(path2, content) {
     await this.assertGeneratedReviewUnmodified(path2);
     const current = await this.readOptional(path2);
-    if (current?.equals(content))
-      return;
-    await atomicWriteBytes(path2, content, { refuseOverwrite: current === void 0 });
-    const basePath = this.generatedReviewBase(path2);
-    await this.assertSafeDestination(this.root, basePath);
-    await atomicWriteBytes(basePath, content);
+    const mirror = await this.workspaceMirrorPath(path2);
+    const mirrorCurrent = mirror === void 0 ? void 0 : await this.readOptional(mirror);
+    if (!current?.equals(content)) {
+      await atomicWriteBytes(path2, content, { refuseOverwrite: current === void 0 });
+      const basePath = this.generatedReviewBase(path2);
+      await this.assertSafeDestination(this.root, basePath);
+      await atomicWriteBytes(basePath, content);
+    }
+    if (mirror !== void 0 && !mirrorCurrent?.equals(content)) {
+      await mkdir11(dirname11(mirror), { recursive: true });
+      await atomicWriteBytes(mirror, content, { refuseOverwrite: mirrorCurrent === void 0 });
+      const mirrorBasePath = this.generatedReviewMirrorBase(mirror);
+      await this.assertSafeDestination(this.root, mirrorBasePath);
+      await atomicWriteBytes(mirrorBasePath, content);
+    }
   }
   async materializeOperationalIndex(run, events, diagnosis, diagnosisHash) {
     const directory = this.operationsReviewDirectory(run);
@@ -72088,14 +72893,14 @@ ${diagnosis.operationalHandoff === void 0 ? "- Operations runbook unavailable: n
 Design estimates are not actual spend. Mapping dispositions are not compliance certification. Documented procedures are not restore-test evidence. The deployment summary identifies simulated versus native-adapter provenance. Current authorization is required for further operations.
 `;
     await Promise.all([
-      this.writeGeneratedReview(join19(directory, "deployment-summary.md"), Buffer.from(await this.renderCompletedDeploymentSummary(run, events))),
-      this.writeGeneratedReview(join19(directory, "resource-inventory.md"), Buffer.from(renderResourceInventory({
+      this.writeGeneratedReview(join20(directory, "deployment-summary.md"), Buffer.from(await this.renderCompletedDeploymentSummary(run, events))),
+      this.writeGeneratedReview(join20(directory, "resource-inventory.md"), Buffer.from(renderResourceInventory({
         ...inventory,
         resources: inventory.resources.map((resource) => ({ ...resource, properties: {} }))
       }))),
-      this.writeGeneratedReview(join19(directory, "policy-matrix.md"), Buffer.from(policy === void 0 ? "# Policy Mapping Matrix\n\nNo accepted policy map is available; compliance is not established.\n" : renderPolicyMappingMatrix(policy, policyHash))),
-      this.writeGeneratedReview(join19(directory, "cost-reference.md"), Buffer.from(costContent)),
-      this.writeGeneratedReview(join19(directory, "handoff-index.md"), Buffer.from(index))
+      this.writeGeneratedReview(join20(directory, "policy-matrix.md"), Buffer.from(policy === void 0 ? "# Policy Mapping Matrix\n\nNo accepted policy map is available; compliance is not established.\n" : renderPolicyMappingMatrix(policy, policyHash))),
+      this.writeGeneratedReview(join20(directory, "cost-reference.md"), Buffer.from(costContent)),
+      this.writeGeneratedReview(join20(directory, "handoff-index.md"), Buffer.from(index))
     ]);
   }
   reviewMarkdownText(value) {
@@ -72132,8 +72937,8 @@ Design estimates are not actual spend. Mapping dispositions are not compliance c
     };
     await mkdir11(directory, { recursive: true });
     await Promise.all([
-      this.writeGeneratedReview(join19(directory, "requirements.md"), Buffer.from(document2.content, "utf8")),
-      this.writeGeneratedReview(join19(directory, "README.md"), Buffer.from(`# ${this.reviewMarkdownText(run.projectId)}
+      this.writeGeneratedReview(join20(directory, "requirements.md"), Buffer.from(document2.content, "utf8")),
+      this.writeGeneratedReview(join20(directory, "README.md"), Buffer.from(`# ${this.reviewMarkdownText(run.projectId)}
 
 Generated Gate 1 review package for run \`${this.reviewMarkdownText(run.runId)}\`. The APEX kernel state remains authoritative.
 
@@ -72142,7 +72947,7 @@ Generated Gate 1 review package for run \`${this.reviewMarkdownText(run.runId)}\
 - Requirements document hash: ${requirementsDocumentHash}
 - Review status: challenger findings pending
 `, "utf8")),
-      this.writeGeneratedReview(join19(directory, "service-recommendations.md"), Buffer.from(`# Service Recommendations
+      this.writeGeneratedReview(join20(directory, "service-recommendations.md"), Buffer.from(`# Service Recommendations
 
 These are user-reviewed candidate services, not Architecture decisions.
 
@@ -72159,7 +72964,7 @@ ${this.reviewMarkdownText(requirements.architectureHandoff ?? "Architecture must
 
 Architecture must validate candidates against approved requirements, governance, and current evidence.
 `, "utf8")),
-      this.writeGeneratedReview(join19(directory, "sku-preferences.md"), Buffer.from(`# SKU Preferences
+      this.writeGeneratedReview(join20(directory, "sku-preferences.md"), Buffer.from(`# SKU Preferences
 
 User constraints only. Architecture owns SKU selection.
 
@@ -72167,7 +72972,7 @@ User constraints only. Architecture owns SKU selection.
 - Budget posture: ${requirements.budgetAndOperations === void 0 ? text5(input2.budget) : this.reviewMarkdownText(requirements.budgetAndOperations)}
 - Scale: ${text5(input2.scale)}
 `, "utf8")),
-      this.writeGeneratedReview(join19(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nRequirements challenger review is pending. The Gate 1 intent confirmation cannot be given until the reviewer completes this document.\n", "utf8"))
+      this.writeGeneratedReview(join20(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nRequirements challenger review is pending. The Gate 1 intent confirmation cannot be given until the reviewer completes this document.\n", "utf8"))
     ]);
   }
   /** The single findings record for a review stage: subject, every finding with its disposition and its evidence. */
@@ -72186,7 +72991,7 @@ User constraints only. Architecture owns SKU selection.
 ${findings}`;
   }
   async materializeRequirementsChallengeFindings(run, review2) {
-    await this.writeGeneratedReview(join19(this.requirementsReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
+    await this.writeGeneratedReview(join20(this.requirementsReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
 
 ${this.reviewFindingsMarkdown(review2)}
 `, "utf8"));
@@ -72278,8 +73083,8 @@ ${list(pillar.recommendations)}
 ${list(pillar.tradeoffs)}`).join("\n\n") ?? "- Unavailable for this historical Architecture artifact.";
     await mkdir11(directory, { recursive: true });
     await Promise.all([
-      this.writeGeneratedReview(join19(directory, "architecture-decisions.md"), Buffer.from(architecture.decisionRecords === void 0 ? "# Architecture Decision Records\n\nStructured decision records are unavailable in the accepted Architecture artifact. Alternatives and consequences have not been inferred from prose.\n" : renderArchitectureDecisionRecords(architecture, hashes.architecture), "utf8")),
-      this.writeGeneratedReview(join19(directory, "README.md"), Buffer.from(`# ${this.reviewMarkdownText(architecture.title)}
+      this.writeGeneratedReview(join20(directory, "architecture-decisions.md"), Buffer.from(architecture.decisionRecords === void 0 ? "# Architecture Decision Records\n\nStructured decision records are unavailable in the accepted Architecture artifact. Alternatives and consequences have not been inferred from prose.\n" : renderArchitectureDecisionRecords(architecture, hashes.architecture), "utf8")),
+      this.writeGeneratedReview(join20(directory, "README.md"), Buffer.from(`# ${this.reviewMarkdownText(architecture.title)}
 
 Generated Gate 2 review package for run \`${this.reviewMarkdownText(run.runId)}\`. The APEX kernel state remains authoritative.
 
@@ -72292,7 +73097,7 @@ Generated Gate 2 review package for run \`${this.reviewMarkdownText(run.runId)}\
 
 ${diagramStatus}
 `, "utf8")),
-      this.writeGeneratedReview(join19(directory, "architecture-assessment.md"), Buffer.from(`# Architecture Assessment
+      this.writeGeneratedReview(join20(directory, "architecture-assessment.md"), Buffer.from(`# Architecture Assessment
 
 ## Summary
 
@@ -72324,7 +73129,7 @@ ${list(architecture.decisions)}
 
 ${list(architecture.risks)}
 `, "utf8")),
-      this.writeGeneratedReview(join19(directory, "cost-estimate.md"), Buffer.from(`# Cost Estimate
+      this.writeGeneratedReview(join20(directory, "cost-estimate.md"), Buffer.from(`# Cost Estimate
 
 - Pricing date: ${this.reviewMarkdownText(cost.pricingDate)}
 - Pricing status: ${this.reviewMarkdownText(cost.pricingStatus ?? "complete")}
@@ -72352,24 +73157,24 @@ ${cost.lineItems.map((item) => `- ${this.reviewMarkdownText(item.service)} / ${t
 
 ${list(cost.assumptions)}
 `, "utf8")),
-      this.writeGeneratedReview(join19(directory, "sku-comparison.md"), Buffer.from(`# SKU Comparison
+      this.writeGeneratedReview(join20(directory, "sku-comparison.md"), Buffer.from(`# SKU Comparison
 
 ${table(["Logical ID", "Service", "Selected SKU", "Quantity", "Rationale"], skuRows)}
 
 These are user-confirmed Architecture decisions. Alternatives and rejected options must be recorded in the architecture assessment before Gate 2 approval.
 `, "utf8")),
-      this.writeGeneratedReview(join19(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nArchitecture challenger review is pending. Gate 2 readiness cannot be recorded until the reviewer completes this document.\n", "utf8")),
+      this.writeGeneratedReview(join20(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nArchitecture challenger review is pending. Gate 2 readiness cannot be recorded until the reviewer completes this document.\n", "utf8")),
       ..."error" in architectureMermaid ? [] : [
-        this.writeGeneratedReview(join19(directory, "03-des-diagram.mmd"), Buffer.from(architectureMermaid.text, "utf8"))
+        this.writeGeneratedReview(join20(directory, "03-des-diagram.mmd"), Buffer.from(architectureMermaid.text, "utf8"))
       ],
       // Drop the Python, SVG and PNG architecture outputs that earlier renders wrote before it became Mermaid.
-      ...["py", "svg", "png"].map((extension) => this.removeGeneratedReview(join19(directory, `03-des-diagram.${extension}`))),
+      ...["py", "svg", "png"].map((extension) => this.removeGeneratedReview(join20(directory, `03-des-diagram.${extension}`))),
       ...diagrams.flatMap((diagram) => "error" in diagram ? [] : [
-        this.writeGeneratedReview(join19(directory, "sources", `${diagram.name}.py`), Buffer.from(diagram.source.python, "utf8")),
+        this.writeGeneratedReview(join20(directory, "sources", `${diagram.name}.py`), Buffer.from(diagram.source.python, "utf8")),
         // Earlier renders wrote the Python source beside the rendered output.
-        this.removeGeneratedReview(join19(directory, `${diagram.name}.py`)),
-        this.writeGeneratedReview(join19(directory, `${diagram.name}.svg`), Buffer.from(diagram.source.svg, "utf8")),
-        "png" in diagram ? this.writeGeneratedReview(join19(directory, `${diagram.name}.png`), Buffer.from(diagram.png)) : this.removeGeneratedReview(join19(directory, `${diagram.name}.png`))
+        this.removeGeneratedReview(join20(directory, `${diagram.name}.py`)),
+        this.writeGeneratedReview(join20(directory, `${diagram.name}.svg`), Buffer.from(diagram.source.svg, "utf8")),
+        "png" in diagram ? this.writeGeneratedReview(join20(directory, `${diagram.name}.png`), Buffer.from(diagram.png)) : this.removeGeneratedReview(join20(directory, `${diagram.name}.png`))
       ])
     ]);
   }
@@ -72385,7 +73190,7 @@ These are user-confirmed Architecture decisions. Alternatives and rejected optio
       criterion.findingIds.map((id) => this.reviewMarkdownText(id)).join(", ") || "None",
       this.reviewMarkdownText(criterion.rationale)
     ]));
-    await this.writeGeneratedReview(join19(this.architectureReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
+    await this.writeGeneratedReview(join20(this.architectureReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
 
 ## Well-Architected Criteria
 
@@ -72419,7 +73224,7 @@ ${this.reviewFindingsMarkdown(review2)}
     ]);
     await mkdir11(directory, { recursive: true });
     await Promise.all([
-      this.writeGeneratedReview(join19(directory, "README.md"), Buffer.from(`# Implementation Plan
+      this.writeGeneratedReview(join20(directory, "README.md"), Buffer.from(`# Implementation Plan
 
 Generated Gate 3 review package for run \`${this.reviewMarkdownText(run.runId)}\`. The APEX kernel state remains authoritative.
 
@@ -72430,9 +73235,9 @@ Generated Gate 3 review package for run \`${this.reviewMarkdownText(run.runId)}\
 
 [Deployment guide](deployment-guide.md) describes the accepted plan and remaining execution prerequisites.
 `, "utf8")),
-      this.writeGeneratedReview(join19(directory, "deployment-guide.md"), Buffer.from(this.renderAcceptedPlanGuide(run, intent, binding, inputs, hashes), "utf8")),
-      this.writeGeneratedReview(join19(directory, "implementation-plan.md"), Buffer.from(renderImplementationPlan(intent, hashes["implementation-intent"]), "utf8")),
-      this.writeGeneratedReview(join19(directory, "iac-binding.md"), Buffer.from(`# IaC Binding
+      this.writeGeneratedReview(join20(directory, "deployment-guide.md"), Buffer.from(this.renderAcceptedPlanGuide(run, intent, binding, inputs, hashes), "utf8")),
+      this.writeGeneratedReview(join20(directory, "implementation-plan.md"), Buffer.from(renderImplementationPlan(intent, hashes["implementation-intent"]), "utf8")),
+      this.writeGeneratedReview(join20(directory, "iac-binding.md"), Buffer.from(`# IaC Binding
 
 - Track: ${this.reviewMarkdownText(binding.track)}
 - Intent hash: ${binding.intentHash}
@@ -72441,17 +73246,17 @@ ${table(["Logical ID", "Implementation", "Version", "Parameters", "Diagnostic Sc
 
 Physical scope declares intended managed and protected resources; it is not evidence of module expansion or resource existence.
 `, "utf8")),
-      this.writeGeneratedReview(join19(directory, "environment-inputs.md"), Buffer.from(`# Environment Inputs
+      this.writeGeneratedReview(join20(directory, "environment-inputs.md"), Buffer.from(`# Environment Inputs
 
 - Environment: ${this.reviewMarkdownText(inputs.environment)}
 
 ${table(["Name", "Kind", "Reference or Value"], inputRows)}
 `, "utf8")),
-      this.writeGeneratedReview(join19(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nImplementation-plan challenger review is pending. Gate 3 readiness cannot be recorded until the reviewer completes this document.\n", "utf8"))
+      this.writeGeneratedReview(join20(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nImplementation-plan challenger review is pending. Gate 3 readiness cannot be recorded until the reviewer completes this document.\n", "utf8"))
     ]);
   }
   async materializePlanChallengeFindings(run, review2) {
-    await this.writeGeneratedReview(join19(this.planReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
+    await this.writeGeneratedReview(join20(this.planReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
 
 ${this.reviewFindingsMarkdown(review2)}
 `, "utf8"));
@@ -72460,7 +73265,7 @@ ${this.reviewFindingsMarkdown(review2)}
     const directory = this.stageDirectory(run, "validation");
     const entries = evidence.entries.length === 0 ? "- No validation evidence entries were produced." : evidence.entries.map(({ kind, hash: hash2, bytes, required: required3, retention }) => `- ${this.reviewMarkdownText(kind)}: ${hash2} (${bytes} bytes; ${required3 ? "required" : "optional"}; ${this.reviewMarkdownText(retention)}; ${this.reviewMarkdownText(evidenceModes[kind] ?? "simulated")})`).join("\n");
     await mkdir11(directory, { recursive: true });
-    await this.writeGeneratedReview(join19(directory, "validation-report.md"), Buffer.from(`# Validation Report
+    await this.writeGeneratedReview(join20(directory, "validation-report.md"), Buffer.from(`# Validation Report
 
 - Task: ${this.reviewMarkdownText(taskType)}
 - Track: ${this.reviewMarkdownText(run.iacTool)}
@@ -72497,7 +73302,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       if (templateDefinition === void 0) {
         throw new ApexError("APEX_INTERNAL", "Requirements template is unregistered", EXIT_CODES.internal);
       }
-      const content = await readFile14(join19(assets.customizations, templateDefinition.assetPath), "utf8");
+      const content = await readFile15(join20(assets.customizations, templateDefinition.assetPath), "utf8");
       return { content, hash: sha256Bytes(Buffer.from(content, "utf8")) };
     })();
     return this.requirementsDocumentTemplate;
@@ -72791,7 +73596,14 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       if (options.previewHash !== preview.previewHash || options.approvalContextHash !== approvalContextHash)
         throw new ApexError("APEX_STALE", "Delegation must request the exact current preview and immutable context", EXIT_CODES.stale);
       await this.readApprovalContext(run, preview.previewHash, approvalContextHash);
-      const provider = providerName === "bicep" ? this.providers.bicep : void 0;
+      const handoffHash = this.artifactHash(events, "iac-handoff");
+      const handoff2 = handoffHash === void 0 ? void 0 : await this.objects.getJson(handoffHash);
+      const project = await this.projects.getProject(run.projectId);
+      const provider = providerName === "bicep" ? await this.resolveProvider("bicep", {
+        run,
+        ...handoff2 === void 0 ? {} : { handoffRootPath: handoff2.rootPath },
+        riskOwner: project.riskOwner
+      }) : void 0;
       if (provider?.labApplyScope === void 0 || provider.validationMode === "simulated")
         throw new ApexError("APEX_AUTHORIZATION", "Native azd scope observations are unavailable; fake previews and external ledgers cannot authorize delegated apply", EXIT_CODES.authorization, { reason: "LAB_DELEGATION_SCOPE_UNPROVEN" });
       scope2 = await this.whileExternalProcessRuns(() => provider.labApplyScope(preview.previewHash));
@@ -72838,7 +73650,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       assertDeploymentPurposeUsable(run.purpose);
     if (gateNumber === 4) {
       for (const name of ["README.md", "deployment-preview.md", "approval.md"])
-        await this.assertGeneratedReviewUnmodified(join19(this.operationsReviewDirectory(run), name));
+        await this.assertGeneratedReviewUnmodified(join20(this.operationsReviewDirectory(run), name));
       await this.assertRunIndexUnmodified(run);
     }
     const gate = run.gates.find(({ gate: gate2 }) => gate2 === gateNumber);
@@ -72969,7 +73781,14 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       if (options.provider !== run.iacTool) {
         throw new ApexError("APEX_VALIDATION", `Provider '${options.provider}' does not match selected track '${run.iacTool}'`, EXIT_CODES.validation);
       }
-      const provider = this.providers[options.provider];
+      const handoffHash = this.artifactHash(events, "iac-handoff");
+      const handoff2 = handoffHash === void 0 ? void 0 : await this.objects.getJson(handoffHash);
+      const project = await this.projects.getProject(run.projectId);
+      const provider = await this.resolveProvider(options.provider, {
+        run,
+        ...handoff2 === void 0 ? {} : { handoffRootPath: handoff2.rootPath },
+        riskOwner: project.riskOwner
+      });
       if (provider === void 0) {
         throw new ApexError("APEX_VALIDATION", `${options.provider} provider is not configured; inject it through ApexService providers or configure the CLI provider registry`, EXIT_CODES.validation);
       }
@@ -72978,8 +73797,6 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       const manifestHash = this.artifactHash(events, "logical-resource-manifest");
       const logicalManifest = manifestHash === void 0 ? void 0 : await this.objects.getJson(manifestHash);
       const policyValidation = options.operation === "apply" ? this.policyValidationInput(run.iacTool, policyMap, logicalManifest) : void 0;
-      const handoffHash = this.artifactHash(events, "iac-handoff");
-      const handoff2 = handoffHash === void 0 ? void 0 : await this.objects.getJson(handoffHash);
       if (provider.validateSource === void 0 && provider.validationMode !== "simulated")
         throw new ApexError("APEX_VALIDATION", "Configured adapter does not support native source validation", EXIT_CODES.validation);
       if (provider.validateSource !== void 0) {
@@ -73006,7 +73823,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
         for (const { validatorId } of NATIVE_VALIDATION_COMMANDS[run.iacTool]) {
           const receiptHash = payload?.validatorEvidenceRefs?.[validatorId];
           const nativeReceipt = receiptHash === void 0 ? void 0 : await this.objects.getJson(receiptHash);
-          if (payload?.validatorEvidenceModes?.[validatorId] !== "native" || !hasValidNativeValidationReceipt(nativeReceipt, binding) || !this.hasRequiredNativePolicyEvidence(nativeReceipt, policyValidation ?? (policyMap !== void 0 && !hasActionablePolicyMappings(policyMap) ? this.policyValidationInput(run.iacTool, policyMap, logicalManifest, true) : void 0)) || !this.hasBoundStorageDiagnostics(nativeReceipt, logicalManifest) || !this.hasBoundStorageRouting(nativeReceipt, await this.storageDiagnosticsTargets(logicalManifest, handoff2)) || !this.hasBoundResourceParity(nativeReceipt, logicalManifest, handoff2.bindingHash))
+          if (payload?.validatorEvidenceModes?.[validatorId] !== "native" || !hasValidNativeValidationReceipt(nativeReceipt, binding) || !this.hasRequiredNativePolicyEvidence(nativeReceipt, policyValidation ?? (policyMap !== void 0 && !hasActionablePolicyMappings(policyMap) ? this.policyValidationInput(run.iacTool, policyMap, logicalManifest, true) : void 0)) || !this.hasBoundStorageDiagnostics(nativeReceipt, logicalManifest) || !this.hasBoundStorageRouting(nativeReceipt, await this.storageDiagnosticsTargets(logicalManifest, handoff2, run.targetScope)) || !this.hasBoundResourceParity(nativeReceipt, logicalManifest, handoff2.bindingHash))
             throw new ApexError("APEX_VALIDATION", "Preview requires current runtime-owned native validation", EXIT_CODES.validation);
         }
       }
@@ -73125,7 +73942,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       targetScope: run.targetScope
     });
     for (const name of ["README.md", "deployment-preview.md"])
-      await this.assertGeneratedReviewUnmodified(join19(this.operationsReviewDirectory(run), name));
+      await this.assertGeneratedReviewUnmodified(join20(this.operationsReviewDirectory(run), name));
     await this.append(run, "preview.created", {
       previewHash: preview.previewHash,
       previewObjectHash,
@@ -73255,7 +74072,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
   }
   async assertApprovalContextReviewed(run, previewHash, approvalContextHash) {
     const context = await this.readApprovalContext(run, previewHash, approvalContextHash);
-    const path2 = join19(this.operationsReviewDirectory(run), "deployment-preview.md");
+    const path2 = join20(this.operationsReviewDirectory(run), "deployment-preview.md");
     await this.assertSafeDestination(this.root, path2);
     const current = await this.readOptional(path2);
     if (current === void 0 || !current.equals(this.approvalContextDocument(context, approvalContextHash)))
@@ -73266,7 +74083,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
     const context = await this.readApprovalContext(run, preview.previewHash, approvalContextHash);
     await mkdir11(directory, { recursive: true });
     await Promise.all([
-      this.writeGeneratedReview(join19(directory, "README.md"), Buffer.from(`# Operations Review
+      this.writeGeneratedReview(join20(directory, "README.md"), Buffer.from(`# Operations Review
 
 Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.runId)}\`. The APEX kernel state remains authoritative.
 
@@ -73275,7 +74092,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
 - Approval context object hash: ${approvalContextHash}
 - Gate 4 status: pending human terminal approval
 `, "utf8")),
-      this.writeGeneratedReview(join19(directory, "deployment-preview.md"), this.approvalContextDocument(context, approvalContextHash))
+      this.writeGeneratedReview(join20(directory, "deployment-preview.md"), this.approvalContextDocument(context, approvalContextHash))
     ]);
     await this.materializeRunIndex(run);
   }
@@ -73349,7 +74166,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       "This approval authorizes only the exact preview above.",
       ""
     ].join("\n");
-    await this.writeGeneratedReview(join19(this.operationsReviewDirectory(run), "approval.md"), Buffer.from(content, "utf8"));
+    await this.writeGeneratedReview(join20(this.operationsReviewDirectory(run), "approval.md"), Buffer.from(content, "utf8"));
     await this.materializeRunIndex(run);
   }
   async currentPreview() {
@@ -73428,7 +74245,14 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     const commonValidatorIds = await this.validateDeployValidators(run, provider, preview, approval, previewHash, dependencyRevision2, "pre", void 0, void 0, void 0, writerTransferClaimHash ?? void 0);
     const declaredValidatorIds = await this.deployValidatorIds(run);
     if (providerName?.provider === "bicep" || providerName?.provider === "terraform") {
-      const provider2 = this.providers[providerName.provider];
+      const handoffHash = this.artifactHash(events, "iac-handoff");
+      const handoff2 = handoffHash === void 0 ? void 0 : await this.objects.getJson(handoffHash);
+      const project = await this.projects.getProject(run.projectId);
+      const provider2 = await this.resolveProvider(providerName.provider, {
+        run,
+        ...handoff2 === void 0 ? {} : { handoffRootPath: handoff2.rootPath },
+        riskOwner: project.riskOwner
+      });
       if (provider2 === void 0)
         throw new ApexError("APEX_VALIDATION", `${providerName.provider} provider is no longer configured`, EXIT_CODES.validation);
       await this.assertCurrentWriterAuthority(run, transferStore);
@@ -73696,19 +74520,36 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return this.runRepository(updated).read();
   }
   async doctor(fix = false, yes = false, live = false) {
-    const apexExists = await this.exists(join19(this.root, ".apex"));
+    const apexExists = await this.exists(join20(this.root, ".apex"));
     if (fix && yes && apexExists) {
-      await this.ensureLocalGitBoundary(true);
-      await this.ensureWorkspaceLauncher();
-      const assets = await resolveBundledAssets();
+      const binding = await workspaceRuntimeBinding(this.root);
+      if (binding.state === "mismatch" && binding.reason === "RUNTIME_WORKSPACE_NEWER") {
+        throw runtimeMismatchError(binding);
+      }
       const selection2 = await this.customizationSelection();
       if (selection2.sourceMode === "custom-source") {
         throw new ApexError("APEX_USAGE", "Custom-source repair requires an explicit customization source update", EXIT_CODES.usage);
       }
+      let previousRuntimeLock;
+      try {
+        const candidate = JSON.parse(await readFile15(join20(this.root, ".apex", "apex.lock.json"), "utf8"));
+        if (value_exports2.Check(RuntimeBundleLockV1Schema, candidate))
+          previousRuntimeLock = candidate;
+      } catch {
+        previousRuntimeLock = void 0;
+      }
+      await this.ensureLocalGitBoundary(true);
+      await this.ensureWorkspaceLauncher();
+      const assets = await resolveBundledAssets();
+      if (previousRuntimeLock !== void 0)
+        await this.installRuntimeGeneration(previousRuntimeLock);
       const clientId2 = selection2.clientId;
       await this.installCustomizations(assets.clientProjections[clientId2], true, assets.config, true, clientId2, assets.plugin);
       await this.installCapabilityAssets(assets);
-      await atomicWriteJson(join19(this.root, ".apex", "apex.lock.json"), await this.createRuntimeLock(assets));
+      const runtimeLock = await this.createRuntimeLock(assets);
+      await atomicWriteJson(join20(this.root, ".apex", "apex.lock.json"), runtimeLock);
+      await atomicWriteJson(join20(this.root, ".apex", "runtime", "apex.lock.json"), runtimeLock);
+      await this.installRuntimeGeneration(runtimeLock);
     }
     const checks = [
       {
@@ -73718,7 +74559,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         remedy: `Install Node.js ${MINIMUM_NODE_VERSION} or newer`
       },
       { id: "workspace", ok: await this.exists(this.root), value: this.root, remedy: "Restore the workspace root" },
-      { id: "apex", ok: apexExists, value: join19(this.root, ".apex"), remedy: "Run apex init" },
+      { id: "apex", ok: apexExists, value: join20(this.root, ".apex"), remedy: "Run apex init" },
       ...await this.hostChecks()
     ];
     if (apexExists && await this.workspaceHasNoProjects()) {
@@ -73764,7 +74605,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
           remedy: status2.action
         })));
       }
-      const providerConfigured = await this.exists(join19(this.root, ".apex", "provider-config.json"));
+      const providerConfigured = await this.exists(join20(this.root, ".apex", "provider-config.json"));
       checks.push({
         id: "provider-config",
         ok: providerConfigured,
@@ -73809,7 +74650,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return result;
   }
   async cacheStatus() {
-    const directory = join19(this.root, ".apex", "cache", "content");
+    const directory = join20(this.root, ".apex", "cache", "content");
     if (!await this.exists(directory))
       return { entries: 0 };
     return { entries: (await readdir9(directory)).filter((name) => /^[0-9a-f]{64}\.json$/.test(name)).length };
@@ -73885,7 +74726,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     if (input2.value === void 0 === (input2.file === void 0))
       throw new ApexError("APEX_USAGE", "Evidence requires exactly one value or file", EXIT_CODES.usage);
     const store = await this.evidenceStore(input2.kind, input2.contentType);
-    let value = input2.file === void 0 ? input2.value : await readFile14(resolve17(input2.file));
+    let value = input2.file === void 0 ? input2.value : await readFile15(resolve17(input2.file));
     if (input2.kind === "architecture-availability-v1") {
       if (input2.contentType !== "application/json")
         throw new ApexError("APEX_VALIDATION", "Architecture availability evidence must use application/json", EXIT_CODES.validation);
@@ -74072,7 +74913,14 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     if (payload.provider !== "bicep" && payload.provider !== "terraform" || typeof payload.previewHash !== "string" || typeof payload.approvalHash !== "string" || payload.operation === null || typeof payload.operation !== "object" || !Array.isArray(payload.preValidatorIds)) {
       throw new ApexError("APEX_VALIDATION", "Deployment execution receipt is invalid", EXIT_CODES.validation);
     }
-    const provider = this.providers[payload.provider];
+    const handoffHash = this.artifactHash(events, "iac-handoff");
+    const handoff2 = handoffHash === void 0 ? void 0 : await this.objects.getJson(handoffHash);
+    const project = await this.projects.getProject(run.projectId);
+    const provider = await this.resolveProvider(payload.provider, {
+      run,
+      ...handoff2 === void 0 ? {} : { handoffRootPath: handoff2.rootPath },
+      riskOwner: project.riskOwner
+    });
     if (provider === void 0)
       throw new ApexError("APEX_VALIDATION", `${payload.provider} provider is required to reconcile deployment inventory`, EXIT_CODES.validation);
     const previewObjectHash = this.latestPayloadHash(events, "preview.created", "previewObjectHash", (candidate) => candidate.previewHash === payload.previewHash);
@@ -74113,7 +74961,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }, this.clock, this.idSource);
     await this.acquireRunWriterLease(run);
     const review2 = descriptor.reviewSubject === void 0 ? void 0 : await this.prepareReviewRequest(run, descriptor, task.taskId, inputRefs);
-    await atomicWriteJson(join19(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${task.taskId}.json`), task, { refuseOverwrite: true });
+    await atomicWriteJson(join20(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${task.taskId}.json`), task, { refuseOverwrite: true });
     await this.append(run, "task.issued", {
       taskId: task.taskId,
       taskType: descriptor.id,
@@ -74121,7 +74969,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     });
     const currentHead = await this.journal(run).head();
     const current = { ...task, expectedHead: currentHead };
-    await atomicWriteJson(join19(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${task.taskId}.json`), current);
+    await atomicWriteJson(join20(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${task.taskId}.json`), current);
     return current;
   }
   async openRunGate(run, gateNumber, dependencyHash) {
@@ -74423,13 +75271,13 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     });
   }
   journal(run) {
-    return new EventJournal(join19(this.projects.runDirectory(run.projectId, run.runId), "journal"), {
+    return new EventJournal(join20(this.projects.runDirectory(run.projectId, run.runId), "journal"), {
       projectId: run.projectId,
       runId: run.runId
     });
   }
   runPath(run) {
-    return join19(this.projects.runDirectory(run.projectId, run.runId), "run.json");
+    return join20(this.projects.runDirectory(run.projectId, run.runId), "run.json");
   }
   async currentRun() {
     await this.recoverCustomizationTransaction();
@@ -74439,7 +75287,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     const directory = this.projects.runDirectory(selection2.projectId, selection2.runId);
     const readOnly = options.readOnly === true || this.snapshotRead.getStore() === true;
     if (readOnly) {
-      const pending = await readFile14(join19(directory, ".run-transaction.json")).catch((error62) => {
+      const pending = await readFile15(join20(directory, ".run-transaction.json")).catch((error62) => {
         if (error62.code === "ENOENT")
           return void 0;
         throw error62;
@@ -74449,7 +75297,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         throw new ApexError("APEX_CONFLICT", "Run transaction recovery is required", EXIT_CODES.conflict);
       }
     }
-    const run = readOnly ? parseRunConfig(await readFile14(join19(directory, "run.json"), "utf8")) : await this.runRepository(selection2).read();
+    const run = readOnly ? parseRunConfig(await readFile15(join20(directory, "run.json"), "utf8")) : await this.runRepository(selection2).read();
     let events;
     try {
       events = await this.journal(run).replay();
@@ -74526,11 +75374,15 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return { workspacePath: this.workspacePath, sessionId: `${process.pid}` };
   }
   async selection() {
-    return JSON.parse(await readFile14(join19(this.root, ".apex", "config.json"), "utf8"));
+    const selected = await this.readValidSelection();
+    if (selected === void 0) {
+      throw new ApexError("APEX_NOT_FOUND", "No active project run is selected; create or select a project first", EXIT_CODES.notFound);
+    }
+    return selected;
   }
   async writeSelection(selection2) {
     this.assertNotSnapshotRead();
-    await atomicWriteJson(join19(this.root, ".apex", "config.json"), selection2);
+    await atomicWriteJson(join20(this.root, ".apex", "config.json"), selection2);
   }
   latestPayloadHash(events, type, field, predicate) {
     for (const event of [...events].reverse()) {
@@ -75053,8 +75905,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async lockedWorkflowEngine(run) {
     const runtimeRoot = await this.runtimeRootForRun(run);
-    const workflowBytes = await readFile14(join19(runtimeRoot, "workflow.v1.json"));
-    const lock = JSON.parse(await readFile14(join19(runtimeRoot, "apex.lock.json"), "utf8"));
+    const workflowBytes = await readFile15(join20(runtimeRoot, "workflow.v1.json"));
+    const lock = JSON.parse(await readFile15(join20(runtimeRoot, "apex.lock.json"), "utf8"));
     this.assertValid("runtime-lock", lock);
     if (sha256Json(lock) !== run.runtimeLockHash || sha256Bytes(workflowBytes) !== lock.workflowHash) {
       throw new ApexError("APEX_STALE", "Runtime workflow lock is not current", EXIT_CODES.stale);
@@ -75063,8 +75915,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async taskLimits(run) {
     const runtimeRoot = await this.runtimeRootForRun(run);
-    const bytes = await readFile14(join19(runtimeRoot, "defaults.v1.json"));
-    const lock = JSON.parse(await readFile14(join19(runtimeRoot, "apex.lock.json"), "utf8"));
+    const bytes = await readFile15(join20(runtimeRoot, "defaults.v1.json"));
+    const lock = JSON.parse(await readFile15(join20(runtimeRoot, "apex.lock.json"), "utf8"));
     this.assertValid("runtime-lock", lock);
     if (sha256Json(lock) !== run.runtimeLockHash || sha256Bytes(bytes) !== lock.defaultsHash)
       throw new ApexError("APEX_STALE", "Runtime defaults lock is not current", EXIT_CODES.stale);
@@ -75337,7 +76189,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         throw new ApexError("APEX_VALIDATION", "Environment inputs do not match the run or contain an invalid secret reference", EXIT_CODES.validation);
       }
       for (const [name, input2] of Object.entries(inputs.inputs)) {
-        if (input2.kind === "value" && /secret|password|token|credential|api[-_]?key/i.test(name)) {
+        if (input2.kind === "value" && isSecretBearingField(name, input2.value)) {
           throw new ApexError("APEX_VALIDATION", `Environment input '${name}' must use a secret-reference`, EXIT_CODES.validation);
         }
       }
@@ -75594,20 +76446,43 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     };
   }
   hasBoundResourceParity(receipt, manifest2, bindingHash) {
-    return receipt.resourceParity === void 0 || manifest2 !== void 0 && receipt.track === "bicep" && receipt.resourceParity.manifestHash === calculatePolicyValidationDigest(manifest2) && receipt.resourceParity.bindingHash === bindingHash;
+    return receipt.resourceParity === void 0 || manifest2 !== void 0 && (receipt.track === "bicep" || receipt.track === "terraform") && receipt.resourceParity.manifestHash === calculatePolicyValidationDigest(manifest2) && receipt.resourceParity.bindingHash === bindingHash;
   }
-  async storageDiagnosticsTargets(manifest2, handoff2) {
+  async storageDiagnosticsTargets(manifest2, handoff2, targetScope) {
     if (manifest2?.track !== "bicep")
       return {};
     const binding = await this.objects.getJson(handoff2.bindingHash);
-    const nativeWorkspaces = manifest2.resources.filter(({ type, ownership }) => ownership === "managed" && type.toLowerCase() === "microsoft.insights/diagnosticsettings").map(({ logicalId }) => binding.resourceBindings[logicalId]?.parameters.properties?.workspaceId);
+    const sameRunWorkspaces = /* @__PURE__ */ new Map();
+    if (typeof targetScope === "string" && /^\/subscriptions\/[a-f0-9-]{36}\/resourceGroups\/[^/]+$/i.test(targetScope)) {
+      for (const entry of manifest2.resources) {
+        if (entry.type.toLowerCase() !== "microsoft.operationalinsights/workspaces")
+          continue;
+        const wsName = binding.resourceBindings[entry.logicalId]?.parameters.name;
+        if (typeof wsName === "string" && wsName.length > 0) {
+          const fullId = `${targetScope}/providers/Microsoft.OperationalInsights/workspaces/${wsName}`;
+          sameRunWorkspaces.set(entry.logicalId, fullId);
+          if (entry.executionAddress !== void 0)
+            sameRunWorkspaces.set(entry.executionAddress, fullId);
+          sameRunWorkspaces.set(`[resourceId('Microsoft.OperationalInsights/workspaces', '${wsName}')]`, fullId);
+        }
+      }
+    }
+    const resolveWorkspaceRef = (candidate) => {
+      if (typeof candidate !== "string")
+        return void 0;
+      if (/^\/subscriptions\/[a-f0-9-]{36}\/resourceGroups\/[^/]+\/providers\/Microsoft\.OperationalInsights\/workspaces\/[^/]+$/i.test(candidate)) {
+        return candidate;
+      }
+      return sameRunWorkspaces.get(candidate);
+    };
+    const nativeWorkspaces = manifest2.resources.filter(({ type, ownership }) => ownership === "managed" && type.toLowerCase() === "microsoft.insights/diagnosticsettings").map(({ logicalId }) => resolveWorkspaceRef(binding.resourceBindings[logicalId]?.parameters.properties?.workspaceId));
     const targets = {};
     for (const resource of manifest2.resources) {
       if (resource.ownership !== "managed" || resource.executionAddress === void 0 || resource.type.toLowerCase() !== "microsoft.storage/storageaccounts")
         continue;
       const settings = binding.resourceBindings[resource.logicalId]?.parameters.diagnosticSettings;
-      const workspaces = Array.isArray(settings) && settings.length > 0 ? settings.map((setting) => setting?.workspaceResourceId) : nativeWorkspaces;
-      if (workspaces.length === 0 || workspaces.some((value) => typeof value !== "string" || !/^\/subscriptions\/[a-f0-9-]{36}\/resourceGroups\/[^/]+\/providers\/Microsoft\.OperationalInsights\/workspaces\/[^/]+$/i.test(value)))
+      const workspaces = Array.isArray(settings) && settings.length > 0 ? settings.map((setting) => resolveWorkspaceRef(setting?.workspaceResourceId)) : nativeWorkspaces;
+      if (workspaces.length === 0 || workspaces.some((value) => value === void 0))
         continue;
       const ids = workspaces;
       if (new Set(ids.map((value) => value.toLowerCase())).size !== 1)
@@ -75696,7 +76571,24 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     if (descriptor.id === `validation-${run.iacTool}`) {
       for (const id of validatorIds)
         nativeEvidenceModes[id] = "simulated";
-      const provider = this.providers[run.iacTool];
+      const currentHandoff = artifacts["iac-handoff"];
+      const submittedEvidence = context.outputs["validation-evidence"];
+      let hasNativeReceiptSubmission = false;
+      for (const entry of submittedEvidence?.entries ?? []) {
+        try {
+          const candidate = await this.objects.getJson(entry.hash);
+          if (candidate !== null && typeof candidate === "object" && Array.isArray(candidate.commands) && typeof candidate.receiptHash === "string") {
+            hasNativeReceiptSubmission = true;
+            break;
+          }
+        } catch {
+        }
+      }
+      const provider = await this.resolveProvider(run.iacTool, {
+        run,
+        ...currentHandoff === void 0 ? {} : { handoffRootPath: currentHandoff.rootPath },
+        ...hasNativeReceiptSubmission ? { sourceValidationOnly: true } : {}
+      });
       if (provider !== void 0 && provider.validateSource === void 0 && provider.validationMode !== "simulated")
         throw new ApexError("APEX_VALIDATION", "Configured adapter does not support native source validation", EXIT_CODES.validation);
       if (provider?.validateSource !== void 0) {
@@ -75718,16 +76610,20 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
           policyHash
         };
         const policyValidation = this.policyValidationInput(run.iacTool, artifacts["policy-property-map"], artifacts["logical-resource-manifest"], true);
-        const diagnosticsTargets = await this.storageDiagnosticsTargets(artifacts["logical-resource-manifest"], handoff2);
+        const diagnosticsTargets = await this.storageDiagnosticsTargets(artifacts["logical-resource-manifest"], handoff2, run.targetScope);
+        const validationManifest = artifacts["logical-resource-manifest"];
         const validationRequest = {
           ...binding,
           generatedSource: { rootPath, treeHash: handoff2.treeHash },
           policyValidation: structuredClone(policyValidation),
+          ...validationManifest === void 0 ? {} : {
+            resourceParityManifest: structuredClone(validationManifest),
+            resourceParityBinding: await this.objects.getJson(handoff2.bindingHash)
+          },
           ...run.iacTool === "bicep" ? {
-            storageSecurityBindings: this.storageSecurityBindings(artifacts["logical-resource-manifest"]),
-            resourceParityManifest: structuredClone(artifacts["logical-resource-manifest"]),
-            resourceParityBinding: await this.objects.getJson(handoff2.bindingHash),
-            storageDiagnosticsTargets: diagnosticsTargets
+            storageSecurityBindings: this.storageSecurityBindings(validationManifest),
+            storageDiagnosticsTargets: diagnosticsTargets,
+            targetScope: run.targetScope
           } : {}
         };
         const validateSource = provider.validateSource.bind(provider);
@@ -75787,7 +76683,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   async qualityValidatorContext(run) {
     let qualityMeasurements;
     try {
-      qualityMeasurements = JSON.parse(await readFile14(join19(this.root, ".apex", "quality", "measurements.json"), "utf8"));
+      qualityMeasurements = JSON.parse(await readFile15(join20(this.root, ".apex", "quality", "measurements.json"), "utf8"));
     } catch (error62) {
       if (error62.code === "ENOENT") {
         throw new ApexError("APEX_VALIDATION", "Quality measurements are unavailable; run quality evaluate first", EXIT_CODES.validation);
@@ -75797,7 +76693,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     this.assertValid("quality-measurements", qualityMeasurements);
     const runtimeRoot = await this.runtimeRootForRun(run);
     return {
-      scorecard: JSON.parse(await readFile14(join19(runtimeRoot, "quality-scorecard.v1.json"), "utf8")),
+      scorecard: JSON.parse(await readFile15(join20(runtimeRoot, "quality-scorecard.v1.json"), "utf8")),
       qualityMeasurements
     };
   }
@@ -76106,7 +77002,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       throw new ApexError("APEX_VALIDATION", "Task ID is invalid", EXIT_CODES.validation);
     }
     try {
-      return JSON.parse(await readFile14(join19(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${taskId}.json`), "utf8"));
+      return JSON.parse(await readFile15(join20(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${taskId}.json`), "utf8"));
     } catch (error62) {
       if (error62.code === "ENOENT") {
         throw new ApexError("APEX_NOT_FOUND", "Task was not found", EXIT_CODES.notFound, void 0, { cause: error62 });
@@ -76119,22 +77015,22 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     const expectedHead = await this.journal(run).head();
     if (expectedHead === null)
       throw new ApexError("APEX_STALE", "Task journal is empty", EXIT_CODES.stale);
-    await atomicWriteJson(join19(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${task.taskId}.json`), {
+    await atomicWriteJson(join20(this.projects.runDirectory(run.projectId, run.runId), "tasks", `${task.taskId}.json`), {
       ...task,
       expectedHead
     });
   }
   async assertNoSymlinkPath(root, destination) {
     await mkdir11(root, { recursive: true });
-    const rootStat = await lstat14(root);
+    const rootStat = await lstat15(root);
     if (rootStat.isSymbolicLink() || !rootStat.isDirectory())
       throw new ApexError("APEX_VALIDATION", "Code staging root must be a real directory", EXIT_CODES.validation);
     let current = root;
     for (const segment of relative8(root, destination).split(sep6).slice(0, -1)) {
-      current = join19(current, segment);
+      current = join20(current, segment);
       if (!await this.exists(current))
         continue;
-      const entry = await lstat14(current);
+      const entry = await lstat15(current);
       if (entry.isSymbolicLink() || !entry.isDirectory())
         throw new ApexError("APEX_VALIDATION", "Code staging path contains a non-directory or symlink", EXIT_CODES.validation);
     }
@@ -76144,7 +77040,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       return 0;
     let total = 0;
     for (const entry of await readdir9(directory, { withFileTypes: true })) {
-      const path2 = join19(directory, entry.name);
+      const path2 = join20(directory, entry.name);
       if (entry.isSymbolicLink())
         throw new ApexError("APEX_VALIDATION", "Code staging tree contains a symlink", EXIT_CODES.validation);
       total += entry.isDirectory() ? await this.directoryBytes(path2) : (await stat2(path2)).size;
@@ -76198,8 +77094,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
     const runtimeRoot = await this.runtimeRootForRun(run);
     const [policyBytes, lockBytes] = await Promise.all([
-      readFile14(join19(runtimeRoot, "improvement-policy.v1.json")),
-      readFile14(join19(runtimeRoot, "apex.lock.json"))
+      readFile15(join20(runtimeRoot, "improvement-policy.v1.json")),
+      readFile15(join20(runtimeRoot, "apex.lock.json"))
     ]);
     const lock = JSON.parse(lockBytes.toString("utf8"));
     this.assertValid("runtime-lock", lock);
@@ -76210,7 +77106,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return this.improvementRuntime;
   }
   async latestRun(projectId) {
-    const names = await readdir9(join19(this.projects.projectDirectory(projectId), "runs"));
+    const names = await readdir9(join20(this.projects.projectDirectory(projectId), "runs"));
     const runs = await Promise.all(names.map((name) => this.projects.getRun(projectId, name)));
     const latest = runs.sort((left, right) => right.createdAt.localeCompare(left.createdAt))[0];
     if (latest === void 0)
@@ -76219,7 +77115,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async customizationSelection() {
     try {
-      const value = JSON.parse(await readFile14(join19(this.root, ".apex", "customizations.selection.json"), "utf8"));
+      const value = JSON.parse(await readFile15(join20(this.root, ".apex", "customizations.selection.json"), "utf8"));
       if (value.clientId === "github-copilot-vscode")
         throw retiredProjectionError();
       if (value.version !== 1 || value.clientId !== "github-copilot-cli" || !["bundled-projection", "custom-source"].includes(value.sourceMode) || value.sourceMode === "custom-source" && typeof value.customSource !== "string") {
@@ -76233,28 +77129,28 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
   }
   async assertCleanInitialization() {
-    if (await this.exists(join19(this.root, ".apex")))
+    if (await this.exists(join20(this.root, ".apex")))
       throw new ApexError("APEX_CONFLICT", "Workspace is already initialized", EXIT_CODES.conflict);
   }
   async createRuntimeLock(assets) {
-    const runtimeRoot = join19(this.root, ".apex", "runtime");
-    const packs = JSON.parse(await readFile14(join19(runtimeRoot, "capability-packs.registry.json"), "utf8"));
+    const runtimeRoot = join20(this.root, ".apex", "runtime");
+    const packs = JSON.parse(await readFile15(join20(runtimeRoot, "capability-packs.registry.json"), "utf8"));
     const requiredCapabilityPacks = (packs.packs ?? []).map((pack) => {
       const id = typeof pack.id === "string" ? pack.id : pack.name;
       if (typeof id !== "string" || id.length === 0)
         throw new ApexError("APEX_VALIDATION", "Capability pack has no identifier", EXIT_CODES.validation);
       return id;
     });
-    const validatorPath = await this.exists(join19(runtimeRoot, "runtime-bundle.v1.json")) ? join19(runtimeRoot, "runtime-bundle.v1.json") : join19(runtimeRoot, "toolchain.v1.json");
+    const validatorPath = await this.exists(join20(runtimeRoot, "runtime-bundle.v1.json")) ? join20(runtimeRoot, "runtime-bundle.v1.json") : join20(runtimeRoot, "toolchain.v1.json");
     const lock = {
       schemaVersion: CONTRACT_VERSION,
       cliVersion: APEX_VERSION,
       customizationVersion: assets.manifest.sources.customizations,
-      workflowHash: sha256Bytes(await readFile14(join19(runtimeRoot, "workflow.v1.json"))),
-      defaultsHash: sha256Bytes(await readFile14(join19(runtimeRoot, "defaults.v1.json"))),
-      validatorHash: sha256Bytes(await readFile14(validatorPath)),
-      qualityScorecardHash: sha256Bytes(await readFile14(join19(runtimeRoot, "quality-scorecard.v1.json"))),
-      improvementPolicyHash: sha256Bytes(await readFile14(join19(runtimeRoot, "improvement-policy.v1.json"))),
+      workflowHash: sha256Bytes(await readFile15(join20(runtimeRoot, "workflow.v1.json"))),
+      defaultsHash: sha256Bytes(await readFile15(join20(runtimeRoot, "defaults.v1.json"))),
+      validatorHash: sha256Bytes(await readFile15(validatorPath)),
+      qualityScorecardHash: sha256Bytes(await readFile15(join20(runtimeRoot, "quality-scorecard.v1.json"))),
+      improvementPolicyHash: sha256Bytes(await readFile15(join20(runtimeRoot, "improvement-policy.v1.json"))),
       requiredCapabilityPacks: [...new Set(requiredCapabilityPacks)].sort()
     };
     this.assertValid("runtime-lock", lock);
@@ -76262,18 +77158,18 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async installRuntimeGeneration(lock) {
     const hash2 = sha256Json(lock);
-    const generationsRoot = join19(this.root, ".apex", "runtime-generations");
-    const destination = join19(generationsRoot, hash2);
+    const generationsRoot = join20(this.root, ".apex", "runtime-generations");
+    const destination = join20(generationsRoot, hash2);
     if (!await this.exists(destination)) {
       await mkdir11(generationsRoot, { recursive: true });
-      const staging = join19(generationsRoot, `.incoming-${this.idSource()}`);
-      await cp2(join19(this.root, ".apex", "runtime"), staging, {
+      const staging = join20(generationsRoot, `.incoming-${this.idSource()}`);
+      await cp2(join20(this.root, ".apex", "runtime"), staging, {
         recursive: true,
         dereference: false,
         errorOnExist: true,
         force: false
       });
-      await atomicWriteJson(join19(staging, "apex.lock.json"), lock);
+      await atomicWriteJson(join20(staging, "apex.lock.json"), lock);
       await renameWithRetry(staging, destination);
     }
     return destination;
@@ -76325,12 +77221,12 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
     const workspaceDisabledPlugins = /* @__PURE__ */ new Set();
     for (const rel of [".github/copilot/settings.json", ".github/copilot/settings.local.json"]) {
-      const settingsPath = join19(this.root, rel);
+      const settingsPath = join20(this.root, rel);
       try {
         await this.assertSafeDestination(this.root, settingsPath);
         if (!await this.pathExistsLstat(settingsPath))
           continue;
-        const parsed = JSON.parse(await readFile14(settingsPath, "utf8"));
+        const parsed = JSON.parse(await readFile15(settingsPath, "utf8"));
         for (const [key, value] of Object.entries(parsed?.enabledPlugins ?? {})) {
           if (value === false)
             workspaceDisabledPlugins.add(key);
@@ -76359,10 +77255,10 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       return { id: "plugin-settings", ok: false, value: "bundled plugin declaration unavailable", remedy };
     }
     const qualified = `${plugin.name}@${plugin.marketplace}`;
-    const path2 = join19(this.root, ".github", "copilot", "settings.json");
+    const path2 = join20(this.root, ".github", "copilot", "settings.json");
     try {
       await this.assertSafeDestination(this.root, path2);
-      const settings = JSON.parse(await readFile14(path2, "utf8"));
+      const settings = JSON.parse(await readFile15(path2, "utf8"));
       const enabled = settings?.enabledPlugins?.[qualified] === true && settings.extraKnownMarketplaces?.[plugin.marketplace]?.source?.repo === plugin.marketplaceRepository;
       return {
         id: "plugin-settings",
@@ -76375,41 +77271,41 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
   }
   async runtimeRootForRun(run) {
-    const generation = join19(this.root, ".apex", "runtime-generations", run.runtimeLockHash);
-    return await this.exists(join19(generation, "apex.lock.json")) ? generation : join19(this.root, ".apex", "runtime");
+    const generation = join20(this.root, ".apex", "runtime-generations", run.runtimeLockHash);
+    return await this.exists(join20(generation, "apex.lock.json")) ? generation : join20(this.root, ".apex", "runtime");
   }
   capabilityPacks(manifestPath) {
     return new CapabilityPackManager({
       root: this.root,
-      manifestPath: manifestPath ?? join19(this.root, ".apex", "runtime", "capability-packs.registry.json"),
+      manifestPath: manifestPath ?? join20(this.root, ".apex", "runtime", "capability-packs.registry.json"),
       processRunner: this.processRunner
     });
   }
   async runtimeLockChecks(run) {
     try {
-      const runtimeRoot = run === void 0 ? join19(this.root, ".apex", "runtime") : await this.runtimeRootForRun(run);
-      await this.assertSafeDestination(this.root, join19(runtimeRoot, "apex.lock.json"));
-      const lockPath = join19(runtimeRoot, "apex.lock.json");
-      const lock = JSON.parse(await readFile14(lockPath, "utf8"));
+      const runtimeRoot = run === void 0 ? join20(this.root, ".apex", "runtime") : await this.runtimeRootForRun(run);
+      await this.assertSafeDestination(this.root, join20(runtimeRoot, "apex.lock.json"));
+      const lockPath = join20(runtimeRoot, "apex.lock.json");
+      const lock = JSON.parse(await readFile15(lockPath, "utf8"));
       this.assertValid("runtime-lock", lock);
-      const validatorPath = await this.exists(join19(runtimeRoot, "runtime-bundle.v1.json")) ? join19(runtimeRoot, "runtime-bundle.v1.json") : join19(runtimeRoot, "toolchain.v1.json");
+      const validatorPath = await this.exists(join20(runtimeRoot, "runtime-bundle.v1.json")) ? join20(runtimeRoot, "runtime-bundle.v1.json") : join20(runtimeRoot, "toolchain.v1.json");
       const hashes = [
-        { id: "runtime-lock:workflow", expected: lock.workflowHash, path: join19(runtimeRoot, "workflow.v1.json") },
-        { id: "runtime-lock:defaults", expected: lock.defaultsHash, path: join19(runtimeRoot, "defaults.v1.json") },
+        { id: "runtime-lock:workflow", expected: lock.workflowHash, path: join20(runtimeRoot, "workflow.v1.json") },
+        { id: "runtime-lock:defaults", expected: lock.defaultsHash, path: join20(runtimeRoot, "defaults.v1.json") },
         { id: "runtime-lock:validators", expected: lock.validatorHash, path: validatorPath },
         {
           id: "runtime-lock:quality-scorecard",
           expected: lock.qualityScorecardHash,
-          path: join19(runtimeRoot, "quality-scorecard.v1.json")
+          path: join20(runtimeRoot, "quality-scorecard.v1.json")
         },
         {
           id: "runtime-lock:improvement-policy",
           expected: lock.improvementPolicyHash,
-          path: join19(runtimeRoot, "improvement-policy.v1.json")
+          path: join20(runtimeRoot, "improvement-policy.v1.json")
         }
       ];
       const checks = await Promise.all(hashes.map(async (item) => {
-        const actual = await this.exists(item.path) ? sha256Bytes(await readFile14(item.path)) : "missing";
+        const actual = await this.exists(item.path) ? sha256Bytes(await readFile15(item.path)) : "missing";
         return {
           id: item.id,
           ok: actual === item.expected,
@@ -76419,11 +77315,11 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       }));
       checks.unshift({
         id: "runtime-lock:run-binding",
-        ok: sha256Json(lock) === (run?.runtimeLockHash ?? sha256Json(JSON.parse(await readFile14(join19(this.root, ".apex/apex.lock.json"), "utf8")))),
+        ok: sha256Json(lock) === (run?.runtimeLockHash ?? sha256Json(JSON.parse(await readFile15(join20(this.root, ".apex/apex.lock.json"), "utf8")))),
         value: sha256Json(lock),
         remedy: "Reinitialize the run against the installed runtime lock"
       });
-      const packs = JSON.parse(await readFile14(join19(runtimeRoot, "capability-packs.registry.json"), "utf8"));
+      const packs = JSON.parse(await readFile15(join20(runtimeRoot, "capability-packs.registry.json"), "utf8"));
       const available = new Set((packs.packs ?? []).flatMap(({ id }) => id === void 0 ? [] : [id]));
       checks.push({
         id: "capability-packs",
@@ -76444,8 +77340,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
   }
   async ensureLocalGitBoundary(repair = false) {
-    const apexRoot = join19(this.root, ".apex");
-    const path2 = join19(apexRoot, ".gitignore");
+    const apexRoot = join20(this.root, ".apex");
+    const path2 = join20(apexRoot, ".gitignore");
     await this.assertSafeDestination(apexRoot, path2);
     const current = await this.readOptional(path2);
     if (current?.toString("utf8") === APEX_GITIGNORE)
@@ -76455,9 +77351,9 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     await atomicWriteBytes(path2, Buffer.from(APEX_GITIGNORE));
   }
   async ensureWorkspaceLauncher() {
-    const apexRoot = join19(this.root, ".apex");
-    const binRoot = join19(apexRoot, "bin");
-    const launcherPath = join19(binRoot, "apex.mjs");
+    const apexRoot = join20(this.root, ".apex");
+    const binRoot = join20(apexRoot, "bin");
+    const launcherPath = join20(binRoot, "apex.mjs");
     await this.assertSafeDestination(this.root, launcherPath);
     const existing = await this.readOptional(launcherPath);
     const changed = existing?.toString("utf8") !== WORKSPACE_CLI_LAUNCHER;
@@ -76467,8 +77363,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
     if (true) {
       const pluginRoot = dirname11(dirname11(fileURLToPath3(import.meta.url)));
-      const localRoot = join19(apexRoot, "local");
-      const hintPath = join19(localRoot, "plugin-root.json");
+      const localRoot = join20(apexRoot, "local");
+      const hintPath = join20(localRoot, "plugin-root.json");
       await this.assertSafeDestination(apexRoot, hintPath);
       await mkdir11(localRoot, { recursive: true });
       await atomicWriteJson(hintPath, { pluginRoot });
@@ -76476,9 +77372,9 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return changed;
   }
   async ensureWorkspaceRuntime() {
-    const packagePath = join19(this.root, "node_modules", "@apexops", "cli", "package.json");
+    const packagePath = join20(this.root, "node_modules", "@apexops", "cli", "package.json");
     try {
-      const installed = JSON.parse(await readFile14(packagePath, "utf8"));
+      const installed = JSON.parse(await readFile15(packagePath, "utf8"));
       if (installed.version === APEX_VERSION)
         return false;
       if (typeof installed.version === "string") {
@@ -76490,13 +77386,13 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       if (error62.code !== "ENOENT")
         throw error62;
     }
-    if (await this.pathExistsLstat(join19(this.root, ".apex", "bin", "apex.mjs"))) {
+    if (await this.pathExistsLstat(join20(this.root, ".apex", "bin", "apex.mjs"))) {
       return false;
     }
     return true;
   }
   async ensureWorkspaceGitRepository(createRepository) {
-    const gitPath = join19(this.root, ".git");
+    const gitPath = join20(this.root, ".git");
     if (await this.pathExistsLstat(gitPath))
       return;
     if (!createRepository) {
@@ -76515,7 +77411,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
   }
   async localGitBoundaryCheck() {
-    const path2 = join19(this.root, ".apex", ".gitignore");
+    const path2 = join20(this.root, ".apex", ".gitignore");
     try {
       if (!await this.pathExistsLstat(path2)) {
         return {
@@ -76525,8 +77421,8 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
           remedy: "Run doctor --fix --yes to restore the APEX local Git boundary"
         };
       }
-      await this.assertSafeExistingPath(join19(this.root, ".apex"), path2);
-      const actual = await readFile14(path2);
+      await this.assertSafeExistingPath(join20(this.root, ".apex"), path2);
+      const actual = await readFile15(path2);
       const actualHash = sha256Bytes(actual);
       return {
         id: "local-git-boundary",
@@ -76544,12 +77440,12 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
   }
   async managedFileChecks() {
-    const path2 = join19(this.root, ".apex", "customizations.lock.json");
+    const path2 = join20(this.root, ".apex", "customizations.lock.json");
     try {
-      const lock = JSON.parse(await readFile14(path2, "utf8"));
+      const lock = JSON.parse(await readFile15(path2, "utf8"));
       const plugin = await readBundledPluginDeclaration();
       const workspaceFiles = lock.files.map((file2) => ({ ...file2, root: this.root }));
-      const runtimeRoot = join19(this.root, ".apex", "runtime");
+      const runtimeRoot = join20(this.root, ".apex", "runtime");
       const runtimeFiles = lock.runtime.map((file2) => ({ ...file2, root: runtimeRoot }));
       const pluginChecks = [];
       for (const file2 of lock.files.filter(({ path: filePath }) => pluginOwnsPath(plugin, filePath)))
@@ -76563,14 +77459,14 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         if (!this.safeManagedRelativePath(file2.path)) {
           throw new ApexError("APEX_VALIDATION", "Managed customization path is unsafe", EXIT_CODES.validation);
         }
-        const destination = join19(this.root, file2.path);
+        const destination = join20(this.root, file2.path);
         await this.assertSafeDestination(this.root, destination);
         if (!await this.pathExistsLstat(destination))
           continue;
         pluginChecks.push({
           id: `plugin-owned:${file2.path}`,
           ok: false,
-          value: sha256Bytes(await readFile14(destination)),
+          value: sha256Bytes(await readFile15(destination)),
           remedy: `Move or delete your edited copy; the ${plugin.name} plugin provides this file`
         });
       }
@@ -76580,7 +77476,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         }
         const destination = resolve17(file2.root, file2.path);
         await this.assertSafeDestination(file2.root, destination);
-        const actual = await this.exists(destination) ? sha256Bytes(await readFile14(destination)) : "missing";
+        const actual = await this.exists(destination) ? sha256Bytes(await readFile15(destination)) : "missing";
         const hashesValid = [file2.sourceHash, file2.baseHash, file2.currentHash].every((hash2) => /^[0-9a-f]{64}$/.test(hash2));
         return {
           id: `managed:${portableRelativePath(this.root, destination)}`,
@@ -76603,7 +77499,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async evidenceStore(kind, contentType) {
     const runtimeRoot = await this.runtimeRootForRun(await this.currentRun());
-    const defaults = JSON.parse(await readFile14(join19(runtimeRoot, "defaults.v1.json"), "utf8"));
+    const defaults = JSON.parse(await readFile15(join20(runtimeRoot, "defaults.v1.json"), "utf8"));
     const maxBytes = defaults.evidence?.budgets?.perEntryBytes;
     if (!Number.isInteger(maxBytes) || maxBytes === void 0 || maxBytes < 1)
       throw new ApexError("APEX_VALIDATION", "Runtime evidence byte budget is invalid", EXIT_CODES.validation);
@@ -76622,25 +77518,25 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   async installCustomizations(sourcePath, update, runtimeSource, repair, clientId2, plugin) {
     await this.recoverCustomizationTransaction();
     const source2 = resolve17(sourcePath);
-    const sourceStat = await lstat14(source2);
+    const sourceStat = await lstat15(source2);
     if (!sourceStat.isDirectory() || sourceStat.isSymbolicLink())
       throw new ApexError("APEX_VALIDATION", "Customizations source must be a real directory", EXIT_CODES.validation);
     await this.assertSafeExistingPath(source2, source2);
-    const lockPath = join19(this.root, ".apex", "customizations.lock.json");
+    const lockPath = join20(this.root, ".apex", "customizations.lock.json");
     let previous;
     if (update)
-      previous = JSON.parse(await readFile14(lockPath, "utf8"));
-    const transactionRoot = join19(this.root, ".apex", "local", `update-${this.idSource()}`);
+      previous = JSON.parse(await readFile15(lockPath, "utf8"));
+    const transactionRoot = join20(this.root, ".apex", "local", `update-${this.idSource()}`);
     const entries = [];
     const retired = [];
     const retained = /* @__PURE__ */ new Map();
     for (const file2 of previous?.externallyManaged?.retained ?? []) {
       if (!this.safeManagedRelativePath(file2.path))
         throw new ApexError("APEX_VALIDATION", "Managed customization path is unsafe", EXIT_CODES.validation);
-      const destination = join19(this.root, file2.path);
+      const destination = join20(this.root, file2.path);
       await this.assertSafeDestination(this.root, destination);
       if (await this.pathExistsLstat(destination))
-        retained.set(file2.path, sha256Bytes(await readFile14(destination)));
+        retained.set(file2.path, sha256Bytes(await readFile15(destination)));
     }
     const prepare = async (sourceRoot, destinationRoot, oldFiles, label2) => {
       const sourceFiles = await this.walkFiles(sourceRoot);
@@ -76655,13 +77551,13 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         if (destination !== destinationRoot && !destination.startsWith(`${destinationRoot}${sep6}`))
           throw new ApexError("APEX_VALIDATION", `${label2} destination escapes its root`, EXIT_CODES.validation);
         await this.assertSafeDestination(destinationRoot, destination);
-        const incoming = await readFile14(absoluteSource);
+        const incoming = await readFile15(absoluteSource);
         const sourceHash = sha256Bytes(incoming);
         const old = oldFiles.find((file2) => file2.path === path2);
         let output2 = incoming;
         const existed = await this.pathExistsLstat(destination);
         if (existed) {
-          const current = await readFile14(destination);
+          const current = await readFile15(destination);
           const currentHash = sha256Bytes(current);
           if (old === void 0 && currentHash !== sourceHash)
             throw new ApexError("APEX_CONFLICT", `Existing file conflicts with managed ${label2}: ${path2}`, EXIT_CODES.conflict);
@@ -76673,18 +77569,18 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
             output2 = Buffer.from(merged);
           }
         }
-        const staged = join19(transactionRoot, "incoming", label2, path2);
+        const staged = join20(transactionRoot, "incoming", label2, path2);
         await atomicWriteBytes(staged, output2);
-        const backup = existed ? join19(transactionRoot, "backup", label2, path2) : void 0;
+        const backup = existed ? join20(transactionRoot, "backup", label2, path2) : void 0;
         if (backup !== void 0)
-          await atomicWriteBytes(backup, await readFile14(destination));
+          await atomicWriteBytes(backup, await readFile15(destination));
         entries.push({ destination, staged, ...backup === void 0 ? {} : { backup }, existed });
-        const baseRef = join19(".apex", "customization-bases", sourceHash, label2, path2).split(sep6).join("/");
-        const baseDestination = join19(this.root, baseRef);
+        const baseRef = join20(".apex", "customization-bases", sourceHash, label2, path2).split(sep6).join("/");
+        const baseDestination = join20(this.root, baseRef);
         await this.assertSafeDestination(this.root, baseDestination);
         entries.push({
           destination: baseDestination,
-          staged: join19(transactionRoot, "bases", sourceHash, label2, path2),
+          staged: join20(transactionRoot, "bases", sourceHash, label2, path2),
           existed: await this.pathExistsLstat(baseDestination)
         });
         await atomicWriteBytes(entries.at(-1).staged, incoming);
@@ -76699,7 +77595,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
             retired.push(old.path);
           continue;
         }
-        const currentHash = sha256Bytes(await readFile14(destination));
+        const currentHash = sha256Bytes(await readFile15(destination));
         if (pluginOwned && currentHash !== old.currentHash && currentHash !== old.baseHash) {
           retained.set(old.path, currentHash);
           continue;
@@ -76708,14 +77604,14 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
           retired.push(old.path);
         if (currentHash !== old.currentHash && currentHash !== old.baseHash)
           throw new ApexError("APEX_CONFLICT", `Removed managed ${label2} was locally modified: ${old.path}`, EXIT_CODES.conflict);
-        const backup = join19(transactionRoot, "backup", label2, old.path);
-        await atomicWriteBytes(backup, await readFile14(destination));
+        const backup = join20(transactionRoot, "backup", label2, old.path);
+        await atomicWriteBytes(backup, await readFile15(destination));
         entries.push({ destination, backup, existed: true, remove: true });
       }
       return managed2;
     };
     const managed = await prepare(source2, this.root, previous?.files ?? [], "customization");
-    const runtime = runtimeSource === void 0 ? previous?.runtime ?? [] : await prepare(resolve17(runtimeSource), join19(this.root, ".apex", "runtime"), previous?.runtime ?? [], "runtime");
+    const runtime = runtimeSource === void 0 ? previous?.runtime ?? [] : await prepare(resolve17(runtimeSource), join20(this.root, ".apex", "runtime"), previous?.runtime ?? [], "runtime");
     let previousLockRef;
     const lockContent = {
       version: 1,
@@ -76736,10 +77632,10 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       previousLockRef = priorLockRef;
     } else if (previous !== void 0) {
       const previousHash = sha256Json(previous);
-      previousLockRef = join19(".apex", "customization-bases", "locks", `${previousHash}.json`).split(sep6).join("/");
-      const previousLockDestination = join19(this.root, previousLockRef);
+      previousLockRef = join20(".apex", "customization-bases", "locks", `${previousHash}.json`).split(sep6).join("/");
+      const previousLockDestination = join20(this.root, previousLockRef);
       if (!await this.pathExistsLstat(previousLockDestination)) {
-        const stagedPreviousLock = join19(transactionRoot, "previous-lock.json");
+        const stagedPreviousLock = join20(transactionRoot, "previous-lock.json");
         await atomicWriteJson(stagedPreviousLock, previous);
         entries.push({ destination: previousLockDestination, staged: stagedPreviousLock, existed: false });
       }
@@ -76748,25 +77644,25 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       ...lockContent,
       ...previousLockRef === void 0 ? {} : { previousLockRef }
     };
-    const stagedLock = join19(transactionRoot, "customizations.lock.json");
+    const stagedLock = join20(transactionRoot, "customizations.lock.json");
     await atomicWriteJson(stagedLock, nextLock);
     const lockExisted = await this.pathExistsLstat(lockPath);
-    const lockBackup = lockExisted ? join19(transactionRoot, "backup", "customizations.lock.json") : void 0;
+    const lockBackup = lockExisted ? join20(transactionRoot, "backup", "customizations.lock.json") : void 0;
     if (lockBackup !== void 0)
-      await atomicWriteBytes(lockBackup, await readFile14(lockPath));
+      await atomicWriteBytes(lockBackup, await readFile15(lockPath));
     entries.push({
       destination: lockPath,
       staged: stagedLock,
       ...lockBackup === void 0 ? {} : { backup: lockBackup },
       existed: lockExisted
     });
-    const transactionPath = join19(transactionRoot, "transaction.json");
+    const transactionPath = join20(transactionRoot, "transaction.json");
     await atomicWriteJson(transactionPath, {
       version: 1,
       status: "applying",
       entries
     });
-    await atomicWriteJson(join19(this.root, ".apex", "local", "customization-transaction.json"), { transactionPath });
+    await atomicWriteJson(join20(this.root, ".apex", "local", "customization-transaction.json"), { transactionPath });
     try {
       for (const [index, entry] of entries.entries()) {
         await this.customizationFailureInjector?.(index, entry.destination);
@@ -76777,7 +77673,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
           await renameWithRetry(entry.staged, entry.destination);
         }
       }
-      await rm12(join19(this.root, ".apex", "local", "customization-transaction.json"), { force: true });
+      await rm12(join20(this.root, ".apex", "local", "customization-transaction.json"), { force: true });
       await rm12(transactionRoot, { recursive: true, force: true });
       return {
         installed: managed.map(({ path: path2 }) => path2),
@@ -76786,14 +77682,14 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       };
     } catch (error62) {
       await this.rollbackCustomizationTransaction({ version: 1, status: "applying", entries });
-      await rm12(join19(this.root, ".apex", "local", "customization-transaction.json"), { force: true });
+      await rm12(join20(this.root, ".apex", "local", "customization-transaction.json"), { force: true });
       await rm12(transactionRoot, { recursive: true, force: true });
       throw error62;
     }
   }
   async installCapabilityAssets(assets) {
-    const runtimeRoot = join19(this.root, ".apex", "runtime");
-    const destination = join19(runtimeRoot, "capability-packs");
+    const runtimeRoot = join20(this.root, ".apex", "runtime");
+    const destination = join20(runtimeRoot, "capability-packs");
     await this.assertSafeExistingPath(assets.capabilityPacks, assets.capabilityPacks);
     await rm12(destination, { recursive: true, force: true });
     await cp2(assets.capabilityPacks, destination, {
@@ -76802,21 +77698,21 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       errorOnExist: true,
       force: false
     });
-    await renameWithRetry(join19(destination, "registry.v1.json"), join19(runtimeRoot, "capability-packs.registry.json"));
+    await renameWithRetry(join20(destination, "registry.v1.json"), join20(runtimeRoot, "capability-packs.registry.json"));
   }
   async recoverCustomizationTransaction() {
-    const pointer = join19(this.root, ".apex", "local", "customization-transaction.json");
+    const pointer = join20(this.root, ".apex", "local", "customization-transaction.json");
     if (this.snapshotRead.getStore() === true) {
       if (await this.pathExistsLstat(pointer))
         this.assertNotSnapshotRead();
       return;
     }
     try {
-      const { transactionPath } = JSON.parse(await readFile14(pointer, "utf8"));
-      const localRoot = join19(this.root, ".apex", "local");
+      const { transactionPath } = JSON.parse(await readFile15(pointer, "utf8"));
+      const localRoot = join20(this.root, ".apex", "local");
       const resolvedTransaction = resolve17(transactionPath);
       await this.assertSafeExistingPath(localRoot, resolvedTransaction);
-      const transaction = JSON.parse(await readFile14(resolvedTransaction, "utf8"));
+      const transaction = JSON.parse(await readFile15(resolvedTransaction, "utf8"));
       await this.rollbackCustomizationTransaction(transaction);
       await rm12(resolve17(resolvedTransaction, ".."), { recursive: true, force: true });
       await rm12(pointer, { force: true });
@@ -76829,10 +77725,10 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     for (const entry of [...transaction.entries].reverse()) {
       await this.assertSafeDestination(this.root, resolve17(entry.destination));
       if (entry.backup !== void 0 && await this.pathExistsLstat(entry.backup)) {
-        await this.assertSafeExistingPath(join19(this.root, ".apex", "local"), resolve17(entry.backup));
+        await this.assertSafeExistingPath(join20(this.root, ".apex", "local"), resolve17(entry.backup));
       }
       if (entry.existed && entry.backup !== void 0 && await this.pathExistsLstat(entry.backup))
-        await atomicWriteBytes(entry.destination, await readFile14(entry.backup));
+        await atomicWriteBytes(entry.destination, await readFile15(entry.backup));
       else if (!entry.existed)
         await rm12(entry.destination, { force: true });
     }
@@ -76850,7 +77746,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     if (!await this.pathExistsLstat(path2))
       return void 0;
     await this.assertSafeExistingPath(this.root, path2);
-    return await readFile14(path2);
+    return await readFile15(path2);
   }
   mergeText(base, local, incoming) {
     if ([base, local, incoming].some((value) => value.includes(0)))
@@ -76887,13 +77783,13 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     for (const segment of relative8(resolvedRoot, resolvedDestination).split(sep6)) {
       if (!segment)
         continue;
-      current = join19(current, segment);
+      current = join20(current, segment);
       if (await this.pathExistsLstat(current))
         await this.assertSafeExistingPath(resolvedRoot, current);
     }
   }
   async assertSafeExistingPath(root, path2) {
-    const entry = await lstat14(path2);
+    const entry = await lstat15(path2);
     if (entry.isSymbolicLink())
       throw new ApexError("APEX_VALIDATION", `Managed path contains a symlink: ${path2}`, EXIT_CODES.validation);
     const actual = await realpath8(path2);
@@ -76903,7 +77799,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async pathExistsLstat(path2) {
     try {
-      await lstat14(path2);
+      await lstat15(path2);
       return true;
     } catch (error62) {
       if (error62.code === "ENOENT")
@@ -76913,7 +77809,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async readOptional(path2) {
     try {
-      return await readFile14(path2);
+      return await readFile15(path2);
     } catch (error62) {
       if (error62.code === "ENOENT")
         return void 0;
@@ -76924,7 +77820,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     const entries = await readdir9(directory, { withFileTypes: true });
     const files2 = [];
     for (const entry of entries.sort((left, right) => left.name < right.name ? -1 : left.name > right.name ? 1 : 0)) {
-      const path2 = join19(directory, entry.name);
+      const path2 = join20(directory, entry.name);
       if (entry.isSymbolicLink())
         throw new ApexError("APEX_VALIDATION", `Customization source contains a symlink: ${path2}`, EXIT_CODES.validation);
       if (entry.isDirectory())
@@ -77200,15 +78096,15 @@ var MCP_OUTPUT_SCHEMAS = {
 };
 
 // packages/cli/dist/workspace-root.js
-import { lstat as lstat15, readFile as readFile15, realpath as realpath9 } from "node:fs/promises";
-import { basename as basename5, dirname as dirname12, isAbsolute as isAbsolute10, join as join20, resolve as resolve18 } from "node:path";
+import { lstat as lstat16, readFile as readFile16, realpath as realpath9 } from "node:fs/promises";
+import { basename as basename5, dirname as dirname12, isAbsolute as isAbsolute10, join as join21, resolve as resolve18 } from "node:path";
 function resolveGitPath(base, value) {
   return isAbsolute10(value) ? resolve18(value) : resolve18(base, value);
 }
 async function findGitDirectory(start) {
   for (let directory = resolve18(start); ; directory = dirname12(directory)) {
-    const gitPath = join20(directory, ".git");
-    const stat3 = await lstat15(gitPath).catch((error62) => {
+    const gitPath = join21(directory, ".git");
+    const stat3 = await lstat16(gitPath).catch((error62) => {
       if (error62.code === "ENOENT")
         return void 0;
       throw error62;
@@ -77216,7 +78112,7 @@ async function findGitDirectory(start) {
     if (stat3?.isDirectory() === true)
       return { gitDirectory: gitPath };
     if (stat3?.isFile() === true) {
-      const content = await readFile15(gitPath, "utf8");
+      const content = await readFile16(gitPath, "utf8");
       const match = /^gitdir:\s*(.+?)\s*$/iu.exec(content.trim());
       if (match === null) {
         throw new ApexError("APEX_WORKSPACE_UNSUPPORTED", `Unsupported git metadata at ${gitPath}; expected a gitdir pointer`, EXIT_CODES.validation);
@@ -77231,8 +78127,8 @@ async function findGitDirectory(start) {
   }
 }
 async function gitCommonDirectory(gitDirectory) {
-  const commonPath = join20(gitDirectory, "commondir");
-  const content = await readFile15(commonPath, "utf8").catch((error62) => {
+  const commonPath = join21(gitDirectory, "commondir");
+  const content = await readFile16(commonPath, "utf8").catch((error62) => {
     if (error62.code === "ENOENT")
       return void 0;
     throw error62;
@@ -77247,8 +78143,8 @@ function ignoreMissingPath(error62) {
 async function mcpWorkspaceRoot(start) {
   const initial = resolve18(start);
   for (let directory = initial; ; directory = dirname12(directory)) {
-    const apex = await lstat15(join20(directory, ".apex")).catch(ignoreMissingPath);
-    const repository = await lstat15(join20(directory, ".git")).catch(ignoreMissingPath);
+    const apex = await lstat16(join21(directory, ".apex")).catch(ignoreMissingPath);
+    const repository = await lstat16(join21(directory, ".git")).catch(ignoreMissingPath);
     if (apex?.isDirectory() === true && (directory === initial || repository !== void 0))
       return directory;
     if (repository !== void 0 || dirname12(directory) === directory)
@@ -77257,7 +78153,7 @@ async function mcpWorkspaceRoot(start) {
 }
 async function resolveMcpWorkspace(start) {
   const workspace = await realpath9(start);
-  const stat3 = await lstat15(workspace);
+  const stat3 = await lstat16(workspace);
   if (!stat3.isDirectory()) {
     throw new ApexError("APEX_VALIDATION", "workspace must be an existing directory", EXIT_CODES.validation);
   }
@@ -77269,118 +78165,6 @@ async function resolveMcpWorkspace(start) {
     throw new ApexError("APEX_WORKSPACE_UNSUPPORTED", `Unsupported git common directory ${commonDirectory}; pass a non-bare checkout or worktree with a standard .git common directory`, EXIT_CODES.validation);
   }
   return { workspace, root: dirname12(commonDirectory) };
-}
-
-// packages/cli/dist/runtime-binding.js
-import { lstat as lstat16, readFile as readFile16 } from "node:fs/promises";
-import { join as join21 } from "node:path";
-var WORKSPACE_RUNTIME_LOCK = ".apex/apex.lock.json";
-var MAX_LOCK_BYTES = 64 * 1024;
-var MAX_VERSION_LENGTH = 128;
-var IDENTIFIER2 = String.raw`(?:0|[1-9]\d*|\d*[A-Za-z-][0-9A-Za-z-]*)`;
-var SEMVER = new RegExp(String.raw`^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)(?:-(${IDENTIFIER2}(?:\.${IDENTIFIER2})*))?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$`, "u");
-function parseVersion(version2) {
-  if (version2.length > MAX_VERSION_LENGTH)
-    return void 0;
-  const match = SEMVER.exec(version2);
-  if (match === null)
-    return void 0;
-  return {
-    core: [match[1], match[2], match[3]],
-    prerelease: match[4] === void 0 ? [] : match[4].split(".")
-  };
-}
-function compareNumeric(left, right) {
-  if (left.length !== right.length)
-    return left.length < right.length ? -1 : 1;
-  return left === right ? 0 : left < right ? -1 : 1;
-}
-function compareRuntimeVersions(left, right) {
-  const a = parseVersion(left);
-  const b = parseVersion(right);
-  if (a === void 0 || b === void 0)
-    throw new Error("Runtime versions must be SemVer");
-  for (let index = 0; index < 3; index += 1) {
-    const order = compareNumeric(a.core[index], b.core[index]);
-    if (order !== 0)
-      return order;
-  }
-  if (a.prerelease.length === 0 || b.prerelease.length === 0)
-    return a.prerelease.length === b.prerelease.length ? 0 : a.prerelease.length === 0 ? 1 : -1;
-  for (let index = 0; index < Math.max(a.prerelease.length, b.prerelease.length); index += 1) {
-    const x = a.prerelease[index];
-    const y = b.prerelease[index];
-    if (x === void 0)
-      return -1;
-    if (y === void 0)
-      return 1;
-    if (x === y)
-      continue;
-    const xNumeric = /^\d+$/u.test(x);
-    const yNumeric = /^\d+$/u.test(y);
-    if (xNumeric && yNumeric)
-      return compareNumeric(x, y);
-    if (xNumeric !== yNumeric)
-      return xNumeric ? -1 : 1;
-    return x < y ? -1 : 1;
-  }
-  return 0;
-}
-async function lockedRuntimeVersion(path2) {
-  let stats;
-  try {
-    stats = await lstat16(path2);
-  } catch (error62) {
-    if (error62.code === "ENOENT")
-      return void 0;
-    return null;
-  }
-  if (!stats.isFile() || stats.size > MAX_LOCK_BYTES)
-    return null;
-  try {
-    const lock = JSON.parse(await readFile16(path2, "utf8"));
-    if (lock === null || typeof lock !== "object" || Array.isArray(lock))
-      return null;
-    const version2 = lock.cliVersion;
-    return typeof version2 === "string" && parseVersion(version2) !== void 0 ? version2 : null;
-  } catch {
-    return null;
-  }
-}
-async function workspaceRuntimeBinding(root, runtimeVersion = APEX_VERSION) {
-  const workspaceRuntimeVersion = await lockedRuntimeVersion(join21(root, WORKSPACE_RUNTIME_LOCK));
-  if (workspaceRuntimeVersion === void 0)
-    return { state: "uninitialized" };
-  if (workspaceRuntimeVersion === runtimeVersion)
-    return { state: "match", runtimeVersion };
-  if (workspaceRuntimeVersion === null)
-    return { state: "mismatch", reason: "RUNTIME_LOCK_INVALID", runtimeVersion, workspaceRuntimeVersion };
-  return {
-    state: "mismatch",
-    // Versions that differ only in build metadata have equal precedence; neither side is older, so the workspace
-    // keeps its version and the runtime must match it.
-    reason: compareRuntimeVersions(workspaceRuntimeVersion, runtimeVersion) < 0 ? "RUNTIME_WORKSPACE_OLDER" : "RUNTIME_WORKSPACE_NEWER",
-    runtimeVersion,
-    workspaceRuntimeVersion
-  };
-}
-function runtimeMismatchError(binding) {
-  const { reason, runtimeVersion, workspaceRuntimeVersion } = binding;
-  const message = workspaceRuntimeVersion === null ? `The workspace runtime lock ${WORKSPACE_RUNTIME_LOCK} has no valid cliVersion; this APEX runtime is @apexops/cli@${runtimeVersion}` : `The workspace runtime lock names @apexops/cli@${workspaceRuntimeVersion}, ${reason === "RUNTIME_WORKSPACE_OLDER" ? "older" : "newer"} than this APEX runtime @apexops/cli@${runtimeVersion}`;
-  return new ApexError("APEX_RUNTIME_MISMATCH", message, EXIT_CODES.conflict, {
-    reason,
-    runtimeVersion,
-    workspaceRuntimeVersion
-  });
-}
-function runtimeMismatchStatus(binding) {
-  return {
-    status: "runtime_mismatch",
-    reason: binding.reason,
-    runtimeVersion: binding.runtimeVersion,
-    workspaceRuntimeVersion: binding.workspaceRuntimeVersion,
-    nextAction: remediationForApexError(runtimeMismatchError(binding))
-  };
 }
 
 // packages/cli/dist/mcp.js
@@ -78976,11 +79760,34 @@ var SAFE_POLICY_ASSERTIONS = /* @__PURE__ */ new Map([
 function safeRelativePath2(path2) {
   return path2.length > 0 && !isAbsolute12(path2) && !path2.includes("\\") && path2 !== "." && path2 !== ".." && !path2.startsWith("../") && posix2.normalize(path2) === path2;
 }
+var ALLOWED_WORK_SOURCE_SUFFIXES = [
+  ".terraform.lock.hcl",
+  ".tfvars.example",
+  ".bicep",
+  ".json",
+  ".tf",
+  ".md",
+  ".yaml"
+];
+function isAllowedWorkSourcePath(path2, runId) {
+  const prefix = `work/${runId}/`;
+  if (!path2.startsWith(prefix))
+    return false;
+  const rest = path2.slice(prefix.length).split("/");
+  if (rest.length < 3 || rest[1] !== "code" || !IDENTIFIER_PATTERN.test(rest[0]))
+    return false;
+  const codeSegments = rest.slice(2);
+  if (codeSegments.some((segment) => segment.length === 0 || segment.startsWith(".") && segment !== ".terraform.lock.hcl")) {
+    return false;
+  }
+  const relativeCodePath = codeSegments.join("/");
+  return ALLOWED_WORK_SOURCE_SUFFIXES.some((suffix) => relativeCodePath.endsWith(suffix));
+}
 function prohibitedStatePath(path2) {
-  if (path2.split("/").some((part) => part.startsWith(".run-mutation.") || part === ".run-transaction.json" || part === ".run-writer-lease.json" || part === REPEAT_GUARD_FILE)) {
+  if (path2.split("/").some((part) => part === ".terraform" || part === ".azure" || part === ".env" || part.startsWith(".env.") || part.startsWith(".run-mutation.") || part === ".run-transaction.json" || part === ".run-writer-lease.json" || part === REPEAT_GUARD_FILE)) {
     return true;
   }
-  return /(?:^|\/)(?:credentials?(?:\.json)?|terraform\.tfstate(?:\.[^/]*)?|[^/]+\.tfplan(?:\.enc)?|state-plans?)(?:\/|$)/i.test(path2);
+  return /(?:^|\/)(?:credentials?(?:\.json)?|terraform\.tfstate(?:\.[^/]*)?|[^/]+\.tfplan(?:\.enc)?|[^/]+\.tfvars(?:\.json)?|state-plans?)(?:\/|$)/i.test(path2);
 }
 function requireIdentifier(value, label2) {
   if (typeof value !== "string" || !IDENTIFIER_PATTERN.test(value))
@@ -79045,12 +79852,14 @@ async function readOptionalRegular(path2, label2) {
     throw error62;
   }
 }
-async function walkRegularFiles(root, directory = root) {
+async function walkRegularFiles(root, directory = root, options = {}) {
   const files2 = [];
   for (const entry of await readdir11(directory, { withFileTypes: true })) {
     const path2 = join24(directory, entry.name);
     if (entry.isSymbolicLink())
       throw new Error(`State transfer source contains a symlink: ${path2}`);
+    if (entry.isDirectory() && options.skipDirectories?.has(entry.name) === true)
+      continue;
     if (directory === root) {
       if (entry.name === ".run-writer-lease.json" || entry.name === REPEAT_GUARD_FILE)
         continue;
@@ -79062,7 +79871,7 @@ async function walkRegularFiles(root, directory = root) {
       }
     }
     if (entry.isDirectory())
-      files2.push(...await walkRegularFiles(root, path2));
+      files2.push(...await walkRegularFiles(root, path2, options));
     else if (entry.isFile())
       files2.push(relative11(root, path2).split(sep8).join("/"));
     else
@@ -79095,13 +79904,47 @@ async function collectObjectClosure(apexRoot, seedFiles) {
   }
   return objects;
 }
+function hasSecretTextAssignment(text5) {
+  for (const rawLine of text5.split(/\r?\n/u)) {
+    const line = rawLine.trim();
+    if (line.length === 0 || line.startsWith("#") || line.startsWith("//"))
+      continue;
+    const match = /^(?:export\s+|param\s+|var\s+)?['"]?([A-Za-z_][A-Za-z0-9_-]*)['"]?(?:\s+[A-Za-z]+)?\s*(?:=|:)\s*(.+?)\s*,?$/u.exec(line);
+    if (match === null)
+      continue;
+    const [, key, rawValue] = match;
+    const value = rawValue.trim();
+    if (!isSecretBearingField(key, value === "true" || value === "false" ? value === "true" : value))
+      continue;
+    if (value.length > 0 && value !== "null" && value !== "false" && value !== "true" && value !== '""' && value !== "''" && value !== "{}" && value !== "[]") {
+      return true;
+    }
+  }
+  return false;
+}
+function validateEntrySafety(bytes, path2) {
+  if (path2 === ".gitignore") {
+    const text5 = bytes.toString("utf8");
+    if (SECRET_VALUE_PATTERN.test(text5) || hasSecretTextAssignment(text5)) {
+      throw new Error(`State transfer contains secret-bearing text in ${path2}`);
+    }
+    return;
+  }
+  if (path2.startsWith("work/") && !path2.endsWith(".json")) {
+    const text5 = bytes.toString("utf8");
+    if (SECRET_VALUE_PATTERN.test(text5) || hasSecretTextAssignment(text5)) {
+      throw new Error(`State transfer contains secret-bearing text in ${path2}`);
+    }
+    return;
+  }
+  validateJsonSafety(bytes, path2);
+}
 function bundleFile2(path2, bytes) {
   if (!safeRelativePath2(path2))
     throw new Error(`Unsafe state transfer path: ${path2}`);
   if (prohibitedStatePath(path2))
     throw new Error(`State transfer path is prohibited: ${path2}`);
-  if (path2 !== ".gitignore")
-    validateJsonSafety(bytes, path2);
+  validateEntrySafety(bytes, path2);
   return { path: path2, bytes: bytes.byteLength, sha256: sha256Bytes(bytes), content: bytes.toString("base64") };
 }
 async function currentState(root, claimHash, recipient, now) {
@@ -79174,6 +80017,20 @@ async function createStateTransferBundle(root, options, now = /* @__PURE__ */ ne
   for (const path2 of await walkRegularFiles(runRoot)) {
     paths.add(`projects/${state.selection.projectId}/runs/${state.selection.runId}/${path2}`);
   }
+  const workRoot = join24(state.apexRoot, "work", state.selection.runId);
+  try {
+    for (const path2 of await walkRegularFiles(workRoot, workRoot, {
+      skipDirectories: /* @__PURE__ */ new Set([".terraform", ".azure"])
+    })) {
+      const candidate = `work/${state.selection.runId}/${path2}`;
+      if (!prohibitedStatePath(candidate) && isAllowedWorkSourcePath(candidate, state.selection.runId)) {
+        paths.add(candidate);
+      }
+    }
+  } catch (error62) {
+    if (error62.code !== "ENOENT")
+      throw error62;
+  }
   const sourceFiles = [];
   for (const path2 of [...paths].sort()) {
     let sourcePath = join24(state.apexRoot, ...path2.split("/"));
@@ -79240,7 +80097,7 @@ function allowedBundlePath(path2, bindings) {
   if (prohibitedStatePath(path2))
     return false;
   const runPrefix = `projects/${bindings.projectId}/runs/${bindings.runId}/`;
-  return path2 === ".gitignore" || path2 === "config.json" || path2 === "apex.lock.json" || /^runtime\/[^/]+\.json$/.test(path2) || path2 === `projects/${bindings.projectId}/project.json` || path2.startsWith(runPrefix) || /^objects\/sha256\/[0-9a-f]{2}\/[0-9a-f]{62}$/.test(path2);
+  return path2 === ".gitignore" || path2 === "config.json" || path2 === "apex.lock.json" || /^runtime\/[^/]+\.json$/.test(path2) || path2 === `projects/${bindings.projectId}/project.json` || path2.startsWith(runPrefix) || isAllowedWorkSourcePath(path2, bindings.runId) || /^objects\/sha256\/[0-9a-f]{2}\/[0-9a-f]{62}$/.test(path2);
 }
 function decodeEntry(entry, bindings) {
   if (!safeRelativePath2(entry.path) || !allowedBundlePath(entry.path, bindings)) {
@@ -79260,8 +80117,7 @@ function decodeEntry(entry, bindings) {
   if (objectMatch !== null && `${objectMatch[1]}${objectMatch[2]}` !== entry.sha256) {
     throw new Error(`State transfer object path does not match its content: ${entry.path}`);
   }
-  if (entry.path !== ".gitignore")
-    validateJsonSafety(bytes, entry.path);
+  validateEntrySafety(bytes, entry.path);
   return bytes;
 }
 function validateJournal(entries, bindings) {
@@ -79833,26 +80689,37 @@ async function onboardingConfig(flags, _root) {
   }
   return config2;
 }
-async function configuredProviders(root, flags) {
-  const persistedPath = join26(root, ".apex", "provider-config.json");
-  const explicitPath = typeof flags["provider-config"] === "string" ? resolve22(flags["provider-config"]) : void 0;
-  let config2;
+async function activeRunProviderContext(root) {
   try {
-    config2 = JSON.parse(await readFile20(explicitPath ?? persistedPath, "utf8"));
-  } catch (error62) {
-    if (error62.code === "ENOENT")
-      return {};
-    throw error62;
+    const selection2 = JSON.parse(await readFile20(join26(root, ".apex", "config.json"), "utf8"));
+    if (selection2 === null || typeof selection2 !== "object" || typeof selection2.projectId !== "string" || selection2.projectId.length === 0 || typeof selection2.runId !== "string" || selection2.runId.length === 0) {
+      return void 0;
+    }
+    const runDirectory = join26(root, ".apex", "projects", selection2.projectId, "runs", selection2.runId);
+    const run = parseRunConfig(await readFile20(join26(runDirectory, "run.json"), "utf8"));
+    const project = await new ProjectStore(root).getProject(selection2.projectId);
+    const events = await new EventJournal(join26(runDirectory, "journal")).replay();
+    let handoffHash;
+    for (const event of events) {
+      if (event.type === "task.completed") {
+        const payload = event.payload;
+        const candidate = payload.artifactHashes?.["iac-handoff"] ?? payload.outputHashes?.["iac-handoff"];
+        if (typeof candidate === "string")
+          handoffHash = candidate;
+      }
+    }
+    const handoff2 = handoffHash === void 0 ? void 0 : await new ObjectStore(root).getJson(handoffHash);
+    return {
+      run,
+      ...handoff2 === void 0 ? {} : { handoffRootPath: handoff2.rootPath },
+      riskOwner: project.riskOwner
+    };
+  } catch {
+    return void 0;
   }
-  assertSecretFreeConfig(config2);
-  if (explicitPath !== void 0) {
-    await mkdir14(join26(root, ".apex"), { recursive: true });
-    await atomicWriteJson(persistedPath, config2);
-  }
-  const runner = new ProcessRunner();
-  let providerRuntime;
-  const runtime = async () => providerRuntime ??= await createFileProviderRuntime(root);
-  const currentAuthority = async () => {
+}
+function makeProviderAuthorityReader(root) {
+  return async () => {
     const selection2 = JSON.parse(await readFile20(join26(root, ".apex", "config.json"), "utf8"));
     const runDirectory = join26(root, ".apex", "projects", selection2.projectId, "runs", selection2.runId);
     const run = parseRunConfig(await readFile20(join26(runDirectory, "run.json"), "utf8"));
@@ -79896,50 +80763,84 @@ async function configuredProviders(root, flags) {
       ...delegationAuthority
     };
   };
-  const providers = {};
+}
+async function validateProviderConfig(root, config2, context) {
+  assertSecretFreeConfig(config2);
+  const validated = {};
   if (config2.bicep !== void 0) {
     const value = config2.bicep;
     for (const key of Object.keys(value)) {
       if (!["cwd", "environmentName", "tenantId", "location", "cloud", "riskOwner", "resourceGroupTags"].includes(key))
         throw new ApexError("APEX_USAGE", `Bicep provider config does not support '${key}'; azd is the only Bicep executor and Deployment Stacks are not supported`, EXIT_CODES.usage);
     }
+    const cwd = value.cwd ?? context?.handoffRootPath;
+    const environmentName = value.environmentName ?? context?.run.environment;
+    const riskOwnerValue = value.riskOwner ?? context?.riskOwner;
+    const resolvedFields = { cwd, environmentName, tenantId: value.tenantId, location: value.location };
     for (const key of ["cwd", "environmentName", "tenantId", "location"]) {
-      if (typeof value[key] !== "string" || value[key].length === 0)
+      if (typeof resolvedFields[key] !== "string" || resolvedFields[key].length === 0)
         throw new ApexError("APEX_USAGE", `Bicep provider config requires ${key}`, EXIT_CODES.usage);
     }
+    validated.bicep = {
+      projectRoot: resolve22(root, cwd),
+      environmentName,
+      tenantId: value.tenantId,
+      location: value.location,
+      ...value.cloud === void 0 ? {} : { cloud: value.cloud },
+      ...riskOwnerValue === void 0 ? {} : { riskOwner: riskOwnerValue },
+      ...value.resourceGroupTags === void 0 ? {} : { resourceGroupTags: value.resourceGroupTags }
+    };
+  }
+  if (config2.terraform !== void 0) {
+    const value = config2.terraform;
+    const cwd = value.cwd ?? context?.handoffRootPath;
+    const target = value.target ?? context?.run.targetScope;
+    const planDirectory = value.planDirectory ?? (context !== void 0 ? ".apex/local/terraform-plans" : void 0);
+    const requiredFields = { cwd, target, planDirectory };
+    for (const key of ["cwd", "target", "planDirectory"]) {
+      if (typeof requiredFields[key] !== "string" || requiredFields[key].length === 0)
+        throw new ApexError("APEX_USAGE", `Terraform provider config requires ${key}`, EXIT_CODES.usage);
+    }
+    if (context === void 0 && (typeof value.lockfileHash !== "string" || value.lockfileHash.length === 0)) {
+      throw new ApexError("APEX_USAGE", "Terraform provider config requires lockfileHash", EXIT_CODES.usage);
+    }
+    const terraformRoot = resolve22(root, cwd);
+    const actualLockfileHash = await hashTerraformLockFile(terraformRoot);
+    if (value.lockfileHash !== void 0 && value.lockfileHash.length > 0 && actualLockfileHash !== value.lockfileHash) {
+      throw new ApexError("APEX_STALE", `Terraform lockfileHash is stale: expected ${value.lockfileHash}, found ${actualLockfileHash}`, EXIT_CODES.stale);
+    }
+    validated.terraform = {
+      terraformRoot,
+      target,
+      planDirectory,
+      actualLockfileHash,
+      ...value.configHash === void 0 ? {} : { configHashValue: value.configHash }
+    };
+  }
+  return validated;
+}
+async function instantiateConfiguredProviders(root, config2, runner, runtime, currentAuthority, context) {
+  const validated = await validateProviderConfig(root, config2, context);
+  const providers = {};
+  if (validated.bicep !== void 0) {
     const localRuntime = await runtime();
     providers.bicep = new AzdBicepProvider({
       runner,
       currentAuthority,
       bindingStore: localRuntime.bindingStores.bicep,
       target: {
-        projectRoot: resolve22(root, value.cwd),
-        environmentName: value.environmentName,
-        tenantId: value.tenantId,
-        location: value.location,
-        azdVersion: (await bundledToolchainMinimums()).azd,
-        ...value.cloud === void 0 ? {} : { cloud: value.cloud },
-        ...value.riskOwner === void 0 ? {} : { riskOwner: value.riskOwner },
-        ...value.resourceGroupTags === void 0 ? {} : { resourceGroupTags: value.resourceGroupTags }
+        ...validated.bicep,
+        azdVersion: (await bundledToolchainMinimums()).azd
       }
     });
   }
-  if (config2.terraform !== void 0) {
-    const value = config2.terraform;
-    for (const key of ["cwd", "target", "planDirectory", "lockfileHash"]) {
-      if (typeof value[key] !== "string" || value[key].length === 0)
-        throw new ApexError("APEX_USAGE", `Terraform provider config requires ${key}`, EXIT_CODES.usage);
-    }
+  if (validated.terraform !== void 0) {
     const localRuntime = await runtime();
-    const terraformRoot = resolve22(root, value.cwd);
-    const actualLockfileHash = await hashTerraformLockFile(terraformRoot);
-    if (actualLockfileHash !== value.lockfileHash) {
-      throw new ApexError("APEX_STALE", `Terraform lockfileHash is stale: expected ${value.lockfileHash}, found ${actualLockfileHash}`, EXIT_CODES.stale);
-    }
+    const { terraformRoot, target, planDirectory, actualLockfileHash, configHashValue } = validated.terraform;
     const configHash = async () => {
       const actual = await hashTerraformConfiguration(terraformRoot);
-      if (value.configHash !== void 0 && value.configHash !== actual) {
-        throw new ApexError("APEX_STALE", `Terraform configHash is stale: expected ${value.configHash}, found ${actual}`, EXIT_CODES.stale);
+      if (configHashValue !== void 0 && configHashValue !== actual) {
+        throw new ApexError("APEX_STALE", `Terraform configHash is stale: expected ${configHashValue}, found ${actual}`, EXIT_CODES.stale);
       }
       return actual;
     };
@@ -79950,15 +80851,83 @@ async function configuredProviders(root, flags) {
       artifactStore: localRuntime.artifactStore,
       keyProvider: localRuntime.keyProvider,
       target: {
-        cwd: value.cwd,
-        target: value.target,
+        cwd: terraformRoot,
+        target,
         lockfileHash: actualLockfileHash,
         configHash,
-        planPath: (request, operation) => join26(value.planDirectory, `${request.runId}-${operation}.tfplan`)
+        planPath: (request, operation) => join26(resolve22(root, planDirectory), `${request.runId}-${operation}.tfplan`)
       }
     });
   }
   return providers;
+}
+async function prepareProviderRegistry(root, flags, command) {
+  const persistedPath = join26(root, ".apex", "provider-config.json");
+  const explicitPath = typeof flags["provider-config"] === "string" ? resolve22(flags["provider-config"]) : void 0;
+  const runner = new ProcessRunner();
+  let providerRuntime;
+  const runtime = async () => providerRuntime ??= await createFileProviderRuntime(root);
+  const currentAuthority = makeProviderAuthorityReader(root);
+  let validatedExplicitConfig;
+  if (explicitPath !== void 0) {
+    const raw = JSON.parse(await readFile20(explicitPath, "utf8"));
+    const initialContext = await activeRunProviderContext(root);
+    await validateProviderConfig(root, raw, initialContext);
+    validatedExplicitConfig = raw;
+  }
+  const persistExplicitConfig = validatedExplicitConfig === void 0 ? void 0 : async () => {
+    await mkdir14(join26(root, ".apex"), { recursive: true });
+    await atomicWriteJson(persistedPath, validatedExplicitConfig);
+  };
+  if (persistExplicitConfig !== void 0 && command !== "init" && !command.startsWith("bootstrap")) {
+    await persistExplicitConfig();
+  }
+  const providerResolver = async (track, context) => {
+    let config2;
+    try {
+      config2 = JSON.parse(await readFile20(explicitPath ?? persistedPath, "utf8"));
+    } catch (error62) {
+      if (error62.code !== "ENOENT")
+        throw error62;
+    }
+    if (config2 !== void 0) {
+      const configured = await instantiateConfiguredProviders(root, config2, runner, runtime, currentAuthority, context);
+      if (configured[track] !== void 0)
+        return configured[track];
+    }
+    if (context.sourceValidationOnly === true && context.handoffRootPath !== void 0) {
+      const sourceRoot = resolve22(root, context.handoffRootPath);
+      if (track === "bicep") {
+        return new AzdBicepProvider({
+          runner,
+          currentAuthority,
+          target: {
+            projectRoot: sourceRoot,
+            environmentName: context.run.environment,
+            tenantId: "",
+            location: "",
+            azdVersion: (await bundledToolchainMinimums()).azd
+          }
+        });
+      }
+      return new NativeTerraformProvider({
+        runner,
+        currentAuthority,
+        target: {
+          cwd: sourceRoot,
+          target: context.run.targetScope,
+          lockfileHash: "",
+          configHash: async () => "",
+          planPath: (request, operation) => join26(root, ".apex", "local", "terraform-plans", `${request.runId}-${operation}.tfplan`)
+        }
+      });
+    }
+    return void 0;
+  };
+  return {
+    providerResolver,
+    ...persistExplicitConfig !== void 0 && (command === "init" || command.startsWith("bootstrap")) ? { persistExplicitConfig } : {}
+  };
 }
 function assertSecretFreeConfig(value, path2 = "provider-config") {
   if (Array.isArray(value)) {
@@ -80036,11 +81005,12 @@ async function qualityStatus(root) {
     throw error62;
   }
 }
-async function createApexService(root, flags = {}, command = "", options = {}) {
+async function createApexServiceWithRegistry(root, flags = {}, command = "", options = {}) {
   const runner = new ProcessRunner();
-  return new ApexService(root, {
+  const registry2 = await prepareProviderRegistry(root, flags, command);
+  const service = new ApexService(root, {
     ...options,
-    providers: { ...options.providers, ...await configuredProviders(root, flags) },
+    providerResolver: options.providerResolver ?? registry2.providerResolver,
     azureAuthStatus: options.azureAuthStatus ?? (async (live) => {
       if (!live || command !== "setup")
         return { authenticated: false, detail: "not-checked; run setup --live" };
@@ -80061,32 +81031,80 @@ async function createApexService(root, flags = {}, command = "", options = {}) {
       }
     })
   });
+  return {
+    service,
+    ...registry2.persistExplicitConfig === void 0 ? {} : { persistExplicitConfig: registry2.persistExplicitConfig }
+  };
+}
+async function createApexService(root, flags = {}, command = "", options = {}) {
+  const { service, persistExplicitConfig } = await createApexServiceWithRegistry(root, flags, command, options);
+  await persistExplicitConfig?.();
+  return service;
 }
 function mcpServiceResolver(defaultService, create) {
-  const cache = /* @__PURE__ */ new Map([[defaultService.root, defaultService]]);
+  const keyOf = (root, workspacePath) => `${root}\0${workspacePath}`;
+  const cache = /* @__PURE__ */ new Map([
+    [keyOf(defaultService.root, defaultService.currentWorkspacePath()), defaultService]
+  ]);
   const peers = () => cache.values();
   defaultService.setReviewGuardPeers(peers);
   return {
     defaultService,
     resolve: async (workspace) => {
       const resolved = await resolveMcpWorkspace(workspace);
-      let resolvedService = cache.get(resolved.root);
+      const cacheKey = keyOf(resolved.root, resolved.workspace);
+      let resolvedService = cache.get(cacheKey);
       if (resolvedService === void 0) {
         resolvedService = await create(resolved.root, resolved.workspace);
         resolvedService.setReviewGuardPeers(peers);
-        cache.set(resolved.root, resolvedService);
+        cache.set(cacheKey, resolvedService);
       }
       return { service: resolvedService, workspace: resolved.workspace };
     }
   };
 }
+async function resolveCliWorkspace(start, command, options) {
+  if (command === "mcp serve") {
+    return { root: await realpath11(await mcpWorkspaceRoot(start)), options };
+  }
+  const localApex = await lstat20(join26(start, ".apex")).catch(() => void 0);
+  if (localApex?.isDirectory() === true)
+    return { root: start, options };
+  if (command === "init" || command.startsWith("bootstrap")) {
+    const localGit = await lstat20(join26(start, ".git")).catch(() => void 0);
+    if (localGit?.isFile() !== true)
+      return { root: start, options };
+  }
+  try {
+    const resolved = await resolveMcpWorkspace(start);
+    const resolvedApex = await lstat20(join26(resolved.root, ".apex")).catch(() => void 0);
+    if (resolved.root !== resolved.workspace || resolvedApex?.isDirectory() === true) {
+      return {
+        root: resolved.root,
+        options: { workspacePath: resolved.workspace, ...options }
+      };
+    }
+  } catch (error62) {
+    if (command === "doctor" || command === "version")
+      return { root: start, options };
+    if (error62.code === "ENOENT")
+      return { root: start, options };
+    throw error62;
+  }
+  return { root: start, options };
+}
 async function execute2(argv, root = process.cwd(), options = {}, interaction = {}) {
   const { words, flags } = parse3(argv);
   const command = words.join(" ");
-  if (command === "mcp serve")
-    root = await realpath11(await mcpWorkspaceRoot(root));
-  const service = await createApexService(root, flags, command, options);
-  const run = () => dispatch(service, command, flags, root, options, interaction);
+  const resolved = await resolveCliWorkspace(root, command, options);
+  root = resolved.root;
+  options = resolved.options;
+  const { service, persistExplicitConfig } = await createApexServiceWithRegistry(root, flags, command, options);
+  const run = async () => {
+    const output2 = await dispatch(service, command, flags, root, options, interaction);
+    await persistExplicitConfig?.();
+    return output2;
+  };
   if (UNSERIALIZED_COMMANDS.has(command))
     return run();
   return service.withWorkspaceWriteLock(run, void 0, { suspendable: true });
@@ -80431,6 +81449,9 @@ Confirm that this exact resource-group scope is yours to authorize and the workl
       return service.acceptWriterTransfer(required2(flags, "claim"), required2(flags, "recipient"), required2(flags, "head"));
     case "writer show":
       return service.currentWriter();
+    case "release-writer":
+    case "writer release":
+      return service.releaseWriter();
     case "evidence accept":
       return service.acceptEvidence({
         kind: required2(flags, "kind"),

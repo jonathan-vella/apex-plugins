@@ -1,7 +1,7 @@
 {
   "version": 1,
   "sources": {
-    "customizations": "0.11.0-next.11",
+    "customizations": "0.11.0-next.12",
     "config": "1.0.0"
   },
   "composition": {
@@ -577,7 +577,7 @@
         "path": "config/runtime-bundle.v1.json",
         "mapping": "config"
       },
-      "sha256": "12b6761372599f8f8c8be06bf9f5eec6eb926c1d98b9b193770441af453ebacf",
+      "sha256": "4cb0c11fbf483ea5164bae0a37849cdcf40a2493c7046f6bc997d01ece6be864",
       "bytes": 2046
     },
     {
@@ -627,8 +627,8 @@
         "path": "customizations/.github/agents/apex.agent.md",
         "mapping": "customizations"
       },
-      "sha256": "600ebd39bb84340fefa6cae41dc1ecb9b02de27ba73572df6331ec6464dc0659",
-      "bytes": 12082
+      "sha256": "e084b9148e90361f480e7d9445c70667e2df8268cc263052e6867b1901ca154f",
+      "bytes": 10433
     },
     {
       "path": "customizations/.github/copilot-instructions.md",
@@ -5687,8 +5687,8 @@
         "path": "customizations/.github/skills/apex-next/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "c53c39261b87630ed8b1e068088bd5dc383f16fe87fe8a48181bee1a3c990e44",
-      "bytes": 8650
+      "sha256": "dbe249ac0238b27ac2088890405ba32d80f4036d4353865e80c9ee5ca45dcf25",
+      "bytes": 8827
     },
     {
       "path": "customizations/.github/skills/apex-operations/SKILL.md",
@@ -5697,8 +5697,8 @@
         "path": "customizations/.github/skills/apex-operations/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "addcdadb55517e9555893fc8c6d5c046c4dec7c5eb897b041644165d45c0edbe",
-      "bytes": 6675
+      "sha256": "03843c4a95b7d5fcd7254dc208c7fd11a9b3dea184931586f8dad2138dc96e77",
+      "bytes": 8727
     },
     {
       "path": "customizations/.github/skills/apex-planning/SKILL.md",
@@ -6317,7 +6317,7 @@
         "path": "customizations/manifest.json",
         "mapping": "customizations"
       },
-      "sha256": "1b262a05b2a1d8bc2747de696b2548170359836b9e5bebd62248a036fe8f087e",
+      "sha256": "832fb54c3dcc8bd4b0a1b5f51fbc9c841f17c3bfedf5bce814732d35cdd6ac71",
       "bytes": 51004
     },
     {
@@ -6354,6 +6354,6 @@
   "lock": {
     "algorithm": "sha256",
     "canonicalization": "apex-bundled-assets-v1",
-    "digest": "5bef566b28aa9e1acf359eb9ec7fef881c67c96b4cd074711a954d63b8d06b29"
+    "digest": "bae34ce087e9fcaee52403a76bee21a11367ff770765841ebe40f73642f15445"
   }
 }
