@@ -1,7 +1,7 @@
 {
   "version": 1,
   "sources": {
-    "customizations": "0.11.0-next.13",
+    "customizations": "0.11.0-next.14",
     "config": "1.0.0"
   },
   "composition": {
@@ -577,7 +577,7 @@
         "path": "config/runtime-bundle.v1.json",
         "mapping": "config"
       },
-      "sha256": "eb3393ec9d28b90eaf8981856ad7aa0ef674dc74c2692b13e1de320572a2ada5",
+      "sha256": "2a26fe18ec5117c218fe173e42b0b9b13ffb4d9361f944dae736ea4cebcc4a43",
       "bytes": 2046
     },
     {
@@ -627,8 +627,8 @@
         "path": "customizations/.github/agents/apex.agent.md",
         "mapping": "customizations"
       },
-      "sha256": "c3e8a36f3d955396fde764120176ce700f88278602ef16bed7d204605c2db33c",
-      "bytes": 10654
+      "sha256": "65b43c52c57ddfdb12ef5c02ab8d2a2c400b64a0b7430a0de5b5cb6f43215d66",
+      "bytes": 11032
     },
     {
       "path": "customizations/.github/copilot-instructions.md",
@@ -867,8 +867,8 @@
         "path": "customizations/.github/skills/apex-architecture/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "36a55b17da0c645b644641363a7dc3590b7d3eba9f0bd1c55b6462cabd480894",
-      "bytes": 13088
+      "sha256": "f1c87cb4732849dea6e36790c6d4fc8c84498b30c826d18e91bd27f300f7063f",
+      "bytes": 13805
     },
     {
       "path": "customizations/.github/skills/apex-artifacts/SKILL.md",
@@ -5687,8 +5687,8 @@
         "path": "customizations/.github/skills/apex-next/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "dbe249ac0238b27ac2088890405ba32d80f4036d4353865e80c9ee5ca45dcf25",
-      "bytes": 8827
+      "sha256": "568deaa254fe565a01bf4c102633cb256889afa77d6b787225d2da782f0b7f3c",
+      "bytes": 11159
     },
     {
       "path": "customizations/.github/skills/apex-operations/SKILL.md",
@@ -5707,8 +5707,8 @@
         "path": "customizations/.github/skills/apex-planning/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "988f115846f583c4c36bfe5e77f82fd97833c43f0db34800add63dfc420dcfec",
-      "bytes": 6913
+      "sha256": "1d0d70a7228a51e3fa20f4cc8c5d8737104921febcf3f401c7991faacd909c4c",
+      "bytes": 7600
     },
     {
       "path": "customizations/.github/skills/apex-python-diagrams/SKILL.md",
@@ -5847,8 +5847,8 @@
         "path": "customizations/.github/skills/apex-requirements/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "d51ad831b48995544e7d7716126c2f1357a3e500cd845e24210d97a0a95ed49a",
-      "bytes": 10287
+      "sha256": "c9301912a878598864b1d9e048a717773f98923ab632d3c5453ba0aadeef45b6",
+      "bytes": 10991
     },
     {
       "path": "customizations/.github/skills/apex-terraform-import/SKILL.md",
@@ -6317,7 +6317,7 @@
         "path": "customizations/manifest.json",
         "mapping": "customizations"
       },
-      "sha256": "c1f39e26140021a0c666455cd4d17804052ed629a871efe663f87b5d7b15428f",
+      "sha256": "0470430f164542cef91c6d54dba62faa3b1240fb07c4e087f2b38dd2285c5c51",
       "bytes": 51004
     },
     {
@@ -6354,6 +6354,6 @@
   "lock": {
     "algorithm": "sha256",
     "canonicalization": "apex-bundled-assets-v1",
-    "digest": "56f889e19af3ac296e37598c5ffc927fdd3db216689777f8d53b0d90d8e00f96"
+    "digest": "8f02a20a0dc0b2f9d74495fbe64d21d07e284acd0c3eac9c38382c06710014d2"
   }
 }

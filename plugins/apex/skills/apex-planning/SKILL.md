@@ -21,8 +21,9 @@ Use this skill only when the kernel routes the active foreground `APEX` agent to
 ## Workflow
 
 1. Call `apex/status`, then `apex/nextTask` only when status leaves runnable Planning work. For `needs_input`, route the
-   exact request according to `apex-next`; do not invent answers or request task context. For `needs_review`, present
-   planning findings and submit permitted decisions through `apex/reviewDecide`.
+   exact request according to `apex-next`; do not invent answers or request task context. For `needs_review`, print a
+   Markdown overview table of actionable planning findings in chat, collect dispositions one finding at a time via
+   sequential `ask_user` calls (`1/N`), and submit the combined decisions once through `apex/reviewDecide`.
 2. For `status=task`, call `apex/taskContext` with the exact planning task ID. If task context is externalized, read it
    in bounded chunks through `apex/readTaskInput`. Do not query session stores, repository files, chat history or
    APEX artifact schemas. The Azure schema and AVM version lookups authorized in step 6 are the only external reads.
@@ -56,9 +57,13 @@ Use this skill only when the kernel routes the active foreground `APEX` agent to
 9. Report the read-only Gate 3 review package under `agent-output/<project>/<run>/03-plan/`, including implementation
    plan, IaC binding, environment inputs and challenger findings.
 10. When the `plan-review` task appears, run the rubber-duck review steps in `apex-next` with the exact `task.taskId`.
-    For `needs_review`, do not request task context or run rubber-duck again; record a disposition for every finding.
-    For accept-risk, show `owner: <project risk owner>, expires in 90 days`, draft the rationale and ask only for
-    confirmation.
+    For `needs_review`, do not request task context or run rubber-duck again: render a Markdown overview table
+    (`| ID | Severity | Finding & Impact | Recommended Action |`) of the `N` open findings in chat, then call `ask_user`
+    **one finding at a time** (`[<SEVERITY>] <ID> (<i>/<N>): <title> — <plain-English impact>`, never bundling multiple
+    findings into one `ask_user` prompt) offering **only** options present in that finding's returned `finding.actions`
+    (`Revise: <concrete fix>`, plus `Accept risk (90d, owner: <project risk owner>): <draft rationale>` only when
+    `"accept-risk"` is in `actions`—never offer `Accept risk` on `critical`/`high` findings or `Dismiss` when absent from
+    `actions`), and submit all decisions together in one `apex/reviewDecide` call.
 11. After `apex/reviewDecide`, call `apex/status`. In a lab run Gate 3 is an automatic readiness checkpoint that the
     kernel records once the review and deterministic checks pass. Never ask the user to approve Gate 3 and never call
     `apex/gateDecide` for it. If status shows a "readiness checkpoint is not recorded" blocker, call `apex/nextTask` once

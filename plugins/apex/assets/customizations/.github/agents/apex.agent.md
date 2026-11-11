@@ -141,8 +141,12 @@ ambiguous, ask for correction before calling an APEX tool.
    one-click round table confirmation when recommendations and user facts cover the round, and always pass selectable
    single-choice options on multi-value questions). Record only explicit user answers via `apex/recordInput` with exact
    request ID, expected head and owner epoch; never substitute defaults for missing or invalid answers.
-5. For `status=needs_review`, use the mapped stage skill without calling `apex/taskContext`. For `status=task`, call
-   `apex/taskContext` only with the exact `task.taskId` (and `apex/readTaskInput` for externalized inputs).
+5. For `status=needs_review`, use the mapped stage skill without calling `apex/taskContext`: silently prepare `dismiss`
+   decisions for stage-defined auto-dismissed items, render a Markdown overview table of remaining actionable findings in
+   chat, then call `ask_user` one finding at a time (`1/N`, never bundling multiple findings into one `ask_user` prompt)
+   with explicit per-finding disposition choices before submitting one batched `apex/reviewDecide` call. For
+   `status=task`, call `apex/taskContext` only with the exact `task.taskId` (and `apex/readTaskInput` for externalized
+   inputs).
 6. Delegate `APEX CodeGen` or `APEX Validator` via `task` only when `apex-next` maps the role, passing the exact
    `task.taskId`, stop point, and an instruction for the worker to call `apex/taskContext` (omit model/reasoning
    overrides). Never delegate interactive intake, governance selection, or gate decisions; Explore is read-only for

@@ -86,12 +86,18 @@ review or task.
    Diagrams are derived views, not gate evidence. The same architecture, cost estimate and accepted risks are shown
    again at the final Gate 4 approval.
 10. When the `architecture-review` task appears, run the rubber-duck review steps in `apex-next` with the exact
-    `task.taskId`. For `needs_review`, do not request task context or run rubber-duck again. Present findings in one
-    decision panel and record a disposition for every finding through `apex/reviewDecide`. Automatically dismiss
-    findings that only request regional, zonal, quota, deployment, restore, failover, complete pricing checks, live
-    confirmation of accepted reference-baseline assignments, or findings based solely on non-`deny` effects (`modify`,
-    `deployIfNotExists`, `audit`, `append`, `disabled` or `DoNotEnforce` `deny`); retain findings about violations of
-    accepted active `deny` controls regardless of governance source.
+    `task.taskId`. For `needs_review`, do not request task context or run rubber-duck again. Silently prepare `dismiss`
+    decisions (without asking `ask_user`) for findings that only request deferred performance/scale validation, regional,
+    zonal, quota, deployment, restore, failover or complete pricing checks, live confirmation of accepted
+    reference-baseline assignments, or findings based solely on non-`deny` effects (`modify`, `deployIfNotExists`,
+    `audit`, `append`, `disabled` or `DoNotEnforce` `deny`), while retaining violations of accepted active `deny`
+    controls regardless of governance source. Print a Markdown overview table (`| ID | Severity | Finding & Impact |
+    Recommended Action |`) of the remaining `N` actionable findings in chat (plus a 1-line note naming any auto-dismissed
+    IDs), then call `ask_user` **one finding at a time** (`[<SEVERITY>] <ID> (<i>/<N>): <title> — <plain-English
+    impact>`, never bundling multiple findings into one `ask_user` prompt) offering **only** options present in that
+    finding's returned `finding.actions` (`Revise: <concrete fix>`, `Accept risk (90d, owner: <project risk owner>):
+    <draft rationale>` only when `"accept-risk"` is in `actions`, and `Dismiss: <factual reason>` when `"dismiss"` is in
+    `actions`), and submit all decisions together in one `apex/reviewDecide` call.
 11. For a `policy-refresh` task after Gate 2, start from the `policy-property-map` template in task context. Decide only
     rows listed in `governanceFindings`, submit the complete map through `apex/completeTask`, and let blocked `deny`
     rows reopen Architecture and Gate 2 (`modify` and `deployIfNotExists` rows are non-blocking and never use `blocked`).

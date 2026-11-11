@@ -31702,7 +31702,7 @@ function renderArchitectureMermaid(architecture) {
 import { join as join26, resolve as resolve22 } from "node:path";
 
 // packages/cli/dist/version.js
-var APEX_VERSION = "0.11.0-next.13";
+var APEX_VERSION = "0.11.0-next.14";
 var MINIMUM_NODE_VERSION = "24.21.0";
 function meetsMinimumVersion(current, minimum) {
   const currentParts = current.split(".").map(Number);
@@ -73407,19 +73407,16 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       throw new ApexError("APEX_STALE", "Review decisions do not match current open findings", EXIT_CODES.stale);
     }
     const revisions = decisions.filter(({ action }) => action === "revise");
-    if (revisions.length > 0) {
-      await this.reviseReview(reviewHash, revisions.map(({ findingId }) => findingId), revisions.map(({ rationale }) => rationale ?? "Revision requested").join("; "));
-      return { status: "revision_requested" };
-    }
-    if (decisions.length !== openIds.length) {
+    const nonRevisions = decisions.filter(({ action }) => action !== "revise");
+    if (revisions.length === 0 && decisions.length !== openIds.length) {
       throw new ApexError("APEX_VALIDATION", "Every open finding requires a decision", EXIT_CODES.validation);
     }
-    for (const decision of decisions) {
+    const preparedResolutions = nonRevisions.map((decision) => {
       if (decision.action === "acknowledge" && payload.nodeId !== "requirements-review") {
         throw new ApexError("APEX_AUTHORIZATION", "Acknowledgment is limited to Requirements review obligations", EXIT_CODES.authorization);
       }
       const acceptedRisk = decision.action === "accept-risk" ? this.reviewAcceptedRiskDefaults(decision, project.riskOwner) : void 0;
-      await this.resolveReview({
+      return {
         findingId: decision.findingId,
         reviewHash,
         subjectHash: String(payload.subjectHash),
@@ -73430,7 +73427,14 @@ Only native entries reference runtime-executed source-bound command receipts. Si
         ...acceptedRisk === void 0 ? {} : { owner: acceptedRisk.owner },
         evidenceRefs: [],
         ...acceptedRisk !== void 0 ? { expiresAt: acceptedRisk.expiresAt } : decision.expiresAt === void 0 ? {} : { expiresAt: decision.expiresAt }
-      });
+      };
+    });
+    for (const resolution of preparedResolutions) {
+      await this.resolveReview(resolution);
+    }
+    if (revisions.length > 0) {
+      await this.reviseReview(reviewHash, revisions.map(({ findingId }) => findingId), revisions.map(({ rationale }) => rationale ?? "Revision requested").join("; "));
+      return { status: "revision_requested" };
     }
     return { status: "resolved" };
   }
