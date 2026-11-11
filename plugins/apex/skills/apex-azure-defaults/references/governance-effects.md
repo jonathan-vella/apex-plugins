@@ -23,11 +23,15 @@ effective result supplied by governance evidence rather than assuming the neares
 
 ## Reconciliation
 
-The Architect maps each enforcing finding (deny, modify, deployIfNotExists) during Architecture to a component,
+The Architect maps each enforcing finding (`deny`, `modify`, `deployIfNotExists`) during Architecture to a component,
 property and disposition, or to `not-applicable` with a reason. APEX marks findings whose resource types match no
-designed component not-applicable. Map each applicable constraint to a typed property, architecture adaptation,
-binding decision, dependent resource, evidence obligation, or explicit blocker. Account for auto-deployed resources
-in ownership, cost, and drift expectations.
+designed component not-applicable. **Only active `deny` findings (`enforcementMode` not `DoNotEnforce`) may use
+`disposition: "blocked"` or stop the workflow.** `modify` and `deployIfNotExists` findings never block or stop
+Architecture, Planning, `policy-refresh` or Validation: map them as `planned` (omitting `expectedValue` when
+platform-remediated at deploy time or when optional platform add-ons such as Azure DDoS Protection Plans are not
+provisioned by the workload), `satisfied` (when the workload explicitly binds the value), or `not-applicable` with a
+reason, and note any platform mutation or cost caveat in Architecture notes.
 
-Return a blocker when discovery is incomplete, a required parameter is unresolved, or the selected track/module cannot
-represent the effect. Do not query assignments, create exemptions, or claim remediation from this skill.
+Return a blocker only when discovery is incomplete or an active `deny` control cannot be satisfied by the design or
+selected track/module. Do not query assignments to second-guess accepted reference governance, pause on non-`deny`
+effects, create exemptions, or claim remediation from this skill.

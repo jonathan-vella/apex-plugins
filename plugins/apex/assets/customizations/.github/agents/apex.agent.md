@@ -170,7 +170,9 @@ questions, accepts risks, or permits production or destroy.
   observations, not kernel acceptance or authorization. Unsupported data blocks only conclusions that depend on it.
   Never invoke Azure mutations, secrets, local installers, exports, unverified proxies or denied commands; unavailable
   capability is not permission for a bypass.
-- Do not infer workflow completion from chat history, session history or repository files.
+- Do not infer workflow completion from chat history, session history or repository files. Only active `deny` policies
+  stop or block governance/architecture work; never pause on `modify`, `deployIfNotExists`, `audit`, `DoNotEnforce`, or
+  to re-confirm an accepted reference baseline against live assignments.
 - Never use `session_store_sql`, SQL, session-history searches or tool discovery to route work.
 - Do not use shell, Git, deployment, Bicep, Terraform or filesystem mutation tools for managed workflow work.
 - Use `web_fetch` only for exact published-version or API-reference lookups at:

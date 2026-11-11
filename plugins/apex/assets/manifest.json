@@ -1,7 +1,7 @@
 {
   "version": 1,
   "sources": {
-    "customizations": "0.11.0-next.12",
+    "customizations": "0.11.0-next.13",
     "config": "1.0.0"
   },
   "composition": {
@@ -577,7 +577,7 @@
         "path": "config/runtime-bundle.v1.json",
         "mapping": "config"
       },
-      "sha256": "4cb0c11fbf483ea5164bae0a37849cdcf40a2493c7046f6bc997d01ece6be864",
+      "sha256": "eb3393ec9d28b90eaf8981856ad7aa0ef674dc74c2692b13e1de320572a2ada5",
       "bytes": 2046
     },
     {
@@ -627,8 +627,8 @@
         "path": "customizations/.github/agents/apex.agent.md",
         "mapping": "customizations"
       },
-      "sha256": "e084b9148e90361f480e7d9445c70667e2df8268cc263052e6867b1901ca154f",
-      "bytes": 10433
+      "sha256": "c3e8a36f3d955396fde764120176ce700f88278602ef16bed7d204605c2db33c",
+      "bytes": 10654
     },
     {
       "path": "customizations/.github/copilot-instructions.md",
@@ -867,8 +867,8 @@
         "path": "customizations/.github/skills/apex-architecture/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "a769aa4d073582d789e6669264e58b309f0c39ad13d45070da754d5e7aae0945",
-      "bytes": 11384
+      "sha256": "36a55b17da0c645b644641363a7dc3590b7d3eba9f0bd1c55b6462cabd480894",
+      "bytes": 13088
     },
     {
       "path": "customizations/.github/skills/apex-artifacts/SKILL.md",
@@ -1577,8 +1577,8 @@
         "path": "customizations/.github/skills/apex-azure-defaults/references/azure-mcp-tools.md",
         "mapping": "customizations"
       },
-      "sha256": "3dc510ec023f61a175c5ab2ed125bd9c25e2fd1e082d4c0610b2ec51b9220b59",
-      "bytes": 6895
+      "sha256": "e7a3e1519aa952de014fb57e0eae872e2ee8864cc84ef362e5b71f888d2dc7a0",
+      "bytes": 7347
     },
     {
       "path": "customizations/.github/skills/apex-azure-defaults/references/baseline-fallbacks.md",
@@ -1617,8 +1617,8 @@
         "path": "customizations/.github/skills/apex-azure-defaults/references/governance-effects.md",
         "mapping": "customizations"
       },
-      "sha256": "d0ccfc0d612da1a3bf673a1ae623375649d3f96f1fbccd1cba109acd0a4c62b0",
-      "bytes": 2776
+      "sha256": "94dd50e17cecc45b8a0e6e84bf8fa7125b9c890ab430059a5bb1f1539334f35b",
+      "bytes": 3222
     },
     {
       "path": "customizations/.github/skills/apex-azure-defaults/references/naming.md",
@@ -2657,8 +2657,8 @@
         "path": "customizations/.github/skills/apex-azure-governance/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "af4e0106be35f687ed3de7a5184408bf4b23e4975981e98c7ba6edf7ab04ac7a",
-      "bytes": 5847
+      "sha256": "f2070d01a8009014aed9860182ff0cd850cc992cec6678d805475a1c366a975a",
+      "bytes": 6226
     },
     {
       "path": "customizations/.github/skills/apex-azure-governance/references/evidence-interpretation.md",
@@ -5697,8 +5697,8 @@
         "path": "customizations/.github/skills/apex-operations/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "03843c4a95b7d5fcd7254dc208c7fd11a9b3dea184931586f8dad2138dc96e77",
-      "bytes": 8727
+      "sha256": "51292ca61f70c3c4f7cd52042dd26ba92a94f695369ac6121b4ba1196fa1c756",
+      "bytes": 8734
     },
     {
       "path": "customizations/.github/skills/apex-planning/SKILL.md",
@@ -6317,7 +6317,7 @@
         "path": "customizations/manifest.json",
         "mapping": "customizations"
       },
-      "sha256": "832fb54c3dcc8bd4b0a1b5f51fbc9c841f17c3bfedf5bce814732d35cdd6ac71",
+      "sha256": "c1f39e26140021a0c666455cd4d17804052ed629a871efe663f87b5d7b15428f",
       "bytes": 51004
     },
     {
@@ -6354,6 +6354,6 @@
   "lock": {
     "algorithm": "sha256",
     "canonicalization": "apex-bundled-assets-v1",
-    "digest": "bae34ce087e9fcaee52403a76bee21a11367ff770765841ebe40f73642f15445"
+    "digest": "56f889e19af3ac296e37598c5ffc927fdd3db216689777f8d53b0d90d8e00f96"
   }
 }

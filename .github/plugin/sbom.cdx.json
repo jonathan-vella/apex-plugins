@@ -1,7 +1,7 @@
 {
   "bomFormat": "CycloneDX",
   "specVersion": "1.6",
-  "serialNumber": "urn:uuid:3cb1644c-85cd-2a4d-af76-b338632d6035",
+  "serialNumber": "urn:uuid:5b201fcd-d3fb-c866-972a-eb7faf34067e",
   "version": 1,
   "metadata": {
     "tools": {
@@ -21,9 +21,9 @@
     },
     "component": {
       "type": "application",
-      "bom-ref": "pkg:generic/apex@0.11.0-next.12",
+      "bom-ref": "pkg:generic/apex@0.11.0-next.13",
       "name": "apex",
-      "version": "0.11.0-next.12",
+      "version": "0.11.0-next.13",
       "description": "APEX vNext Azure workflow agent, hidden workers, skills, managed hooks, the bundled MCP server and read-only Azure pricing tools.",
       "licenses": [
         {
@@ -32,12 +32,12 @@
           }
         }
       ],
-      "purl": "pkg:generic/apex@0.11.0-next.12",
+      "purl": "pkg:generic/apex@0.11.0-next.13",
       "externalReferences": [
         {
           "type": "vcs",
           "url": "https://github.com/jonathan-vella/apex-vnext",
-          "comment": "commit d6e97a594eaebe93c159be9ee55c11358276dd40"
+          "comment": "commit 806d05380442f05ed00484ea330bd300920a6b34"
         }
       ],
       "properties": [
@@ -47,7 +47,7 @@
         },
         {
           "name": "apex:source-commit",
-          "value": "d6e97a594eaebe93c159be9ee55c11358276dd40"
+          "value": "806d05380442f05ed00484ea330bd300920a6b34"
         },
         {
           "name": "apex:tree-algorithm",
@@ -55,7 +55,7 @@
         },
         {
           "name": "apex:tree-sha256",
-          "value": "3cb1644c85cd2a4daf76b338632d60358a395a44f418b3702f46810e6099e122"
+          "value": "5b201fcdd3fbc866972aeb7faf34067e21e8f9368991de8396d4163d951611c7"
         },
         {
           "name": "apex:tree-file-count",
@@ -67,15 +67,15 @@
   "components": [
     {
       "type": "application",
-      "bom-ref": "pkg:npm/%40apexops/cli@0.11.0-next.12",
+      "bom-ref": "pkg:npm/%40apexops/cli@0.11.0-next.13",
       "name": "@apexops/cli",
-      "version": "0.11.0-next.12",
+      "version": "0.11.0-next.13",
       "scope": "required",
-      "purl": "pkg:npm/%40apexops/cli@0.11.0-next.12",
+      "purl": "pkg:npm/%40apexops/cli@0.11.0-next.13",
       "properties": [
         {
           "name": "apex:git-head",
-          "value": "d6e97a594eaebe93c159be9ee55c11358276dd40"
+          "value": "806d05380442f05ed00484ea330bd300920a6b34"
         }
       ]
     },
@@ -838,7 +838,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "4cb0c11fbf483ea5164bae0a37849cdcf40a2493c7046f6bc997d01ece6be864"
+          "content": "eb3393ec9d28b90eaf8981856ad7aa0ef674dc74c2692b13e1de320572a2ada5"
         }
       ]
     },
@@ -893,7 +893,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "e084b9148e90361f480e7d9445c70667e2df8268cc263052e6867b1901ca154f"
+          "content": "c3e8a36f3d955396fde764120176ce700f88278602ef16bed7d204605c2db33c"
         }
       ]
     },
@@ -1157,7 +1157,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "a769aa4d073582d789e6669264e58b309f0c39ad13d45070da754d5e7aae0945"
+          "content": "36a55b17da0c645b644641363a7dc3590b7d3eba9f0bd1c55b6462cabd480894"
         }
       ]
     },
@@ -1938,7 +1938,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "3dc510ec023f61a175c5ab2ed125bd9c25e2fd1e082d4c0610b2ec51b9220b59"
+          "content": "e7a3e1519aa952de014fb57e0eae872e2ee8864cc84ef362e5b71f888d2dc7a0"
         }
       ]
     },
@@ -1982,7 +1982,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "d0ccfc0d612da1a3bf673a1ae623375649d3f96f1fbccd1cba109acd0a4c62b0"
+          "content": "94dd50e17cecc45b8a0e6e84bf8fa7125b9c890ab430059a5bb1f1539334f35b"
         }
       ]
     },
@@ -3126,7 +3126,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "af4e0106be35f687ed3de7a5184408bf4b23e4975981e98c7ba6edf7ab04ac7a"
+          "content": "f2070d01a8009014aed9860182ff0cd850cc992cec6678d805475a1c366a975a"
         }
       ]
     },
@@ -6470,7 +6470,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "03843c4a95b7d5fcd7254dc208c7fd11a9b3dea184931586f8dad2138dc96e77"
+          "content": "51292ca61f70c3c4f7cd52042dd26ba92a94f695369ac6121b4ba1196fa1c756"
         }
       ]
     },
@@ -7152,7 +7152,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "832fb54c3dcc8bd4b0a1b5f51fbc9c841f17c3bfedf5bce814732d35cdd6ac71"
+          "content": "c1f39e26140021a0c666455cd4d17804052ed629a871efe663f87b5d7b15428f"
         }
       ]
     },
@@ -7185,7 +7185,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "e92cc3f0237a681ba7e2a7cdae1a6348c3fbf8b248ec437401b6cb632c6ebbd4"
+          "content": "53120569bf1bd99c5e9600cb8137c20ca112d93a5ac635d8bbec3a6cb37ce11e"
         }
       ]
     },
@@ -7240,7 +7240,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "4b11cf85128d83d12b725cdc21e864244f4b8e874780229c615cb18bdc8c034a"
+          "content": "cc8723cabc34adf069291a8e9b11669a1c1d65d75832686c07f704d468f5e19b"
         }
       ]
     },
@@ -7295,7 +7295,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "6146744e02da68c5529c73db23cab447a5194d28990bc1f7c7cd805ce90ee3b1"
+          "content": "dae59e0fd1468df994f18ed4670b9e76c6655dbdd740e34e37824bb4b641c043"
         }
       ]
     },
@@ -7350,7 +7350,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "b18382f89cf4cae0fb3c2ef98f763a835463067d56f8b5c489b9aab06b8f5bd6"
+          "content": "19034f0016f369f84b37f43287a8e1ab5b71fa56bd7eca9a0ae2c958e418f23f"
         }
       ]
     },
@@ -7383,7 +7383,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "a769aa4d073582d789e6669264e58b309f0c39ad13d45070da754d5e7aae0945"
+          "content": "36a55b17da0c645b644641363a7dc3590b7d3eba9f0bd1c55b6462cabd480894"
         }
       ]
     },
@@ -8164,7 +8164,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "3dc510ec023f61a175c5ab2ed125bd9c25e2fd1e082d4c0610b2ec51b9220b59"
+          "content": "e7a3e1519aa952de014fb57e0eae872e2ee8864cc84ef362e5b71f888d2dc7a0"
         }
       ]
     },
@@ -8208,7 +8208,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "d0ccfc0d612da1a3bf673a1ae623375649d3f96f1fbccd1cba109acd0a4c62b0"
+          "content": "94dd50e17cecc45b8a0e6e84bf8fa7125b9c890ab430059a5bb1f1539334f35b"
         }
       ]
     },
@@ -9352,7 +9352,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "af4e0106be35f687ed3de7a5184408bf4b23e4975981e98c7ba6edf7ab04ac7a"
+          "content": "f2070d01a8009014aed9860182ff0cd850cc992cec6678d805475a1c366a975a"
         }
       ]
     },
@@ -12696,7 +12696,7 @@
       "hashes": [
         {
           "alg": "SHA-256",
-          "content": "03843c4a95b7d5fcd7254dc208c7fd11a9b3dea184931586f8dad2138dc96e77"
+          "content": "51292ca61f70c3c4f7cd52042dd26ba92a94f695369ac6121b4ba1196fa1c756"
         }
       ]
     },
@@ -13353,9 +13353,9 @@
   "services": [],
   "dependencies": [
     {
-      "ref": "pkg:generic/apex@0.11.0-next.12",
+      "ref": "pkg:generic/apex@0.11.0-next.13",
       "dependsOn": [
-        "pkg:npm/%40apexops/cli@0.11.0-next.12",
+        "pkg:npm/%40apexops/cli@0.11.0-next.13",
         "pkg:npm/%40azure/mcp@3.0.0",
         "pkg:npm/%40modelcontextprotocol/core@2.4.0",
         "pkg:npm/%40modelcontextprotocol/server@2.4.0",

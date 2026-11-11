@@ -19341,7 +19341,12 @@ function buildReviewInstructions(subjectKind) {
       "Explicit partial pricing is valid cost documentation. APEX builds the hosting platform: application",
       "functionality such as business workflows, approval paths or application data-lifecycle rules is out of scope.",
       "Check the policy map: each enforcing finding maps to a component with a plausible property and disposition,",
-      "`blocked` rows are findings, and every `not-applicable` reason is consistent with the design.",
+      "`blocked` `deny` rows are findings, and every `not-applicable` reason is consistent with the design.",
+      "Only active `deny` policies (including active `deny` controls in the reference baseline) block a design:",
+      "`modify`, `deployIfNotExists`, `audit` and `DoNotEnforce` findings are non-blocking when mapped as `planned`",
+      "(without `expectedValue` when platform-remediated) or `not-applicable` with a reason; do not report blocking",
+      "findings requesting live subscription confirmation of the accepted reference baseline or treating `modify` or",
+      "`deployIfNotExists` controls (such as optional Azure DDoS Protection) as blockers.",
       "",
       "Return one criteria entry for each Well-Architected pillar. Link `finding` outcomes to finding IDs, explain every",
       "`pass` or `not-applicable` outcome, and use `not-applicable` only where the accepted assessment says so."
@@ -31697,7 +31702,7 @@ function renderArchitectureMermaid(architecture) {
 import { join as join26, resolve as resolve22 } from "node:path";
 
 // packages/cli/dist/version.js
-var APEX_VERSION = "0.11.0-next.12";
+var APEX_VERSION = "0.11.0-next.13";
 var MINIMUM_NODE_VERSION = "24.21.0";
 function meetsMinimumVersion(current, minimum) {
   const currentParts = current.split(".").map(Number);
@@ -71834,7 +71839,16 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const refresh = (await this.readTask(run, taskId)).taskType === "policy-refresh";
     const completed = await this.acceptTaskOutputs(taskId, outputs);
     const policy = outputs.find(({ kind }) => kind === "policy-property-map")?.value;
-    if (!refresh || !policy?.mappings.some(({ disposition }) => disposition === "blocked"))
+    if (!refresh || policy === void 0)
+      return completed;
+    const events = await this.journal(run).replay();
+    const activeDenyKeys = new Set((await this.enforcingGovernanceFindings(run, events)).filter(({ effect }) => effect === "deny").map((finding2) => this.policyMappingKey({
+      policyAssignmentId: finding2.assignmentId,
+      policyDefinitionId: finding2.policyId,
+      ...finding2.policyDefinitionReferenceId === void 0 ? {} : { policyDefinitionReferenceId: finding2.policyDefinitionReferenceId },
+      effect: finding2.effect
+    })));
+    if (!policy.mappings.some((mapping) => mapping.disposition === "blocked" && activeDenyKeys.has(this.policyMappingKey(mapping))))
       return completed;
     await this.reopenArchitecture("Refreshed subscription governance blocks the approved Architecture");
     return {
@@ -76246,7 +76260,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       await this.selectedGovernanceSnapshot(run, governance);
     }
     if (descriptor.id === "architecture" || descriptor.id === "policy-refresh")
-      await this.assertPolicyMapCoverage(run, events, byKind["policy-property-map"], byKind.architecture ?? await this.objects.getJson(this.artifactHash(events, "architecture")));
+      await this.assertPolicyMapCoverage(run, events, byKind["policy-property-map"], byKind.architecture ?? await this.objects.getJson(this.artifactHash(events, "architecture")), descriptor.id === "policy-refresh");
     if (descriptor.reviewSubject !== void 0) {
       const review2 = byKind["review-findings"];
       const subjectKind = descriptor.reviewSubject;
@@ -76377,14 +76391,15 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       throw new ApexError("APEX_STALE", "Accepted governance is unavailable", EXIT_CODES.stale);
     return { schemaVersion: CONTRACT_VERSION, projectId: run.projectId, runId: run.runId, governanceHash, mappings };
   }
-  async assertPolicyMapCoverage(run, events, policyMap, architecture) {
-    const issues = await this.policyMapCoverageIssues(run, events, policyMap, architecture);
+  async assertPolicyMapCoverage(run, events, policyMap, architecture, requireAcceptedBlockedDeny = false) {
+    const issues = await this.policyMapCoverageIssues(run, events, policyMap, architecture, requireAcceptedBlockedDeny);
     if (issues.length > 0)
       throw new ApexError("APEX_VALIDATION", issues.map(({ message }) => message).join("; "), EXIT_CODES.validation);
   }
-  async policyMapCoverageIssues(run, events, policyMap, architecture) {
+  async policyMapCoverageIssues(run, events, policyMap, architecture, requireAcceptedBlockedDeny = false) {
     const issues = [];
-    if (policyMap.governanceHash !== this.artifactHash(events, "governance-constraints"))
+    const governanceHash = this.artifactHash(events, "governance-constraints");
+    if (governanceHash === void 0 || policyMap.governanceHash !== governanceHash)
       return [
         { path: "/policyMappings", message: "Policy property map does not bind accepted governance constraints" }
       ];
@@ -76393,7 +76408,16 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       ...new Map(architecture.components.flatMap(({ resourceTypes }) => resourceTypes.map((type) => [type.toLowerCase(), type]))).values()
     ];
     const designed = new Set(designedTypes.map((type) => type.toLowerCase()));
-    const findings = new Map((await this.enforcingGovernanceFindings(run, events)).filter(({ resourceTypes }) => resourceTypes.length === 0 || resourceTypes.some((type) => designed.has(type.toLowerCase()))).map((finding2) => [
+    const snapshot = await this.selectedGovernanceSnapshot(run, await this.objects.getJson(governanceHash));
+    const inactiveDenyAssignments = new Set(snapshot.findings.filter(({ effect, enforcementMode: enforcementMode2 }) => effect === "deny" && enforcementMode2 === "DoNotEnforce").map(({ assignmentId }) => assignmentId.toLowerCase()));
+    const enforcing = snapshot.findings.filter(({ effect, enforcementMode: enforcementMode2 }) => ENFORCING_POLICY_EFFECTS.has(effect) && !(effect === "deny" && enforcementMode2 === "DoNotEnforce"));
+    const activeDenyKeys = new Set(enforcing.filter(({ effect }) => effect === "deny").map((finding2) => this.policyMappingKey({
+      policyAssignmentId: finding2.assignmentId,
+      policyDefinitionId: finding2.policyId,
+      ...finding2.policyDefinitionReferenceId === void 0 ? {} : { policyDefinitionReferenceId: finding2.policyDefinitionReferenceId },
+      effect: finding2.effect
+    })));
+    const findings = new Map(enforcing.filter(({ resourceTypes }) => resourceTypes.length === 0 || resourceTypes.some((type) => designed.has(type.toLowerCase()))).map((finding2) => [
       this.policyMappingKey({
         policyAssignmentId: finding2.assignmentId,
         policyDefinitionId: finding2.policyId,
@@ -76412,6 +76436,11 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       seen.add(key);
       if (mapping.disposition === "exempt")
         issues.push({ path: `${path2}/disposition`, message: `Reported exemptions are not verified: ${label2}` });
+      if (mapping.disposition === "blocked" && (mapping.effect !== "deny" || inactiveDenyAssignments.has(mapping.policyAssignmentId.toLowerCase()) || requireAcceptedBlockedDeny && !activeDenyKeys.has(key)))
+        issues.push({
+          path: `${path2}/disposition`,
+          message: `Only accepted active "deny" policy findings can be marked "blocked": ${label2} (effect ${mapping.effect}) is non-blocking or not an active deny finding; use "planned" (omit expectedValue when platform-remediated), "satisfied", or "not-applicable" with a reason`
+        });
       if (mapping.disposition === "not-applicable") {
         if (mapping.reason === void 0)
           issues.push({ path: `${path2}/reason`, message: `Not-applicable policy mapping needs a reason: ${label2}` });
