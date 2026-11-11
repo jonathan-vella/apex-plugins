@@ -1,7 +1,7 @@
 {
   "source": {
     "repository": "jonathan-vella/apex-vnext",
-    "commit": "806d05380442f05ed00484ea330bd300920a6b34",
+    "commit": "71ad1d110112f24a2571b6533acddaf36c106121",
     "lockfile": "package-lock.json"
   },
   "components": [

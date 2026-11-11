@@ -46,8 +46,9 @@ or task.
    the request, plus one typed answer per question. Preserve arrays and typed values such as classifications,
    compliance selections, explicit deferrals and unknowns. A chat answer is not kernel acceptance; wait for
    `recorded: true` before advancing.
-4. After accepted input, call `apex/nextTask` again. Do not poll unresolved input or review. For `needs_review`, present
-   the findings in one decision panel and submit permitted decisions through `apex/reviewDecide`.
+4. After accepted input, call `apex/nextTask` again. Do not poll unresolved input or review. For `needs_review`, print a
+   Markdown overview table of actionable findings in chat, collect dispositions one finding at a time via sequential
+   `ask_user` calls (`1/N`), and submit the combined decisions once through `apex/reviewDecide`.
 5. For `status=task`, call `apex/taskContext` with the exact `task.taskId`. If the context is externalized, read it in
    bounded chunks through `apex/readTaskInput`. Use `taskContext.recordedInput` and `outputTemplates` as the complete
    contract; do not read repository schemas or session history.
@@ -76,13 +77,17 @@ or task.
 10. Immediately call `apex/nextTask` after submitting requirements. When it returns the `requirements-review` task,
     run the rubber-duck review steps in `apex-next` with that exact `task.taskId`. If rubber-duck is unavailable or the
     capture fails twice, report the pending review task and stop.
-11. When `needs_review` returns, do not request task context or run rubber-duck again. Record a disposition for every
-    finding: fix, accept or dismiss with a reason, or acknowledge an obligation with an owner. For accept-risk, show
-    `owner: <project risk owner>, expires in 90 days`, draft the rationale and ask only for confirmation. Existing
-    blocking findings require the normal correction and fresh review path; do not automatically acknowledge, dismiss or
-    accept risk.
-    Deferred validation and obligation owners are separate from the project's `riskOwner`; use the user's explicit
-    accountable owner (for example `partner`), not an inferred `customer` default.
+11. When `needs_review` returns, do not request task context or run rubber-duck again. Follow the 1-by-1 disposition
+    flow in `apex-next`: render a Markdown overview table (`| ID | Severity | Finding & Impact | Recommended Action |`)
+    in chat for all `N` open findings, then call `ask_user` sequentially **one finding at a time**
+    (`[SEVERITY] <ID> (<i>/<N>): <title> — <plain-English impact>`, never bundling multiple findings into one
+    `ask_user` prompt). Offer **only** options present in that finding's returned `finding.actions` (`Revise: <concrete
+    fix>`, `Acknowledge obligation (owner: <accountable owner>): <scope>` when `"acknowledge"` is in `actions`, and
+    `Accept risk (90d, owner: <project risk owner>): <draft rationale>` when `"accept-risk"` is in `actions`—never offer
+    `Accept risk` on `critical`/`high` findings). Existing blocking findings require the normal user choice or revision
+    path; do not silently acknowledge, dismiss or accept risk on any item. Deferred validation and obligation owners are
+    separate from the project's `riskOwner`; use the user's explicit accountable owner (for example `partner`), not an
+    inferred `customer` default. Submit all collected decisions together in one `apex/reviewDecide` call.
 12. After `apex/reviewDecide`, call `apex/status`. If Gate 1 is pending, report it and stop. Do not call
     `apex/nextTask` while Gate 1 is pending. Gate 1 is the single intent confirmation: show the user the run's
     purpose (`lab` by default; `production` is unavailable until the CI-owned production flow ships), its target scope
