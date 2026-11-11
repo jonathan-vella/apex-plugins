@@ -54,12 +54,16 @@ an unavailable namespace never blocks the kernel workflow.
 | Stage | Grounding sources | Use |
 | --- | --- | --- |
 | Requirements | `cloudarchitect`, `documentation`, `wellarchitectedframework` | Advisory candidate-service rationale and recommendation text only; never recorded as a user answer |
-| Architecture | `wellarchitectedframework`, `cloudarchitect`, `documentation`, `get_azure_bestpractices` or `azureterraformbestpractices` for the selected track, `policy` only for an approved subscription target | WAF pillar reasoning, design alternatives, service guidance and policy context; pricing stays in `apex-azure/pricing` |
+| Architecture | `wellarchitectedframework`, `cloudarchitect`, `documentation`, `get_azure_bestpractices` or `azureterraformbestpractices` for the selected track, `policy` only for an approved subscription target with `source: "collected"` governance | WAF pillar reasoning, design alternatives, service guidance and policy context; pricing stays in `apex-azure/pricing` |
 | Planning, Bicep track | `bicepschema`, `documentation`, `get_azure_bestpractices` | Resource-type schemas and guidance for the binding; AVM module versions still come from the allow-listed MCR tag lists through `web_fetch` |
 | Planning, Terraform track | `azureterraform`, `azureterraformbestpractices`, `documentation` | AVM module versions and details, azurerm resource documentation and provider guidance |
 
-`policy` needs an approved subscription: do not call it for a `local` target, where the accepted governance input is the
-policy source. Do not use these namespaces to check regional support, quota or deployment feasibility.
+`policy` needs an approved subscription with `source: "collected"` governance: do not call it for a `local` target or
+when accepted `governance-constraints` uses `source: "reference"` (where the accepted governance artifact in
+`apex/taskContext` is the stage's policy source and `governance-refresh` replaces it later). Never pause Architecture or
+ask to refresh accepted governance over live `policy_assignment_list` differences or non-`deny` effects (`modify`,
+`deployIfNotExists`, `audit`, `append`, `disabled`); only active `deny` controls stop. Do not use these namespaces to
+check regional support, quota or deployment feasibility.
 
 The verified `documentation` namespace is available. A namespace grant does not authorize every operation: the
 managed hook limits commands and parameters, including metadata-only Storage/Cosmos reads and Deploy guidance/log

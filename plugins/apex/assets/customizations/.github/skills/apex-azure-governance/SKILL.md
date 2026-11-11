@@ -40,9 +40,12 @@ an agent.
    snapshot (default) or Refresh from Azure when selecting governance inputs. Do not repeatedly ask at later stages. At
    exactly 30 days or older, require refresh through the consumer collection workflow. A legacy TTL cannot shorten or
    extend this rule. Do not claim a refresh or persisted choice unless the runtime confirms it.
-3. Treat `Deny` findings as blockers unless an accepted exemption records them as informational.
-4. Account for `DeployIfNotExists` and `Modify` findings as deployment-time conditions rather than silently assuming the
-   desired result.
+3. Treat only active `Deny` findings (`enforcementMode` not `DoNotEnforce`) as stopping blockers (`disposition: "blocked"`).
+4. Treat `DeployIfNotExists` and `Modify` findings as non-blocking deployment-time / platform-remediated conditions:
+   map them as `planned` (omitting `expectedValue` when platform-remediated or when optional platform add-ons such as
+   Azure DDoS Protection are not provisioned in the workload), `satisfied`, or `not-applicable` with a reason—never stop
+   the workflow, mark them `blocked`, or pause to ask whether to continue or refresh accepted governance over non-`Deny`
+   effects.
 5. Carry required tags, allowed locations, and relevant property-path constraints into the typed planning or
    architecture decision, using the effective values from the evidence rather than definition defaults.
 6. Record the evidence identifier, scope, completeness signature, and any unresolved constraint in the staged artifact.

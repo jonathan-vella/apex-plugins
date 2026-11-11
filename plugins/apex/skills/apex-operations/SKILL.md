@@ -40,8 +40,8 @@ inventory, diagnosis, reconciliation or quality work.
      workflow (`.github/workflows/governance-policy-baseline.yml`, which includes descendant scopes) and complete human
      review of the local baseline file first**. Explain both consequences when presenting the choice: the reference
      baseline is a design assumption, a reviewed subscription baseline is required at `governance-refresh` before
-     planning (`plan`), and blocked controls found during `policy-refresh` can reopen Architecture and Gate 2. If the
-     user selects the reference baseline, call `apex/governanceImport` (`reference: true`) and continue directly into
+     planning (`plan`), and blocked `deny` controls found during `policy-refresh` can reopen Architecture and Gate 2. If
+     the user selects the reference baseline, call `apex/governanceImport` (`reference: true`) and continue directly into
      Architecture.
    - At `governance-refresh` (after Gate 2 when Architecture used the reference baseline), if no reviewed subscription
      baseline path is available yet, direct the user to run the consumer governance collection workflow

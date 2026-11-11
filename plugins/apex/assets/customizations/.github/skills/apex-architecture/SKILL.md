@@ -56,9 +56,15 @@ review or task.
    Map each applicable finding in `policyMappings` with assignment, definition, reference ID, effect, logical resource,
    property path, expected value where known and disposition: `satisfied`, `planned`, `blocked` or
    `not-applicable` with a factual reason. Never mark `exempt`. Deny findings in `DoNotEnforce` assignments are
-   informational and need no mapping. Architecture acceptance rejects any `blocked` row and names it: change the
-   design so the control is `satisfied` or `planned`, or ask the user how to proceed. A review disposition never
-   changes a mapping.
+   informational and need no mapping. **Only active `deny` findings (`effect: "deny"` with `enforcementMode` not
+   `DoNotEnforce`) stop the workflow or use `disposition: "blocked"`**: Architecture acceptance rejects any `blocked`
+   `deny` row and names it, so change the design to satisfy/plan that `deny` control or ask the user how to proceed.
+   **Never stop, mark `blocked`, or pause to ask the user whether to continue or refresh governance for `modify`,
+   `deployIfNotExists`, `audit`, `auditIfNotExists`, `append` or `disabled` findings**: map `modify` and
+   `deployIfNotExists` findings as `planned` (omitting `expectedValue` when platform-remediated at deploy time or when
+   optional platform add-ons such as an Azure DDoS Protection Plan are not provisioned by the workload), `satisfied`
+   (only when the workload itself sets that exact value), or `not-applicable` with a factual reason, note any platform
+   mutation/cost caveat in Architecture notes, and continue. A review disposition never changes a mapping.
    The policy-property validator evaluates a mapping's `propertyPath` on the compiled template resource that the
    logical resource's code symbol points to, as dotted names only (no array indexes). For a Bicep resource deployed
    through an AVM module that resource is the module deployment, so an ARM path such as
@@ -81,11 +87,14 @@ review or task.
    again at the final Gate 4 approval.
 10. When the `architecture-review` task appears, run the rubber-duck review steps in `apex-next` with the exact
     `task.taskId`. For `needs_review`, do not request task context or run rubber-duck again. Present findings in one
-    decision panel and record a disposition for every finding through `apex/reviewDecide`. Automatically
-    dismiss findings that only request regional, zonal, quota, deployment, restore, failover or complete pricing checks.
+    decision panel and record a disposition for every finding through `apex/reviewDecide`. Automatically dismiss
+    findings that only request regional, zonal, quota, deployment, restore, failover, complete pricing checks, live
+    confirmation of accepted reference-baseline assignments, or findings based solely on non-`deny` effects (`modify`,
+    `deployIfNotExists`, `audit`, `append`, `disabled` or `DoNotEnforce` `deny`); retain findings about violations of
+    accepted active `deny` controls regardless of governance source.
 11. For a `policy-refresh` task after Gate 2, start from the `policy-property-map` template in task context. Decide only
-    rows listed in `governanceFindings`, submit the complete map through `apex/completeTask`, and let blocked rows
-    reopen Architecture and Gate 2.
+    rows listed in `governanceFindings`, submit the complete map through `apex/completeTask`, and let blocked `deny`
+    rows reopen Architecture and Gate 2 (`modify` and `deployIfNotExists` rows are non-blocking and never use `blocked`).
 12. After `apex/reviewDecide`, call `apex/status`. In a lab run Gate 2 is an automatic readiness checkpoint that the
     kernel records once the review and deterministic checks pass. Never ask the user to approve Gate 2 and never call
     `apex/gateDecide` for it. If status shows a "readiness checkpoint is not recorded" blocker, call `apex/nextTask` once
@@ -105,8 +114,13 @@ in [Design Stage Grounding](../apex-azure-defaults/references/azure-mcp-tools.md
 - Use `apex-azure/documentation` (`microsoft_docs_search`, then `microsoft_docs_fetch` for a selected official URL) for
   service behavior, limits and recommended configuration, and the track's best-practice namespace
   (`get_azure_bestpractices` for Bicep, `azureterraformbestpractices` for Terraform).
-- Use `apex-azure/policy` (`policy_assignment_list`) only when the target is a subscription with an approved
-  subscription; for a `local` target the accepted governance input is the policy source.
+- Use `apex-azure/policy` (`policy_assignment_list`) only when the target is a subscription and accepted
+  `governance-constraints` has `source: "collected"`; when `governance-constraints` has `source: "reference"` or the
+  target is `local`, the accepted governance artifact in `apex/taskContext` is already the stage's policy source
+  (`governance-refresh` replaces it later). Never pause Architecture or ask the user whether to continue with the
+  accepted reference baseline or refresh governance because a live query omits or differs from reference-baseline
+  assignments, and never stop on `modify`, `deployIfNotExists`, `audit`, `append` or `disabled` effects—only an
+  unresolvable active `deny` constraint stops.
 
 Cite what informed each recommendation or decision record (namespace, command, bounded query, retrieval time). Grounding
 never replaces the kernel's accepted inputs, and a result cannot approve, accept or waive anything. If a namespace is
