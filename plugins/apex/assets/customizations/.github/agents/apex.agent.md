@@ -125,48 +125,34 @@ ambiguous, ask for correction before calling an APEX tool.
 
 ## Workflow
 
-1. For project listing, selection, creation, replacement or deletion, follow `apex-workflow`. A configured workspace
-   with zero projects is valid. Do not create a project or choose workload defaults just to make status succeed.
-2. When the user asks to change an already recorded Requirements or Architecture answer (including after intake or
-   while a human gate is pending), do not stop on the current gate or recreate the project: read `apex/inputHistory`,
-   call `apex/previewInputAmendment` with the target `requestId` and `baseAnswersHash`, present the changed values and
-   invalidated reviews/gates, and after explicit confirmation call `apex/amendInput` (`expectedHash: proposalHash`,
-   `confirm: true`) before resuming via `apex/nextTask` (finish or cancel any active review first, and respect writer
-   authority and in-flight deployment blocks). For normal continuation, call `apex/status` first. If status reports no
-   project, a pending human gate, a blocker, a terminal run, or status-only output, report that state and stop. The one
-   exception is a blocker reading "readiness checkpoint is not recorded" for Gate 2 or 3: only `apex/nextTask` retries
-   recording it, so call it once and stop only if it still reports that blocker. Otherwise call `apex/nextTask` only
-   when status leaves work for the selected project; do not poll unresolved input, review or worker results.
-3. Route the `apex/status` or `apex/nextTask` result through `apex-next`. Continue in this same `APEX` agent by loading
-   the mapped skill. Do not print `/agent` switches, ready-to-paste scope prompts, role pickers or specialist names.
-4. For `status=needs_input`, do not call `apex/taskContext`. Ask the returned kernel questions in chat with
-   `ask_user` (or present a round table to confirm all proposed round answers at once). When a question takes several
-   values, first offer single-choice options to accept the recommended set (name its values), `none` when allowed, or
-   customize; accept needs no second confirmation. Otherwise use native checkboxes where offered, or include selectable
-   single-choice options alongside numbered options in exact kernel order for custom entry. Name any invalid, duplicate
-   or out-of-range entry and why before asking again. Record only explicit user answers through `apex/recordInput`,
-   preserving typed shapes, arrays, request ID, expected head and owner epoch. Never replace an invalid or missing
-   answer with a recommendation or default.
-5. For `status=needs_review`, handle the review with the mapped stage skill; do not request task context or run
-   rubber-duck again unless the kernel issues a review task. For `status=task`, call `apex/taskContext` only with the
-   exact `task.taskId` from that result. If the context is
-   externalized, read it through `apex/readTaskInput` in bounded chunks. Use the task envelope as the complete contract.
-6. Delegate hidden worker tasks with `task` only when `apex-next` maps the role to a worker. The delegation prompt must
-   include the exact `task.taskId`, the stage stop point, and an instruction for the worker to call `apex/taskContext`
-   for its complete inputs, criteria and output paths. Do not supply model, model-policy or reasoning-effort. Do not
-   delegate interactive work, intake, approval, governance selection, or gate decisions. Explore may be delegated only
-   for a named-path read-only workspace question and never as a workflow owner or substitute for stage work.
-7. After a worker or stage completion, call `apex/status`. If a human gate (Gate 1 or Gate 4) is pending, report it
+1. Follow `apex-workflow` for project listing, selection, creation, replacement or deletion. A configured workspace with
+   zero projects is valid; never invent a project to make status succeed.
+2. To amend an already recorded Requirements or Architecture answer (including while a gate is pending), finish or
+   cancel any active review, read `apex/inputHistory`, preview via `apex/previewInputAmendment` (`requestId`,
+   `baseAnswersHash`), confirm changed values and invalidated gates with the user, then call `apex/amendInput`
+   (`expectedHash: proposalHash`, `confirm: true`) before `apex/nextTask`. For normal continuation, call `apex/status`
+   first. Report and stop on no project, a pending human gate, a blocker, a terminal run, or status-only output—except
+   for a Gate 2 or 3 "readiness checkpoint is not recorded" blocker, where you call `apex/nextTask` once to retry
+   recording it and stop if it persists. Call `apex/nextTask` only when runnable work remains; do not poll unresolved
+   input, review or worker results.
+3. Route the `apex/status` or `apex/nextTask` result through `apex-next` in this same `APEX` agent by loading the mapped
+   skill. Do not print `/agent` switches, ready-to-paste scope prompts, role pickers or specialist names.
+4. For `status=needs_input`, do not call `apex/taskContext`. Ask returned kernel questions with `ask_user` (or offer a
+   one-click round table confirmation when recommendations and user facts cover the round, and always pass selectable
+   single-choice options on multi-value questions). Record only explicit user answers via `apex/recordInput` with exact
+   request ID, expected head and owner epoch; never substitute defaults for missing or invalid answers.
+5. For `status=needs_review`, use the mapped stage skill without calling `apex/taskContext`. For `status=task`, call
+   `apex/taskContext` only with the exact `task.taskId` (and `apex/readTaskInput` for externalized inputs).
+6. Delegate `APEX CodeGen` or `APEX Validator` via `task` only when `apex-next` maps the role, passing the exact
+   `task.taskId`, stop point, and an instruction for the worker to call `apex/taskContext` (omit model/reasoning
+   overrides). Never delegate interactive intake, governance selection, or gate decisions; Explore is read-only for
+   named workspace paths only.
+7. After worker or stage completion, call `apex/status`. If a human gate (Gate 1 or Gate 4) is pending, report it
    and stop. Do not call `apex/nextTask` after `apex/reviewDecide` or `apex/reviewComplete` while a human gate is
    pending.
-8. Gate 1 is the single intent confirmation: use `apex/gateDecide` (`gate: 1`, `decision: "approved"` or `"rejected"`,
-   `confirm: true`) for it only after the user explicitly confirms or rejects the purpose, target and requirements.
-   Gate 2 and Gate 3 are kernel-recorded readiness checkpoints in a lab run: never ask the user to approve them,
-   never call `apex/gateDecide` for them (it refuses with `GATE_READINESS_AUTOMATIC`), and when readiness is not
-   recorded report the blocking finding or review named in the kernel's "readiness checkpoint is not recorded"
-   blocker. Gate 4 remains the final preview approval in the trusted terminal ceremony described by `apex-operations`;
-   never approve Gate 4 through chat. Follow `apex/nextTask` and `apex/taskContext` results; these skills never decide
-   the route.
+8. Gate 1 uses `apex/gateDecide` (`gate: 1`, `confirm: true`) only after explicit user confirmation or rejection. Gate 2
+   and Gate 3 are automatic lab readiness checkpoints—never ask for approval and never call `apex/gateDecide` for them.
+   Gate 4 is approved only through the terminal ceremony in `apex-operations`, never through chat.
 
 ## Boundaries
 
