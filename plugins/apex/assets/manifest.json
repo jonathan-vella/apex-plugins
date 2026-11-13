@@ -1,7 +1,7 @@
 {
   "version": 1,
   "sources": {
-    "customizations": "0.11.0-next.15",
+    "customizations": "0.11.0-next.16",
     "config": "1.0.0"
   },
   "composition": {
@@ -577,7 +577,7 @@
         "path": "config/runtime-bundle.v1.json",
         "mapping": "config"
       },
-      "sha256": "6a7c5405c64fa0d8f61b553b9191c7dadcd1f7e7b31207789f55e25cec67fb5f",
+      "sha256": "4ab59c4e34d24997c33f395e105062a00eefabc3025966789a184ef745c8e011",
       "bytes": 2046
     },
     {
@@ -607,8 +607,8 @@
         "path": "customizations/.github/agents/apex-codegen.agent.md",
         "mapping": "customizations"
       },
-      "sha256": "65278e4e433f21abc0bcd75e558a839be40763372d0e1d04a0a06962b08d0dcb",
-      "bytes": 2488
+      "sha256": "07a137606989b14c62adbcfb2d22ffa8246d130d095e2afff57068f501f09b56",
+      "bytes": 3765
     },
     {
       "path": "customizations/.github/agents/apex-validator.agent.md",
@@ -1557,8 +1557,8 @@
         "path": "customizations/.github/skills/apex-azure-defaults/references/avm-binding-guidance.md",
         "mapping": "customizations"
       },
-      "sha256": "50c234083ae2eed851dab07a0bab1b9e28cc76497b6e5272c14406aad42db82e",
-      "bytes": 5688
+      "sha256": "b09299d8908044bb9b33a16401220a3e2dd8ae5f746b60b88cf994c6c4efbfaf",
+      "bytes": 5827
     },
     {
       "path": "customizations/.github/skills/apex-azure-defaults/references/azure-cli-and-azd.md",
@@ -5537,8 +5537,8 @@
         "path": "customizations/.github/skills/apex-codegen/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "8fbef8f0567c8142759563509c0485b2d3acaed0d73f6e8adae786370a63607d",
-      "bytes": 2436
+      "sha256": "5effd63f15cb9e8e3dd136e04a7dd58ecc28b04eb6f69e082e723d9ce0566c97",
+      "bytes": 3447
     },
     {
       "path": "customizations/.github/skills/apex-entra-app-registration/SKILL.md",
@@ -5697,8 +5697,8 @@
         "path": "customizations/.github/skills/apex-operations/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "fd29d74bb2b4e3ffff5e80473dc9f56ac49b9653d48d17a324d3545b298b7189",
-      "bytes": 9380
+      "sha256": "8686d6698160afe8ba40d7c8db474f72208bd74cf694dd34b8d4458757cbc0a2",
+      "bytes": 9481
     },
     {
       "path": "customizations/.github/skills/apex-planning/SKILL.md",
@@ -5707,8 +5707,8 @@
         "path": "customizations/.github/skills/apex-planning/SKILL.md",
         "mapping": "customizations"
       },
-      "sha256": "1d0d70a7228a51e3fa20f4cc8c5d8737104921febcf3f401c7991faacd909c4c",
-      "bytes": 7600
+      "sha256": "967a22492f5d04fa7605b3d7ac5e95e4e64714c1a58170b4a5e8c412e83a3592",
+      "bytes": 8745
     },
     {
       "path": "customizations/.github/skills/apex-python-diagrams/SKILL.md",
@@ -6317,7 +6317,7 @@
         "path": "customizations/manifest.json",
         "mapping": "customizations"
       },
-      "sha256": "86ab6c5390573cbc027ff3a17d2505b92c0a500b03ab5760183ddc262fe247f9",
+      "sha256": "494b19eeae700efb304f34e04fb9025104b9cbe5d8dd7577dc89c1d544d55bc4",
       "bytes": 51004
     },
     {
@@ -6354,6 +6354,6 @@
   "lock": {
     "algorithm": "sha256",
     "canonicalization": "apex-bundled-assets-v1",
-    "digest": "08bc1fd8547cf5f04110a47f577f195b3245f184ae4b5e0c7d11e9a46639f68d"
+    "digest": "039f974d090a025bfe1d64ce6a7d38545c844b17d29f6182c4c0cb0869818c93"
   }
 }
