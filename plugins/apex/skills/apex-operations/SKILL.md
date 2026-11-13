@@ -43,11 +43,16 @@ inventory, diagnosis, reconciliation or quality work.
      planning (`plan`), and blocked `deny` controls found during `policy-refresh` can reopen Architecture and Gate 2. If
      the user selects the reference baseline, call `apex/governanceImport` (`reference: true`) and continue directly into
      Architecture.
-   - At `governance-refresh` (after Gate 2 when Architecture used the reference baseline), if no reviewed subscription
-     baseline path is available yet, direct the user to run the consumer governance collection workflow
-     (`.github/workflows/governance-policy-baseline.yml`), complete human review, and provide the reviewed local path
-     via `ask_user`, then call `apex/governanceSelect` and `apex/governanceImport` with that path before continuing to
-     `policy-refresh` and planning.
+   - At `governance-refresh` (after Gate 2 when Architecture used the reference baseline), if a reviewed subscription
+     baseline path is already available, call `apex/governanceSelect` and `apex/governanceImport` with that path before
+     continuing to `policy-refresh` and planning. If no reviewed subscription baseline is available yet (for example in
+     pre-sales mode before subscription access is granted), do not dead-end silently: use `ask_user` (one call) to offer
+     **Continue offline in pre-sales/design mode with the ALZ Corp reference baseline through Planning, CodeGen and IaC
+     validation (blocks before live Azure preview/deploy until `apex governance revise` imports a collected baseline)
+     (Recommended when subscription access is not yet available)** versus **Collect and review the subscription baseline
+     now (`tools/scripts/collect-governance-baseline.ps1` or `.github/workflows/governance-policy-baseline.yml`) and
+     provide its local path**. If the user selects offline pre-sales continuation on a `lab` run, call
+     `apex/governanceImport` (`reference: true`) and continue directly into `plan`.
    Return the service's `outputHash` and `summary`, never baseline bytes. Import does not perform live discovery, map
    policies, authorize planning or approve a gate.
 5. If policy content changed, explain invalidation scope and direct the user to the trusted CLI governance revision

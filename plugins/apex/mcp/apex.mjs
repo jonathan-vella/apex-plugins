@@ -30504,6 +30504,10 @@ function escapeMarkdown(value) {
   const text5 = value === null ? "null" : String(value);
   return text5.replace(/[\u0000-\u0009\u000b\u000c\u000e-\u001f\u007f]/g, (character) => `\\u${character.charCodeAt(0).toString(16).padStart(4, "0")}`).replace(/\r\n?|\n/g, "<br>").replace(/\\/g, "\\\\").replace(/\|/g, "\\|");
 }
+function escapeMarkdownBlock(value) {
+  const text5 = value === null ? "null" : String(value);
+  return text5.replace(/\r\n?/g, "\n").replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/g, (character) => `\\u${character.charCodeAt(0).toString(16).padStart(4, "0")}`);
+}
 function markdownTable(headers, rows) {
   const header = `| ${headers.map(escapeMarkdown).join(" | ")} |`;
   const separator = `| ${headers.map(() => "---").join(" | ")} |`;
@@ -30664,22 +30668,23 @@ function renderRequirementsDocument(requirements, template, artifactHash, templa
   assertExactSlots(template, templateDefinition.slots);
   const requirementsRows = [...requirements.requirements].sort((left, right) => left.id.localeCompare(right.id)).map((item) => [item.id, item.priority, item.status, item.statement, item.source]);
   const list = (items) => items.length === 0 ? "None." : [...items].sort((left, right) => left.localeCompare(right)).map((item) => `- ${escapeMarkdown(item)}`).join("\n");
+  const listBlock = (value) => escapeMarkdownBlock(value).replace(/\n/gu, "\n  ");
   const replacements = {
-    workload: escapeMarkdown(requirements.workload),
+    workload: listBlock(requirements.workload),
     "artifact-hash": artifactHash,
     "template-hash": templateHash,
     environment: escapeMarkdown(requirements.environment),
     "artifact-status": "accepted",
     "business-context": escapeMarkdown(requirements.businessContext ?? unavailable("business context")),
-    "success-criteria": escapeMarkdown(requirements.successCriteria ?? unavailable("success criteria")),
+    "success-criteria": listBlock(requirements.successCriteria ?? unavailable("success criteria")),
     "requirements-table": markdownTable(["ID", "Priority", "Status", "Statement", "Source"], requirementsRows),
-    "nfr-table": escapeMarkdown(requirements.nonFunctionalRequirements ?? unavailable("non-functional requirement classifications")),
-    "security-and-compliance-table": escapeMarkdown(requirements.securityAndCompliance ?? unavailable("security or compliance classifications")),
-    "budget-and-operations": escapeMarkdown(requirements.budgetAndOperations ?? unavailable("budget or operations data")),
-    "regional-constraints": escapeMarkdown(requirements.regionalConstraints ?? unavailable("regional or residency constraints")),
+    "nfr-table": escapeMarkdownBlock(requirements.nonFunctionalRequirements ?? unavailable("non-functional requirement classifications")),
+    "security-and-compliance-table": escapeMarkdownBlock(requirements.securityAndCompliance ?? unavailable("security or compliance classifications")),
+    "budget-and-operations": escapeMarkdownBlock(requirements.budgetAndOperations ?? unavailable("budget or operations data")),
+    "regional-constraints": escapeMarkdownBlock(requirements.regionalConstraints ?? unavailable("regional or residency constraints")),
     "assumptions-list": list(requirements.assumptions),
     "unknowns-list": list(requirements.unknowns),
-    "architecture-handoff": escapeMarkdown(requirements.architectureHandoff ?? "Architecture must validate candidate services against current evidence.")
+    "architecture-handoff": escapeMarkdownBlock(requirements.architectureHandoff ?? "Architecture must validate candidate services against current evidence.")
   };
   return template.replace(/(?<!\\)\{([a-z][a-z-]*)\}|\\([{}])/gu, (_match, slot, escapedBrace) => escapedBrace ?? replacements[slot]);
 }
@@ -31309,6 +31314,33 @@ function short(value, length = 64) {
   const normalized = value.replace(/\s+/gu, " ").trim();
   return normalized.length <= length ? normalized : `${normalized.slice(0, length - 3)}...`;
 }
+function wrapLines(value, maxChars, maxLines) {
+  const words = value.replace(/\s+/gu, " ").trim().split(" ").filter(Boolean);
+  if (words.length === 0)
+    return [""];
+  const lines = [];
+  let current = "";
+  for (let index = 0; index < words.length; index += 1) {
+    const word = words[index];
+    const candidate = current === "" ? word : `${current} ${word}`;
+    if (candidate.length <= maxChars || current === "") {
+      current = candidate;
+    } else if (lines.length + 1 < maxLines) {
+      lines.push(current);
+      current = word;
+    } else {
+      const remaining = `${current} ${words.slice(index).join(" ")}`;
+      lines.push(short(remaining, maxChars));
+      return lines;
+    }
+  }
+  if (current !== "")
+    lines.push(short(current, maxChars));
+  return lines;
+}
+function titleCasePillar(pillar) {
+  return pillar.split("-").map((part) => part.length === 0 ? part : `${part[0].toUpperCase()}${part.slice(1)}`).join(" ");
+}
 function document(title, height, body, description) {
   return [
     `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${height}" viewBox="0 0 ${WIDTH} ${height}" role="img" aria-labelledby="title description">`,
@@ -31374,12 +31406,13 @@ function renderWafAssessmentDiagram(architecture) {
   ]);
   const rows = assessment.pillars.map(({ pillar, status: status2, assessment: detail }) => ({ id: pillar, label: pillar, status: status2, detail })).sort((left, right) => (order.get(left.id) ?? 99) - (order.get(right.id) ?? 99));
   const body = rows.map((row, index) => {
-    const y = 86 + index * 74;
+    const y = 84 + index * 86;
     const color = STATUS_COLORS[row.status ?? ""] ?? MUTED;
-    return `<g><rect x="40" y="${y}" width="880" height="56" rx="6" fill="#ffffff" stroke="#d7e0e8"/><rect x="40" y="${y}" width="12" height="56" rx="6" fill="${color}"/><text x="70" y="${y + 23}" fill="${INK}" font-family="Arial, sans-serif" font-size="15" font-weight="700">${xml(row.label.replaceAll("-", " "))}</text><text x="260" y="${y + 23}" fill="${color}" font-family="Arial, sans-serif" font-size="13" font-weight="700">${xml(row.status)}</text><text x="70" y="${y + 44}" fill="${MUTED}" font-family="Arial, sans-serif" font-size="12">${xml(short(row.detail ?? "", 110))}</text></g>`;
+    const detailLines = wrapLines(row.detail ?? "", 115, 2).map((line, lineIndex) => `<text x="70" y="${y + 43 + lineIndex * 18}" fill="${MUTED}" font-family="Arial, sans-serif" font-size="12">${xml(line)}</text>`).join("");
+    return `<g><rect x="40" y="${y}" width="880" height="72" rx="6" fill="#ffffff" stroke="#d7e0e8"/><rect x="40" y="${y}" width="12" height="72" rx="6" fill="${color}"/><text x="70" y="${y + 23}" fill="${INK}" font-family="Arial, sans-serif" font-size="15" font-weight="700">${xml(titleCasePillar(row.label))}</text><text x="275" y="${y + 23}" fill="${color}" font-family="Arial, sans-serif" font-size="13" font-weight="700">${xml(row.status)}</text>${detailLines}</g>`;
   }).join("\n");
   const spec = { kind: "waf", title: "Azure Well-Architected Assessment", rows };
-  return source(spec, document(spec.title, 480, body, "Qualitative status for the five Azure Well-Architected pillars"));
+  return source(spec, document(spec.title, 530, body, "Qualitative status for the five Azure Well-Architected pillars"));
 }
 function renderCostBreakdownDiagram(cost) {
   const rows = cost.lineItems.map(({ id, service, sku, monthlyCost }) => ({
@@ -31389,15 +31422,17 @@ function renderCostBreakdownDiagram(cost) {
   })).sort((left, right) => compare2(left.id, right.id));
   const maximum = Math.max(1, ...rows.map(({ value }) => value ?? 0));
   const notes = (cost.unpricedItems ?? []).map(({ service, sku }) => `Unpriced: ${service} / ${sku}`).sort(compare2);
-  const height = Math.max(260, 120 + rows.length * 52 + notes.length * 20);
+  const emptyBannerHeight = rows.length === 0 ? 58 : 0;
+  const height = Math.max(260, 120 + emptyBannerHeight + rows.length * 52 + notes.length * 20);
+  const emptyBanner = rows.length === 0 ? `<g><rect x="40" y="84" width="880" height="44" rx="6" fill="#ffffff" stroke="#d7e0e8"/><text x="60" y="111" fill="${MUTED}" font-family="Arial, sans-serif" font-size="13">${xml(`No priced line items returned (${notes.length} unpriced component(s)); see cost-estimate.md for query reasons.`)}</text></g>` : "";
   const bars = rows.map((row, index) => {
     const y = 88 + index * 52;
     const width = (row.value ?? 0) / maximum * 520;
     return `<g><text x="40" y="${y + 16}" fill="${INK}" font-family="Arial, sans-serif" font-size="13">${xml(short(row.label, 42))}</text><rect x="350" y="${y}" width="${width.toFixed(2)}" height="22" fill="${ACCENT}"/><text x="${Math.min(880, 360 + width)}" y="${y + 16}" fill="${INK}" font-family="Arial, sans-serif" font-size="12">${xml(`${(row.value ?? 0).toFixed(2)} ${cost.currency}`)}</text></g>`;
   }).join("\n");
-  const noteSvg = notes.map((note, index) => `<text x="40" y="${112 + rows.length * 52 + index * 20}" fill="#a4262c" font-family="Arial, sans-serif" font-size="12">${xml(note)}</text>`).join("\n");
+  const noteSvg = notes.map((note, index) => `<text x="40" y="${112 + emptyBannerHeight + rows.length * 52 + index * 20}" fill="#a4262c" font-family="Arial, sans-serif" font-size="12">${xml(note)}</text>`).join("\n");
   const spec = { kind: "cost-breakdown", title: "Monthly Cost Breakdown", rows, notes };
-  return source(spec, document(spec.title, height, `${bars}
+  return source(spec, document(spec.title, height, `${emptyBanner}${bars}
 ${noteSvg}`, "Priced monthly costs; unpriced items are excluded"));
 }
 function renderCostUncertaintyDiagram(cost) {
@@ -31409,8 +31444,8 @@ function renderCostUncertaintyDiagram(cost) {
     upper: assertNonNegativeFinite(uncertainty.upperMonthlyCost, `cost line item '${id}' upperMonthlyCost`)
   })).sort((left, right) => compare2(left.id, right.id));
   const maximum = Math.max(1, ...rows.map(({ upper }) => upper));
-  const height = Math.max(260, 120 + rows.length * 58);
-  const ranges = rows.map((row, index) => {
+  const height = Math.max(200, 120 + rows.length * 58);
+  const ranges = rows.length === 0 ? `<g><rect x="40" y="84" width="880" height="52" rx="6" fill="#ffffff" stroke="#d7e0e8"/><text x="60" y="115" fill="${MUTED}" font-family="Arial, sans-serif" font-size="13">${xml(`Uncertainty bands unavailable: 0 priced line items (${(cost.unpricedItems ?? []).length} unpriced component(s); see cost-estimate.md).`)}</text></g>` : rows.map((row, index) => {
     const y = 96 + index * 58;
     const lower = 350 + row.lower / maximum * 500;
     const upper = 350 + row.upper / maximum * 500;
@@ -31425,7 +31460,8 @@ function renderCostUncertaintyDiagram(cost) {
 var TIERS = [
   { id: "edge", title: "Edge & ingress", icon: "\u{1F310}", fill: "#e8f3fc", stroke: "#0f6cbd" },
   { id: "application", title: "Application & compute", icon: "\u2699\uFE0F", fill: "#e9f6e8", stroke: "#107c10" },
-  { id: "data", title: "Data & messaging", icon: "\u{1F5C4}\uFE0F", fill: "#fdf3e3", stroke: "#b45f06" },
+  { id: "messaging", title: "Messaging & events", icon: "\u{1F4E8}", fill: "#fef7e6", stroke: "#c45100" },
+  { id: "data", title: "Data & storage", icon: "\u{1F5C4}\uFE0F", fill: "#fdf3e3", stroke: "#b45f06" },
   { id: "network", title: "Network & private access", icon: "\u{1F50C}", fill: "#efeaf8", stroke: "#6b4ea8" },
   { id: "security", title: "Security & identity", icon: "\u{1F511}", fill: "#fbeaea", stroke: "#a4262c" },
   { id: "operations", title: "Monitoring & operations", icon: "\u{1F4CA}", fill: "#e6f2f3", stroke: "#0b6a6f" },
@@ -31445,15 +31481,15 @@ var TIER_RULES = [
   ["microsoft.containerregistry/", "application"],
   ["microsoft.compute/", "application"],
   ["microsoft.logic/", "application"],
+  ["microsoft.servicebus/", "messaging"],
+  ["microsoft.eventhub/", "messaging"],
+  ["microsoft.eventgrid/", "messaging"],
   ["microsoft.sql/", "data"],
   ["microsoft.storage/", "data"],
   ["microsoft.documentdb/", "data"],
   ["microsoft.dbforpostgresql/", "data"],
   ["microsoft.dbformysql/", "data"],
   ["microsoft.cache/", "data"],
-  ["microsoft.servicebus/", "data"],
-  ["microsoft.eventhub/", "data"],
-  ["microsoft.eventgrid/", "data"],
   ["microsoft.search/", "data"],
   ["microsoft.keyvault/", "security"],
   ["microsoft.managedidentity/", "security"],
@@ -31506,6 +31542,8 @@ function nodeText(tier, service, id) {
 }
 function shape(tier, text5) {
   switch (tier) {
+    case "messaging":
+      return `[["${text5}"]]`;
     case "data":
       return `[("${text5}")]`;
     case "edge":
@@ -31676,7 +31714,7 @@ function renderArchitectureMermaid(architecture) {
   }
   const allEdges = [...edgePairs.values()].map(([fromNode, toNode, lookupKey]) => formatEdge(fromNode, toNode, flowLabels.get(lookupKey) ?? actorLabelFallback.get(lookupKey))).sort(compare3);
   lines.push(...allEdges);
-  lines.push(`  subgraph legend["Legend"]`, "    direction LR", `    legend_key["([Ingress / Actor]) \u2022 [Compute / Network] \u2022 [(Data)] \u2022 {{Security}}"]`, "  end");
+  lines.push(`  subgraph legend["Legend"]`, "    direction LR", `    legend_key["([Ingress / Actor]) \u2022 [Compute / Network] \u2022 [[Messaging]] \u2022 [(Data)] \u2022 {{Security}}"]`, "  end");
   if (actors.length > 0) {
     lines.push(`  class ${actors.map(({ id }) => actorIds.get(id)).join(",")} actor_node`, "  class lane_actors lane_actors");
   }
@@ -31702,7 +31740,7 @@ function renderArchitectureMermaid(architecture) {
 import { join as join26, resolve as resolve22 } from "node:path";
 
 // packages/cli/dist/version.js
-var APEX_VERSION = "0.11.0-next.14";
+var APEX_VERSION = "0.11.0-next.15";
 var MINIMUM_NODE_VERSION = "24.21.0";
 function meetsMinimumVersion(current, minimum) {
   const currentParts = current.split(".").map(Number);
@@ -71501,37 +71539,46 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const run = await this.currentRun();
     const events = await this.journal(run).replay();
     await this.assertCurrentWriterAuthority(run, new WriterTransferStore(this.projects.runDirectory(run.projectId, run.runId), this.clock));
-    if (this.acceptedArtifactHashes(events)["governance-constraints"] !== void 0)
-      throw new ApexError("APEX_CONFLICT", "Governance is already accepted; use apex governance revise to replace it", EXIT_CODES.conflict);
+    const existingHash = this.acceptedArtifactHashes(events)["governance-constraints"];
+    const existingGovernance = existingHash === void 0 ? void 0 : await this.objects.getJson(existingHash);
     const route = await this.route(run, events);
-    if (route.task?.id !== "governance-discovery" || route.blockers.length > 0)
+    const refreshingPreSales = existingGovernance?.source === "reference" && run.purpose === "lab" && route.task?.id === "governance-refresh";
+    if (existingHash !== void 0 && !refreshingPreSales)
+      throw new ApexError("APEX_CONFLICT", "Governance is already accepted; use apex governance revise to replace it", EXIT_CODES.conflict);
+    const expectedTask = refreshingPreSales ? "governance-refresh" : "governance-discovery";
+    if (route.task?.id !== expectedTask || route.blockers.length > 0)
       throw new ApexError("APEX_AUTHORIZATION", "Governance import requires the active discovery task", EXIT_CODES.authorization);
-    let selection2;
-    try {
-      selection2 = importGovernanceReference(await this.bundledGovernanceReference(), {
-        targetScope: run.targetScope,
-        now: this.clock().toISOString()
-      });
-    } catch (error62) {
-      if (error62 instanceof GovernanceBaselineError)
-        throw governanceBaselineApexError(error62, "reference");
-      throw error62;
-    }
     await this.acquireRunWriterLease(run);
-    const digest2 = await this.objects.putJson({ ...selection2.snapshot, projectId: run.projectId, runId: run.runId });
-    const constraints = {
-      ...selection2.constraints,
-      source: "reference",
-      projectId: run.projectId,
-      runId: run.runId,
-      targetScope: run.targetScope,
-      constraintsRef: {
-        mediaType: "application/json",
-        uri: `apex-object:${digest2}`,
-        digest: digest2,
-        bytes: (await this.objects.getBytes(digest2)).byteLength
+    let constraints;
+    if (refreshingPreSales && existingGovernance !== void 0 && isGovernanceObservationCurrent(existingGovernance.discoveredAt, this.clock().toISOString())) {
+      constraints = existingGovernance;
+    } else {
+      let selection2;
+      try {
+        selection2 = importGovernanceReference(await this.bundledGovernanceReference(), {
+          targetScope: run.targetScope,
+          now: this.clock().toISOString()
+        });
+      } catch (error62) {
+        if (error62 instanceof GovernanceBaselineError)
+          throw governanceBaselineApexError(error62, "reference");
+        throw error62;
       }
-    };
+      const digest2 = await this.objects.putJson({ ...selection2.snapshot, projectId: run.projectId, runId: run.runId });
+      constraints = {
+        ...selection2.constraints,
+        source: "reference",
+        projectId: run.projectId,
+        runId: run.runId,
+        targetScope: run.targetScope,
+        constraintsRef: {
+          mediaType: "application/json",
+          uri: `apex-object:${digest2}`,
+          digest: digest2,
+          bytes: (await this.objects.getBytes(digest2)).byteLength
+        }
+      };
+    }
     const task = await this.issueTask(run, route.task, await this.inputRefs(run, events, route.task));
     const completed = await this.acceptTaskOutputs(task.taskId, [
       { kind: "governance-constraints", value: constraints }
@@ -72718,7 +72765,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       ]);
     if (descriptor.reviewSubject !== void 0) {
       const stage = descriptor.reviewSubject;
-      files2.push(...inStage(stage, ["challenger-findings.md"]));
+      files2.push(...inStage(stage, ["challenger-findings.md", "README.md"]));
     }
     for (const name of ["00-index.md", ...new Set(files2)])
       await this.assertGeneratedReviewUnmodified(join20(root, name));
@@ -72808,14 +72855,29 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const sections = [];
     for (const [title, summary, files2] of stages) {
       const present = [];
-      for (const [path2, description] of files2)
-        if (await this.readOptional(join20(root, path2)) !== void 0)
+      for (const [path2, description] of files2) {
+        const existing = await this.readOptional(join20(root, path2));
+        if (existing !== void 0) {
+          await this.mirrorUntamperedGeneratedReview(join20(root, path2), existing);
           present.push(`- [${description}](${path2})`);
+        }
+      }
       sections.push(`## ${title}
 
 ${summary}
 
 ${present.length === 0 ? "Not generated yet." : present.join("\n")}`);
+    }
+    for (const diagramName of ["02-waf-assessment", "03-des-cost-breakdown", "03-des-cost-uncertainty"]) {
+      for (const rel of [
+        `${STAGE_FOLDERS.architecture}/${diagramName}.svg`,
+        `${STAGE_FOLDERS.architecture}/${diagramName}.png`,
+        `${STAGE_FOLDERS.architecture}/sources/${diagramName}.py`
+      ]) {
+        const existing = await this.readOptional(join20(root, rel));
+        if (existing !== void 0)
+          await this.mirrorUntamperedGeneratedReview(join20(root, rel), existing);
+      }
     }
     const text5 = [
       "# Run index",
@@ -72834,6 +72896,25 @@ ${present.length === 0 ? "Not generated yet." : present.join("\n")}`);
     ].join("\n");
     await mkdir11(root, { recursive: true });
     await this.writeGeneratedReview(join20(root, "00-index.md"), Buffer.from(text5, "utf8"));
+  }
+  async mirrorUntamperedGeneratedReview(path2, content) {
+    const mirror = await this.workspaceMirrorPath(path2);
+    if (mirror === void 0)
+      return;
+    await this.assertSafeDestination(this.root, path2);
+    const basePath = this.generatedReviewBase(path2);
+    await this.assertSafeDestination(this.root, basePath);
+    const base = await this.readOptional(basePath);
+    if (base === void 0 || !content.equals(base))
+      return;
+    const mirrorCurrent = await this.readOptional(mirror);
+    if (mirrorCurrent !== void 0)
+      return;
+    await mkdir11(dirname11(mirror), { recursive: true });
+    await atomicWriteBytes(mirror, content, { refuseOverwrite: true });
+    const mirrorBasePath = this.generatedReviewMirrorBase(mirror);
+    await this.assertSafeDestination(this.root, mirrorBasePath);
+    await atomicWriteBytes(mirrorBasePath, content);
   }
   async writeGeneratedReview(path2, content) {
     await this.assertGeneratedReviewUnmodified(path2);
@@ -72949,6 +73030,12 @@ Design estimates are not actual spend. Mapping dispositions are not compliance c
         return "- None recorded.";
       return value.map((item) => `- ${this.reviewMarkdownText(item)}`).join("\n");
     };
+    const candidateServices = [
+      .../* @__PURE__ */ new Set([
+        ...Array.isArray(input2["service-preferences"]) ? input2["service-preferences"] : [],
+        ...Array.isArray(input2["security-controls"]) && input2["security-controls"].includes("key-vault") ? ["key-vault"] : []
+      ])
+    ];
     await mkdir11(directory, { recursive: true });
     await Promise.all([
       this.writeGeneratedReview(join20(directory, "requirements.md"), Buffer.from(document2.content, "utf8")),
@@ -72966,7 +73053,7 @@ Generated Gate 1 review package for run \`${this.reviewMarkdownText(run.runId)}\
 These are user-reviewed candidate services, not Architecture decisions.
 
 ## Candidate Services
-${list(input2["service-preferences"])}
+${list(candidateServices)}
 
 ## Recommendation Rationale
 ${this.reviewMarkdownText(requirements.architectureHandoff ?? "Architecture must evaluate the candidate services against approved requirements and current evidence.")}
@@ -72983,7 +73070,7 @@ Architecture must validate candidates against approved requirements, governance,
 User constraints only. Architecture owns SKU selection.
 
 - Preference: ${text5(input2["sku-preferences"])}
-- Budget posture: ${requirements.budgetAndOperations === void 0 ? text5(input2.budget) : this.reviewMarkdownText(requirements.budgetAndOperations)}
+- Budget posture: ${requirements.budgetAndOperations === void 0 ? text5(input2.budget) : input2.budget !== void 0 && requirements.budgetAndOperations === this.requirementsTemplateFromIntake(input2).budgetAndOperations ? text5(input2.budget) : this.reviewMarkdownText(requirements.budgetAndOperations)}
 - Scale: ${text5(input2.scale)}
 `, "utf8")),
       this.writeGeneratedReview(join20(directory, "challenger-findings.md"), Buffer.from("# Challenger Findings\n\nRequirements challenger review is pending. The Gate 1 intent confirmation cannot be given until the reviewer completes this document.\n", "utf8"))
@@ -73004,11 +73091,67 @@ User constraints only. Architecture owns SKU selection.
 
 ${findings}`;
   }
+  effectiveReviewFindings(review2, events, reviewHash, subjectHash, dependencyHash) {
+    const resolutions = /* @__PURE__ */ new Map();
+    for (const event of events) {
+      if (event.type !== "review.resolved")
+        continue;
+      const resolution = event.payload.resolution;
+      if (resolution?.reviewHash !== reviewHash)
+        continue;
+      if (subjectHash !== void 0 && resolution.subjectHash !== subjectHash)
+        continue;
+      if (dependencyHash !== void 0 && resolution.dependencyHash !== dependencyHash)
+        continue;
+      const active = resolution.disposition === "fixed" || resolution.disposition === "acknowledged" || resolution.disposition === "dismissed" || resolution.expiresAt !== void 0 && Date.parse(resolution.expiresAt) > this.clock().getTime();
+      if (!active)
+        continue;
+      resolutions.set(resolution.findingId, resolution);
+    }
+    if (resolutions.size === 0)
+      return review2;
+    return {
+      ...review2,
+      findings: review2.findings.map((finding2) => {
+        const resolved = resolutions.get(finding2.id);
+        if (resolved === void 0)
+          return finding2;
+        const mappedDisposition = resolved.disposition === "dismissed" ? "dismissed" : resolved.disposition === "fixed" ? "remediated" : "accepted";
+        const suffix = [
+          resolved.disposition === "accepted-risk" || resolved.disposition === "acknowledged" ? resolved.disposition : void 0,
+          resolved.owner === void 0 ? void 0 : `owner: ${resolved.owner}`,
+          resolved.expiresAt === void 0 ? void 0 : `expires: ${resolved.expiresAt}`
+        ].filter(Boolean).join(", ");
+        return {
+          ...finding2,
+          disposition: mappedDisposition,
+          resolution: suffix === "" ? resolved.rationale : `${resolved.rationale} (${suffix})`
+        };
+      })
+    };
+  }
+  reviewStatusSummary(review2) {
+    if (review2.findings.length === 0)
+      return "passed (no findings)";
+    const openCount = review2.findings.filter(({ disposition }) => disposition === "open").length;
+    return openCount === 0 ? `resolved (${review2.findings.length} finding(s) dispositioned)` : `open (${openCount} of ${review2.findings.length} finding(s) awaiting disposition)`;
+  }
+  async updateStageReadmeReviewStatus(directory, statusSummary) {
+    const readmePath = join20(directory, "README.md");
+    const current = await this.readOptional(readmePath);
+    if (current === void 0)
+      return;
+    const updated = current.toString("utf8").replace(/^- Review status: .*$/mu, `- Review status: ${this.reviewMarkdownText(statusSummary)}`);
+    await this.writeGeneratedReview(readmePath, Buffer.from(updated, "utf8"));
+  }
   async materializeRequirementsChallengeFindings(run, review2) {
-    await this.writeGeneratedReview(join20(this.requirementsReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
+    const directory = this.requirementsReviewDirectory(run);
+    await mkdir11(directory, { recursive: true });
+    await this.writeGeneratedReview(join20(directory, "challenger-findings.md"), Buffer.from(`# Challenger Findings
 
 ${this.reviewFindingsMarkdown(review2)}
 `, "utf8"));
+    await this.updateStageReadmeReviewStatus(directory, this.reviewStatusSummary(review2));
   }
   architectureReviewDirectory(run) {
     return this.stageDirectory(run, "architecture");
@@ -73204,7 +73347,9 @@ These are user-confirmed Architecture decisions. Alternatives and rejected optio
       criterion.findingIds.map((id) => this.reviewMarkdownText(id)).join(", ") || "None",
       this.reviewMarkdownText(criterion.rationale)
     ]));
-    await this.writeGeneratedReview(join20(this.architectureReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
+    const directory = this.architectureReviewDirectory(run);
+    await mkdir11(directory, { recursive: true });
+    await this.writeGeneratedReview(join20(directory, "challenger-findings.md"), Buffer.from(`# Challenger Findings
 
 ## Well-Architected Criteria
 
@@ -73212,6 +73357,7 @@ ${criteria}
 
 ${this.reviewFindingsMarkdown(review2)}
 `, "utf8"));
+    await this.updateStageReadmeReviewStatus(directory, this.reviewStatusSummary(review2));
   }
   planReviewDirectory(run) {
     return this.stageDirectory(run, "plan");
@@ -73270,10 +73416,13 @@ ${table(["Name", "Kind", "Reference or Value"], inputRows)}
     ]);
   }
   async materializePlanChallengeFindings(run, review2) {
-    await this.writeGeneratedReview(join20(this.planReviewDirectory(run), "challenger-findings.md"), Buffer.from(`# Challenger Findings
+    const directory = this.planReviewDirectory(run);
+    await mkdir11(directory, { recursive: true });
+    await this.writeGeneratedReview(join20(directory, "challenger-findings.md"), Buffer.from(`# Challenger Findings
 
 ${this.reviewFindingsMarkdown(review2)}
 `, "utf8"));
+    await this.updateStageReadmeReviewStatus(directory, this.reviewStatusSummary(review2));
   }
   async materializeValidationReport(run, evidence, taskType, evidenceModes) {
     const directory = this.stageDirectory(run, "validation");
@@ -73370,14 +73519,30 @@ Only native entries reference runtime-executed source-bound command receipts. Si
       const prior = event.payload.resolution;
       return prior?.reviewHash === resolution.reviewHash && prior.findingId === resolution.findingId ? [prior] : [];
     });
-    if (priorResolutions.some((prior) => sha256Json(prior) === sha256Json(resolution)))
-      return;
-    const hasCurrentResolution = priorResolutions.some((prior) => prior.disposition === "fixed" || prior.disposition === "dismissed" || prior.expiresAt !== void 0 && Date.parse(prior.expiresAt) > this.clock().getTime());
-    if (hasCurrentResolution)
-      throw new ApexError("APEX_CONFLICT", "Finding already has a conflicting resolution", EXIT_CODES.conflict);
-    await this.append(run, "review.resolved", { resolution });
-    const updatedEvents = await this.journal(run).replay();
+    const alreadyCommitted = priorResolutions.some((prior) => sha256Json(prior) === sha256Json(resolution));
+    if (!alreadyCommitted) {
+      const hasCurrentResolution = priorResolutions.some((prior) => prior.disposition === "fixed" || prior.disposition === "acknowledged" || prior.disposition === "dismissed" || prior.expiresAt !== void 0 && Date.parse(prior.expiresAt) > this.clock().getTime());
+      if (hasCurrentResolution)
+        throw new ApexError("APEX_CONFLICT", "Finding already has a conflicting resolution", EXIT_CODES.conflict);
+    }
     const nodeId = reviewPayload.nodeId;
+    const stageDirectory = nodeId === "requirements-review" ? this.requirementsReviewDirectory(run) : nodeId === "architecture-review" ? this.architectureReviewDirectory(run) : nodeId === "plan-review" ? this.planReviewDirectory(run) : void 0;
+    if (stageDirectory !== void 0) {
+      await this.assertGeneratedReviewUnmodified(join20(stageDirectory, "challenger-findings.md"));
+      await this.assertGeneratedReviewUnmodified(join20(stageDirectory, "README.md"));
+    }
+    if (!alreadyCommitted) {
+      await this.append(run, "review.resolved", { resolution });
+    }
+    const updatedEvents = alreadyCommitted ? events : await this.journal(run).replay();
+    const effective = this.effectiveReviewFindings(review2, updatedEvents, resolution.reviewHash, reviewPayload.subjectHash, reviewPayload.dependencyHash);
+    if (nodeId === "requirements-review") {
+      await this.materializeRequirementsChallengeFindings(run, effective);
+    } else if (nodeId === "architecture-review") {
+      await this.materializeArchitectureChallengeFindings(run, effective);
+    } else if (nodeId === "plan-review") {
+      await this.materializePlanChallengeFindings(run, effective);
+    }
     const descriptor = typeof nodeId === "string" ? TASKS.find(({ id }) => id === nodeId) : void 0;
     if (descriptor?.gate !== void 0 && this.reviewBlockers(updatedEvents, descriptor.id).length === 0) {
       const current = await this.currentRun();
@@ -74954,8 +75119,11 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     return this.doctor(false, false, live);
   }
   async issueTask(run, descriptor, inputRefs = []) {
-    if (descriptor.id === "plan")
-      await this.assertImportedGovernanceCurrent(run, await this.journal(run).replay());
+    if (descriptor.id === "plan") {
+      await this.assertImportedGovernanceCurrent(run, await this.journal(run).replay(), {
+        allowLabReferenceAfterRefresh: true
+      });
+    }
     const head = await this.journal(run).head();
     if (head === null)
       throw new ApexError("APEX_STALE", "Cannot issue a task before run initialization", EXIT_CODES.stale);
@@ -75450,8 +75618,9 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   }
   async inputRefs(run, events, descriptor) {
     events = this.governanceWorkflowEvents(events);
-    if (descriptor.id === "plan")
-      await this.assertImportedGovernanceCurrent(run, events);
+    if (descriptor.id === "plan") {
+      await this.assertImportedGovernanceCurrent(run, events, { allowLabReferenceAfterRefresh: true });
+    }
     const manifest2 = (await this.lockedWorkflowEngine(run)).manifest;
     const node2 = manifest2.nodes.find(({ id }) => id === (descriptor.reviewSubject ?? descriptor.id));
     if (node2 === void 0)
@@ -75494,7 +75663,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       return "implementation-intent";
     return descriptor.reviewSubject;
   }
-  async assertImportedGovernanceCurrent(run, events) {
+  async assertImportedGovernanceCurrent(run, events, options = {}) {
     const selection2 = await this.governanceInputState(run, events);
     if (selection2 !== void 0 && !selection2.fulfilled) {
       this.assertGovernanceInputBinding(run, selection2.request, selection2.choice === void 0);
@@ -75511,7 +75680,13 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     if (governance.source === "reference") {
       if (!/^\/subscriptions\/[0-9a-f-]{36}(?:\/|$)/iu.test(run.targetScope))
         return;
-      throw new ApexError("APEX_AUTHORIZATION", "The ALZ Corp reference baseline cannot authorize planning for a subscription target; import the reviewed subscription baseline with apex governance revise", EXIT_CODES.authorization);
+      if (options.allowLabReferenceAfterRefresh === true && run.purpose === "lab" && this.completedNodeIds(events).has("governance-refresh")) {
+        if (!isGovernanceObservationCurrent(governance.discoveredAt, this.clock().toISOString())) {
+          throw new ApexError("APEX_STALE", "Governance snapshot requires refresh: reference observation is future-dated or at least 30 days old", EXIT_CODES.stale);
+        }
+        return;
+      }
+      throw new ApexError("APEX_AUTHORIZATION", "Reviewed subscription governance baseline is required before deployment preview (run uses the ALZ reference assumption; run apex governance revise with a collected baseline)", EXIT_CODES.authorization);
     }
     const snapshot = await this.selectedGovernanceSnapshot(run, governance);
     const latest = await this.latestGovernanceObservation(run, events, hash2, governance, snapshot);
@@ -75570,6 +75745,14 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         title: "Architecture title",
         summary: "Architecture summary and key trade-offs",
         sourceHashes: { requirements: this.artifactHash(events, "requirements") ?? "0".repeat(64) },
+        actors: [
+          {
+            id: "external-caller",
+            label: "External client or partner",
+            targetIds: ["INGRESS_COMPONENT_ID"],
+            edgeLabel: "HTTPS"
+          }
+        ],
         components: [
           {
             id: "COMPONENT_ID",
@@ -75577,7 +75760,15 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
             resourceTypes: ["Microsoft.Provider/resourceType"],
             purpose: "Component purpose",
             requirementIds: ["REQUIREMENT_ID"],
-            dependsOn: []
+            dependsOn: [],
+            subnet: "snet-workload"
+          }
+        ],
+        flows: [
+          {
+            from: "INGRESS_COMPONENT_ID",
+            to: "BACKEND_COMPONENT_ID",
+            label: "Internal HTTPS / Private Link"
           }
         ],
         decisions: ["Describe one decision, rationale, alternatives, and consequences."],
@@ -75821,6 +76012,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       { id: "workload-pattern", label: "Workload pattern", priority: "should" },
       { id: "delivery-scenario", label: "Delivery scenario", priority: "should" },
       { id: "region", label: "Region", priority: "should" },
+      { id: "recovery", label: "Recovery targets", priority: "must" },
       { id: "workload-profile", label: "Workload profile", priority: "must" }
     ];
     const answered = fields.flatMap((field) => {
@@ -75858,7 +76050,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     const reviewFields = {
       businessContext: joinValues2("industry", "delivery-scenario", "workload-pattern"),
       successCriteria: recommend(text5("scale") ?? "Performance and scale goals are intentionally deferred for later validation.", "Validate performance and scale later with defined measurement boundaries, normal and peak load, percentiles, error rate, and test duration. Treat stated numbers as goals, not acceptance gates."),
-      nonFunctionalRequirements: [text5("availability-recovery") ?? text5("recovery"), performanceScale].filter((value) => value !== void 0).join("\n\n"),
+      nonFunctionalRequirements: [joinValues2("availability-recovery", "recovery"), performanceScale].filter((value) => value !== void 0).join("\n\n"),
       securityAndCompliance: gdpr ? recommend(joinValues2("security-controls", "compliance", "authentication", "data-sensitivity"), "Inventory personal data, minimize collection and telemetry, and document retention/deletion and data-subject handling before production use. Suggested role: privacy/data owner; no assignment, retention period or GDPR compliance is asserted.") : joinValues2("security-controls", "compliance", "authentication", "data-sensitivity"),
       budgetAndOperations: joinValues2("budget", "operations"),
       regionalConstraints: text5("region"),
@@ -75984,6 +76176,13 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
           return { blockers: ["Deployment executed but requires reconciliation"] };
         }
         const preview = this.latestPayloadHash(events, "preview.created", "previewHash");
+        if (preview === void 0 && await this.referenceGovernanceNeedsRefresh(run, events)) {
+          return {
+            blockers: [
+              "Reviewed subscription governance baseline is required before deployment preview (run uses the ALZ reference assumption; run apex governance revise with a collected baseline)"
+            ]
+          };
+        }
         if (preview === void 0)
           return { blockers: ["Deployment preview is required"] };
         if (!this.gateSatisfied(run, 4, events)) {
@@ -76155,6 +76354,10 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         artifacts[payload.nodeId] = true;
       }
     }
+    if (await this.referenceGovernanceNeedsRefresh(run, events)) {
+      const blocker = "Reviewed subscription governance baseline is required before deployment preview (run uses the ALZ reference assumption; run apex governance revise with a collected baseline)";
+      throw new ApexError("APEX_AUTHORIZATION", `Workflow is not ready for preview-${run.iacTool}: ${blocker}`, EXIT_CODES.authorization, [blocker]);
+    }
     const completedNodes = [
       ...this.completedNodeIds(events),
       ...run.gates.flatMap((gate) => this.gateSatisfied(run, gate.gate, events) ? [`gate-${gate.gate}`] : [])
@@ -76233,7 +76436,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     }
     if (descriptor.id === "plan") {
       const intent = byKind["implementation-intent"];
-      await this.assertImportedGovernanceCurrent(run, events);
+      await this.assertImportedGovernanceCurrent(run, events, { allowLabReferenceAfterRefresh: true });
       const binding = byKind["iac-binding"];
       const resourceIds = new Set(intent.resources.map(({ id }) => id));
       const bindingIds = Object.keys(binding.resourceBindings);
@@ -76259,7 +76462,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       const governance = byKind["governance-constraints"];
       if (governance.constraintsRef.uri !== `apex-object:${governance.constraintsRef.digest}`)
         throw new ApexError("APEX_VALIDATION", "Governance discovery accepts only an imported baseline or the shipped ALZ Corp reference", EXIT_CODES.validation);
-      if (descriptor.id === "governance-refresh" && governance.source !== "collected")
+      if (descriptor.id === "governance-refresh" && governance.source !== "collected" && !(run.purpose === "lab" && governance.source === "reference"))
         throw new ApexError("APEX_VALIDATION", "Governance refresh requires the reviewed subscription baseline", EXIT_CODES.validation);
       await this.selectedGovernanceSnapshot(run, governance);
     }

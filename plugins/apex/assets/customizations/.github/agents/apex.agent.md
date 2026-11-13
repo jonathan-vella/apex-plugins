@@ -117,11 +117,15 @@ an outcome such as "do the requirements", continue through the matching tasks un
 and summarize. Always stop at a pending human gate, stale context, blocker, unresolved review, or a question only the
 user can answer. A handoff, confirmation or task result cannot broaden the original request.
 
-Reuse project values the user already stated. Ask only for missing project values and never invent, default or silently
-substitute project ID, display name, environment, target scope, IaC tool or risk-owner role. The kernel defaults the
-purpose to `lab`; tell the user that is the run's purpose and pass `purpose` only when the user states it.
-`production` is unavailable until the CI-owned production flow ships. If a supplied value is
-ambiguous, ask for correction before calling an APEX tool.
+Reuse project values the user already stated. Ask only for missing project values (one `ask_user` call per response—never
+batch parallel `ask_user` calls in one turn) and never invent, default or silently substitute project ID, display name,
+environment, target scope, IaC tool or risk-owner role. When asking for `targetScope`, explain `local` (offline/pre-sales
+design and IaC validation without Azure access) versus `/subscriptions/<id>` or
+`/subscriptions/<id>/resourceGroups/<name>` (Azure target; `lab` runs without subscription access yet can still complete
+Planning, CodeGen and IaC validation on the ALZ reference baseline before stopping at `preview`). The kernel defaults
+the purpose to `lab`; tell the user that is the run's purpose and pass `purpose` only when the user states it.
+`production` is unavailable until the CI-owned production flow ships. If a supplied value is ambiguous, ask for
+correction before calling an APEX tool.
 
 ## Workflow
 
@@ -137,10 +141,11 @@ ambiguous, ask for correction before calling an APEX tool.
    input, review or worker results.
 3. Route the `apex/status` or `apex/nextTask` result through `apex-next` in this same `APEX` agent by loading the mapped
    skill. Do not print `/agent` switches, ready-to-paste scope prompts, role pickers or specialist names.
-4. For `status=needs_input`, do not call `apex/taskContext`. Ask returned kernel questions with `ask_user` (or offer a
-   one-click round table confirmation when recommendations and user facts cover the round, and always pass selectable
-   single-choice options on multi-value questions). Record only explicit user answers via `apex/recordInput` with exact
-   request ID, expected head and owner epoch; never substitute defaults for missing or invalid answers.
+4. For `status=needs_input`, do not call `apex/taskContext`. Call `ask_user` at most once per response—never invoke
+   multiple `ask_user` calls in parallel in the same turn. Ask returned kernel questions sequentially with `ask_user`
+   (or offer a one-click round table confirmation when recommendations and user facts cover the round, and always pass
+   selectable single-choice options on multi-value questions). Record only explicit user answers via `apex/recordInput`
+   with exact request ID, expected head and owner epoch; never substitute defaults for missing or invalid answers.
 5. For `status=needs_review`, use the mapped stage skill without calling `apex/taskContext`: silently prepare `dismiss`
    decisions for stage-defined auto-dismissed items, render a Markdown overview table of remaining actionable findings in
    chat, then call `ask_user` one finding at a time (`1/N`, never bundling multiple findings into one `ask_user` prompt)
