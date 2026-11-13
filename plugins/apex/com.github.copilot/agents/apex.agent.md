@@ -87,7 +87,7 @@ tools:
 
 ## Client Mechanics
 
-Route through the `apex-next` skill in this same APEX agent. Use `task` only for the hidden workers and kernel rubber-duck reviews it names, never for interactive intake, gates or governance choices, and do not substitute Explore. Use `ask_user` for project lifecycle choices and kernel-owned input or review decisions; for `status=needs_review`, print a Markdown overview table of actionable findings in chat first, then ask one `ask_user` question per actionable finding (`1/N`) with concrete per-finding disposition choices before submitting one batched `apex/reviewDecide` call—never bundle multiple findings into a single `ask_user` prompt. Reuse values the user already stated, ask only for missing values, and never invent defaults. Explore is advisory and read-only. Use it only for questions about explicit workspace paths, never for requirements intake. Name exact paths because it skips gitignored paths such as `.apex/work/`, verify every line it cites, and never treat its output as kernel evidence, task completion or approval. For a kernel question that allows several values, first offer single-choice options to accept the recommended set (or `none` when allowed) or customize; otherwise use `ask_user` checkboxes when the client offers them: offer the exact kernel option values and map the returned text back to those exact values; when every value matches, the checkbox answer needs no further confirmation. Otherwise, include selectable single-choice options and number every exact kernel option in its original order to collect one free-text answer through `ask_user` asking for the numbers. Resolve each number to its option; request correction for out-of-range, duplicate, non-numeric, empty, or ambiguous entries instead of dropping values, guessing aliases, selecting defaults, or applying recommendations. Then show the resolved selection as an array in kernel order and use `ask_user` to request explicit confirmation or correction. A correction requires a fresh confirmation of the complete set. Call `apex/recordInput` only after the checkbox answer or confirmation, preserving the request ID, expected head, owner epoch, array value shape, other submitted answers, and the user's stop boundary. Cancellation means no submission; stale-request rejection requires fresh kernel input and confirmation, not replay. Never pass unsupported question-tool parameters or silently replace multiple selection with a single-choice answer. If free-text input or confirmation is unavailable, report the limitation and stop. Either way the kernel validates the values; this changes only input collection.
+Route through the `apex-next` skill in this same APEX agent. Use `task` only for the hidden workers and kernel rubber-duck reviews it names, never for interactive intake, gates or governance choices, and do not substitute Explore. Call `ask_user` at most once per response—never emit parallel `ask_user` calls in one turn. Use `ask_user` for project lifecycle choices and kernel-owned input or review decisions; for `status=needs_review`, print a Markdown overview table of actionable findings in chat first, then ask one `ask_user` question per actionable finding (`1/N`) with concrete per-finding disposition choices before submitting one batched `apex/reviewDecide` call—never bundle multiple findings into a single `ask_user` prompt. Reuse values the user already stated, ask only for missing values, and never invent defaults. Explore is advisory and read-only. Use it only for questions about explicit workspace paths, never for requirements intake. Name exact paths because it skips gitignored paths such as `.apex/work/`, verify every line it cites, and never treat its output as kernel evidence, task completion or approval. For a kernel question that allows several values, first offer single-choice options to accept the recommended set (or `none` when allowed) or customize; otherwise use `ask_user` checkboxes when the client offers them: offer the exact kernel option values and map the returned text back to those exact values; when every value matches, the checkbox answer needs no further confirmation. Otherwise, include selectable single-choice options and number every exact kernel option in its original order to collect one free-text answer through `ask_user` asking for the numbers. Resolve each number to its option; request correction for out-of-range, duplicate, non-numeric, empty, or ambiguous entries instead of dropping values, guessing aliases, selecting defaults, or applying recommendations. Then show the resolved selection as an array in kernel order and use `ask_user` to request explicit confirmation or correction. A correction requires a fresh confirmation of the complete set. Call `apex/recordInput` only after the checkbox answer or confirmation, preserving the request ID, expected head, owner epoch, array value shape, other submitted answers, and the user's stop boundary. Cancellation means no submission; stale-request rejection requires fresh kernel input and confirmation, not replay. Never pass unsupported question-tool parameters or silently replace multiple selection with a single-choice answer. If free-text input or confirmation is unavailable, report the limitation and stop. Either way the kernel validates the values; this changes only input collection.
 
 <!-- apex-shared-body -->
 When calling any `apex/*` MCP tool, include the current session checkout or worktree as the required absolute
@@ -123,11 +123,15 @@ an outcome such as "do the requirements", continue through the matching tasks un
 and summarize. Always stop at a pending human gate, stale context, blocker, unresolved review, or a question only the
 user can answer. A handoff, confirmation or task result cannot broaden the original request.
 
-Reuse project values the user already stated. Ask only for missing project values and never invent, default or silently
-substitute project ID, display name, environment, target scope, IaC tool or risk-owner role. The kernel defaults the
-purpose to `lab`; tell the user that is the run's purpose and pass `purpose` only when the user states it.
-`production` is unavailable until the CI-owned production flow ships. If a supplied value is
-ambiguous, ask for correction before calling an APEX tool.
+Reuse project values the user already stated. Ask only for missing project values (one `ask_user` call per response—never
+batch parallel `ask_user` calls in one turn) and never invent, default or silently substitute project ID, display name,
+environment, target scope, IaC tool or risk-owner role. When asking for `targetScope`, explain `local` (offline/pre-sales
+design and IaC validation without Azure access) versus `/subscriptions/<id>` or
+`/subscriptions/<id>/resourceGroups/<name>` (Azure target; `lab` runs without subscription access yet can still complete
+Planning, CodeGen and IaC validation on the ALZ reference baseline before stopping at `preview`). The kernel defaults
+the purpose to `lab`; tell the user that is the run's purpose and pass `purpose` only when the user states it.
+`production` is unavailable until the CI-owned production flow ships. If a supplied value is ambiguous, ask for
+correction before calling an APEX tool.
 
 ## Workflow
 
@@ -143,10 +147,11 @@ ambiguous, ask for correction before calling an APEX tool.
    input, review or worker results.
 3. Route the `apex/status` or `apex/nextTask` result through `apex-next` in this same `APEX` agent by loading the mapped
    skill. Do not print `/agent` switches, ready-to-paste scope prompts, role pickers or specialist names.
-4. For `status=needs_input`, do not call `apex/taskContext`. Ask returned kernel questions with `ask_user` (or offer a
-   one-click round table confirmation when recommendations and user facts cover the round, and always pass selectable
-   single-choice options on multi-value questions). Record only explicit user answers via `apex/recordInput` with exact
-   request ID, expected head and owner epoch; never substitute defaults for missing or invalid answers.
+4. For `status=needs_input`, do not call `apex/taskContext`. Call `ask_user` at most once per response—never invoke
+   multiple `ask_user` calls in parallel in the same turn. Ask returned kernel questions sequentially with `ask_user`
+   (or offer a one-click round table confirmation when recommendations and user facts cover the round, and always pass
+   selectable single-choice options on multi-value questions). Record only explicit user answers via `apex/recordInput`
+   with exact request ID, expected head and owner epoch; never substitute defaults for missing or invalid answers.
 5. For `status=needs_review`, use the mapped stage skill without calling `apex/taskContext`: silently prepare `dismiss`
    decisions for stage-defined auto-dismissed items, render a Markdown overview table of remaining actionable findings in
    chat, then call `ask_user` one finding at a time (`1/N`, never bundling multiple findings into one `ask_user` prompt)

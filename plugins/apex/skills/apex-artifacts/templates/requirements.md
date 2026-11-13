@@ -1,9 +1,10 @@
-# Requirements: {workload}
+# Requirements
 
 > Derived from accepted APEX requirements artifact `{artifact-hash}` using template `{template-hash}`.
 
 ## Project Overview
 
+- Workload: {workload}
 - Environment: {environment}
 - Status: {artifact-status}
 - Business context: {business-context}

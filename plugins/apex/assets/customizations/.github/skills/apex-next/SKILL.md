@@ -92,18 +92,20 @@ output and the kernel derives the findings from that capture; this agent never w
    findings yourself.
 5. When `apex/nextTask` returns `needs_review`, load the stage skill for that gate and collect dispositions **one
    finding at a time**:
-   - **Step A — Auto-dismiss stage-defined out-of-scope noise first:** When a finding's `actions` includes `"dismiss"`
-     and the active stage skill marks it for automatic dismissal (such as Architecture findings requesting deferred
-     performance/scale validation, partial/unpriced retail queries, regional/quota/failover checks, live confirmation of
-     accepted reference baselines, or non-`deny` policy effects), prepare a `dismiss` decision with a factual rationale
-     without creating an `ask_user` prompt for it.
+   - **Step A — Auto-dismiss stage-defined `info`/`low` noise first:** Only when a finding has `info` or `low` severity,
+     its `actions` includes `"dismiss"`, and the active stage skill marks it as stage-excluded noise (Architecture
+     findings that solely request deferred performance/scale validation, partial/unpriced retail queries,
+     regional/quota/failover checks, live confirmation of accepted reference baselines, or non-`deny` policy effects),
+     prepare a `dismiss` decision with a factual rationale without creating an `ask_user` prompt. Never auto-dismiss
+     `critical` or `high` findings or `medium` requirement, security, RBAC or recovery findings.
    - **Step B — Print a Markdown overview table in chat before calling `ask_user`:** Show
      `| ID | Severity | Finding & Impact | Recommended Action |` for all `N` actionable findings (plus a one-line note
      naming any auto-dismissed finding IDs and why). If `N = 0`, call `apex/reviewDecide` directly with the
      auto-dismissed decisions.
-   - **Step C — Ask `ask_user` sequentially, one finding per call (`1/N` .. `N/N`):** Never cram multiple findings into
-     one `ask_user` paragraph and never offer `"Accept all / Let me choose individually"` batch shortcuts. For each
-     actionable finding `i` of `N`, set `question` to
+   - **Step C — Ask `ask_user` sequentially, one finding per response (`1/N` .. `N/N`):** Call `ask_user` at most once
+     per response (never invoke parallel `ask_user` calls in one turn), never cram multiple findings into one `ask_user`
+     paragraph, and never offer `"Accept all / Let me choose individually"` batch shortcuts. For each actionable finding
+     `i` of `N`, set `question` to
      `[<SEVERITY>] <ID> (<i>/<N>): <title> — <1–2 sentence plain-English explanation of what is missing/wrong and its impact>`
      and include **only** options whose `action` appears in that finding's returned `finding.actions` (put the
      recommended choice first with `(Recommended)`; `critical`/`high` findings omit `accept-risk`, and Gate 3 omits

@@ -21,48 +21,62 @@ Pass only the filters needed to identify the intended meter.
 
 | Filter | Source | Rule |
 | --- | --- | --- |
-| `service` | Retail catalog service name | Required. Use a name the catalog returns; never guess. |
-| `region` | Deployment region slug | Keep the deployment region unless evidence shows global billing. |
-| `sku` | Verified ARM catalog SKU | Optional. Many services leave it empty; do not copy a deployment tier into it by default. |
-| `filter` | Additional raw OData expression | Optional meter/product disambiguation using returned catalog fields. |
+| `service` | Retail catalog service name | Pair only with a verified ARM `sku` (`armSkuName`, e.g. `Standard_D4s_v5`). `@azure/mcp` rejects `service` without `sku` (HTTP 400). |
+| `sku` | Verified ARM catalog `armSkuName` | Use only when the catalog populates `armSkuName` (such as Virtual Machines). Tier/meter-billed services leave `armSkuName` empty (`""`) and put the tier in `skuName`. |
+| `filter` | Raw OData expression | **Primary query path for tier/meter-billed services** (`armSkuName == ""`). Omit `service` and `sku` and pass `serviceName eq '<service>' and armRegionName eq '<region>' and priceType eq 'Consumption'`. |
+| `region` | Deployment region slug | Keep the deployment region unless evidence shows global/zone billing (`Global`, `Zone 1`). |
 | `price-type` | Requirement | `Consumption`, `Reservation`, or `DevTestConsumption`; never `SavingsPlan`. |
 | `currency` | Requirement | Keep one currency per estimate; never mix currencies. |
 | `include-savings-plan` | Commitment comparison | Boolean; request nested savings-plan rates with Consumption prices. |
-| `service-family` | Verified service family | Optional refinement, not a substitute for a bounded service/SKU query. |
+| `service-family` | Verified service family | Optional refinement, not a substitute for a bounded service/SKU or OData query. |
 
-Call shape (replace placeholders with accepted workload values):
+Call shapes (replace placeholders with accepted workload values):
 
 ```text
+# 1. ARM-SKU services (e.g. Virtual Machines where armSkuName is populated)
 apex-azure/pricing
 {
-  intent: "price chosen SKU",
+  intent: "price chosen VM SKU",
   command: "pricing_get",
   parameters: {
-    service: "<catalog service>",
-    sku: "<verified SKU>",
+    service: "Virtual Machines",
+    sku: "<verified armSkuName>",
     region: "<billing region>",
     currency: "<estimate currency>",
     "price-type": "Consumption",
     "include-savings-plan": true
   }
 }
+
+# 2. Tier- or meter-billed services (Container Apps, Key Vault, ACR, App Gateway, Log Analytics, Storage, Private Endpoint)
+apex-azure/pricing
+{
+  intent: "price chosen service meters",
+  command: "pricing_get",
+  parameters: {
+    currency: "<estimate currency>",
+    filter: "serviceName eq '<catalog service>' and armRegionName eq '<billing region>' and priceType eq 'Consumption'"
+  }
+}
 ```
 
 Pass only these pricing parameters; do not forward retired camelCase filters or authentication/retry options.
 
-Group identical parameter sets and query once per group, then reuse the rows across quantities and candidate tiers.
-The command follows API pages internally but silently stops at 5,000 rows. It returns no continuation link or
-completeness flag. Treat **5,000 or more returned rows as potentially incomplete**: narrow and repeat the query, or
-record the affected resource in `unpricedItems`. Never accept a capped response as a priced line, invent a next page,
-or turn a failed/incomplete lookup into a successful zero-price fallback. For tier- or operation-billed services such as
-Container Registry and Key Vault, start with service, region, price type, and currency, then select the exact
-SKU, product, meter, and unit locally.
+Group identical parameter sets and query once per group (you may combine 2–3 services in the same billing region with
+`(serviceName eq 'A' or serviceName eq 'B') and armRegionName eq '<region>' and priceType eq 'Consumption'`), then reuse
+the rows across quantities and candidate tiers. The command follows API pages internally but silently stops at 5,000
+rows. It returns no continuation link or completeness flag. Treat **5,000 or more returned rows as potentially
+incomplete**: narrow and repeat the query, or record the affected resource in `unpricedItems`. Never accept a capped
+response as a priced line, invent a next page, or turn a failed/incomplete lookup into a successful zero-price fallback.
 
 ## Empty Results
 
-An empty narrow result is not proof that a service or regional SKU is unavailable. Retry once with the unverified SKU
-or meter filters removed, keeping the deployment region, and inspect the returned names. If no matching row appears,
-leave the line unresolved with the attempted parameters and timestamp. Never submit a zero or placeholder price.
+An empty narrow `service` + `sku` result usually means `armSkuName` is empty (`""`) in the Retail Prices catalog rather
+than regional unavailability. Do **not** retry `service` without `sku` (`@azure/mcp` rejects `service` without `--sku`
+with HTTP 400). Retry once using `filter: "serviceName eq '<service>' and armRegionName eq '<region>' and priceType eq 'Consumption'"`
+(omitting `service` and `sku`) and inspect `skuName`, `productName`, `meterName`, and `unitOfMeasure`. If no matching
+row appears or usage quantities are unknown for purely consumption-billed meters, leave the affected line in
+`unpricedItems` with the attempted parameters and timestamp. Never submit a zero or placeholder price.
 
 ## Service Names And Billing Regions
 
@@ -111,6 +125,12 @@ never a wildcard. Fail the line when several plausible rows remain and no explic
 | Azure Front Door Standard / Premium | `Azure Front Door Service`, `Zone 1`, `Standard` or `Premium` | `productName` `Azure Front Door`; select `<Tier> Base Fees` (`1/Month`, `$35` Standard / `$330` Premium), `<Tier> Requests` (`10K`), `<Tier> Data Transfer Out` (`1 GB`), and `<Tier> Data Transfer In` (`1 GB`) |
 | Azure Bastion Standard / Basic | `Azure Bastion`, deployment region, `Standard` or `Basic` | Select `<Tier> Gateway` (`1 Hour`, includes the mandatory 2 base scale units — add `<Tier> Additional Gateway` only when `scale_units > 2`) and `<Tier> Data Transfer Out` (`1 GB`) |
 | Azure Monitor metric alerts | `Azure Monitor`, deployment region, `Alerts` | Resource-scoped metric alert rules bill on `Alerts Resource Monitored` (`1/Month`) matched to evaluation frequency (`1/5/10/15 Minute Frequency`) times monitored-resource count |
+| Azure Container Apps Consumption | `filter` with `serviceName eq 'Azure Container Apps'`, deployment region | `armSkuName` is `""`, `skuName` is `Standard`; meters are `Standard vCPU Active Usage` (`1 Second`), `Standard Memory Active Usage` (`1 GiB Second`), `Standard vCPU Idle Usage` (`1 Second`), `Standard Memory Idle Usage` (`1 GiB Second`), and `Standard Requests` (`1M`) |
+| Application Gateway WAF_v2 / Standard_v2 | `filter` with `serviceName eq 'Application Gateway'`, deployment region | `armSkuName` is `""`, `productName` `Application Gateway WAF v2` (or `Application Gateway Standard v2`), `skuName` `Standard`; select `Standard Fixed Cost` (`1/Hour` × 730) plus `Standard Capacity Units` (`1/Hour`) when capacity units are modeled |
+| Container Registry Basic / Standard / Premium | `filter` with `serviceName eq 'Container Registry'`, deployment region | `armSkuName` is `""`, `skuName` `<Tier>`; select `<Tier> Registry Unit` (`1/Day` × 30.4167 or 30) plus `Data Stored` (`1 GB/Month`) when extra storage is modeled |
+| Key Vault Standard / Premium | `filter` with `serviceName eq 'Key Vault'`, deployment region | `armSkuName` is `""`, `productName` `Key Vault`, `skuName` `Standard` or `Premium`; operation-billed on `Operations` (`10K`), `Secret Renewal` (`1`), `Certificate Renewal Request` (`1`), and `Automated Key Rotation` (`1 Rotation`) |
+| Log Analytics pay-as-you-go | `filter` with `serviceName eq 'Log Analytics'`, deployment region | `armSkuName` is `""`, `skuName` `Analytics Logs`; usage-billed on `Analytics Logs Data Ingestion` (`1 GB`, non-zero tier) and `Analytics Logs Data Retention` (`1 GB/Month`) |
+| Private Endpoint | `filter` with `serviceName eq 'Virtual Network' and armRegionName eq 'Global'` | `armSkuName` is `""`, `productName` `Virtual Network Private Link`, `skuName` `Standard`; select `Standard Private Endpoint` (`1 Hour` × 730 per endpoint) plus `Standard Data Processed - Ingress` / `Egress` (`1 GB`) when transfer is modeled |
 | Microsoft Foundry / Azure OpenAI models | `Foundry Models`, deployment region | On `@azure/mcp@3.0.0`, `pricing_get` can return status 400 `ArgumentOutOfRangeException: Unknown ServiceFamily value` on `AI + Machine Learning`; do not retry `pricing_get` on that parser exception, and record the affected model in `unpricedItems` with the parser error if no authorized fallback is active |
 
 ## Priced-Line Provenance

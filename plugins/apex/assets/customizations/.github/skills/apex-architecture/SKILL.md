@@ -43,14 +43,22 @@ review or task.
    evidence references, recommendations and trade-offs for every pillar. Treat performance and scale numbers as later
    validation goals; missing measurement boundaries, unverified latency, scale feasibility and capacity-test detail are
    not Architecture blockers.
-4. Keep identity, networking, diagnostics, recovery, data and lifecycle decisions explicit. For material alternatives,
-   include decision records with stable IDs, context, decision, accepted requirement IDs, at least two alternatives,
-   consequences, WAF impacts, compliance considerations and implementation notes.
-5. After selecting candidate SKUs, call `apex-azure/pricing` with command `pricing_get` for every distinct price query.
-   Do not infer pricing unavailability from APEX task grants. A well-scoped no-result query becomes a partial estimate
-   and `unpricedItems` entry with attempted timestamp and reason. Never submit synthetic zero prices, placeholders or
-   invented prices through `apex/architectureComplete`. A capped (5,000-row) or incomplete query is unpriced, never a
-   successful priced line; retain exact query/version/completeness provenance under the central pricing contract.
+4. Keep identity, networking, diagnostics, recovery, data and lifecycle decisions explicit. Populate `actors` (external
+   callers/operators and their ingress `targetIds`), `flows` (runtime request and event paths such as public edge to
+   internal compute and backend dependencies, distinct from IAM/VNet `dependsOn`), and `subnet` boundaries on networked
+   components so `03-des-diagram.mmd` renders end-to-end traffic flow. For material alternatives, include decision
+   records with stable IDs, context, decision, accepted requirement IDs, at least two alternatives, consequences, WAF
+   impacts, compliance considerations and implementation notes.
+5. After selecting candidate SKUs, call `apex-azure/pricing` with command `pricing_get` following the
+   [central pricing contract](../apex-azure-defaults/references/retail-pricing.md): for tier- or meter-billed services
+   whose `armSkuName` is empty (`Container Apps`, `Application Gateway`, `Container Registry`, `Key Vault`, `Log
+   Analytics`, `Storage`, `Virtual Network` Private Endpoints in `Global`), query with OData `filter` (`serviceName eq
+   '<service>' and armRegionName eq '<region>' and priceType eq 'Consumption'`, omitting `service` and `sku`) rather
+   than passing a deployment tier in `sku` or calling `service` without `sku`. Price fixed hourly/daily/monthly base
+   meters (`Standard Fixed Cost`, `<Tier> Registry Unit`, `Standard Private Endpoint`) and keep purely variable meters
+   with unknown quantities in `unpricedItems` with attempted timestamp and reason. Never submit synthetic zero prices,
+   placeholders or invented prices through `apex/architectureComplete`. A capped (5,000-row) or incomplete query is
+   unpriced, never a successful priced line.
 6. Design against accepted governance. Every Architecture component lists the ARM resource types it deploys. Read
    relevant governance findings with `apex/readTaskInput` using the task-context input hash for those designed types.
    Map each applicable finding in `policyMappings` with assignment, definition, reference ID, effect, logical resource,
@@ -87,17 +95,19 @@ review or task.
    again at the final Gate 4 approval.
 10. When the `architecture-review` task appears, run the rubber-duck review steps in `apex-next` with the exact
     `task.taskId`. For `needs_review`, do not request task context or run rubber-duck again. Silently prepare `dismiss`
-    decisions (without asking `ask_user`) for findings that only request deferred performance/scale validation, regional,
-    zonal, quota, deployment, restore, failover or complete pricing checks, live confirmation of accepted
-    reference-baseline assignments, or findings based solely on non-`deny` effects (`modify`, `deployIfNotExists`,
-    `audit`, `append`, `disabled` or `DoNotEnforce` `deny`), while retaining violations of accepted active `deny`
-    controls regardless of governance source. Print a Markdown overview table (`| ID | Severity | Finding & Impact |
-    Recommended Action |`) of the remaining `N` actionable findings in chat (plus a 1-line note naming any auto-dismissed
-    IDs), then call `ask_user` **one finding at a time** (`[<SEVERITY>] <ID> (<i>/<N>): <title> — <plain-English
-    impact>`, never bundling multiple findings into one `ask_user` prompt) offering **only** options present in that
-    finding's returned `finding.actions` (`Revise: <concrete fix>`, `Accept risk (90d, owner: <project risk owner>):
-    <draft rationale>` only when `"accept-risk"` is in `actions`, and `Dismiss: <factual reason>` when `"dismiss"` is in
-    `actions`), and submit all decisions together in one `apex/reviewDecide` call.
+    decisions (without asking `ask_user`) **only** for `info` or `low` findings whose `actions` includes `"dismiss"` and
+    that solely request deferred performance/scale validation, regional/zonal/quota/failover checks, complete pricing on
+    documented partial estimates, live confirmation of accepted reference-baseline assignments, or non-`deny` policy
+    effects (`modify`, `deployIfNotExists`, `audit`, `append`, `disabled` or `DoNotEnforce` `deny`). **Never** silently
+    auto-dismiss `critical` or `high` findings, violations of active `deny` controls, or `medium` findings about
+    requirement/SLO narrowing, shared RBAC/Key Vault scopes, unverified `must` recovery paths, or credential-lifecycle
+    gaps—always include them in the Markdown overview table (`| ID | Severity | Finding & Impact | Recommended Action |`,
+    plus a 1-line note naming any auto-dismissed IDs), then call `ask_user` **one finding at a time** (at most one
+    `ask_user` call per response: `[<SEVERITY>] <ID> (<i>/<N>): <title> — <plain-English impact>`, never bundling
+    multiple findings into one `ask_user` prompt) offering **only** options present in that finding's returned
+    `finding.actions` (`Revise: <concrete fix>`, `Accept risk (90d, owner: <project risk owner>): <draft rationale>`
+    only when `"accept-risk"` is in `actions`, and `Dismiss: <factual reason>` when `"dismiss"` is in `actions`), and
+    submit all decisions together in one `apex/reviewDecide` call.
 11. For a `policy-refresh` task after Gate 2, start from the `policy-property-map` template in task context. Decide only
     rows listed in `governanceFindings`, submit the complete map through `apex/completeTask`, and let blocked `deny`
     rows reopen Architecture and Gate 2 (`modify` and `deployIfNotExists` rows are non-blocking and never use `blocked`).
