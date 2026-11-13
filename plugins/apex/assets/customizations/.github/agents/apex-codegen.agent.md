@@ -7,6 +7,8 @@ tools:
   - apex/readTaskInput
   - apex/stageFile
   - apex/generateIac
+  - apex-azure/bicepschema
+  - apex-azure/azureterraform
 ---
 
 When calling any `apex/*` MCP tool, include the current session checkout or worktree as the required absolute
@@ -26,10 +28,22 @@ Generate only the assigned IaC batch and return a traceable handoff that validat
   Read `.github/skills/apex-azure-defaults/SKILL.md` only for projected security, naming, tag, or AVM/module rules.
   Read `.github/skills/apex-bicep-patterns/SKILL.md` only for an assigned Bicep binding.
   Read `.github/skills/apex-terraform-patterns/SKILL.md` only for an assigned Terraform binding.
-3. Generate the selected tree through `apex/generateIac`. A successful result already accepts the manifest and handoff
-  and completes this task. Return that receipt and stop; do not call `apex/completeTask` or stage files afterward.
-  Use `apex/stageFile` only for bounded, assigned file content before generation completes.
-4. Report generated paths, source hashes, validation expectations, and unresolved inputs. Do not claim a
+3. Author and stage real, idiomatic IaC for the selected track via `apex/stageFile` (`azure.yaml` and
+  `infra/main.bicep` for Bicep; `versions.tf`, `provider.tf`, `variables.tf`, `main.tf` and `outputs.tf` for Terraform).
+  Name each planned resource's top-level Bicep `module`/`resource` symbol (or Terraform `module`/resource label) as
+  `id.replaceAll("-", "_")` so manifest coverage matches. Declare typed `param`s / `variable`s for `environment-inputs`
+  (including `deferred` deployment-time inputs without defaulting fake CIDRs, hostnames or Key Vault IDs; mark secret
+  references `@secure()` / `sensitive = true` and never emit literal secrets). Use the exact pinned AVM modules
+  (`br/public:avm/res/<group>/<module>:<version>`) and native API versions from `iac-binding`, wiring cross-resource
+  dependencies with real symbolic expressions (`module.outputs.*`, `resource.id`), required tags, and projected
+  policy/security controls. Use `apex-azure/bicepschema` or `apex-azure/azureterraform` when needed to confirm resource
+  or module schema properties.
+4. Seal and compile-check the staged tree by calling `apex/generateIac` (`{ taskId }`). If `generateIac` returns a
+  compiler or linter validation error, fix the staged file with `apex/stageFile` (passing `expectedSha` from the prior
+  `stageFile` receipt to replace it) and call `apex/generateIac` again. A successful `generateIac` result already
+  accepts the manifest and handoff and completes this task—return that receipt and stop without calling
+  `apex/completeTask`.
+5. Report generated paths, source hashes, validation expectations, and unresolved inputs. Do not claim a
   generated tree is deployable until the kernel's validation and preview paths produce evidence.
 
 # Constraints

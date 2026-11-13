@@ -27,17 +27,27 @@ Use this skill only when the kernel routes the active foreground `APEX` agent to
 2. For `status=task`, call `apex/taskContext` with the exact planning task ID. If task context is externalized, read it
    in bounded chunks through `apex/readTaskInput`. Do not query session stores, repository files, chat history or
    APEX artifact schemas. The Azure schema and AVM version lookups authorized in step 6 are the only external reads.
-3. Replace every template placeholder with a decision grounded in projected inputs. For `environment-inputs`, every
-   secret reference includes its required kind, provider and reference shape, never a secret value.
-4. Keep implementation intent track-neutral. Define logical resources, controls, dependencies, identity, networking,
-   diagnostics, outputs, rollback boundaries and environment obligations. Keep dependencies acyclic.
+3. Replace every template placeholder with a decision grounded in projected inputs. For `environment-inputs`, use:
+   - `{ "kind": "value", "value": <string|number|boolean> }` for known non-secret values (such as `location`),
+   - `{ "kind": "secret-reference", "provider": "azure-key-vault" | "environment" | "github-actions",`
+     `"reference": "<id>" }` only when an external secret reference already exists (never a secret value), and
+   - `{ "kind": "deferred", "owner": "<accountable team>", "reason": "<why deferred until preview>" }` for deployment-time
+     inputs not yet assigned in pre-sales/design mode (such as CIDRs, custom hostnames, container image digests, action
+     group IDs or not-yet-created Key Vault secret references). Deferred inputs allow Planning, CodeGen and offline IaC
+     validation to complete and block only before live `preview`.
+4. Keep implementation intent track-neutral. Define logical resources (`type` as the ARM resource type such as
+   `Microsoft.Network/virtualNetworks`), controls, dependencies, identity, networking, diagnostics, outputs, rollback
+   boundaries and environment obligations. When one Architecture component expands into multiple planned IaC resources
+   (for example `container-platform` into `container-env` and `container-app`), set `componentId: "<architecture-component-id>"`
+   on each split resource so policy mappings stay traceable. Keep dependencies acyclic.
 5. Put modules, providers, API versions, parameters, variables, phases, backend and state ownership in the selected
    IaC binding. Bind only the selected task track and trace every binding obligation to intent and projected policy
    requirements. Write each `implementation` and `version` in the grammar of
    [Binding Grammar](../apex-azure-defaults/references/avm-binding-guidance.md#binding-grammar): Bicep AVM
-   `avm:br/public:avm/res/<group>/<module>@<exact version>` with `version` equal to that pin and a `physicalResources`
-   map, native `native:<ResourceType>@<api-version>` with `version` equal to the API version. Keep each logical resource
-   id exactly as the Architecture names it; hyphens are allowed. A binding that does not
+   `avm:br/public:avm/res/<group>/<module>@<exact version>` with `version` equal to that pin (include `physicalResources`
+   only when the run `targetScope` is already an exact `/subscriptions/<id>/resourceGroups/<rg>`—omit `physicalResources`
+   for `local` or subscription-scoped runs), or native `native:<ResourceType>@<api-version>` with `version` equal to the
+   API version. Keep logical resource ids valid IaC identifiers (hyphens allowed). A binding that does not
    follow it is rejected by `apex/planComplete`; fix it from the message and resubmit.
 6. Pin every binding to an exact published stable version. For the Terraform track, read it with `apex-azure/azureterraform`
    (`azureterraform_avm_versions`, then `azureterraform_avm_get` for the exact module and version, and

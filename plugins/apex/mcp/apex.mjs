@@ -11221,6 +11221,7 @@ var RequirementsChangeProposalV1Schema = Type.Object({
 }, { $id: "https://schemas.apexops.dev/requirements-change-proposal-v1.json", additionalProperties: false });
 var LogicalResourceV1Schema = Type.Object({
   id: NonEmptyStringSchema,
+  componentId: Type.Optional(NonEmptyStringSchema),
   type: NonEmptyStringSchema,
   purpose: NonEmptyStringSchema,
   dependsOn: Type.Array(NonEmptyStringSchema, { uniqueItems: true }),
@@ -14930,6 +14931,11 @@ var SecretReferenceV1Schema = Type.Object({
   reference: NonEmptyStringSchema,
   version: Type.Optional(NonEmptyStringSchema)
 }, { additionalProperties: false });
+var DeferredEnvironmentInputV1Schema = Type.Object({
+  kind: Type.Literal("deferred"),
+  owner: NonEmptyStringSchema,
+  reason: Type.Optional(NonEmptyStringSchema)
+}, { additionalProperties: false });
 var EnvironmentInputsV1Schema = Type.Object({
   schemaVersion: ContractVersionSchema,
   projectId: ProjectIdSchema,
@@ -14940,7 +14946,8 @@ var EnvironmentInputsV1Schema = Type.Object({
       kind: Type.Literal("value"),
       value: Type.Union([Type.String(), Type.Number(), Type.Boolean()])
     }, { additionalProperties: false }),
-    SecretReferenceV1Schema
+    SecretReferenceV1Schema,
+    DeferredEnvironmentInputV1Schema
   ]))
 }, { $id: "https://schemas.apexops.dev/environment-inputs-v1.json", additionalProperties: false });
 var LogicalResourceManifestV1Schema = Type.Object({
@@ -14950,6 +14957,7 @@ var LogicalResourceManifestV1Schema = Type.Object({
   track: IacToolSchema,
   resources: Type.Array(Type.Object({
     logicalId: NonEmptyStringSchema,
+    componentId: Type.Optional(NonEmptyStringSchema),
     type: NonEmptyStringSchema,
     implementationAddress: NonEmptyStringSchema,
     executionAddress: Type.Optional(NonEmptyStringSchema),
@@ -14970,6 +14978,7 @@ var IacHandoffV1Schema = Type.Object({
   projectId: ProjectIdSchema,
   runId: RunIdSchema,
   track: IacToolSchema,
+  authoringMode: Type.Optional(Type.Union([Type.Literal("staged"), Type.Literal("generated")])),
   rootPath: NonEmptyStringSchema,
   treeHash: Sha256Schema,
   intentHash: Sha256Schema,
@@ -15155,7 +15164,10 @@ function hasValidCostPricingSources(estimate) {
   });
 }
 function hasOnlyTypedSecretReferences(inputs) {
-  return Object.values(inputs.inputs).every((input2) => input2.kind === "value" || input2.kind === "secret-reference" && input2.reference.length > 0);
+  return Object.values(inputs.inputs).every((input2) => input2.kind === "value" || input2.kind === "deferred" && input2.owner.trim().length > 0 || input2.kind === "secret-reference" && input2.reference.length > 0);
+}
+function deferredEnvironmentInputNames(inputs) {
+  return Object.entries(inputs.inputs).filter(([, input2]) => input2.kind === "deferred").map(([name]) => name).sort();
 }
 function hasValidLogicalResourceReferences(manifest2) {
   const ids = manifest2.resources.map((resource) => resource.logicalId);
@@ -16421,7 +16433,7 @@ function hasValidNativeValidationReceipt(value, binding) {
     }))))
       return false;
     const policy = receipt.policyValidation;
-    if (policy !== void 0 && (policy.projectId !== receipt.projectId || policy.runId !== receipt.runId || policy.outcome !== "pass" || !hasValidPolicyValidation(policy, {
+    if (policy !== void 0 && (policy.projectId !== receipt.projectId || policy.runId !== receipt.runId || policy.outcome === "fail" || policy.outcome === "unsupported" && policy.results.some(({ reason }) => ["unverified-exemption", "invalid-source", "unsupported-path", "unsupported-effect"].includes(reason)) || !hasValidPolicyValidation(policy, {
       track: receipt.track,
       sourceHash: receipt.sourceHash,
       policyMapHash: receipt.policyHash,
@@ -26579,6 +26591,56 @@ function virtualTree(files2, logicalManifest) {
     throw new TypeError("Virtual tree paths must be unique");
   return { files: normalized, logicalManifest, treeHash: sha2562(normalized) };
 }
+function computeVirtualTree(files2, logicalManifest) {
+  return virtualTree(files2, logicalManifest);
+}
+function buildLogicalResourceManifest(intent, binding, sourcePath, existingResources = []) {
+  if (intent.projectId !== binding.projectId || intent.runId !== binding.runId) {
+    throw new TypeError("Intent and binding identities do not match");
+  }
+  const intentIds = new Set(intent.resources.map(({ id }) => id));
+  const bindingIds = Object.keys(binding.resourceBindings);
+  if (bindingIds.length !== intentIds.size || bindingIds.some((id) => !intentIds.has(id))) {
+    throw new TypeError("Binding must cover every logical resource exactly once");
+  }
+  const existing = new Set(existingResources);
+  for (const logicalId of existing) {
+    assertLogicalId(logicalId, "Existing resource id");
+    if (!intentIds.has(logicalId)) {
+      throw new TypeError(`Existing resource '${logicalId}' is not present in the intent`);
+    }
+  }
+  const symbols = /* @__PURE__ */ new Map();
+  const contexts = [...intent.resources].sort((left, right) => left.id.localeCompare(right.id)).map((resource) => {
+    assertLogicalId(resource.id, "Logical resource id");
+    const declaration = symbolicName(resource.id);
+    const previous = symbols.get(declaration);
+    if (previous !== void 0) {
+      throw new TypeError(`Logical resource ids '${previous}' and '${resource.id}' map to the same IaC symbolic name '${declaration}'`);
+    }
+    symbols.set(declaration, resource.id);
+    for (const dependency of resource.dependsOn) {
+      assertLogicalId(dependency, "Dependency id");
+      if (!intentIds.has(dependency)) {
+        throw new TypeError(`Resource '${resource.id}' has unknown dependency '${dependency}'`);
+      }
+    }
+    const resourceBinding = binding.resourceBindings[resource.id];
+    if (resourceBinding.scopeLogicalId !== void 0) {
+      const target = binding.resourceBindings[resourceBinding.scopeLogicalId];
+      if (binding.track !== "bicep" || target === void 0 || target.scopeLogicalId !== void 0 || resourceBinding.scopeLogicalId === resource.id || !resource.dependsOn.includes(resourceBinding.scopeLogicalId)) {
+        throw new TypeError("Scoped Bicep binding requires an explicit unchained dependency");
+      }
+    }
+    return {
+      resource,
+      binding: resourceBinding,
+      declaration,
+      parsed: parseBinding(resourceBinding.implementation, resourceBinding.version)
+    };
+  });
+  return manifest(intent, binding, contexts, sourcePath, existing);
+}
 function manifest(intent, binding, contexts, sourcePath, existing) {
   return {
     schemaVersion: intent.schemaVersion,
@@ -26587,6 +26649,7 @@ function manifest(intent, binding, contexts, sourcePath, existing) {
     track: binding.track,
     resources: contexts.map(({ resource, declaration, parsed }) => ({
       logicalId: resource.id,
+      ...resource.componentId === void 0 ? {} : { componentId: resource.componentId },
       type: resource.type,
       implementationAddress: binding.resourceBindings[resource.id].implementation,
       executionAddress: binding.track === "bicep" ? declaration : parsed.kind === "avm" ? `module.${declaration}` : existing.has(resource.id) ? `data.azapi_resource.${declaration}` : `azapi_resource.${declaration}`,
@@ -27149,6 +27212,7 @@ import { spawn } from "node:child_process";
 
 // packages/capabilities/dist/executable-resolution.js
 import { accessSync, constants as constants12, statSync } from "node:fs";
+import { homedir as homedir2 } from "node:os";
 import { posix, win32 } from "node:path";
 var DEFAULT_PATHEXT = ".COM;.EXE;.BAT;.CMD";
 function environmentValue(env, name, platform) {
@@ -27188,6 +27252,16 @@ function resolveExecutable(executable, options = {}) {
     const found = candidatesFor(path2.join(directory, executable)).find((candidate) => isExecutableFile(candidate, platform));
     if (found !== void 0)
       return found;
+  }
+  const baseName = path2.basename(executable, path2.extname(executable)).toLowerCase();
+  if (baseName === "bicep") {
+    const home = environmentValue(env, "USERPROFILE", platform) ?? environmentValue(env, "HOME", platform) ?? (options.env === void 0 ? homedir2() : void 0);
+    if (home !== void 0 && home.length > 0) {
+      const azureBin = path2.join(home, ".azure", "bin", executable);
+      const found = candidatesFor(azureBin).find((candidate) => isExecutableFile(candidate, platform));
+      if (found !== void 0)
+        return found;
+    }
   }
   return void 0;
 }
@@ -27521,6 +27595,28 @@ function observeBoundProperty(mapping, request, resources) {
   const physicalId = text4(own(binding, "physicalId"));
   if (Object.hasOwn(binding, "physicalId") && physicalId === void 0)
     return { outcome: "unsupported", reason: "unsupported-resource" };
+  const rawSiblings = own(binding, "componentSymbols");
+  if (Array.isArray(rawSiblings) && rawSiblings.length > 0 && physicalId === void 0) {
+    const symbols = rawSiblings.filter((sym) => typeof sym === "string" && sym.length > 0);
+    if (symbols.length === 0)
+      return { outcome: "unsupported", reason: "resource-not-bound" };
+    const outcomes = symbols.map((sym) => observeBoundProperty(mapping, {
+      track: request.track,
+      logicalResourceManifest: {
+        [mapping.logicalResourceId]: request.track === "terraform" ? { terraformAddress: sym } : { codeSymbol: sym }
+      }
+    }, resources));
+    const applicable = outcomes.filter((candidate) => !(candidate.outcome === "fail" && candidate.reason === "missing-property"));
+    if (applicable.length === 0)
+      return { outcome: "fail", reason: "missing-property" };
+    const failed = applicable.find((candidate) => candidate.outcome === "fail");
+    if (failed !== void 0)
+      return failed;
+    const unsupported = applicable.find((candidate) => candidate.outcome === "unsupported");
+    if (unsupported !== void 0)
+      return unsupported;
+    return applicable[0];
+  }
   const codeSymbol = request.track === "terraform" ? text4(own(binding, "terraformAddress")) ?? text4(own(binding, "codeSymbol")) : text4(own(binding, "codeSymbol"));
   if (codeSymbol === void 0 && (request.track === "terraform" || physicalId === void 0)) {
     return { outcome: "unsupported", reason: "resource-not-bound" };
@@ -27596,10 +27692,22 @@ function observeBoundProperty(mapping, request, resources) {
   }
   if (walked.expressionHit || hasUnknown(walked.unknown) || expression(walked.observed, request.track))
     return { outcome: "unsupported", reason: "unsupported-expression" };
-  if (walked.observed === void 0)
+  if (walked.observed === void 0) {
     return { outcome: "fail", reason: "missing-property" };
-  const observedValueDigest = calculatePolicyValidationDigest(walked.observed);
-  const matched = observedValueDigest === calculatePolicyValidationDigest(mapping.expectedValue);
+  }
+  const expectedValueDigest = calculatePolicyValidationDigest(mapping.expectedValue);
+  let observedValueDigest = calculatePolicyValidationDigest(walked.observed);
+  let matched = observedValueDigest === expectedValueDigest;
+  if (!matched) {
+    const statusWrapper = object3(walked.observed);
+    if (statusWrapper !== void 0 && Object.keys(statusWrapper).length === 1 && Object.hasOwn(statusWrapper, "status")) {
+      const statusDigest = calculatePolicyValidationDigest(own(statusWrapper, "status"));
+      if (statusDigest === expectedValueDigest) {
+        observedValueDigest = statusDigest;
+        matched = true;
+      }
+    }
+  }
   return { outcome: matched ? "pass" : "fail", reason: matched ? "matched" : "value-mismatch", observedValueDigest };
 }
 function validateStorageSecurityBindings(request) {
@@ -27710,6 +27818,257 @@ function validateBicepStorageDiagnostics(request) {
   }
   return result("pass", "matched");
 }
+function validateStagedBicepParity(request) {
+  const inputHash = createHash10("sha256").update(request.json).digest("hex");
+  const result = (outcome, reason) => ({
+    coverage: "bicep-symbolic-resource-parity-v1",
+    sourceHash: request.sourceHash,
+    manifestHash: calculatePolicyValidationDigest(request.manifest),
+    ...request.binding === void 0 ? {} : { bindingHash: calculatePolicyValidationDigest(request.binding) },
+    inputHash,
+    outcome,
+    reason
+  });
+  const planned = request.manifest.resources;
+  const byId = new Map(planned.map((entry) => [entry.logicalId, entry]));
+  if (byId.size !== planned.length || new Set(planned.map(({ executionAddress }) => executionAddress)).size !== planned.length || planned.some((entry) => entry.executionAddress === void 0 || entry.executionAddress.length === 0 || entry.dependsOn.some((dep) => !byId.has(dep)))) {
+    return result("unsupported", "unsupported-resource");
+  }
+  let allObserved;
+  try {
+    allObserved = resourcesFromJson(request.json, "bicep");
+  } catch {
+    return result("unsupported", "invalid-source");
+  }
+  const topLevel = allObserved.filter((resource) => !resource.codeSymbol?.includes("::"));
+  const mainBicep = request.sourceFiles?.["infra/main.bicep"];
+  for (const expected of planned) {
+    const matches = topLevel.filter(({ codeSymbol }) => codeSymbol === expected.executionAddress);
+    if (matches.length !== 1)
+      return result("fail", "coverage-mismatch");
+    const bySymbol = matches[0];
+    if (bySymbol.existing === true !== (expected.ownership === "existing")) {
+      return result("fail", "type-mismatch");
+    }
+    const bound = request.binding?.resourceBindings[expected.logicalId];
+    if (bound !== void 0 && bound.implementation !== expected.implementationAddress) {
+      return result("fail", "type-mismatch");
+    }
+    if (expected.implementationKind === "module") {
+      if (bySymbol.resourceType?.toLowerCase() !== "microsoft.resources/deployments") {
+        return result("fail", "type-mismatch");
+      }
+      const avmMatch = /^avm:([^@\s]+)@([^@\s]+)$/u.exec(expected.implementationAddress);
+      if (avmMatch === null)
+        return result("unsupported", "unsupported-resource");
+      if (bound !== void 0 && bound.version !== avmMatch[2])
+        return result("fail", "type-mismatch");
+      if (mainBicep !== void 0) {
+        const escapedSymbol = expected.executionAddress.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+        const escapedTarget = `${avmMatch[1]}:${avmMatch[2]}`.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+        const modulePattern = new RegExp(`\\bmodule\\s+${escapedSymbol}\\s+'${escapedTarget}'`, "u");
+        if (!modulePattern.test(mainBicep))
+          return result("fail", "type-mismatch");
+      }
+    } else {
+      const nativeMatch = /^native:(Microsoft\.[A-Za-z0-9.]+(?:\/[A-Za-z][A-Za-z0-9]*)+)@([^@\s]+)$/iu.exec(expected.implementationAddress);
+      if (nativeMatch === null)
+        return result("unsupported", "unsupported-resource");
+      if (bySymbol.resourceType?.toLowerCase() !== nativeMatch[1].toLowerCase() || text4(bySymbol.value.apiVersion)?.toLowerCase() !== nativeMatch[2].toLowerCase() || bound !== void 0 && bound.version !== nativeMatch[2] || /^Microsoft\.[A-Za-z0-9.]+(?:\/[A-Za-z][A-Za-z0-9]*)+$/iu.test(expected.type) && bySymbol.resourceType?.toLowerCase() !== expected.type.toLowerCase()) {
+        return result("fail", "type-mismatch");
+      }
+    }
+    if (expected.ownership !== "existing" && expected.dependsOn.length > 0) {
+      const rawDeps = Array.isArray(bySymbol.value.dependsOn) ? bySymbol.value.dependsOn : [];
+      const observedDeps = new Set(rawDeps.filter((dep) => typeof dep === "string"));
+      const serialized = JSON.stringify(bySymbol.value);
+      for (const depId of expected.dependsOn) {
+        const depSymbol = byId.get(depId)?.executionAddress;
+        if (depSymbol === void 0 || !observedDeps.has(depSymbol) && !serialized.includes(`'${depSymbol}'`) && !serialized.includes(`"${depSymbol}"`)) {
+          return result("fail", "dependency-mismatch");
+        }
+      }
+    }
+  }
+  return result("pass", "matched");
+}
+function validateStagedBicepBaseline(request) {
+  const parity = validateStagedBicepParity(request);
+  const result = (outcome, reason) => ({
+    coverage: "bicep-storage-only-baseline-v1",
+    sourceHash: request.sourceHash,
+    inputHash: parity.inputHash,
+    manifestHash: parity.manifestHash,
+    bindingHash: calculatePolicyValidationDigest(request.binding),
+    outcome,
+    reason
+  });
+  const strict = validateBicepStorageBaseline(request);
+  if (strict.outcome === "fail" && strict.reason === "credential-content")
+    return strict;
+  if (parity.outcome !== "pass")
+    return result(parity.outcome, "resource-parity");
+  let allObserved;
+  try {
+    allObserved = resourcesFromJson(request.json, "bicep");
+  } catch {
+    return result("unsupported", "resource-parity");
+  }
+  const legacyTls = /* @__PURE__ */ new Set(["1.0", "1.1", "TLS1_0", "TLS1_1"]);
+  for (const resource of allObserved) {
+    if (resource.existing === true)
+      continue;
+    const type = resource.resourceType?.toLowerCase();
+    const props = object3(resource.value.properties);
+    if (type === "microsoft.storage/storageaccounts" && props !== void 0) {
+      if (props.allowBlobPublicAccess === true || props.allowSharedKeyAccess === true || props.supportsHttpsTrafficOnly === false || typeof props.minimumTlsVersion === "string" && legacyTls.has(props.minimumTlsVersion)) {
+        return result("fail", "storage-controls");
+      }
+    } else if (type === "microsoft.web/sites" && props !== void 0) {
+      const siteConfig = object3(props.siteConfig);
+      if (props.httpsOnly === false || siteConfig?.http20Enabled === false || siteConfig?.ftpsState === "AllAllowed" || typeof siteConfig?.minTlsVersion === "string" && legacyTls.has(siteConfig.minTlsVersion)) {
+        return result("fail", "storage-controls");
+      }
+    } else if (type === "microsoft.containerregistry/registries" && props !== void 0) {
+      if (props.adminUserEnabled === true)
+        return result("fail", "storage-controls");
+    } else if (type === "microsoft.keyvault/vaults" && props !== void 0) {
+      if (props.enableRbacAuthorization === false || props.enableSoftDelete === false) {
+        return result("fail", "storage-controls");
+      }
+    } else if (type === "microsoft.sql/servers" && props !== void 0) {
+      const admins = object3(props.administrators);
+      if (typeof props.minimalTlsVersion === "string" && legacyTls.has(props.minimalTlsVersion) || admins?.azureADOnlyAuthentication === false) {
+        return result("fail", "storage-controls");
+      }
+    } else if ((type === "microsoft.dbforpostgresql/flexibleservers" || type === "microsoft.dbformysql/flexibleservers") && props !== void 0) {
+      if (props.sslEnforcement === "Disabled")
+        return result("fail", "storage-controls");
+    } else if ((type === "microsoft.servicebus/namespaces" || type === "microsoft.eventhub/namespaces" || type === "microsoft.cache/redis") && props !== void 0) {
+      if (props.enableNonSslPort === true || typeof props.minimumTlsVersion === "string" && legacyTls.has(props.minimumTlsVersion)) {
+        return result("fail", "storage-controls");
+      }
+    } else if (type === "microsoft.resources/deployments" && props !== void 0) {
+      const params = object3(props.parameters);
+      const paramVal = (name) => own(params?.[name], "value");
+      const tlsParam = paramVal("minimumTlsVersion") ?? paramVal("minTlsVersion") ?? paramVal("minimalTlsVersion");
+      if (paramVal("allowBlobPublicAccess") === true || paramVal("allowSharedKeyAccess") === true || paramVal("supportsHttpsTrafficOnly") === false || paramVal("httpsOnly") === false || paramVal("adminUserEnabled") === true || paramVal("acrAdminUserEnabled") === true || paramVal("enableRbacAuthorization") === false || paramVal("enableSoftDelete") === false || paramVal("enableNonSslPort") === true || typeof tlsParam === "string" && legacyTls.has(tlsParam)) {
+        return result("fail", "storage-controls");
+      }
+    }
+  }
+  return result("pass", "matched");
+}
+function validateStagedTerraformParity(request) {
+  const inputHash = calculatePolicyValidationDigest(Object.fromEntries(Object.entries(request.files).sort(([a], [b]) => a.localeCompare(b))));
+  const result = (outcome, reason) => ({
+    coverage: "terraform-symbolic-resource-parity-v1",
+    sourceHash: request.sourceHash,
+    manifestHash: calculatePolicyValidationDigest(request.manifest),
+    ...request.binding === void 0 ? {} : { bindingHash: calculatePolicyValidationDigest(request.binding) },
+    inputHash,
+    outcome,
+    reason
+  });
+  const expected = request.manifest.resources;
+  const byId = new Map(expected.map((entry) => [entry.logicalId, entry]));
+  if (byId.size !== expected.length || new Set(expected.map(({ executionAddress }) => executionAddress)).size !== expected.length || expected.some((entry) => entry.executionAddress === void 0 || entry.executionAddress.length === 0 || entry.dependsOn.some((dep) => !byId.has(dep)))) {
+    return result("unsupported", "unsupported-resource");
+  }
+  const tfEntries = Object.entries(request.files).filter(([path2]) => path2.endsWith(".tf")).sort(([a], [b]) => a.localeCompare(b));
+  if (tfEntries.length === 0)
+    return result("fail", "coverage-mismatch");
+  const blocks = parseTerraformBlocks(tfEntries.map(([, content]) => content).join("\n\n"));
+  if (blocks === void 0)
+    return result("unsupported", "invalid-source");
+  for (const resource of expected) {
+    const matches = blocks.filter(({ address }) => address === resource.executionAddress);
+    if (matches.length !== 1)
+      return result("fail", "coverage-mismatch");
+    const block = matches[0];
+    const expectedKind = resource.ownership === "existing" ? "data" : resource.implementationKind === "module" ? "module" : "resource";
+    if (block.kind !== expectedKind)
+      return result("fail", "type-mismatch");
+    const attrs = parseTopLevelHclAttributes(block.body);
+    if (attrs === void 0)
+      return result("unsupported", "unsupported-resource");
+    const bound = request.binding?.resourceBindings[resource.logicalId];
+    if (bound !== void 0 && bound.implementation !== resource.implementationAddress) {
+      return result("fail", "type-mismatch");
+    }
+    if (block.kind === "module") {
+      const avmMatch = /^avm:([^@\s]+)@([^@\s]+)$/u.exec(resource.implementationAddress);
+      if (avmMatch === null)
+        return result("unsupported", "unsupported-resource");
+      const sourceAttr = parseHclStringLiteral(attrs.get("source"));
+      const versionAttr = parseHclStringLiteral(attrs.get("version"));
+      if (sourceAttr === void 0 || versionAttr === void 0)
+        return result("unsupported", "unsupported-resource");
+      if (sourceAttr !== avmMatch[1] || versionAttr.replace(/^=\s*/u, "") !== avmMatch[2].replace(/^=\s*/u, "") || bound !== void 0 && bound.version !== avmMatch[2]) {
+        return result("fail", "type-mismatch");
+      }
+    } else if (block.blockType === "azapi_resource") {
+      const nativeMatch = /^native:([^@\s]+)@([^@\s]+)$/u.exec(resource.implementationAddress);
+      if (nativeMatch === null)
+        return result("unsupported", "unsupported-resource");
+      const typeAttr = parseHclStringLiteral(attrs.get("type"));
+      if (typeAttr === void 0)
+        return result("unsupported", "unsupported-resource");
+      if (typeAttr.toLowerCase() !== `${nativeMatch[1]}@${nativeMatch[2]}`.toLowerCase() || bound !== void 0 && bound.version !== nativeMatch[2] || /^Microsoft\.[A-Za-z0-9.]+(?:\/[A-Za-z][A-Za-z0-9]*)+$/iu.test(resource.type) && nativeMatch[1].toLowerCase() !== resource.type.toLowerCase()) {
+        return result("fail", "type-mismatch");
+      }
+    } else {
+      return result("fail", "type-mismatch");
+    }
+    if (resource.ownership !== "existing" && resource.dependsOn.length > 0) {
+      for (const depId of resource.dependsOn) {
+        const depAddress = byId.get(depId)?.executionAddress;
+        if (depAddress === void 0)
+          return result("fail", "dependency-mismatch");
+        const escapedAddr = depAddress.replace(/[.*+?^${}()|[\]\\]/gu, "\\$&");
+        const referencedInBody = new RegExp(`\\b${escapedAddr}\\b`, "u").test(block.body);
+        if (!block.dependsOn.includes(depAddress) && !referencedInBody) {
+          return result("fail", "dependency-mismatch");
+        }
+      }
+    }
+  }
+  return result("pass", "matched");
+}
+function validateStagedTerraformBaseline(request) {
+  const parity = validateStagedTerraformParity(request);
+  const result = (outcome, reason) => ({
+    coverage: "terraform-source-baseline-v1",
+    sourceHash: request.sourceHash,
+    inputHash: parity.inputHash,
+    manifestHash: parity.manifestHash,
+    bindingHash: calculatePolicyValidationDigest(request.binding),
+    outcome,
+    reason
+  });
+  for (const [path2, content] of Object.entries(request.files)) {
+    if (path2 === ".terraform.lock.hcl")
+      continue;
+    if (SECRET_VALUE_PATTERN.test(content))
+      return result("fail", "credential-content");
+    const clean = stripHclComments(content);
+    for (const rawLine of clean.split(/\r?\n/u)) {
+      const line = rawLine.trim();
+      if (line.length === 0)
+        continue;
+      const match = /^"?([A-Za-z_][A-Za-z0-9_-]*)"?\s*[:=]\s*"([^"]+)"\s*,?$/u.exec(line);
+      if (match !== null && !match[2].includes("${") && isSecretBearingField(match[1], match[2])) {
+        return result("fail", "credential-content");
+      }
+    }
+    if (/\ballow_nested_items_to_be_public\s*=\s*true\b/u.test(clean) || /\bshared_access_key_enabled\s*=\s*true\b/u.test(clean) || /\bhttps_traffic_only_enabled\s*=\s*false\b/u.test(clean) || /\ballowBlobPublicAccess"?\s*[:=]\s*true\b/u.test(clean) || /\ballowSharedKeyAccess"?\s*[:=]\s*true\b/u.test(clean) || /\bsupportsHttpsTrafficOnly"?\s*[:=]\s*false\b/u.test(clean) || /\b(?:https_only|httpsOnly|http2_enabled|http20Enabled)"?\s*[:=]\s*false\b/u.test(clean) || /\b(?:admin_enabled|adminUserEnabled|acrAdminUserEnabled|non_ssl_port_enabled|enableNonSslPort)"?\s*[:=]\s*true\b/u.test(clean) || /\b(?:enable_rbac_authorization|rbac_authorization_enabled|enableRbacAuthorization|enableSoftDelete)"?\s*[:=]\s*false\b/u.test(clean) || /\b(?:min_tls_version|minimum_tls_version|minimumTlsVersion|minTlsVersion|minimalTlsVersion)"?\s*[:=]\s*"(?:TLS1_[01]|1\.[01])"/u.test(clean)) {
+      return result("fail", "storage-controls");
+    }
+  }
+  if (parity.outcome !== "pass")
+    return result(parity.outcome, "resource-parity");
+  return result("pass", "matched");
+}
 function validateBicepResourceParity(request) {
   assertPolicyValidationJson(request.manifest);
   if (request.binding !== void 0) {
@@ -27801,15 +28160,27 @@ function validateBicepStorageBaseline(request) {
     outcome,
     reason
   });
-  if (parity.outcome !== "pass")
+  let parsed;
+  try {
+    parsed = JSON.parse(request.json);
+  } catch {
     return result(parity.outcome, "resource-parity");
-  const parsed = JSON.parse(request.json);
+  }
   const isArmExpression = (value) => value.startsWith("[") && !value.startsWith("[[") && value.endsWith("]");
   const hasSecretValue = (value, insideModuleTemplate) => {
     const normalized = insideModuleTemplate && isArmExpression(value) ? value.replace(/AccountKey=\{\d+\}/giu, "") : value;
     return SECRET_VALUE_PATTERN.test(normalized);
   };
   const isSafeModuleFieldExpression = (value) => isArmExpression(value) && !hasSecretValue(value, true) && !/\bconcat\s*\(/iu.test(value) && /^\[(?:parameters|tryGet|if|subscriptionResourceId|resourceId|reference)\(/u.test(value);
+  const topLevelParams = object3(object3(parsed)?.parameters);
+  const secureParameterNames = new Set(Object.entries(topLevelParams ?? {}).filter(([, def]) => {
+    const paramType = text4(object3(def)?.type)?.toLowerCase();
+    return paramType === "securestring" || paramType === "secureobject";
+  }).map(([name]) => name));
+  const isVerifiedSecureParameterReference = (value) => {
+    const match = /^\[parameters\('([A-Za-z_][A-Za-z0-9_]*)'\)\]$/u.exec(value.trim());
+    return match !== null && secureParameterNames.has(match[1]);
+  };
   const hasCredential = (value, insideModuleTemplate = false, inDeploymentProperties = false) => {
     if (typeof value === "string") {
       return hasSecretValue(value, insideModuleTemplate);
@@ -27827,7 +28198,7 @@ function validateBicepStorageBaseline(request) {
       const paramValue = !insideModuleTemplate ? object3(child)?.value : void 0;
       const candidate = typeof child === "string" ? child : typeof paramValue === "string" ? paramValue : void 0;
       if (isSecretBearingField(key, candidate ?? child)) {
-        if (candidate !== void 0 && candidate.length > 0 && !(insideModuleTemplate && isSafeModuleFieldExpression(candidate))) {
+        if (candidate !== void 0 && candidate.length > 0 && !(insideModuleTemplate && isSafeModuleFieldExpression(candidate)) && !(!insideModuleTemplate && isVerifiedSecureParameterReference(candidate))) {
           return true;
         }
       }
@@ -27836,6 +28207,8 @@ function validateBicepStorageBaseline(request) {
   };
   if (hasCredential(parsed))
     return result("fail", "credential-content");
+  if (parity.outcome !== "pass")
+    return result(parity.outcome, "resource-parity");
   const onlyKeys2 = (value, keys) => object3(value) !== void 0 && Object.keys(value).every((key) => keys.includes(key));
   const template = object3(parsed);
   if (!onlyKeys2(template, [
@@ -28917,13 +29290,25 @@ ${result.stderr}`;
           await verify();
         }
       }
-      const terraformFiles = track === "terraform" ? Object.fromEntries([...source2.paths].sort().map((path2) => [path2, source2.fileContents.get(path2)?.toString("utf8") ?? ""])) : {};
+      const sourceFiles = Object.fromEntries([...source2.paths].sort().map((path2) => [path2, source2.fileContents.get(path2)?.toString("utf8") ?? ""]));
+      const terraformFiles = track === "terraform" ? sourceFiles : {};
       if (parityManifest !== void 0) {
-        receipt.resourceParity = track === "bicep" ? validateBicepResourceParity({
+        receipt.resourceParity = track === "bicep" ? request.stagedSource === true ? validateStagedBicepParity({
+          sourceHash: receipt.sourceHash,
+          manifest: parityManifest,
+          ...parityBinding === void 0 ? {} : { binding: parityBinding },
+          json: compiledTemplate ?? "",
+          sourceFiles
+        }) : validateBicepResourceParity({
           sourceHash: receipt.sourceHash,
           manifest: parityManifest,
           ...parityBinding === void 0 ? {} : { binding: parityBinding },
           json: compiledTemplate ?? ""
+        }) : request.stagedSource === true ? validateStagedTerraformParity({
+          sourceHash: receipt.sourceHash,
+          manifest: parityManifest,
+          ...parityBinding === void 0 ? {} : { binding: parityBinding },
+          files: terraformFiles
         }) : validateTerraformResourceParity({
           sourceHash: receipt.sourceHash,
           manifest: parityManifest,
@@ -28936,12 +29321,23 @@ ${result.stderr}`;
         receipt.receiptHash = calculateNativeValidationReceiptHash(updated);
       }
       if (parityManifest !== void 0 && parityBinding !== void 0) {
-        receipt.securityBaseline = track === "bicep" ? validateBicepStorageBaseline({
+        receipt.securityBaseline = track === "bicep" ? request.stagedSource === true ? validateStagedBicepBaseline({
+          sourceHash: receipt.sourceHash,
+          manifest: parityManifest,
+          binding: parityBinding,
+          json: compiledTemplate ?? "",
+          sourceFiles
+        }) : validateBicepStorageBaseline({
           sourceHash: receipt.sourceHash,
           manifest: parityManifest,
           binding: parityBinding,
           json: compiledTemplate ?? "",
           ...request.targetScope === void 0 ? {} : { targetScope: request.targetScope }
+        }) : request.stagedSource === true ? validateStagedTerraformBaseline({
+          sourceHash: receipt.sourceHash,
+          manifest: parityManifest,
+          binding: parityBinding,
+          files: terraformFiles
         }) : validateTerraformStorageBaseline({
           sourceHash: receipt.sourceHash,
           manifest: parityManifest,
@@ -28969,8 +29365,15 @@ ${result.stderr}`;
         receipt.receiptHash = calculateNativeValidationReceiptHash(updated);
       }
       if (track === "bicep" && policyInput !== void 0 && hasActionablePolicyMappings(policyInput.policyMap)) {
+        const unsafePolicyReasons = /* @__PURE__ */ new Set([
+          "unverified-exemption",
+          "invalid-source",
+          "unsupported-path",
+          "unsupported-effect"
+        ]);
         let policyValidation;
         let failure2 = "Native policy property validation failed";
+        let rejected = false;
         try {
           policyValidation = validatePolicyProperties({
             ...policyInput,
@@ -28979,14 +29382,16 @@ ${result.stderr}`;
             policyMapHash: receipt.policyHash,
             json: compiledTemplate ?? ""
           });
-          if (policyValidation.outcome !== "pass")
+          rejected = request.stagedSource === true ? policyValidation.outcome === "fail" || policyValidation.results.some(({ reason }) => unsafePolicyReasons.has(reason)) : policyValidation.outcome !== "pass";
+          if (rejected)
             failure2 += `: ${policyFailureSummary(policyValidation)}`;
         } catch {
           policyValidation = void 0;
+          rejected = true;
         } finally {
           await verify();
         }
-        if (policyValidation === void 0 || policyValidation.outcome !== "pass")
+        if (policyValidation === void 0 || rejected)
           throw new IacProviderError("NATIVE_VALIDATION_FAILED", failure2);
         receipt.policyValidation = policyValidation;
         const { receiptHash, ...updated } = receipt;
@@ -30787,8 +31192,8 @@ function renderDeploymentGuide(input2) {
     markdownTable(["Configuration Name", "Kind", "Secret Reference", "Version"], configurations.map(([name, value]) => [
       name,
       value.kind,
-      value.kind === "value" ? "Not a secret reference" : `${value.provider}:${value.reference}`,
-      value.kind === "value" ? "Not applicable" : value.version ?? "Not pinned"
+      value.kind === "value" ? "Not a secret reference" : value.kind === "deferred" ? `Deferred (${value.owner}${value.reason === void 0 ? "" : `: ${value.reason}`})` : `${value.provider}:${value.reference}`,
+      value.kind === "secret-reference" ? value.version ?? "Not pinned" : "Not applicable"
     ])),
     "",
     "Confirm the active writer, target identity, required Azure permissions, secret access and installed toolchain before any cloud operation. This plan does not establish access or grant roles.",
@@ -31740,7 +32145,7 @@ function renderArchitectureMermaid(architecture) {
 import { join as join26, resolve as resolve22 } from "node:path";
 
 // packages/cli/dist/version.js
-var APEX_VERSION = "0.11.0-next.15";
+var APEX_VERSION = "0.11.0-next.16";
 var MINIMUM_NODE_VERSION = "24.21.0";
 function meetsMinimumVersion(current, minimum) {
   const currentParts = current.split(".").map(Number);
@@ -67043,12 +67448,12 @@ import { fileURLToPath as fileURLToPath3 } from "node:url";
 
 // packages/cli/dist/host-profile.js
 import { readFile as readFile13, stat } from "node:fs/promises";
-import { homedir as homedir2, release } from "node:os";
+import { homedir as homedir3, release } from "node:os";
 import { join as join18 } from "node:path";
 var MAX_COPILOT_CONFIG_BYTES = 1024 * 1024;
 var RELEASE_VERSION2 = /^(0|[1-9]\d*)\.(0|[1-9]\d*)\.(0|[1-9]\d*)$/u;
 function currentHostEnvironment() {
-  return { platform: process.platform, release: release(), env: process.env, homedir: homedir2() };
+  return { platform: process.platform, release: release(), env: process.env, homedir: homedir3() };
 }
 function detectHostKind(host) {
   if (host.platform === "win32")
@@ -67834,9 +68239,9 @@ function planSourceCoverage(value) {
   if (context.artifactHashes["policy-property-map"] !== void 0 && policy === void 0) {
     issues.push({ path: "/artifacts/policy-property-map", message: "Accepted policy mappings are required" });
   }
-  const resources = new Set(intent.resources.map(({ id }) => id));
+  const coveredIds = new Set(intent.resources.flatMap(({ id, componentId }) => componentId === void 0 ? [id] : [id, componentId]));
   for (const mapping of policy?.mappings ?? []) {
-    if (mapping.disposition !== "not-applicable" && !resources.has(mapping.logicalResourceId))
+    if (mapping.disposition !== "not-applicable" && !coveredIds.has(mapping.logicalResourceId))
       issues.push({
         path: "/outputs/implementation-intent/resources",
         message: "Policy mapping references a resource absent from the plan"
@@ -67863,27 +68268,57 @@ function bindingTrackMatch(value) {
         message: "Exact physical resource maps and diagnostic scope references are supported only for Bicep bindings"
       });
     } else if (issues.length === 0) {
-      issues.push(...resolveNativeBicepResourceOwnership({
-        intent,
-        binding,
-        targetScope: context.targetScope,
-        manifest: {
-          schemaVersion: "1.0.0",
-          projectId: intent.projectId,
-          runId: intent.runId,
-          track: "bicep",
-          resources: intent.resources.map((resource) => ({
-            logicalId: resource.id,
-            type: resource.type,
-            implementationAddress: binding.resourceBindings[resource.id].implementation,
-            implementationKind: binding.resourceBindings[resource.id].implementation.startsWith("avm:") ? "module" : "resource",
-            ownership: "managed",
-            dependsOn: resource.dependsOn,
-            generatedDependencies: [],
-            sourcePath: "infra/main.bicep"
-          }))
+      if (!bicepResourceGroupScopePattern.test(context.targetScope)) {
+        for (const resource of intent.resources) {
+          const entry = binding.resourceBindings[resource.id];
+          const path2 = `/binding/resourceBindings/${resource.id}`;
+          if (entry.physicalResources !== void 0) {
+            issues.push({ path: path2, message: "AVM ownership requires an exact resource-group scope" });
+          }
+          if (entry.scopeLogicalId !== void 0 && (!resourceIds.has(entry.scopeLogicalId) || entry.scopeLogicalId === resource.id || !resource.dependsOn.includes(entry.scopeLogicalId) || binding.resourceBindings[entry.scopeLogicalId]?.scopeLogicalId !== void 0)) {
+            issues.push({ path: path2, message: "Scoped Bicep binding requires an explicit unchained dependency" });
+          }
         }
-      }).issues);
+      } else {
+        const allNativeResolved = intent.resources.every(({ id }) => {
+          const entry = binding.resourceBindings[id];
+          return entry.implementation.startsWith("avm:") || typeof entry.parameters.name === "string" && typeof entry.parameters.parentId === "string";
+        });
+        if (allNativeResolved) {
+          issues.push(...resolveNativeBicepResourceOwnership({
+            intent,
+            binding,
+            targetScope: context.targetScope,
+            manifest: {
+              schemaVersion: "1.0.0",
+              projectId: intent.projectId,
+              runId: intent.runId,
+              track: "bicep",
+              resources: intent.resources.map((resource) => ({
+                logicalId: resource.id,
+                type: resource.type,
+                implementationAddress: binding.resourceBindings[resource.id].implementation,
+                implementationKind: binding.resourceBindings[resource.id].implementation.startsWith("avm:") ? "module" : "resource",
+                ownership: "managed",
+                dependsOn: resource.dependsOn,
+                generatedDependencies: [],
+                sourcePath: "infra/main.bicep"
+              }))
+            }
+          }).issues);
+        } else {
+          const physicalIds = /* @__PURE__ */ new Set();
+          for (const resource of intent.resources) {
+            const entry = binding.resourceBindings[resource.id];
+            const path2 = `/binding/resourceBindings/${resource.id}`;
+            if (entry.implementation.startsWith("avm:")) {
+              issues.push(...bicepPhysicalResourceIssues(entry, resource.type, context.targetScope, path2, physicalIds));
+            } else if (entry.physicalResources !== void 0) {
+              issues.push({ path: path2, message: "Physical resource maps are not supported on native Bicep declarations" });
+            }
+          }
+        }
+      }
     }
   }
   return issues;
@@ -71606,19 +72041,33 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       throw new ApexError("APEX_VALIDATION", "Staged path escapes the code root", EXIT_CODES.validation);
     await this.assertNoSymlinkPath(codeRoot, path2);
     const bytes = typeof content === "string" ? Buffer.from(content, "utf8") : Buffer.from(content);
+    if (SECRET_VALUE_PATTERN.test(bytes.toString("utf8")))
+      throw new ApexError("APEX_VALIDATION", "Staged file contains a secret-bearing value; use @secure() parameters or sensitive variables", EXIT_CODES.validation);
     const hash2 = sha256Bytes(bytes);
-    if (expectedSha !== void 0 && expectedSha !== hash2)
-      throw new ApexError("APEX_STALE", "Staged content hash does not match expected SHA", EXIT_CODES.stale);
     await this.acquireRunWriterLease(run);
     let idempotent = false;
     if (await this.exists(path2)) {
       const entry = await lstat15(path2);
       if (!entry.isFile() || entry.isSymbolicLink())
         throw new ApexError("APEX_VALIDATION", "Staged destination must be a regular file", EXIT_CODES.validation);
-      if (sha256Bytes(await readFile15(path2)) !== hash2)
-        throw new ApexError("APEX_CONFLICT", `Refusing to overwrite staged file: ${normalized}`, EXIT_CODES.conflict);
-      idempotent = true;
+      const currentBytes = await readFile15(path2);
+      const currentHash = sha256Bytes(currentBytes);
+      if (currentHash === hash2) {
+        idempotent = true;
+      } else if (expectedSha !== void 0 && expectedSha === currentHash) {
+        const used = await this.directoryBytes(codeRoot);
+        if (used - currentBytes.byteLength + bytes.byteLength > task.maxOutputBytes)
+          throw new ApexError("APEX_VALIDATION", "Task output exceeds its cumulative size limit", EXIT_CODES.validation);
+        await atomicWriteBytes(path2, bytes);
+        this.repeatWrites.getStore()?.file(path2, hash2);
+        await this.append(run, "file.staged", { taskId, path: normalized, hash: hash2, bytes: bytes.byteLength });
+        await this.refreshTaskHead(run, task);
+      } else {
+        throw new ApexError("APEX_CONFLICT", `Refusing to overwrite staged file: ${normalized}; pass expectedSha "${currentHash}" to replace`, EXIT_CODES.conflict);
+      }
     } else {
+      if (expectedSha !== void 0 && expectedSha !== hash2)
+        throw new ApexError("APEX_STALE", "Staged content hash does not match expected SHA", EXIT_CODES.stale);
       const used = await this.directoryBytes(codeRoot);
       if (used + bytes.byteLength > task.maxOutputBytes)
         throw new ApexError("APEX_VALIDATION", "Task output exceeds its cumulative size limit", EXIT_CODES.validation);
@@ -71653,18 +72102,29 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     }
   }
   /**
-   * Fail fast at plan time: dry-run the selected track's generator on the submitted plan, so a binding the generator
-   * rejects is refused here instead of after the review gates. For Bicep, ownership is also resolved when the run
-   * targets an exact resource group; without one, only AVM bindings with no physical resource map are refused here.
+   * Fail fast at plan time: validate binding pins, logical IDs, and dependencies without requiring literal generator
+   * parameters or exact RG physical-ID maps on local/subscription scopes. When the run already targets an exact
+   * resource group, Bicep AVM physical resource maps are checked here.
    */
-  assertPlanGeneratable(run, intent, binding, options = {}) {
-    const tree = this.generateIacTree(run, intent, binding, options);
-    if (run.iacTool !== "bicep")
+  assertPlanGeneratable(run, intent, binding, _options = {}) {
+    let logicalManifest;
+    try {
+      logicalManifest = buildLogicalResourceManifest(intent, binding, run.iacTool === "bicep" ? "infra/main.bicep" : "main.tf");
+    } catch (error62) {
+      if (error62 instanceof ApexError)
+        throw error62;
+      throw new ApexError("APEX_VALIDATION", `IaC binding cannot be generated: ${error62 instanceof Error ? error62.message : String(error62)}`, EXIT_CODES.validation);
+    }
+    if (run.iacTool !== "bicep" || !bicepResourceGroupScopePattern.test(run.targetScope))
       return;
-    const issues = bicepResourceGroupScopePattern.test(run.targetScope) ? resolveNativeBicepResourceOwnership({
+    const allNativeParameterized = intent.resources.every(({ id }) => {
+      const entry = binding.resourceBindings[id];
+      return entry.implementation.startsWith("avm:") || typeof entry.parameters.name === "string" && typeof entry.parameters.parentId === "string";
+    });
+    const issues = allNativeParameterized ? resolveNativeBicepResourceOwnership({
       intent,
       binding,
-      manifest: tree.logicalManifest,
+      manifest: logicalManifest,
       targetScope: run.targetScope
     }).issues : Object.entries(binding.resourceBindings).filter(([, entry]) => entry.implementation.startsWith("avm:") && entry.physicalResources === void 0).map(([id]) => ({
       path: `/binding/resourceBindings/${id}`,
@@ -71691,6 +72151,12 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const project = await this.projects.getProject(run.projectId);
     const governanceHash = this.artifactHash(events, "governance-constraints");
     const governance = governanceHash === void 0 ? void 0 : await this.objects.getJson(governanceHash);
+    const taskRoot = resolve17(this.root, ".apex", "work", run.runId, taskId, "code");
+    const entrypoint = run.iacTool === "bicep" ? "infra/main.bicep" : "main.tf";
+    const hasStagedEntrypoint = await this.exists(join20(taskRoot, entrypoint));
+    if (hasStagedEntrypoint) {
+      return this.sealStagedIac(run, task, taskId, taskRoot, entrypoint, intent, binding, environmentInputs, options);
+    }
     const tree = this.generateIacTree(run, intent, binding, {
       ...options,
       riskOwner: project.riskOwner,
@@ -71699,8 +72165,8 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
     const files2 = [];
     const sourceRoot = previousHandoff?.treeHash === tree.treeHash ? resolve17(this.root, previousHandoff.rootPath) : resolve17(this.root, ".apex", "work", run.runId, taskId, "code");
     if (previousHandoff?.treeHash === tree.treeHash) {
-      const taskRoot = resolve17(this.root, ".apex", "work", run.runId, taskId, "code");
-      if (await this.exists(taskRoot))
+      const taskRoot2 = resolve17(this.root, ".apex", "work", run.runId, taskId, "code");
+      if (await this.exists(taskRoot2))
         throw new ApexError("APEX_CONFLICT", "Current task already has staged files; resolve them before reusing unchanged source", EXIT_CODES.conflict);
       for (const file2 of tree.files) {
         const bytes = Buffer.from(file2.content, "utf8");
@@ -71742,6 +72208,200 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       intentHash,
       bindingHash,
       environmentInputsHash,
+      logicalResourceManifestHash: sha256Json(tree.logicalManifest),
+      requiredToolVersions: options.requiredToolVersions ?? { [run.iacTool]: "system" },
+      generatedAt: this.clock().toISOString()
+    };
+    const completed = await this.completeTaskOutputs(taskId, [
+      { kind: "logical-resource-manifest", value: tree.logicalManifest },
+      { kind: "iac-handoff", value: handoff2 }
+    ]);
+    return { files: files2, outputHashes: completed.outputHashes, treeHash: tree.treeHash };
+  }
+  async collectStagedVirtualFiles(rootDir, currentDir = rootDir) {
+    const entries = await readdir9(currentDir, { withFileTypes: true });
+    const collected = [];
+    for (const entry of entries) {
+      const fullPath = join20(currentDir, entry.name);
+      if (entry.isSymbolicLink()) {
+        throw new ApexError("APEX_VALIDATION", "Staged source must not contain symbolic links", EXIT_CODES.validation);
+      }
+      if (entry.isDirectory()) {
+        if (entry.name === ".terraform")
+          continue;
+        collected.push(...await this.collectStagedVirtualFiles(rootDir, fullPath));
+        continue;
+      }
+      if (!entry.isFile())
+        continue;
+      const bytes = await readFile15(fullPath);
+      const content = bytes.toString("utf8");
+      if (SECRET_VALUE_PATTERN.test(content)) {
+        throw new ApexError("APEX_VALIDATION", `Staged file '${relative8(rootDir, fullPath).replaceAll("\\", "/")}' contains a secret-bearing value`, EXIT_CODES.validation);
+      }
+      collected.push({ path: relative8(rootDir, fullPath).replaceAll("\\", "/"), content });
+    }
+    return collected.sort((left, right) => left.path.localeCompare(right.path));
+  }
+  sanitizeCompilerDiagnostics(raw, rootDir) {
+    const escapedRoot = rootDir.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const slashRoot = rootDir.replaceAll("\\", "/").replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    return raw.replace(new RegExp(`${escapedRoot}[\\\\/]?`, "giu"), "").replace(new RegExp(`${slashRoot}/?`, "giu"), "").replace(/(?:\bBearer\s+\S+|(?:AccountKey|SharedAccessSignature|ClientSecret)\s*=\s*\S+)/giu, "[REDACTED]").trim().slice(0, 2e3);
+  }
+  async sealStagedIac(run, task, taskId, taskRoot, entrypoint, intent, binding, environmentInputs, options) {
+    let logicalManifest;
+    try {
+      logicalManifest = buildLogicalResourceManifest(intent, binding, entrypoint, options.existingResources);
+    } catch (error62) {
+      if (error62 instanceof ApexError)
+        throw error62;
+      throw new ApexError("APEX_VALIDATION", `IaC binding cannot be generated: ${error62 instanceof Error ? error62.message : String(error62)}`, EXIT_CODES.validation);
+    }
+    if (run.iacTool === "bicep") {
+      if (!await this.exists(join20(taskRoot, "azure.yaml"))) {
+        await this.stageFile(taskId, "azure.yaml", `name: ${intent.projectId}
+infra:
+  provider: bicep
+  path: infra
+  module: main
+`);
+      }
+      if (!await this.exists(join20(taskRoot, "infra/bicepconfig.json"))) {
+        await this.stageFile(taskId, "infra/bicepconfig.json", `${JSON.stringify({ experimentalFeaturesEnabled: { symbolicNameCodegen: true } }, null, 2)}
+`);
+      }
+    }
+    const beforeFormat = new Map((await this.collectStagedVirtualFiles(taskRoot)).map(({ path: path2, content }) => [
+      path2,
+      sha256Bytes(Buffer.from(content, "utf8"))
+    ]));
+    if (run.iacTool === "bicep" && resolveExecutable("bicep") !== void 0) {
+      await this.whileExternalProcessRuns(async () => {
+        try {
+          const buildResult = await this.processRunner.run({
+            executable: "bicep",
+            args: ["build", entrypoint, "--stdout"],
+            cwd: taskRoot,
+            timeoutMs: 12e4,
+            maxOutputBytes: 16 * 1024 * 1024
+          });
+          if (buildResult.exitCode !== 0 || buildResult.signal !== null || buildResult.timedOut) {
+            throw new ProcessRunnerError("PROCESS_EXIT_NONZERO", "bicep build failed", buildResult);
+          }
+        } catch (error62) {
+          const result = error62 instanceof ProcessRunnerError ? error62.result : void 0;
+          const detail = this.sanitizeCompilerDiagnostics(result === void 0 ? String(error62) : `${result.stderr}
+${result.stdout}`, taskRoot);
+          throw new ApexError("APEX_VALIDATION", `Staged Bicep failed bicep build${detail.length === 0 ? "" : `: ${detail}`}`, EXIT_CODES.validation);
+        }
+        try {
+          const lintResult = await this.processRunner.run({
+            executable: "bicep",
+            args: ["lint", "--pattern", "**/*.bicep", "--no-restore"],
+            cwd: taskRoot,
+            timeoutMs: 12e4,
+            maxOutputBytes: 512 * 1024
+          });
+          if (lintResult.exitCode !== 0 || lintResult.signal !== null || lintResult.timedOut) {
+            throw new ProcessRunnerError("PROCESS_EXIT_NONZERO", "bicep lint failed", lintResult);
+          }
+        } catch (error62) {
+          const result = error62 instanceof ProcessRunnerError ? error62.result : void 0;
+          const detail = this.sanitizeCompilerDiagnostics(result === void 0 ? String(error62) : `${result.stderr}
+${result.stdout}`, taskRoot);
+          throw new ApexError("APEX_VALIDATION", `Staged Bicep failed bicep lint${detail.length === 0 ? "" : `: ${detail}`}`, EXIT_CODES.validation);
+        }
+        try {
+          const fmtResult = await this.processRunner.run({
+            executable: "bicep",
+            args: ["format", "--pattern", "**/*.bicep"],
+            cwd: taskRoot,
+            timeoutMs: 6e4,
+            maxOutputBytes: 256 * 1024
+          });
+          if (fmtResult.exitCode !== 0 || fmtResult.signal !== null || fmtResult.timedOut) {
+            throw new ProcessRunnerError("PROCESS_EXIT_NONZERO", "bicep format failed", fmtResult);
+          }
+        } catch (error62) {
+          const result = error62 instanceof ProcessRunnerError ? error62.result : void 0;
+          const detail = this.sanitizeCompilerDiagnostics(result === void 0 ? String(error62) : `${result.stderr}
+${result.stdout}`, taskRoot);
+          throw new ApexError("APEX_VALIDATION", `Staged Bicep failed bicep format${detail.length === 0 ? "" : `: ${detail}`}`, EXIT_CODES.validation);
+        }
+      });
+    } else if (run.iacTool === "terraform" && resolveExecutable("terraform") !== void 0) {
+      await this.whileExternalProcessRuns(async () => {
+        try {
+          for (const [label2, args] of [
+            ["terraform init", ["init", "-backend=false", "-input=false", "-no-color"]],
+            ["terraform validate", ["validate", "-no-color"]],
+            ["terraform fmt", ["fmt", "-recursive"]]
+          ]) {
+            try {
+              const tfResult = await this.processRunner.run({
+                executable: "terraform",
+                args: [...args],
+                cwd: taskRoot,
+                timeoutMs: 12e4,
+                maxOutputBytes: 512 * 1024
+              });
+              if (tfResult.exitCode !== 0 || tfResult.signal !== null || tfResult.timedOut) {
+                throw new ProcessRunnerError("PROCESS_EXIT_NONZERO", `${label2} failed`, tfResult);
+              }
+            } catch (error62) {
+              const result = error62 instanceof ProcessRunnerError ? error62.result : void 0;
+              const detail = this.sanitizeCompilerDiagnostics(result === void 0 ? String(error62) : `${result.stderr}
+${result.stdout}`, taskRoot);
+              throw new ApexError("APEX_VALIDATION", `Staged Terraform failed ${label2}${detail.length === 0 ? "" : `: ${detail}`}`, EXIT_CODES.validation);
+            }
+          }
+        } finally {
+          await rm12(join20(taskRoot, ".terraform"), { recursive: true, force: true });
+        }
+      });
+    }
+    const virtualFiles = await this.collectStagedVirtualFiles(taskRoot);
+    await this.acquireRunWriterLease(run);
+    let formattedCount = 0;
+    for (const file2 of virtualFiles) {
+      const bytes = Buffer.from(file2.content, "utf8");
+      const hash2 = sha256Bytes(bytes);
+      if (beforeFormat.get(file2.path) !== hash2) {
+        const fullPath = join20(taskRoot, file2.path);
+        this.repeatWrites.getStore()?.file(fullPath, hash2);
+        await this.append(run, "file.staged", { taskId, path: file2.path, hash: hash2, bytes: bytes.byteLength });
+        formattedCount += 1;
+      }
+    }
+    if (formattedCount > 0)
+      await this.refreshTaskHead(run, task);
+    const tree = computeVirtualTree(virtualFiles, logicalManifest);
+    try {
+      await assertGeneratedSourceUnchanged({ rootPath: taskRoot, treeHash: tree.treeHash });
+    } catch {
+      throw new ApexError("APEX_CONFLICT", "Generated source differs from the expected tree; preserve and resolve staged-file conflicts before retrying", EXIT_CODES.conflict);
+    }
+    const files2 = tree.files.map((file2) => {
+      const bytes = Buffer.from(file2.content, "utf8");
+      return {
+        taskId,
+        path: join20(taskRoot, file2.path),
+        bytes: bytes.byteLength,
+        hash: sha256Bytes(bytes),
+        idempotent: true
+      };
+    });
+    const handoff2 = {
+      schemaVersion: CONTRACT_VERSION,
+      projectId: run.projectId,
+      runId: run.runId,
+      track: run.iacTool,
+      authoringMode: "staged",
+      rootPath: relative8(this.root, taskRoot),
+      treeHash: tree.treeHash,
+      intentHash: sha256Json(intent),
+      bindingHash: sha256Json(binding),
+      environmentInputsHash: sha256Json(environmentInputs),
       logicalResourceManifestHash: sha256Json(tree.logicalManifest),
       requiredToolVersions: options.requiredToolVersions ?? { [run.iacTool]: "system" },
       generatedAt: this.clock().toISOString()
@@ -71824,6 +72484,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
         policyValidation: structuredClone(policyValidation),
         resourceParityManifest: structuredClone(manifest2),
         resourceParityBinding: await this.objects.getJson(handoff2.bindingHash),
+        ...handoff2.authoringMode === "staged" ? { stagedSource: true } : {},
         ...run.iacTool === "bicep" ? {
           storageSecurityBindings: this.storageSecurityBindings(manifest2),
           storageDiagnosticsTargets: diagnosticsTargets,
@@ -71832,7 +72493,7 @@ ${JSON.stringify(event.payload)}`.toLowerCase().includes(needle)) {
       };
       const validateSource = provider.validateSource.bind(provider);
       const receipt = await this.whileExternalProcessRuns(() => validateSource(validationRequest));
-      if (!hasValidNativeValidationReceipt(receipt, binding) || !this.hasRequiredNativePolicyEvidence(receipt, policyValidation) || !this.hasBoundResourceParity(receipt, manifest2, handoff2.bindingHash) || !this.hasBoundStorageDiagnostics(receipt, manifest2) || !this.hasBoundStorageRouting(receipt, diagnosticsTargets))
+      if (!hasValidNativeValidationReceipt(receipt, binding) || !this.hasRequiredNativePolicyEvidence(receipt, policyValidation, true) || !this.hasBoundResourceParity(receipt, manifest2, handoff2.bindingHash) || !this.hasBoundStorageDiagnostics(receipt, manifest2) || !this.hasBoundStorageRouting(receipt, diagnosticsTargets))
         throw new ApexError("APEX_VALIDATION", "Native validation receipt is invalid or incomplete", EXIT_CODES.validation);
       const current = await this.currentRun();
       if (current.runId !== run.runId || current.projectId !== run.projectId || current.ownerEpoch !== run.ownerEpoch)
@@ -73379,8 +74040,8 @@ ${this.reviewFindingsMarkdown(review2)}
     ]);
     const inputRows = Object.entries(inputs.inputs).map(([name, value]) => [
       this.reviewMarkdownText(name),
-      value.kind === "value" ? "value" : "secret-reference",
-      this.reviewMarkdownText(value.kind === "value" ? String(value.value) : `${value.provider}:${value.reference}`)
+      value.kind,
+      this.reviewMarkdownText(value.kind === "value" ? String(value.value) : value.kind === "deferred" ? `deferred (${value.owner}${value.reason === void 0 ? "" : `: ${value.reason}`})` : `${value.provider}:${value.reference}`)
     ]);
     await mkdir11(directory, { recursive: true });
     await Promise.all([
@@ -74006,7 +74667,7 @@ Only native entries reference runtime-executed source-bound command receipts. Si
         for (const { validatorId } of NATIVE_VALIDATION_COMMANDS[run.iacTool]) {
           const receiptHash = payload?.validatorEvidenceRefs?.[validatorId];
           const nativeReceipt = receiptHash === void 0 ? void 0 : await this.objects.getJson(receiptHash);
-          if (payload?.validatorEvidenceModes?.[validatorId] !== "native" || !hasValidNativeValidationReceipt(nativeReceipt, binding) || !this.hasRequiredNativePolicyEvidence(nativeReceipt, policyValidation ?? (policyMap !== void 0 && !hasActionablePolicyMappings(policyMap) ? this.policyValidationInput(run.iacTool, policyMap, logicalManifest, true) : void 0)) || !this.hasBoundStorageDiagnostics(nativeReceipt, logicalManifest) || !this.hasBoundStorageRouting(nativeReceipt, await this.storageDiagnosticsTargets(logicalManifest, handoff2, run.targetScope)) || !this.hasBoundResourceParity(nativeReceipt, logicalManifest, handoff2.bindingHash))
+          if (payload?.validatorEvidenceModes?.[validatorId] !== "native" || !hasValidNativeValidationReceipt(nativeReceipt, binding) || !this.hasRequiredNativePolicyEvidence(nativeReceipt, policyValidation ?? (policyMap !== void 0 && !hasActionablePolicyMappings(policyMap) ? this.policyValidationInput(run.iacTool, policyMap, logicalManifest, true) : void 0), true) || !this.hasBoundStorageDiagnostics(nativeReceipt, logicalManifest) || !this.hasBoundStorageRouting(nativeReceipt, await this.storageDiagnosticsTargets(logicalManifest, handoff2, run.targetScope)) || !this.hasBoundResourceParity(nativeReceipt, logicalManifest, handoff2.bindingHash))
             throw new ApexError("APEX_VALIDATION", "Preview requires current runtime-owned native validation", EXIT_CODES.validation);
         }
       }
@@ -75982,12 +76643,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
         runId: run.runId,
         environment: run.environment,
         inputs: {
-          location: { kind: "value", value: "REGION" },
-          credential: {
-            kind: "secret-reference",
-            provider: "azure-key-vault",
-            reference: "KEY_VAULT_SECRET_REFERENCE"
-          }
+          location: { kind: "value", value: "REGION" }
         }
       };
     }
@@ -76358,6 +77014,15 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       const blocker = "Reviewed subscription governance baseline is required before deployment preview (run uses the ALZ reference assumption; run apex governance revise with a collected baseline)";
       throw new ApexError("APEX_AUTHORIZATION", `Workflow is not ready for preview-${run.iacTool}: ${blocker}`, EXIT_CODES.authorization, [blocker]);
     }
+    const envInputsHash = this.artifactHash(events, "environment-inputs");
+    if (envInputsHash !== void 0) {
+      const envInputs = await this.objects.getJson(envInputsHash);
+      const deferred = deferredEnvironmentInputNames(envInputs);
+      if (deferred.length > 0) {
+        const blocker = `Environment inputs remain deferred before deployment preview: ${deferred.join(", ")}`;
+        throw new ApexError("APEX_VALIDATION", `Workflow is not ready for preview-${run.iacTool}: ${blocker}`, EXIT_CODES.validation, [blocker]);
+      }
+    }
     const completedNodes = [
       ...this.completedNodeIds(events),
       ...run.gates.flatMap((gate) => this.gateSatisfied(run, gate.gate, events) ? [`gate-${gate.gate}`] : [])
@@ -76479,7 +77144,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       }
     }
   }
-  hasRequiredNativePolicyEvidence(receipt, input2) {
+  hasRequiredNativePolicyEvidence(receipt, input2, allowSourceStageDeferred = false) {
     if (input2 === void 0)
       return receipt.policyApplicability === void 0;
     if (!hasActionablePolicyMappings(input2.policyMap))
@@ -76489,6 +77154,15 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
     if (receipt.track !== "bicep")
       return true;
     const policy = receipt.policyValidation;
+    const deferredReasons = /* @__PURE__ */ new Set([
+      "unsupported-expression",
+      "missing-expected-value",
+      "resource-not-found",
+      "resource-not-bound",
+      "ambiguous-resource",
+      "unsupported-resource"
+    ]);
+    const acceptableOutcome = policy !== void 0 && (policy.outcome === "pass" || allowSourceStageDeferred && policy.outcome === "unsupported" && policy.results.every(({ outcome, reason }) => outcome === "pass" || deferredReasons.has(reason)));
     return policy !== void 0 && hasValidPolicyValidation(policy, {
       track: receipt.track,
       sourceHash: receipt.sourceHash,
@@ -76496,12 +77170,12 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
       policyMapContentHash: calculatePolicyValidationDigest(input2.policyMap),
       logicalResourceManifestHash: calculatePolicyValidationDigest(input2.logicalResourceManifest),
       inputHash: policy.inputHash
-    }) && policy.outcome === "pass" && policy.projectId === receipt.projectId && policy.runId === receipt.runId && policy.results.length === input2.policyMap.mappings.length && this.policyResultsMatchMappings(policy, input2.policyMap);
+    }) && acceptableOutcome && policy.projectId === receipt.projectId && policy.runId === receipt.runId && policy.results.length === input2.policyMap.mappings.length && this.policyResultsMatchMappings(policy, input2.policyMap);
   }
   policyResultsMatchMappings(receipt, policyMap) {
     return receipt.results.length === policyMap.mappings.length && receipt.results.every((result, index) => {
       const mapping = policyMap.mappings[index];
-      return result.mappingIndex === index && result.mappingHash === calculatePolicyValidationDigest(mapping) && result.policyAssignmentId === mapping.policyAssignmentId && result.policyDefinitionId === mapping.policyDefinitionId && result.policyDefinitionReferenceId === mapping.policyDefinitionReferenceId && result.effect === mapping.effect && result.disposition === mapping.disposition && result.logicalResourceId === mapping.logicalResourceId && result.propertyPath === mapping.propertyPath && (Object.hasOwn(mapping, "expectedValue") ? result.expectedValueDigest === calculatePolicyValidationDigest(mapping.expectedValue) : result.expectedValueDigest === void 0 && (result.reason === "not-applicable" || result.reason === "platform-remediated"));
+      return result.mappingIndex === index && result.mappingHash === calculatePolicyValidationDigest(mapping) && result.policyAssignmentId === mapping.policyAssignmentId && result.policyDefinitionId === mapping.policyDefinitionId && result.policyDefinitionReferenceId === mapping.policyDefinitionReferenceId && result.effect === mapping.effect && result.disposition === mapping.disposition && result.logicalResourceId === mapping.logicalResourceId && result.propertyPath === mapping.propertyPath && (Object.hasOwn(mapping, "expectedValue") ? result.expectedValueDigest === calculatePolicyValidationDigest(mapping.expectedValue) : result.expectedValueDigest === void 0 && (result.reason === "not-applicable" || result.reason === "platform-remediated" || result.reason === "missing-expected-value"));
     });
   }
   async referenceGovernanceNeedsRefresh(run, events) {
@@ -76673,13 +77347,29 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
   policyValidationInput(track, policyMap, manifest2, includeEmpty = false) {
     if (policyMap === void 0 || !includeEmpty && !hasActionablePolicyMappings(policyMap))
       return void 0;
-    return {
-      policyMap,
-      logicalResourceManifest: Object.fromEntries((manifest2?.resources ?? []).filter(({ ownership, executionAddress }) => ownership === "managed" && executionAddress !== void 0).map(({ logicalId, executionAddress }) => [
-        logicalId,
-        track === "bicep" ? { codeSymbol: executionAddress } : { terraformAddress: executionAddress }
-      ]))
-    };
+    const managed = (manifest2?.resources ?? []).filter(({ ownership, executionAddress }) => ownership === "managed" && executionAddress !== void 0);
+    const byComponent = /* @__PURE__ */ new Map();
+    for (const resource of managed) {
+      if (resource.componentId === void 0)
+        continue;
+      const list = byComponent.get(resource.componentId) ?? [];
+      list.push(resource.executionAddress);
+      byComponent.set(resource.componentId, list);
+    }
+    const entries = {};
+    for (const { logicalId, executionAddress } of managed) {
+      entries[logicalId] = track === "bicep" ? { codeSymbol: executionAddress } : { terraformAddress: executionAddress };
+    }
+    for (const [componentId, symbols] of byComponent.entries()) {
+      if (Object.hasOwn(entries, componentId) || symbols.length === 0)
+        continue;
+      const sorted = [...symbols].sort();
+      entries[componentId] = {
+        ...track === "bicep" ? { codeSymbol: sorted[0] } : { terraformAddress: sorted[0] },
+        ...sorted.length > 1 ? { componentSymbols: sorted } : {}
+      };
+    }
+    return { policyMap, logicalResourceManifest: entries };
   }
   hasBoundResourceParity(receipt, manifest2, bindingHash) {
     return receipt.resourceParity === void 0 || manifest2 !== void 0 && (receipt.track === "bicep" || receipt.track === "terraform") && receipt.resourceParity.manifestHash === calculatePolicyValidationDigest(manifest2) && receipt.resourceParity.bindingHash === bindingHash;
@@ -76856,6 +77546,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
             resourceParityManifest: structuredClone(validationManifest),
             resourceParityBinding: await this.objects.getJson(handoff2.bindingHash)
           },
+          ...handoff2.authoringMode === "staged" ? { stagedSource: true } : {},
           ...run.iacTool === "bicep" ? {
             storageSecurityBindings: this.storageSecurityBindings(validationManifest),
             storageDiagnosticsTargets: diagnosticsTargets,
@@ -76868,7 +77559,7 @@ Generated from exact kernel evidence for run \`${this.reviewMarkdownText(run.run
           throw new ApexError("APEX_VALIDATION", "Native validation receipt is invalid or stale", EXIT_CODES.validation);
         if (!this.hasBoundStorageRouting(receipt, diagnosticsTargets))
           throw new ApexError("APEX_VALIDATION", "Native diagnostic routing does not match accepted targets", EXIT_CODES.validation);
-        if (!this.hasRequiredNativePolicyEvidence(receipt, policyValidation))
+        if (!this.hasRequiredNativePolicyEvidence(receipt, policyValidation, true))
           throw new ApexError("APEX_VALIDATION", "Native validation requires passing source-bound policy evidence for every mapping", EXIT_CODES.validation);
         if (!this.hasBoundStorageDiagnostics(receipt, artifacts["logical-resource-manifest"]))
           throw new ApexError("APEX_VALIDATION", "Native storage diagnostic does not match accepted binding", EXIT_CODES.validation);
@@ -79037,7 +79728,7 @@ function createMcpServerFactory(serviceOrResolver, options = {}) {
     }
   }, async ({ amendment, ...options2 }) => result(await service.amendInput(amendment, options2)));
   registerTool("governanceImport", {
-    description: "Import governance for the active discovery task: a reviewed local subscription baseline path or reference: true for the shipped ALZ Corp reference baseline.",
+    description: "Import governance for an active discovery or refresh task: a reviewed local baseline path, or reference: true for the ALZ Corp reference baseline.",
     inputSchema: { path: external_exports.string().min(1).optional(), reference: external_exports.literal(true).optional() }
   }, async ({ path: path2, reference }) => {
     if (path2 === void 0 === (reference === void 0))

@@ -39,8 +39,9 @@ inventory, diagnosis, reconciliation or quality work.
      Architecture starts immediately (Recommended for design/pilot)** versus **Run the consumer governance collection
      workflow (`.github/workflows/governance-policy-baseline.yml`, which includes descendant scopes) and complete human
      review of the local baseline file first**. Explain both consequences when presenting the choice: the reference
-     baseline is a design assumption, a reviewed subscription baseline is required at `governance-refresh` before
-     planning (`plan`), and blocked `deny` controls found during `policy-refresh` can reopen Architecture and Gate 2. If
+     baseline is a design assumption, a reviewed subscription baseline is required before live Azure `preview`/`deploy`
+     (checked again at `governance-refresh`, where pre-sales lab runs can continue offline through Planning, CodeGen and
+     Validation), and blocked `deny` controls found during `policy-refresh` can reopen Architecture and Gate 2. If
      the user selects the reference baseline, call `apex/governanceImport` (`reference: true`) and continue directly into
      Architecture.
    - At `governance-refresh` (after Gate 2 when Architecture used the reference baseline), if a reviewed subscription
@@ -54,7 +55,7 @@ inventory, diagnosis, reconciliation or quality work.
      provide its local path**. If the user selects offline pre-sales continuation on a `lab` run, call
      `apex/governanceImport` (`reference: true`) and continue directly into `plan`.
    Return the service's `outputHash` and `summary`, never baseline bytes. Import does not perform live discovery, map
-   policies, authorize planning or approve a gate.
+   policies or approve a gate.
 5. If policy content changed, explain invalidation scope and direct the user to the trusted CLI governance revision
    ceremony. Never infer revision confirmation or use deployment reconciliation for governance revision.
 6. Use `apex/preview` only to read the current preview and explain recorded semantic changes, target, expiry,

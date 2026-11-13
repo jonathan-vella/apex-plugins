@@ -35,24 +35,23 @@ render is refused there with the generator's message. Resource binding fields:
 
 | Form | `implementation` | `version` | Also required |
 | --- | --- | --- | --- |
-| Bicep AVM | `avm:br/public:avm/res/<group>/<module>@<exact version>` | the same exact version | `physicalResources` (below) |
+| Bicep AVM | `avm:br/public:avm/res/<group>/<module>@<exact version>` | the same exact version | `physicalResources` only when `targetScope` is an exact `/subscriptions/<id>/resourceGroups/<rg>` (omit on `local` or `/subscriptions/<id>` scopes) |
 | Terraform AVM | `avm:registry.terraform.io/Azure/<avm-res-module>/azurerm@<exact version>` | the same exact version | none |
-| Native (either track) | `native:<Microsoft.Namespace/type[/child]>@<yyyy-mm-dd[-preview]>` | the same API version | `parameters.name`, `location`, `parentId` strings and a `properties` object |
+| Native (either track) | `native:<Microsoft.Namespace/type[/child]>@<yyyy-mm-dd[-preview]>` | the same API version | key intent/configuration `parameters` (`APEX CodeGen` authors the real Bicep/Terraform file and cross-resource expressions) |
 
-- Logical resource ids, `dependsOn` entries and `scopeLogicalId` keep the Architecture's id exactly. An id starts with a
-  letter or underscore and uses letters, digits, hyphens or underscores; the generator turns `-` into `_` for the Bicep
-  symbolic name or Terraform label. Two ids that differ only by `-` versus `_` are rejected.
+- Logical resource ids, `dependsOn` entries and `scopeLogicalId` use letters, digits, hyphens or underscores (starting
+  with a letter or underscore); CodeGen turns `-` into `_` for the Bicep symbolic name or Terraform label. When one
+  Architecture component splits into multiple planned resources, set `componentId` to the Architecture component id so
+  policy mappings stay bound. Two ids that differ only by `-` versus `_` are rejected.
 - An exact version is `major.minor.patch` with an optional prerelease or build suffix; `~`, `^`, ranges and `latest` are
   rejected. A bare `br/public:avm/res/...` path or an unprefixed resource type is not an `implementation`.
-- Bicep AVM `physicalResources` lists 1-128 entries shaped like `{resourceId, type, ownership, role}`, with `ownership`
-  `managed` or `existing` and `role` `primary` or `ancillary`. Exactly one `managed` `primary` entry has the intent
-  resource's ARM type. Every `resourceId` is
-  `/subscriptions/<guid>/resourceGroups/<rg>/providers/<Namespace>/<type>/<name>` under the run's resource-group target
-  scope. Native Bicep bindings carry no `physicalResources`; their `parentId` is `/` or the target scope.
-- `parameters` values are JSON literals rendered verbatim. The generator does not interpret prefixes such as `input:`,
-  `ref:` or `json(...)`; a string is emitted as a literal string.
-- A Bicep AVM binding's policy mapping with an `expectedValue` is checked at the module deployment, at
-  `properties.parameters.<module parameter>.value`. Bind exactly that parameter in `parameters` to the expected literal.
+- When the run targets an exact resource group (`/subscriptions/<guid>/resourceGroups/<rg>`), Bicep AVM
+  `physicalResources` lists 1-128 entries shaped like `{resourceId, type, ownership, role}`, with `ownership` `managed`
+  or `existing` and `role` `primary` or `ancillary`, and one `managed` `primary` entry matching the intent resource's ARM
+  type. On `local` or subscription-only (`/subscriptions/<guid>`) scopes, omit `physicalResources`.
+- `APEX CodeGen` authors real Bicep (`infra/main.bicep`) or Terraform (`main.tf`) using `param`s / `variable`s for
+  `environment-inputs` (including `deferred` inputs) and symbolic expressions (`module.outputs.*`, `resource.id`) for
+  cross-resource wiring. Keep `parameters` in `iac-binding` as clean JSON design intent for CodeGen.
 
 Example Bicep AVM binding entry:
 
